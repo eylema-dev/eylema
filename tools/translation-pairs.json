@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "c269c28f6aaf69572d6a254fb549c464a350d8a51f71d38e040c97c2566643ce",
-      "tr_sha256": "483c5fcc463c9c78b147ed5226a5cdfee6cb70a8f1064ee2382d34c0669c682f"
+      "en_sha256": "0c0ff4a3cac6b06352b610232a587b6f13ba67c33dfe74ff9569f711026fd722",
+      "tr_sha256": "fa6e58f4cd97b1f942a787bddd44d797626dddc569da5e048beb808234376d01"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -61,6 +61,12 @@
       "tr": "docs/tr/local-journal.md",
       "en_sha256": "507e95ac91f0c0a9da7dbb2076fa6914bd6b613d9aaf2dd50e15c83c17ff41a8",
       "tr_sha256": "ef9cf8cc3c948d4d46442396a7b90a7650b254cbedadc456a234ea6bdc52b3a7"
+    },
+    {
+      "en": "docs/en/runtime-recovery.md",
+      "tr": "docs/tr/runtime-recovery.md",
+      "en_sha256": "0341ac58cd2918fca014d89552d5932c900016f86e0f47c6e31e9889857bf1ee",
+      "tr_sha256": "de49864c7a897ca8f58354d8247e50486c19d8ce0e5a5f6ba051046c90635880"
     }
   ],
   "documents": []

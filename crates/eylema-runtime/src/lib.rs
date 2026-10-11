@@ -9,6 +9,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::sync::Arc;
 
 mod oversight;
+mod recovery;
 pub use oversight::*;
 
 pub type Result<T> = std::result::Result<T, ErrorCode>;
@@ -137,6 +138,7 @@ pub struct Runtime<S: HostServices> {
     limits: Limits,
     grants: Vec<Grant>,
     human_slots: BTreeSet<usize>,
+    retired_slots: BTreeSet<usize>,
     revoked_slots: BTreeMap<usize, Revocation>,
     approvals: BTreeMap<EventId, ApprovalRecord>,
     governance: BTreeMap<GovernanceRef, GovernanceRecord>,
@@ -166,6 +168,7 @@ impl<S: HostServices> Runtime<S> {
                 limits,
                 grants: vec![],
                 human_slots: BTreeSet::new(),
+                retired_slots: BTreeSet::new(),
                 revoked_slots: BTreeMap::new(),
                 approvals: BTreeMap::new(),
                 governance: BTreeMap::new(),
@@ -211,6 +214,7 @@ impl<S: HostServices> Runtime<S> {
     fn grant(&self, session: &Session) -> Result<&Grant> {
         if !Arc::ptr_eq(&self.identity, &session.identity)
             || self.revoked_slots.contains_key(&session.slot)
+            || self.retired_slots.contains(&session.slot)
         {
             return Err(ErrorCode::Forbidden);
         }

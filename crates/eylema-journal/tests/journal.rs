@@ -513,3 +513,42 @@ fn claimed_authority_remains_inert_stored_data() {
         codec::encode(&value).unwrap()
     ); // storage treats claims as inert data
 }
+#[test]
+fn transaction_capacity_preflight_counts_complete_frames_and_performs_no_writes() {
+    let limits = Limits {
+        records: 2,
+        payload_bytes: 32,
+        file_bytes: 8 + 2 * (76 + 32),
+    };
+    let (mut j, s, _) = fixture(limits);
+    let before = s.data();
+    assert_eq!(j.check_append_capacity(&[32, 32]), Ok(()));
+    assert_eq!(
+        j.check_append_capacity(&[32, 32, 8]),
+        Err(JournalError::BudgetExceeded)
+    );
+    assert_eq!(
+        j.check_append_capacity(&[33]),
+        Err(JournalError::BudgetExceeded)
+    );
+    assert_eq!(
+        j.check_append_capacity(&[7]),
+        Err(JournalError::BudgetExceeded)
+    );
+    assert_eq!(
+        j.check_append_capacity(&[]),
+        Err(JournalError::InvalidLimits)
+    );
+    assert_eq!(s.data(), before);
+    j.append(&Value::Null).unwrap();
+    assert_eq!(
+        j.check_append_capacity(&[32, 8]),
+        Err(JournalError::BudgetExceeded)
+    );
+    s.faults.borrow_mut().zero = true;
+    assert!(j.append(&Value::Null).is_err());
+    assert_eq!(
+        j.check_append_capacity(&[8]),
+        Err(JournalError::NeedsRecovery)
+    );
+}

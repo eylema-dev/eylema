@@ -1,0 +1,106 @@
+{
+  "goal": "G13",
+  "task_revision": 3,
+  "issue": "https://github.com/eylema-dev/eylema/issues/15",
+  "base": "0d6093564fe2373aa2b68e1d3f745fb09bdf268a",
+  "guide_base": "e0380b6248ccaeae477fa9aa47420dc7cd486704",
+  "accepted_dependencies": {
+    "G11": "Included accepted core68ba77a95a66370900e4b210ff04d89441109758; guide944369280819cdb7d1b1857886d00e6783fae4f5",
+    "G12": {
+      "eylema": {
+        "head": "b67aac6c80983d95b4280d13246e5d40776fc945",
+        "main": "0d6093564fe2373aa2b68e1d3f745fb09bdf268a",
+        "pr_url": "https://github.com/eylema-dev/eylema/pull/45",
+        "final_pr_ci": 38173357991,
+        "main_ci": {
+          "conclusion": "success",
+          "createdAt": "2026-10-11T20:43:56Z",
+          "databaseId": 38173433713,
+          "event": "push",
+          "headSha": "0d6093564fe2373aa2b68e1d3f745fb09bdf268a",
+          "status": "completed"
+        },
+        "reviewed_tree_matches_main": true
+      },
+      "devguide": {
+        "head": "9e189bac31807d21f3633228b10abe3a88d4a7d9",
+        "main": "e0380b6248ccaeae477fa9aa47420dc7cd486704",
+        "pr_url": "https://github.com/eylema-dev/devguide/pull/18",
+        "final_pr_ci": 38173360972,
+        "main_ci": {
+          "conclusion": "success",
+          "createdAt": "2026-10-11T20:44:02Z",
+          "databaseId": 38173439779,
+          "event": "push",
+          "headSha": "e0380b6248ccaeae477fa9aa47420dc7cd486704",
+          "status": "completed"
+        },
+        "reviewed_tree_matches_main": true
+      }
+    }
+  },
+  "authority": "Actual all-Goal request and standing scoped merge after separate review/currentCI; G05 keep settings/prepared proposal; G06 license pending. No deployment/release/admin/access/spending authority.",
+  "allowed_paths": [
+    "crates/eylema-runtime/src/lib.rs",
+    "crates/eylema-runtime/src/recovery.rs",
+    "crates/eylema-runtime/tests/recovery.rs",
+    "crates/eylema-journal/src/lib.rs",
+    "crates/eylema-journal/tests/journal.rs",
+    "crates/eylema-host/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "tools/work-plans/g13.json",
+    "docs/en/runtime-recovery.md",
+    "docs/tr/runtime-recovery.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "crates/eylema-runtime/src/oversight.rs"
+  ],
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g13-runtime-recovery.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
+    ]
+  },
+  "scope_revision": "Adapt proposed runtime/journal paths to accepted owned crates. Add owned host composition for runtime+journal+platform as current architecture explicitly assigns host persistence coordination; preserve runtime/journal contracts-facing production separation and avoid dependency cycles. Journal adds bounded preflight transaction capacity, runtime adds host-gated unfinished OutcomeUnknown/ephemeral authority retirement, host owns durable commands/replay. No external Cargo crate/build script, workflow/guard/profile/Wasm selection, network/public CLI or G14 implementation. Narrow sibling recovery visibility of historical issuer/decision fields supports complete bounded semantic replay digest; no public authority surface change.",
+  "design": "Versioned bounded host command intent/commit append records. Before any mutation preflight command/transcript/record/file budgets, synchronize intent. Execute owned deterministic Runtime with recorded clock/ID/failure transcript; synchronized commit precedes successful response. Replay confirmed commands using their original metadata/identities/results and validate exact result/transcript, rebuild owned memory without external adapters. Interrupted intent never auto-runs; retain explicit attempt uncertainty and conservatively terminalize unfinished execution OutcomeUnknown with existing reserved identity/observation, retaining confirmed partial effects/value and idempotency. Completed/late results/events remain exact. Real subprocess abrupt-exit/restart tests at before/after intent, after effect/precommit, postcommit/preresponse. Historical opaque capabilities never exposed as usable restored credentials: host-only replay then retire legacy enrollment/human availability; require fresh independent host enrollment/reverification. Keep immutable accepted oversight, revoked/policy/audit history; unsupported controls fail before effects. All mutable controls durable or fail explicitly, no mutable runtime escape handle. Host configured owner-controlled0700 directory/new0600 locked journal, standard OS crypto/fullsync no fallback; chain is not authentication, complete bytes not prior ack, physical powerloss not inferred. Finite retained history/no automatic rotation/truncation/repair; corruption/version/gaps/transcript mismatch explicitly fail closed.",
+  "acceptance_checks": [
+    "Crash/restart exact Task/Execution/Event/Observation identities, values/revisions/results and retained idempotency; confirmed effects not applied twice, payload conflicts/stale policy rejected",
+    "Write-ahead/commit/noack failure boundaries, pending operation/unfinished OutcomeUnknown with truthful partial/unknown effects, repeated recovery no false success/stop/duplicate effects",
+    "Approval/revocation/governance/cancel/policy and historical audit retained or explicitly fail closed; fresh host enrollment, no claimed or old capability restoration; deadlines/service/size/history errors bounded",
+    "Actual native file and scoped child process exit/restart proof; fault regression, exact6AGENTS plus unchanged Rust/gates/firstparty/selected2Wasm; paired EN/TR meaningful review/fingerprints/populatedPR/privacy/preservation14/integration9/live47",
+    "Fresh separate final-head reviewer/current exact-head body-event CI/standing merge/exact-main CI/reviewed tree equality"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context actual Rust/Python/Git/gh/macOS files/processes/services",
+    "reviewer": "Fresh separate exact-head context planned accepted gpt-6.1-sol/high invocation; hidden identity unverifiable"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false,
+    "substage_minutes": {
+      "pure_recovery_and_codec": 25,
+      "host_durable_replay_and_regressions": 55,
+      "native_process_checks_docs_delivery": 40
+    }
+  },
+  "risks": [
+    "Trusted host replay journal is not an untrusted request/authentication surface; no secrets/private training or hidden reasoning in logs",
+    "Owned deterministic memory reconstruction is not external exactly-once; uncertain external effects never silently repeated",
+    "Ephemeral enrollment retirement consumes bounded retained slots/history; no silent history erasure or automatic rotation",
+    "Physical power-cut/OS-crash acceptance not_run; scoped child abrupt exits only",
+    "Record/file/transcript budgets finite, no allocator/latency/performance claim"
+  ],
+  "rollback": "Revert scoped host/runtime/journal/docs/pin/tracking via reviewed PR; preserve accepted G11/G12/frozen history/settings/license and original dirty work. Preserve private journal evidence without publishing it.",
+  "repair_record": {
+    "targeted_repairs": 3,
+    "reason": "First test build: rename Memory bytes helper to avoid Read::bytes resolution; import CancellationOutcome, remove unused imports. Correct fixture expectation to current policy-revision precedence; production gates/semantics unchanged. Second targeted correction: new journal capacity regression used nonexistent write_zero field; use existing Faults.zero, no production behavior/check change. In the same capacity-test verification cycle, clippy singleton clone corrected to slice::from_ref; no lint suppression. Third targeted repair: native proof ErrorCode has no Display; use stable as_str instead of generic Display formatter. No production semantic change or gate weakening."
+  },
+  "decision_record": "Before first full delivery verification, complete typed decision-return capture so Approve/Govern-without-Observe actors receive their authorized operation result only after durable commit; bounded ephemeral reply cache, no new observation permission or authority. Dedicated narrow-permission regression passed.",
+  "executed_evidence": "Full core sixAGENTS/43Python/repository/template/whitespace and unchanged Rust guard6ownedpackages/fmt/clippy/95native tests/build/selected2Wasm passed. Actual scoped4child exit86/restart nativeproof passed and repeated typed narrow-permission regression passed. Three initial targeted repair cycles recorded; no production gate weakened. Service restart evidence is actual childprocess, no physicalpowerloss/person-login/browser/GPU/model/training/performance claim."
+}

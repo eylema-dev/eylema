@@ -437,6 +437,38 @@ impl<T: Storage, H: Sha256> Journal<T, H> {
             end_offset: end,
         })
     }
+    /// Trusted host composition preflights complete transaction envelopes. This
+    /// does not write/reserve disk space and is not a filesystem capacity promise.
+    /// Exclusive ownership must continue; append repeats all its own checks.
+    pub fn check_append_capacity(&self, encoded_payload_lengths: &[usize]) -> Result<()> {
+        if self.poisoned {
+            return Err(JournalError::NeedsRecovery);
+        }
+        if encoded_payload_lengths.is_empty() || encoded_payload_lengths.len() > 65536 {
+            return Err(JournalError::InvalidLimits);
+        }
+        let count = self
+            .sequence
+            .checked_add(encoded_payload_lengths.len() as u64)
+            .ok_or(JournalError::BudgetExceeded)?;
+        if count > self.limits.records {
+            return Err(JournalError::BudgetExceeded);
+        }
+        let mut end = self.end;
+        for &length in encoded_payload_lengths {
+            if length < 8 || length > self.limits.payload_bytes {
+                return Err(JournalError::BudgetExceeded);
+            }
+            end = end
+                .checked_add(FRAME_HEADER_BYTES as u64)
+                .and_then(|n| n.checked_add(length as u64))
+                .ok_or(JournalError::BudgetExceeded)?;
+        }
+        if end > self.limits.file_bytes {
+            return Err(JournalError::BudgetExceeded);
+        }
+        Ok(())
+    }
     pub fn is_poisoned(&self) -> bool {
         self.poisoned
     }
