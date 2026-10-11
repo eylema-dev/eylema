@@ -1,0 +1,13 @@
+[package]
+name = "eylema-journal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+eylema-contracts.workspace = true
+
+[dev-dependencies]
+eylema-platform = { path = "../eylema-platform" }
+eylema-runtime = { path = "../eylema-runtime" }
