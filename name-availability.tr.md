@@ -6,7 +6,9 @@
 
 **Kontrol:** 11 Ekim 2026, yaklaşık 15:49–15:56, Europe/Istanbul. Kayıt/API zaman damgası ve tarayıcı gözlemlerinin zaman aralığı [makinece okunabilir kayıtta](name-availability.json) bulunur. Uygunluk, kayıt yapılana kadar değişebilir.
 
-**GitHub güncellemesi — 11 Ekim 2026:** [eylema-dev organizasyonu](https://github.com/eylema-dev) ve public [eylema-dev/eylema deposu](https://github.com/eylema-dev/eylema) artık oluşturuldu. Aşağıdaki sonuçlar, oluşturma öncesindeki uygunluk kontrolünün tarihsel kaydıdır. Güncel dokümantasyon adresi bu depodur; alan adı kaydı hâlâ beklemektedir.
+**GitHub güncellemesi — 11 Ekim 2026:** [eylema-dev organizasyonu](https://github.com/eylema-dev) ve public [eylema-dev/eylema deposu](https://github.com/eylema-dev/eylema) artık oluşturuldu. Aşağıdaki sonuçlar, oluşturma öncesindeki uygunluk kontrolünün tarihsel kaydıdır. Güncel dokümantasyon adresi bu depodur.
+
+**Alan adı güncellemesi — 11 Ekim 2026:** Proje sahibi **`eylema.dev` alan adını GoDaddy üzerinden satın aldığını** bildirdi. Ana proje alan adı budur. Bu güncelleme sahibinin beyanını kaydeder; aşağıdaki tablo satın alma öncesi gözlemlerin tarihsel kaydıdır. Logo çalışmasında DNS, TLS ve platform yayını kabulü kontrol edilmedi.
 
 ## Alan adı sonuçları
 
@@ -38,4 +40,4 @@ Kaynaklar: GitHub açık API'sinde [eylema](https://api.github.com/users/eylema)
 - Gelecekteki ana depo: **`eylema-dev/eylema`** — önerilen yol, mevcut depo iddiası değil.
 - `eylema.com` sonradan alınırsa ek marka adresi olarak kullanılabilir. `eylema.ai` isteğe bağlıdır.
 
-İlk uygunluk kontrolü organizasyon veya alan adı sahipliği kanıtı değildi. Organizasyon ve depo için sonraki durum yukarıdaki güncellemede yer alır; alan adı sahipliği iddiası yoktur. Mevcut protokol kimlikleri, API işlem kimlikleri, dosya yolları ve sözleşme sürümleri korundu. Şemaya eşlik eden örnekteki `example/eylema` açıkça yer tutucudur. Bu kontrol marka tescili veya paket sicillerinde isim uygunluğu kontrolü değildir.
+İlk uygunluk kontrolü organizasyon veya alan adı sahipliği kanıtı değildi. Organizasyon ve deponun sonraki durumu ile sahibinin bildirdiği alan adı kaydı yukarıdaki güncellemelerde yer alır. Mevcut protokol kimlikleri, API işlem kimlikleri, dosya yolları ve sözleşme sürümleri korundu. Şemaya eşlik eden örnekteki `example/eylema` açıkça yer tutucudur. Bu kontrol marka tescili veya paket sicillerinde isim uygunluğu kontrolü değildir.

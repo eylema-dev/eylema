@@ -173,5 +173,17 @@
       "created": true
     },
     "note": "Earlier registry, registrar and namespace results are historical pre-creation observations. Repository contents are published separately; no domain was purchased."
+  },
+  "domain_registration_update": {
+    "reported_on": "2026-10-11",
+    "domain": "eylema.dev",
+    "registrar": "GoDaddy",
+    "status": "registered_as_reported_by_project_owner",
+    "source": "Direct project-owner message reporting the purchase.",
+    "primary_project_domain": true,
+    "dns_verified": false,
+    "tls_verified": false,
+    "platform_deployment_verified": false,
+    "note": "Earlier availability results are historical observations made before this reported purchase."
   }
 }
