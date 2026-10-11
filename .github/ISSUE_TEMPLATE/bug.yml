@@ -1,0 +1,64 @@
+name: Bug / Hata
+description: Report a reproducible defect / Yeniden üretilebilir hata
+title: '[Bug] '
+body:
+- type: markdown
+  attributes:
+    value: Read CONTRIBUTING.md before implementation. English or Turkish is welcome. / Uygulamadan önce
+      CONTRIBUTING.tr.md dosyasını okuyun.
+- type: textarea
+  id: need
+  attributes:
+    label: Observed and expected behavior / Gözlenen ve beklenen
+    description: What happened and what should happen? / Ne oldu, ne olmalıydı?
+  validations:
+    required: true
+- type: textarea
+  id: reproduction
+  attributes:
+    label: Reproduction / Yeniden üretim
+    description: Minimal steps and sanitized example. / Asgari adımlar ve temizlenmiş örnek.
+  validations:
+    required: true
+- type: textarea
+  id: targets
+  attributes:
+    label: Version and environment / Sürüm ve ortam
+    description: Commit, commands, OS/browser/device; label documentation-only reports. / Commit, komut,
+      ortam; belge hatasını belirtin.
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance criteria / Kabul koşulları
+    description: Observable scenarios and results; include failure cases. / Gözlenebilir senaryolar, sonuçlar
+      ve hata durumları.
+  validations:
+    required: true
+- type: textarea
+  id: scope
+  attributes:
+    label: Scope and exclusions / Kapsam ve kapsam dışı
+    description: Affected paths/modules; production dependencies, permissions and data boundaries. / Dosyalar,
+      bağımlılıklar, yetki ve veri sınırları.
+  validations:
+    required: true
+- type: textarea
+  id: verification
+  attributes:
+    label: Verification plan / Doğrulama planı
+    description: Commands, tests and required hardware; mark unavailable checks not_run. / Komutlar, testler,
+      gereken donanım ve çalıştırılamayan kontroller.
+  validations:
+    required: true
+- type: checkboxes
+  id: hygiene
+  attributes:
+    label: Submission / Gönderim
+    options:
+    - label: I removed secrets and private data. / Sırları ve özel veriyi çıkardım.
+      required: true
+    - label: I understand this issue is a proposal, not execution authority. / Bu issue öneridir, yürütme
+        yetkisi değildir.
+      required: true

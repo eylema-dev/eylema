@@ -6,11 +6,11 @@
 
 **Status:** Research-informed design, not an implemented framework, verified model support, or measured performance.
 
-**Turkish companion:** [Full Turkish architecture](framework-mimari-taslagi-v0.3.md). **Translation revision:** 0.3.0, translated from the Turkish v0.3 source. This English edition establishes the canonical language policy; automated translation drift checks are planned, not implemented.
+**Turkish companion:** [Full Turkish architecture](framework-mimari-taslagi-v0.3.md). **Translation revision:** 0.3.0, translated from the Turkish v0.3 source. This English edition establishes the canonical language policy; repository tooling now checks translation byte fingerprints and API identifier parity; semantic equivalence still requires review.
 
 ## Language policy
 
-English is the source language for code, API names, schemas, protocols, and documentation. Turkish is the second language and must remain a complete, synchronized companion. Machine identifiers, enum values, schema keys, and protocol versions remain identical across languages. Translations record their source revision; planned drift checks will flag changes requiring translation review. A language label does not establish semantic equivalence without review.
+English is the source language for code, API names, schemas, protocols, and documentation. Turkish is the second language and must remain a complete, synchronized companion. Machine identifiers, enum values, schema keys, and protocol versions remain identical across languages. Translations record their source revision; repository fingerprint checks flag unrecorded translation edits. A language label does not establish semantic equivalence without review.
 
 ## Central idea
 

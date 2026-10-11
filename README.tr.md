@@ -17,7 +17,11 @@ Herkese açık dokümantasyon deposu [eylema-dev/eylema](https://github.com/eyle
 
 Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/README.tr.md), [önizleme](assets/eylema-logo/brand-preview.png), [logo paketini indir](assets/eylema-logo.zip).
 
-**Durum: mimari ve API sözleşmesi taslakları.** Bu dokümantasyon çalışmasında çalışan framework, eğitilmiş model, üretim API’si, GitHub otomasyonu veya performans kıyası teslim edilmedi.
+**Durum: mimari/API taslakları ve katkı araçları.** Depo CI kontrolleri belgeleri, şemaları ve PR yapısını doğrular; Rust runtime, model yürütmesi, otonom AI geliştirme takımı veya performans kıyası sağlamaz.
+
+## Katkıda bulunma
+
+[Katkı kuralları](CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](ROADMAP.tr.md), [kalite kontrollerini](docs/tr/quality-gates.md) ve [CI araç envanterini](docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.
 
 ## Ürün yönü
 

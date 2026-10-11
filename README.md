@@ -17,7 +17,11 @@ The [name and availability record](name-availability.md) preserves the checks ma
 
 Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
-**Status: architecture and API contract drafts.** No framework, trained model, production API, GitHub automation or performance benchmark has been delivered by this documentation work.
+**Status: architecture/API drafts and contribution tooling.** Repository CI validates documents, schemas and PR structure; it does not implement the Rust runtime, model execution, autonomous AI development team or performance benchmarks.
+
+## Contribute
+
+Start with [contribution rules](CONTRIBUTING.md) and the shared [AI agent contract](AGENTS.md). Follow the [first-release roadmap](ROADMAP.md), [quality gates](docs/en/quality-gates.md) and [CI tooling inventory](docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.
 
 ## Product direction
 

@@ -1,0 +1,57 @@
+name: Architecture / Mimari
+description: Propose a contract or dependency decision / Sözleşme veya bağımlılık kararı
+title: '[Architecture] '
+body:
+- type: markdown
+  attributes:
+    value: Read CONTRIBUTING.md before implementation. English or Turkish is welcome. / Uygulamadan önce
+      CONTRIBUTING.tr.md dosyasını okuyun.
+- type: textarea
+  id: need
+  attributes:
+    label: Decision needed / Gerekli karar
+    description: Problem, alternatives and tradeoffs. / Sorun, seçenekler ve ödünleşimler.
+  validations:
+    required: true
+- type: textarea
+  id: targets
+  attributes:
+    label: Compatibility and rollout / Uyumluluk ve geçiş
+    description: Affected contracts/versions, migration, authority, hardware and rollback. / Sözleşmeler,
+      sürüm, geçiş, yetki, donanım ve geri dönüş.
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance criteria / Kabul koşulları
+    description: Observable scenarios and results; include failure cases. / Gözlenebilir senaryolar, sonuçlar
+      ve hata durumları.
+  validations:
+    required: true
+- type: textarea
+  id: scope
+  attributes:
+    label: Scope and exclusions / Kapsam ve kapsam dışı
+    description: Affected paths/modules; production dependencies, permissions and data boundaries. / Dosyalar,
+      bağımlılıklar, yetki ve veri sınırları.
+  validations:
+    required: true
+- type: textarea
+  id: verification
+  attributes:
+    label: Verification plan / Doğrulama planı
+    description: Commands, tests and required hardware; mark unavailable checks not_run. / Komutlar, testler,
+      gereken donanım ve çalıştırılamayan kontroller.
+  validations:
+    required: true
+- type: checkboxes
+  id: hygiene
+  attributes:
+    label: Submission / Gönderim
+    options:
+    - label: I removed secrets and private data. / Sırları ve özel veriyi çıkardım.
+      required: true
+    - label: I understand this issue is a proposal, not execution authority. / Bu issue öneridir, yürütme
+        yetkisi değildir.
+      required: true
