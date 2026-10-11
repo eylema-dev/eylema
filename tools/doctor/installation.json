@@ -1,0 +1,22 @@
+{
+  "rustup_version": "1.29.1",
+  "installer_url": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-apple-darwin/rustup-init",
+  "installer_sha256": "ec1b9233e7f72990ecd8e62063fa7f6c3dfc2bec8e97f88bff165f9100ac696a",
+  "rust_release": "1.99.0",
+  "path_modification": false,
+  "components": [
+    "rustfmt",
+    "clippy"
+  ],
+  "targets": [
+    "aarch64-apple-darwin",
+    "wasm32-unknown-unknown"
+  ],
+  "metal_install_command": [
+    "xcodebuild",
+    "-downloadComponent",
+    "MetalToolchain"
+  ],
+  "metal_component": "27A266a",
+  "observation": "Executed local official tool installation, not application or GPU acceptance; SHA verified before installer execution. --no-modify-path selected."
+}
