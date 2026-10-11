@@ -53,9 +53,10 @@
   "linked_scope": {
     "devguide": [
       "docs/plans/g08-typed-contracts.md",
-      "tools/repository-set.json"
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
     ]
   },
-  "guide_base": "effe36587d45a341f8c38292f4bfb3bf09dee540",
-  "boundary": "G05 in review awaiting separately requested settings authority, G06 license decision pending. G08 sole active implementation, direct G07 accepted. No settings, license, publish/deploy/provider/weights/private data or spending."
+  "guide_base": "f223c4d5f3aee4ae0a60d200dd578137d278da51",
+  "boundary": "G05 accepted through actual maintainer retain-settings/prepared-proposal decision, separate exact-head review, scoped merges and mainCI38165218414/38165212246. G06 license decision pending. G08 sole active implementation, direct G07 accepted. Guide delivery records actual G05 acceptance and G08 review metadata; no settings, license, publish/deploy/provider/weights/private data or spending."
 }
