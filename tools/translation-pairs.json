@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "423eaf4a1d576a81790ca493b6ec8cb6ad928f9317f9416d9fe65baea9f69b55",
-      "tr_sha256": "f0e4036c16de26f35ecc9cec902b02f86be3965775ae5fa2ed4769cbdd6a3336"
+      "en_sha256": "d612406bb3c76a75508925cbec71f10d85c2a8d3bdc9bcb62cec525f1c14ed80",
+      "tr_sha256": "17149385a1687c8f4a796d4368ba34a02f615bc49cf3d77ebc9878800065e8f2"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -47,8 +47,14 @@
     {
       "en": "docs/en/deterministic-runtime.md",
       "tr": "docs/tr/deterministic-runtime.md",
-      "en_sha256": "60f73a87ed6d70aedbfd7b8227fe288bfeab05002f7adb76483dd7e323040e0a",
-      "tr_sha256": "0f69c32f5351adf145160240b0a049e054c3f7bfeff5fbd5ad7e841bbcf4f9a1"
+      "en_sha256": "728a198a368216a3200e44ee1d796fa302d858ef0a8ddf0f6354db77e9eb0e5b",
+      "tr_sha256": "c832f589c9753850ee9962edc4ac49c2d09fe5d3a3f8290140866f7a9ea548ba"
+    },
+    {
+      "en": "docs/en/human-oversight.md",
+      "tr": "docs/tr/human-oversight.md",
+      "en_sha256": "08976428312e3f66338e5ec1f2cdbe2947ef7c09eec1dea2b83915388c27fbab",
+      "tr_sha256": "cb15165ae2aff322a4dea45a52e51e1d144226babaecd817d92b117603f6b00d"
     }
   ],
   "documents": []
