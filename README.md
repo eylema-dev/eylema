@@ -28,7 +28,7 @@ Start with [contribution rules](https://github.com/eylema-dev/devguide/blob/main
 Build an end-to-end web platform that AI teams can develop and operate through explicit, inspectable contracts. Applications declare state, goals, actions, authority, budgets and acceptance conditions. Human participation, oversight and command remain practical capabilities of the same system.
 
 - Own Rust production components for web, data, agents, compute and tooling; optional 3D, local language, decision and world-model capabilities.
-- Browser Rust/Wasm/WebGPU and native Linux execution, with separately verified capabilities.
+- Browser Rust/Wasm/WebGPU and native macOS CPU/Metal on one M4 Pro/24 GB device for the first experimental release; Linux and second physical-device acceptance are future scope.
 - Frontier-model development teams using a standard requirement-to-PR protocol.
 - Hardware-selected local model teams, versioned and evaluated under combined application load.
 - Permitted experience, human corrections and verified outcomes feeding curated training data.
@@ -55,13 +55,13 @@ Quality floors are mandatory before optimizing speed or cost. Compare complete a
 
 | Document | English source | Turkish companion |
 |---|---|---|
-| Project structure 0.1.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Architecture 0.3.1 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
-| API and oversight 0.1.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
-| Development and operations 0.1.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
-| Learning and training 0.1.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
+| Project structure 0.2.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Architecture 0.4.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| API and oversight 0.2.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
+| Development and operations 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
+| Learning and training 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
 
-Machine-readable drafts: [development request schema](ai-team-protocol/request.schema.json), [illustrative request](ai-team-protocol/request.example.json), [model team release schema](ai-team-protocol/model-set-release.schema.json). Schema validity is not authorization or evidence of successful execution.
+Machine-readable drafts: [development request schema](ai-team-protocol/request.schema.json), [illustrative request](ai-team-protocol/request.example.json), [macOS model-set 0.2.0 schema](ai-team-protocol/v0.2/model-set-release.schema.json), [synthetic candidate](ai-team-protocol/v0.2/model-set-release.example.json), [preserved historical 0.1.0 schema](ai-team-protocol/model-set-release.schema.json). Schema validity is not authorization or evidence of successful execution.
 
 English identifiers, paths, fields, enums and error codes are shared across languages. Current documents use matching English file names under `docs/` in `eylema-docs-en` and `eylema-docs-tr`; translations track source revisions. Earlier Turkish architecture versions and the original API outline are retained in `eylema-docs-tr/archive/` as historical records. See [project structure](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) for the layout and migration notes.
 

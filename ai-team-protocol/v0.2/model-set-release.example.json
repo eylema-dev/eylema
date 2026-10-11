@@ -1,0 +1,99 @@
+{
+  "schema_version": "0.2.0",
+  "runtime_protocol_version": "0.1.0",
+  "release_id": "synthetic-macos-candidate",
+  "status": "candidate",
+  "behavior_contract_ref": "synthetic-contract-v1",
+  "behavior_contract_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "engine": {
+    "id": "synthetic",
+    "version": "test-only",
+    "build_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "models": [
+    {
+      "id": "synthetic-policy",
+      "kind": "policy",
+      "source_ref": "synthetic-source-v1",
+      "artifact_ref": "synthetic-artifact-v1",
+      "artifact_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "architecture": "test-only",
+      "format": "test-only",
+      "quantization": "none",
+      "required_operators": [
+        "synthetic-op"
+      ]
+    }
+  ],
+  "hardware_profiles": [
+    {
+      "id": "synthetic-one-physical-device",
+      "architecture": "aarch64",
+      "os": "macos",
+      "os_version": "synthetic-not-observed",
+      "chip": "M4 Pro target (synthetic)",
+      "unified_memory_bytes": 25769803776,
+      "capabilities": []
+    }
+  ],
+  "workload_profiles": [
+    {
+      "id": "synthetic-cpu-alone",
+      "hardware_profile_id": "synthetic-one-physical-device",
+      "target": "native_macos",
+      "backend": "native_cpu",
+      "gpu_api": "none",
+      "workload_ref": "synthetic-not-executed-synthetic-cpu-alone",
+      "workload_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "environment_ref": "synthetic-no-runtime-inventory"
+    },
+    {
+      "id": "synthetic-metal-combined",
+      "hardware_profile_id": "synthetic-one-physical-device",
+      "target": "native_macos",
+      "backend": "native_gpu",
+      "gpu_api": "metal",
+      "workload_ref": "synthetic-not-executed-synthetic-metal-combined",
+      "workload_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "environment_ref": "synthetic-no-runtime-inventory"
+    }
+  ],
+  "assignments": [
+    {
+      "role": "synthetic-role",
+      "hardware_profile_id": "synthetic-one-physical-device",
+      "workload_profile_id": "synthetic-cpu-alone",
+      "model_ids": [
+        "synthetic-policy"
+      ],
+      "max_concurrency": 1,
+      "fallback": "fail",
+      "budget": {
+        "max_latency_ms": 1,
+        "max_resident_bytes": 1
+      },
+      "contract_ref": "synthetic-contract-v1"
+    },
+    {
+      "role": "synthetic-role",
+      "hardware_profile_id": "synthetic-one-physical-device",
+      "workload_profile_id": "synthetic-metal-combined",
+      "model_ids": [
+        "synthetic-policy"
+      ],
+      "max_concurrency": 1,
+      "fallback": "fail",
+      "budget": {
+        "max_latency_ms": 1,
+        "max_resident_bytes": 1
+      },
+      "contract_ref": "synthetic-contract-v1"
+    }
+  ],
+  "evidence": [],
+  "objectives": [
+    "quality",
+    "latency",
+    "memory"
+  ]
+}
