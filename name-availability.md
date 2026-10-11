@@ -6,7 +6,9 @@ English is canonical. [Türkçe](name-availability.tr.md).
 
 **Checked:** 11 October 2026, approximately 15:49–15:56 Europe/Istanbul. The registry/API timestamp and browser observation window are recorded in [the machine-readable record](name-availability.json). Availability can change before registration.
 
-**GitHub update — 11 October 2026:** The [eylema-dev organization](https://github.com/eylema-dev) and public [eylema-dev/eylema repository](https://github.com/eylema-dev/eylema) have now been created. The results below preserve the earlier, pre-creation availability check. The repository is the current documentation destination; domain registration is still pending.
+**GitHub update — 11 October 2026:** The [eylema-dev organization](https://github.com/eylema-dev) and public [eylema-dev/eylema repository](https://github.com/eylema-dev/eylema) have now been created. The results below preserve the earlier, pre-creation availability check. The repository is the current documentation destination.
+
+**Domain update — 11 October 2026:** The project owner reported purchasing **`eylema.dev` through GoDaddy**. It is the primary project domain. This update records the owner's report; the availability table below remains the historical pre-purchase observation. DNS, TLS and platform deployment acceptance were not checked by this logo work.
 
 ## Domain results
 
@@ -38,4 +40,4 @@ Sources: GitHub public API for [eylema](https://api.github.com/users/eylema), [e
 - Future main repository: **`eylema-dev/eylema`** — proposed path, not an existing repository claim.
 - `eylema.com` can serve as an additional brand address if later acquired. `eylema.ai` is optional.
 
-The original availability check did not establish domain or organization ownership. Subsequent organization and repository creation is recorded in the update above; no domain ownership is claimed. Existing protocol identifiers, API operation identifiers, file paths and contract versions were preserved. The illustrative schema example uses `example/eylema`, explicitly a placeholder. This check does not establish trademark clearance or package-registry name availability.
+The original availability check did not establish domain or organization ownership. Subsequent organization and repository creation and the owner-reported domain registration are recorded in the updates above. Existing protocol identifiers, API operation identifiers, file paths and contract versions were preserved. The illustrative schema example uses `example/eylema`, explicitly a placeholder. This check does not establish trademark clearance or package-registry name availability.
