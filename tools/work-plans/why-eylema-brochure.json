@@ -1,0 +1,62 @@
+{
+  "task_id": "WHY-EYLEMA-BROCHURE",
+  "revision": 2,
+  "request": "Explicit maintainer request in this chat: create a Why Eylema brochure with striking headlines; audience confirmed as general introduction and potential contributors.",
+  "base_sha": "7e64118196845814d9e8de531fb817c9f14fde5a",
+  "branch": "codex/why-eylema-brochure",
+  "allowed_paths": [
+    ".gitattributes",
+    "assets/eylema-brochure/",
+    "docs/en/brochure.md",
+    "docs/tr/brochure.md",
+    "tools/render-brochure.py",
+    "tools/work-plans/why-eylema-brochure.json",
+    "tools/translation-pairs.json"
+  ],
+  "deliverables": "Four-page A4 Turkish brochure and English companion, editable bilingual copy, reproducible PDF builder and bounded claim/source record.",
+  "acceptance": [
+    {"criterion": "Clear, striking introduction for general readers and potential contributors", "check": "Read both language versions and inspect all eight rendered PDF pages"},
+    {"criterion": "Existing logo and brand colors; readable Turkish glyphs and no clipped text", "check": "PDF text extraction, page bounds and visual rendering"},
+    {"criterion": "Current implementation and future ambitions remain distinct", "check": "Compare claims with pinned core README/G08 evidence and product architecture, API and roadmap"},
+    {"criterion": "Small bilingual repository change", "check": "Required local commands, translation hashes, diff and real PR body validation"}
+  ],
+  "budgets": {"wall_minutes": 60, "layout_repair_cycles": 3, "external_model_calls": 0, "paid_services": 0},
+  "roles": {
+    "architect": "Codex, GPT-6 family; exact model revision not exposed",
+    "implementer": "Same Codex context",
+    "verifier": "Same Codex context, tool-based checks and visual inspection",
+    "reviewer": "Self-review only; independent review pending"
+  },
+  "tools": ["Git", "GitHub CLI", "apply_patch", "bundled Python", "ReportLab", "pypdf", "pypdfium2", "Pillow"],
+  "decisions": [
+    "Use current main in an isolated worktree because the original checkout contains unrelated work.",
+    "Keep the brochure as a brand asset in core; source product architecture remains in the language repositories.",
+    "Use orange, ink and paper from the existing brand. Use vector typography and diagrams rather than invented product screenshots.",
+    "Revision 2 adds a scoped PDF binary attribute after Git interpreted ReportLab PDF streams as text; preserve PDF bytes and avoid text diffs without changing validators.",
+    "Label this as an early-development vision brochure and bind status claims to a source revision. Full task flow, GPU/model execution and autonomous development remain future acceptance work."
+  ],
+  "risks": ["Fast-moving implementation may outdate the status snapshot", "Font substitution can change layout", "PDF is for digital sharing and ordinary A4 printing; no press bleed or CMYK profile", "No new runtime, model, GPU, performance or independent-review evidence is created by editorial checks"],
+  "out_of_scope": ["Runtime or validator changes", "Merge", "Deployment", "Release", "Permissions", "Public license selection", "Paid tools"],
+  "verification": {
+    "revision": "This PR head; CI records the exact head and checked-out merge revision",
+    "environment": "macOS 27.0.1 ARM64; repository Python 3.14.8; artifact Python 3.12.14; Rust 1.99.0",
+    "passed": [
+      "Required Python 3.14 virtual environment and hash-locked CI requirements installation",
+      "43 repository tooling tests",
+      "Repository checks: 88 files, 3 schemas, 7 local language records and 3 issue forms",
+      "Blank PR template structure",
+      "Native Rust formatting, clippy, 19 integration tests and build; selected portable library Wasm compilation",
+      "Both PDFs: four A4 pages, all copy extracted, embedded TrueType fonts, correct metadata and two GitHub link annotations",
+      "Visual inspection of all eight rendered pages and both overview images",
+      "English-Turkish self-review and translation fingerprint refresh",
+      "Scoped content inspection for private paths, credentials, weights and unrelated changes"
+    ],
+    "not_run": [
+      "Independent review remains pending; this is self-review",
+      "Cross-repository pinned-set acceptance remains a separate devguide review step",
+      "Physical printing and physical QR scanning",
+      "Browser/Wasm execution, GPU, model, training and performance; this editorial change makes no such acceptance claim"
+    ],
+    "repairs": "One ReportLab viewer-preference type mismatch corrected before successful generation; staged whitespace check initially treated PDFs as text, resolved by a scoped binary file attribute. No unresolved rendering failure."
+  }
+}
