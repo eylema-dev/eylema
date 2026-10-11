@@ -1,0 +1,93 @@
+{
+  "goal": "G12",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/14",
+  "base": "68ba77a95a66370900e4b210ff04d89441109758",
+  "guide_base": "944369280819cdb7d1b1857886d00e6783fae4f5",
+  "dependencies": {
+    "G10": "Accepted core9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841 included in current accepted G11 main",
+    "inherited_G11": {
+      "eylema": {
+        "head": "edbec25f1b44ada352a06a90a02f21f448873b06",
+        "main": "68ba77a95a66370900e4b210ff04d89441109758",
+        "pr_url": "https://github.com/eylema-dev/eylema/pull/44",
+        "final_pr_ci": 38171754551,
+        "main_ci": {
+          "conclusion": "success",
+          "createdAt": "2026-10-11T20:21:04Z",
+          "databaseId": 38171836336,
+          "event": "push",
+          "headSha": "68ba77a95a66370900e4b210ff04d89441109758",
+          "status": "completed"
+        },
+        "reviewed_tree_matches_main": true
+      },
+      "devguide": {
+        "head": "2b0f2687fff0fd4cf93c94ddc9554ab11b16a2ff",
+        "main": "944369280819cdb7d1b1857886d00e6783fae4f5",
+        "pr_url": "https://github.com/eylema-dev/devguide/pull/17",
+        "final_pr_ci": 38171757455,
+        "main_ci": {
+          "conclusion": "success",
+          "createdAt": "2026-10-11T20:21:10Z",
+          "databaseId": 38171842796,
+          "event": "push",
+          "headSha": "944369280819cdb7d1b1857886d00e6783fae4f5",
+          "status": "completed"
+        },
+        "reviewed_tree_matches_main": true
+      }
+    }
+  },
+  "authority": "Actual maintainer all-Goal request and standing scoped merge after separate review/currentCI; G05 current settings retained/proposal only; G06 license pending. No deployment/release/admin/access/spending authority.",
+  "allowed_paths": [
+    "crates/eylema-journal/",
+    "crates/eylema-platform/src/lib.rs",
+    "Cargo.toml",
+    "Cargo.lock",
+    "tools/work-plans/g12.json",
+    "docs/en/local-journal.md",
+    "docs/tr/local-journal.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json"
+  ],
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g12-local-journal.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
+    ]
+  },
+  "scope_revision": "Adapt proposed journal path to accepted crates/eylema-journal; root workspace/lock and owned platform narrow F_FULLFSYNC binding needed for actual native consumer. Journal production imports contracts only; development uses local owned platform/runtime. No foreign Cargo package/build script or portable selection/guard/workflow change. G13 semantic runtime restore remains separate.",
+  "design": "Owned safe bounded versioned append journal over canonical EYL Value records, standard trusted-host SHA256 digest/previous-digest/sequence chain (not authentication). Validate header/version/reserved fields, consecutive sequence, declared bounded length before allocation, digest/chain/canonical payload and strict EOF before accepting/opening. Never silently truncate/repair/migrate damaged input. IO/hash/corrupt/torn/incompatible/budget/lock outcomes explicit and redacted. Trusted host storage boundary; native File try_lock cooperative advisory ownership, no exposed raw file clone. Append encode/check/reserve bounds before writes; after any fallible write/flush/sync or uncertain disk failure poison writer and return no durable receipt, require reopen/inspection rather than automatic retry. Native sync file+parent followed by actual platform F_FULLFSYNC with no fallback; SDK constant/ABI checked, pure std safe journal receives host callback, platform owns narrow unsafe binding. Files0600 in trusted host-controlled directory. OS acknowledged synchronization/process reopen evidence distinct from untested physical power-loss/OS-crash or hostile local tampering. Retained bytes alone do not prove previous client acknowledgement. Generic stored data is inert, not recovered authority/runtime execution.",
+  "acceptance_checks": [
+    "Meaningful injected short/zero/failed writes, read/seek/flush/file-sync/parent-sync/full-sync/hash failures: explicit no receipt/poison/reopen; no effects on preflight rejection",
+    "Every partial frame/header truncation, checksum/chain/sequence/length/version/reserved/canonical corruption, bounded payload/record/total limits and no silent repair",
+    "Actual native file write/sync/fullsync/close/reopen/read typed task and real executor events, cooperative simultaneous writer lock denial; separate G13 recovery boundary",
+    "Exact six AGENTS, unchanged Rust fmt/clippy/offline/locked/native tests/build/two selected portable Wasm, actual populated PR, EN/TR meaning then fingerprints/privacy/first-party diff/integration/live47Goal/original14checkout preservation",
+    "Fresh separate final-head review/current CI/standing merge/exact-mainCI/tree equality"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context actual Rust/Python/Git/gh/OS filesystem services",
+    "reviewer": "Fresh separate exact-head context, accepted planned gpt-6.1-sol/high invocation, hidden identity unverifiable"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "risks": [
+    "Advisory lock assumes cooperative host-controlled directory; checksum is not authentication against malicious same-user writes",
+    "Native storage synchronization cannot prove actual physical power-loss acceptance; no destructive device tests",
+    "Generic journal data is not automatic session/approval restoration; runtime durability/recovery/idempotency in G13",
+    "Finite structural wire/file limits, no performance/allocator-memory claim; journal native-only"
+  ],
+  "rollback": "Revert scoped journal/platform/workspace/docs/pins/tracking through reviewed PRs; preserve accepted G10/G11, frozen history/settings/license boundary and original dirty work. Never publish private journal contents/paths/credentials/weights/training data.",
+  "repair_record": {
+    "targeted_repairs": 1,
+    "reason": "Fault fixture nested RefCell borrow panicked; compute threshold before mutable borrow. Corrected fixture, unchanged production semantics/checks; 16 journal tests and actual typed native consumer passed."
+  }
+}

@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "d612406bb3c76a75508925cbec71f10d85c2a8d3bdc9bcb62cec525f1c14ed80",
-      "tr_sha256": "17149385a1687c8f4a796d4368ba34a02f615bc49cf3d77ebc9878800065e8f2"
+      "en_sha256": "c269c28f6aaf69572d6a254fb549c464a350d8a51f71d38e040c97c2566643ce",
+      "tr_sha256": "483c5fcc463c9c78b147ed5226a5cdfee6cb70a8f1064ee2382d34c0669c682f"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -55,6 +55,12 @@
       "tr": "docs/tr/human-oversight.md",
       "en_sha256": "d0163b70979e1f72298fd4413521ef27adae186885a1ed63441877a62dc974cf",
       "tr_sha256": "2664cbef4c40153d715c8dc0a34267ce2f1a160c03f83c11799678c99c4d56f7"
+    },
+    {
+      "en": "docs/en/local-journal.md",
+      "tr": "docs/tr/local-journal.md",
+      "en_sha256": "507e95ac91f0c0a9da7dbb2076fa6914bd6b613d9aaf2dd50e15c83c17ff41a8",
+      "tr_sha256": "ef9cf8cc3c948d4d46442396a7b90a7650b254cbedadc456a234ea6bdc52b3a7"
     }
   ],
   "documents": []

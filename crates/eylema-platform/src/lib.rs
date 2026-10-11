@@ -83,6 +83,12 @@ pub fn random_id(kind: IdKind) -> Result<String, PlatformError> {
     Ok(id_from_entropy(kind, &entropy))
 }
 
+/// Requests the macOS drive-cache flush after ordinary file/parent sync.
+/// The caller retains the live file handle; unsupported targets fail explicitly.
+pub fn full_sync_file(file: &std::fs::File) -> Result<(), PlatformError> {
+    native::full_sync_file(file)
+}
+
 #[cfg(target_os = "macos")]
 mod native {
     use super::PlatformError;
@@ -90,10 +96,22 @@ mod native {
     #[link(name = "System")]
     unsafe extern "C" {
         fn CC_SHA256(data: *const c_void, length: u32, output: *mut u8) -> *mut u8;
+        fn fcntl(fd: c_int, command: c_int, ...) -> c_int;
     }
     #[link(name = "Security", kind = "framework")]
     unsafe extern "C" {
         fn SecRandomCopyBytes(random: *const c_void, count: usize, output: *mut c_void) -> c_int;
+    }
+    pub fn full_sync_file(file: &std::fs::File) -> Result<(), PlatformError> {
+        use std::os::fd::AsRawFd;
+        // SAFETY: macOS27 SDK fcntl(int,int,...) and F_FULLFSYNC=51. This
+        // command has no additional argument. The borrowed File keeps its valid
+        // descriptor alive throughout the synchronous OS call; no pointer.
+        if unsafe { fcntl(file.as_raw_fd(), 51) } == 0 {
+            Ok(())
+        } else {
+            Err(PlatformError::ServiceFailure)
+        }
     }
     pub fn sha256(bytes: &[u8]) -> Result<[u8; 32], PlatformError> {
         let length = u32::try_from(bytes.len()).map_err(|_| PlatformError::TooLarge)?;
@@ -143,6 +161,9 @@ mod native {
 #[cfg(not(target_os = "macos"))]
 mod native {
     use super::PlatformError;
+    pub fn full_sync_file(_: &std::fs::File) -> Result<(), PlatformError> {
+        Err(PlatformError::Unavailable)
+    }
     pub fn sha256(_: &[u8]) -> Result<[u8; 32], PlatformError> {
         Err(PlatformError::Unavailable)
     }
