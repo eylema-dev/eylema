@@ -3,7 +3,8 @@
   "repository": "eylema-dev/eylema",
   "role": "core",
   "stage": "documentation",
-  "tooling_version": "0.2.0",
+  "tooling_version": "0.3.0",
   "runtime_implemented": false,
-  "license_status": "pending maintainer decision"
+  "license_status": "pending maintainer decision",
+  "gate_profile": "documentation-v1"
 }
