@@ -5,6 +5,7 @@
 //! controller/adapter responsibilities. No execution or permission is implied.
 #![forbid(unsafe_code)]
 
+pub mod codec;
 mod primitives;
 mod records;
 

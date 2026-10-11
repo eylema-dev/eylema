@@ -37,6 +37,12 @@
       "tr": "docs/tr/typed-contracts.md",
       "en_sha256": "ba2b65854ad07494f87942069872021ead9e732a9159acae7e57a8709ff2d497",
       "tr_sha256": "540b4a3a179651f3bc675e38e49fd3a170fb944da95164a8d255251e785b8faa"
+    },
+    {
+      "en": "docs/en/codec-platform.md",
+      "tr": "docs/tr/codec-platform.md",
+      "en_sha256": "f3979b3b1a7d20e5b20f28747baea2acf5ed4b9e98f2ca13f2f8031f3a7a7eff",
+      "tr_sha256": "bd5b053fd478eed489781e0267a87bbe108d1736a9c4a4a642d14061f0cb051d"
     }
   ],
   "documents": []

@@ -8,6 +8,7 @@
   "license_status": "pending maintainer decision",
   "gate_profile": "rust-v1",
   "wasm_packages": [
-    "eylema-contracts"
+    "eylema-contracts",
+    "eylema-platform"
   ]
 }

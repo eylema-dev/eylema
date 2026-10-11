@@ -12,3 +12,10 @@ dependencies = [
 [[package]]
 name = "eylema-contracts"
 version = "0.1.0"
+
+[[package]]
+name = "eylema-platform"
+version = "0.1.0"
+dependencies = [
+ "eylema-contracts",
+]
