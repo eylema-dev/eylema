@@ -28,7 +28,7 @@ Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/
 AI ekiplerinin açık ve incelenebilir sözleşmelerle geliştirebildiği ve işletebildiği uçtan uca bir web platformu. Uygulamalar durumunu, hedeflerini, eylemlerini, yetkilerini, bütçelerini ve kabul koşullarını tanımlar. İnsan katılımı, gözetimi ve komutası aynı sistemin kullanılabilir yetenekleridir.
 
 - Web, veri, eylemci, hesaplama ve araçlar için kendi Rust üretim bileşenlerimiz; seçilebilir 3B, yerel dil, karar ve dünya modeli yetenekleri.
-- Ayrı doğrulanan yeteneklerle tarayıcı Rust/Wasm/WebGPU ve native Linux yürütmesi.
+- İlk deneysel sürümde tek M4 Pro/24 GB cihazda tarayıcı Rust/Wasm/WebGPU ve native macOS CPU/Metal; Linux ve ikinci fiziksel cihaz kabulü sonraki kapsamdır.
 - İhtiyaçtan PR’a standart protokol kullanan büyük model geliştirme ekipleri.
 - Donanıma göre seçilen, sürümlenen ve ortak uygulama yükünde değerlendirilen yerel model takımları.
 - İzinli deneyim, insan düzeltmesi ve gerçek sonuçlardan kürasyonla oluşturulan eğitim verileri.
@@ -55,13 +55,13 @@ Hız veya maliyet iyileştirilmeden önce asgari kalite karşılanır. Kernel ya
 
 | Belge | İngilizce kaynak | Türkçe karşılık |
 |---|---|---|
-| Proje yapısı 0.1.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Mimari 0.3.1 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
-| API ve denetim 0.1.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
-| Geliştirme ve işletim 0.1.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
-| Öğrenme ve eğitim 0.1.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
+| Proje yapısı 0.2.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Mimari 0.4.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| API ve denetim 0.2.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
+| Geliştirme ve işletim 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
+| Öğrenme ve eğitim 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
 
-Makinece okunabilir taslaklar: [geliştirme isteği şeması](ai-team-protocol/request.schema.json), [örnek istek](ai-team-protocol/request.example.json), [model takımı sürüm şeması](ai-team-protocol/model-set-release.schema.json). Şemaya uygunluk, yetki veya başarılı çalışma kanıtı değildir.
+Makinece okunabilir taslaklar: [geliştirme isteği şeması](ai-team-protocol/request.schema.json), [örnek istek](ai-team-protocol/request.example.json), [macOS model-set 0.2.0 şeması](ai-team-protocol/v0.2/model-set-release.schema.json), [sentetik aday](ai-team-protocol/v0.2/model-set-release.example.json), [korunmuş tarihsel 0.1.0 şeması](ai-team-protocol/model-set-release.schema.json). Şemaya uygunluk, yetki veya başarılı çalışma kanıtı değildir.
 
 İşlem kimlikleri, yollar, alanlar, enum değerleri ve hata kodları iki dilde aynı İngilizce tanımları kullanır. Güncel belgeler `eylema-docs-en` ve `eylema-docs-tr` depolarının `docs/` dizinlerinde eşleşen İngilizce dosya adları taşır; çeviriler kaynak sürümünü izler. Önceki Türkçe mimari sürümleri ve ilk API özeti tarihsel kayıt olarak `eylema-docs-tr/archive/` altında korunur. Düzen ve taşıma notları [proje yapısı belgesindedir](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md).
 
