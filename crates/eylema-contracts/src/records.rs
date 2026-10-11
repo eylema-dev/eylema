@@ -49,7 +49,8 @@ pub struct ActionDraft {
     pub budget: Budget,
     pub target: ExecutionTarget,
     pub idempotency_key: IdempotencyKey,
-    /// Opaque bounded bytes, not yet a canonical or trusted wire payload (G09).
+    /// Opaque bounded application bytes; canonical G09 enclosing wire does not
+    /// interpret or trust this content.
     pub payload: Vec<u8>,
 }
 

@@ -1,0 +1,72 @@
+{
+  "goal": "G09",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/11",
+  "base": "7e64118196845814d9e8de531fb817c9f14fde5a",
+  "dependencies": {
+    "G08": {
+      "core_main": "7e64118196845814d9e8de531fb817c9f14fde5a",
+      "guide_main": "749d2fbb21f5afaf1cb86739048d5cbd66318ca4",
+      "main_ci": [
+        38165677386,
+        38165683286
+      ]
+    }
+  },
+  "authority": "Actual maintainer request for all accepted Goals, standing scoped merges after current CI and separate review. G05 actual decision retains settings/prepared proposal. G06 license remains pending. No text reference grants authority.",
+  "allowed_paths": [
+    "crates/eylema-contracts/",
+    "crates/eylema-platform/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "repository.json",
+    "platform/browser/",
+    "tools/check_codec_platform.mjs",
+    "tools/work-plans/g09.json",
+    "docs/en/codec-platform.md",
+    "docs/tr/codec-platform.md",
+    "tools/translation-pairs.json"
+  ],
+  "scope_revision": "Use accepted actual contracts component path; introduce one owned platform library with real native and Wasm consumers, explicit ABI and audited unsafe OS/host boundary. No third-party Cargo package or build script.",
+  "design": "Versioned bounded canonical binary codec for generic payload data plus all G08 typed records/adapters. Strict fixed-size scalars, UTF8 bytes, ordered map/set semantics, duplicate/unknown/truncated/overflow/depth/item/aggregate bounds. Proposal payload binding excludes request/correlation transport identities and includes every effect-relevant declared field. SHA256 uses CommonCrypto; random IDs use Security SecRandomCopyBytes. Wasm uses the exact portable codec and a minimal memory-lifecycle binding; WebCrypto supplies browser-host digest/entropy, never owned cryptography. Node26.11.1 is an explicitly inventoried development-only actual Wasm/WebCrypto test host, not browser acceptance.",
+  "acceptance_checks": [
+    "Exact six AGENTS commands plus unchanged Rust fmt/clippy/native tests/build and explicitly selected portable libraries Wasm build",
+    "Canonical reference vectors and native malformed/oversize/duplicate/version/depth/overflow/internal binding regression tests",
+    "Actual native platform SHA256 known vectors, native bounded entropy/ID generation and explicit failure behavior",
+    "Actual Wasm decoder/encoder in Node26.11.1 compared byte-for-byte and SHA256-for-SHA256 with native macOS; host memory bounds/repeated lifecycle/bad-input and unavailable crypto failure tests",
+    "EN/TR meaning/fingerprints, SDK/API dependency/unsafe boundary inventory and no crypto/source/provenance copying",
+    "Guide pins/live tracking/G08 accepted proofs/test fixture maintenance, fetched integration, fresh separate exact-head review/current CI/scoped merge/main CI/tree proof"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context using Rust/Python/Git/gh/Node/SDK/official API docs",
+    "reviewer": "Fresh separate exact-head context; accepted invocation gpt-6.1-sol/high, hidden identity not independently verified"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "risks": [
+    "Canonical bytes/hash format must stay exact/versioned; scalar/map distinctions and Unicode byte preservation explicit",
+    "Input construction is not authorization, signature, source trust, accepted approval or effect evidence",
+    "No crypto algorithm reimplementation; unsafe FFI/ABI isolated from contracts forbid-unsafe policy",
+    "Fixed aggregate wire/depth/item bounds are structural limits, not measured performance/capacity",
+    "Node-hosted Wasm execution is not browser execution; explicit host bindings/standard libraries are inventoried",
+    "G08-to-accepted tracking transition requires regression fixtures independent of mutable card status"
+  ],
+  "guide_base": "749d2fbb21f5afaf1cb86739048d5cbd66318ca4",
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g09-codec-platform.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json",
+      "tools/tests/test_goal_tracking.py",
+      "docs/en/tooling.md",
+      "docs/tr/tooling.md",
+      "tools/translation-pairs.json"
+    ]
+  },
+  "rollback": "Revert scoped codec/platform/workspace/bindings/docs/pins/tracking changes through reviewed PRs, preserve accepted G08 semantics/current settings/original dirty work. No publish/deploy/license/admin/access/provider/training/weights/private data/new spending."
+}
