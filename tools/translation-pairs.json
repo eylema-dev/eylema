@@ -19,6 +19,12 @@
       "tr": "assets/eylema-logo/README.tr.md",
       "en_sha256": "32f6b6331166160ba38f0382a87526937fd2cf27c16dd06778e43cc6616aa4a8",
       "tr_sha256": "7628d6dc5c5d61cf47129803f32acdc60323464fe1962213dac34bc96bf71dae"
+    },
+    {
+      "en": "docs/en/development-environment.md",
+      "tr": "docs/tr/development-environment.md",
+      "en_sha256": "ee6b4e1b7f3c91489463807924a267f489613207b8c3eb0a8186ba96f3898273",
+      "tr_sha256": "5343dbc4609b2fe12ed6a705c863772f2b2c3c73ee3bfc229aa043dbc832a773"
     }
   ],
   "documents": []

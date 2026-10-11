@@ -1,0 +1,284 @@
+{
+  "format_version": 1,
+  "goal": "G04",
+  "status": "passed",
+  "observed_at": "2026-10-11T17:36:05.145746+00:00",
+  "doctor_source_sha256": "d58d597a8e6ab72097c03c5cc9fb06b6d6422d1e60ce4107b9d4aaa0d6bf29f6",
+  "hardware": {
+    "physical_devices": 1,
+    "chip": "Apple M4 Pro",
+    "architecture": "aarch64-apple-darwin",
+    "unified_memory_bytes": 25769803776,
+    "os": "macos",
+    "os_version": "27.0.1"
+  },
+  "toolchain": {
+    "rust": {
+      "binary": "rustc",
+      "commit-hash": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+      "commit-date": "2026-09-28",
+      "host": "aarch64-apple-darwin",
+      "release": "1.99.0",
+      "LLVM version": "23.1.1"
+    },
+    "rustup": "rustup 1.29.1 (d95a37b6a 2026-08-13)",
+    "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)",
+    "rustfmt": "rustfmt 1.10.0-stable (b940084d7e 2026-09-28)",
+    "clippy": "clippy 0.1.99 (b940084d7e 2026-09-28)",
+    "installed_targets": [
+      "aarch64-apple-darwin",
+      "wasm32-unknown-unknown"
+    ]
+  },
+  "platform": {
+    "xcode": "Xcode 27.0\nBuild version 27A266a",
+    "sdk_version": "27.0",
+    "metal_version": "Apple metal version 32023.921 (metalfe-32023.921.6)",
+    "chrome": {
+      "bundle_id": "com.google.Chrome",
+      "version": "154.0.8037.98"
+    }
+  },
+  "probes": {
+    "native_compile_run": {
+      "status": "passed",
+      "source_sha256": "055db9c85c4e37760ba3b327c4c0b623402fdaafd3405abd612851ba1667f4f2",
+      "output": "G04-native-arm64-ok",
+      "artifact": {
+        "bytes": 471112,
+        "sha256": "b383e1cc79b68248c9995527922797b3392061961fad520c81586179e8274654"
+      }
+    },
+    "wasm_compile": {
+      "status": "passed",
+      "source_sha256": "f239fae966f2de284b1839df5ba6d076369d89e83a7eb60f7979693d5d7b6a06",
+      "artifact": {
+        "bytes": 1673595,
+        "sha256": "a7d195ff62ad83b9b83ed10c52bcab6ac1e45e15f930e1d84583500594daeef4"
+      },
+      "execution": "not_run"
+    },
+    "metal_compile_link": {
+      "status": "passed",
+      "source_sha256": "93bc047f9bc24f3d7dbca2ac9376e05d2248103fc88a2dfafe0c0cf9d9a7210c",
+      "air": {
+        "bytes": 3520,
+        "sha256": "d0316a6c985fc33de08122be13a293f2d7d6e5d44222ff22c2f95cbb1fb3772f"
+      },
+      "library": {
+        "bytes": 3520,
+        "sha256": "5704a40431315df2ce6c76c7d5ad7091e5e5e1a68d4d4540a938846e68d7249e"
+      },
+      "gpu_execution": "not_run"
+    }
+  },
+  "commands": [
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "run",
+        "1.99.0",
+        "rustc",
+        "--version",
+        "--verbose"
+      ],
+      "status": "passed",
+      "stdout": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: aarch64-apple-darwin\nrelease: 1.99.0\nLLVM version: 23.1.1"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "--version"
+      ],
+      "status": "passed",
+      "stdout": "rustup 1.29.1 (d95a37b6a 2026-08-13)"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "run",
+        "1.99.0",
+        "cargo",
+        "--version"
+      ],
+      "status": "passed",
+      "stdout": "cargo 1.99.0 (5f94df478 2026-08-27)"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "run",
+        "1.99.0",
+        "rustfmt",
+        "--version"
+      ],
+      "status": "passed",
+      "stdout": "rustfmt 1.10.0-stable (b940084d7e 2026-09-28)"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "run",
+        "1.99.0",
+        "cargo-clippy",
+        "--version"
+      ],
+      "status": "passed",
+      "stdout": "clippy 0.1.99 (b940084d7e 2026-09-28)"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "target",
+        "list",
+        "--toolchain",
+        "1.99.0",
+        "--installed"
+      ],
+      "status": "passed",
+      "stdout": "aarch64-apple-darwin\nwasm32-unknown-unknown"
+    },
+    {
+      "command": [
+        "/usr/sbin/sysctl",
+        "-n",
+        "machdep.cpu.brand_string"
+      ],
+      "status": "passed",
+      "stdout": "Apple M4 Pro"
+    },
+    {
+      "command": [
+        "/usr/sbin/sysctl",
+        "-n",
+        "hw.memsize"
+      ],
+      "status": "passed",
+      "stdout": "25769803776"
+    },
+    {
+      "command": [
+        "/usr/bin/sw_vers",
+        "-productVersion"
+      ],
+      "status": "passed",
+      "stdout": "27.0.1"
+    },
+    {
+      "command": [
+        "/usr/bin/xcodebuild",
+        "-version"
+      ],
+      "status": "passed",
+      "stdout": "Xcode 27.0\nBuild version 27A266a"
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "--sdk",
+        "macosx",
+        "--show-sdk-version"
+      ],
+      "status": "passed",
+      "stdout": "27.0"
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "metal",
+        "--version"
+      ],
+      "status": "passed",
+      "stdout": "Apple metal version 32023.921 (metalfe-32023.921.6)\nTarget: air64-apple-darwin27.0.0\nThread model: posix\nInstalledDir: $METAL_TOOLCHAIN"
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "--find",
+        "metallib"
+      ],
+      "status": "passed",
+      "stdout": "$METAL_TOOLCHAIN/metallib"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "run",
+        "1.99.0",
+        "rustc",
+        "--edition=2024",
+        "--target",
+        "aarch64-apple-darwin",
+        "$PROBE/native.rs",
+        "-o",
+        "$PROBE/native"
+      ],
+      "status": "passed",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "/usr/bin/file",
+        "-b",
+        "$PROBE/native"
+      ],
+      "status": "passed",
+      "stdout": "Mach-O 64-bit executable arm64"
+    },
+    {
+      "command": [
+        "$PROBE/native"
+      ],
+      "status": "passed",
+      "stdout": "G04-native-arm64-ok"
+    },
+    {
+      "command": [
+        "$HOME/.cargo/bin/rustup",
+        "run",
+        "1.99.0",
+        "rustc",
+        "--edition=2024",
+        "--crate-type=cdylib",
+        "--crate-name",
+        "eylema_doctor_probe",
+        "--target",
+        "wasm32-unknown-unknown",
+        "$PROBE/portable.rs",
+        "-o",
+        "$PROBE/portable.wasm"
+      ],
+      "status": "passed",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "--sdk",
+        "macosx",
+        "metal",
+        "-std=metal4.0",
+        "-c",
+        "$PROBE/probe.metal",
+        "-o",
+        "$PROBE/probe.air"
+      ],
+      "status": "passed",
+      "stdout": ""
+    },
+    {
+      "command": [
+        "/usr/bin/xcrun",
+        "--sdk",
+        "macosx",
+        "metallib",
+        "$PROBE/probe.air",
+        "-o",
+        "$PROBE/probe.metallib"
+      ],
+      "status": "passed",
+      "stdout": ""
+    }
+  ],
+  "scope": "Development smoke fixtures only; Eylema runtime/workspace, browser/Wasm execution, GPU/model/training/performance acceptance not_run. Temporary probe artifacts are deleted."
+}
