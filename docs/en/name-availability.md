@@ -1,10 +1,10 @@
 # Eylema — Name and availability record
 
-English is canonical. [Türkçe](name-availability.tr.md).
+English is canonical. [Türkçe](../tr/name-availability.md).
 
 **Brand decision:** Eylema, accepted by the project owner on 11 October 2026. Public display name: **Eylema**. Proposed CLI name and package prefix: `eylema`; these are design conventions, not published packages or implemented commands.
 
-**Checked:** 11 October 2026, approximately 15:49–15:56 Europe/Istanbul. The registry/API timestamp and browser observation window are recorded in [the machine-readable record](name-availability.json). Availability can change before registration.
+**Checked:** 11 October 2026, approximately 15:49–15:56 Europe/Istanbul. The registry/API timestamp and browser observation window are recorded in [the machine-readable record](../records/name-availability.json). Availability can change before registration.
 
 **GitHub update — 11 October 2026:** The [eylema-dev organization](https://github.com/eylema-dev) and public [eylema-dev/eylema repository](https://github.com/eylema-dev/eylema) have now been created. The results below preserve the earlier, pre-creation availability check. The repository is the current documentation destination.
 

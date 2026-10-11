@@ -7,7 +7,7 @@ canonical_language: en
 
 # Eylema — Ortak API ve insan denetimi — v0.1
 
-[İngilizce belge](../en/reference-v0.1.md) esas kaynaktır; bu belge onun tam Türkçe çevirisidir. İşlem kimlikleri, alan adları, durumlar ve hata kodları her dilde İngilizce kalır. Belge, önerilen bir sözleşmeyi tanımlar. Adlandırılan uç noktalar, SDK, üreticiler ve uygunluk testleri bu belgeyle uygulanmış veya çalıştığı gösterilmiş değildir. Bu sürümde OpenAPI tanım dosyası teslim edilmez.
+[İngilizce belge](../en/api-reference.md) esas kaynaktır; bu belge onun tam Türkçe çevirisidir. İşlem kimlikleri, alan adları, durumlar ve hata kodları her dilde İngilizce kalır. Belge, önerilen bir sözleşmeyi tanımlar. Adlandırılan uç noktalar, SDK, üreticiler ve uygunluk testleri bu belgeyle uygulanmış veya çalıştığı gösterilmiş değildir. Bu sürümde OpenAPI tanım dosyası teslim edilmez.
 
 ## Tek sözleşme, farklı istemciler
 
@@ -119,4 +119,4 @@ Zorunlu olumsuz örnekler; uyuşmayan içerik hash'i, süresi geçmiş onay, esk
 
 Uygunluk kontrolleri üretilen arayüzleri karşılaştıracak, yetkilendirme ve tekrar anlamlarını çalıştıracak, kimliklerin diller arasında aynı kaldığını doğrulayacaktır. Yerel, tarayıcı ve GPU kanıtları ayrı tutulur; çalıştırılmayan kontroller `not_run` veya gerekçeli `not_applicable` kalır.
 
-İlgili sözleşmeler: [mimari](../../framework-mimari-taslagi-v0.3.md), [takım protokolleri](../../ai-takim-protokolleri-v0.1.md), [öğrenme ve eğitim](../../ogrenme-verisi-ve-egitim-protokolu-v0.1.md), [NeedSpec şeması](../../ai-team-protocol/request.schema.json), [sentetik istek örneği](../../ai-team-protocol/request.example.json), [model takımı sürüm şeması](../../ai-team-protocol/model-set-release.schema.json). Şema doğrulaması yapıyı kontrol eder; yetki, referans bütünlüğü, uyumluluk ve çalıştırılmış kanıt bağımsız anlamsal kontroller gerektirir.
+İlgili sözleşmeler: [mimari](architecture.md), [takım protokolleri](development-and-operations.md), [öğrenme ve eğitim](learning-and-training.md), [NeedSpec şeması](../../ai-team-protocol/request.schema.json), [sentetik istek örneği](../../ai-team-protocol/request.example.json), [model takımı sürüm şeması](../../ai-team-protocol/model-set-release.schema.json). Şema doğrulaması yapıyı kontrol eder; yetki, referans bütünlüğü, uyumluluk ve çalıştırılmış kanıt bağımsız anlamsal kontroller gerektirir.

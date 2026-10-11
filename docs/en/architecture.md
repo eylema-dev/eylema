@@ -1,16 +1,16 @@
 # Eylema Architecture v0.3 — English canonical
 
-**Architecture revision:** 0.3.0 · **Date:** 11 October 2026 · **Language:** English (canonical)
+**Architecture revision:** 0.3.1 · **Date:** 11 October 2026 · **Language:** English (canonical)
 
 **Product:** Eylema. **Descriptor:** A Simple, High-Performance Agentic AI Web Platform for Continuous Development and Operations.
 
 **Status:** Research-informed design, not an implemented framework, verified model support, or measured performance.
 
-**Turkish companion:** [Full Turkish architecture](framework-mimari-taslagi-v0.3.md). **Translation revision:** 0.3.0, translated from the Turkish v0.3 source. This English edition establishes the canonical language policy; automated translation drift checks are planned, not implemented.
+**Turkish companion:** [Full Turkish architecture](../tr/architecture.md). **Translation revision:** 0.3.1. The original English v0.3 edition was translated from the Turkish source. This English edition establishes the canonical language policy; repository tooling now checks translation byte fingerprints and API identifier parity; semantic equivalence still requires review.
 
 ## Language policy
 
-English is the source language for code, API names, schemas, protocols, and documentation. Turkish is the second language and must remain a complete, synchronized companion. Machine identifiers, enum values, schema keys, and protocol versions remain identical across languages. Translations record their source revision; planned drift checks will flag changes requiring translation review. A language label does not establish semantic equivalence without review.
+Code, comments, file names, API names, schemas, protocols and contribution records use English. Documentation is bilingual, with English as its canonical source. Turkish is the second language and must remain a complete, synchronized companion. Machine identifiers, enum values, schema keys, and protocol versions remain identical across languages. Translations record their source revision; repository fingerprint checks flag unrecorded translation edits. A language label does not establish semantic equivalence without review.
 
 ## Central idea
 
@@ -139,23 +139,25 @@ Each operation documents purpose, inputs/outputs, preconditions, effects, author
 | Slice | Deliverable | Acceptance evidence |
 |---|---|---|
 | 0 | Narrow goal; API/state/action contracts; support/dependency matrix | Consistent interpretation by human and AI tools |
-| 1 | Small web UI, local Rust server/persistence, WebGPU 3D scene | Task, object movement, save, and reopen flow |
+| 1a | Rust task contracts, deterministic executor and local journal | Authorized execution, bounded work, truthful cancellation and restart recovery |
+| 1b | Minimal web interface and local host service | Create, run, inspect, stop, save and reopen a task in a browser |
+| 1c | Optional WebGPU 3D scene | Object movement and real browser/device execution |
 | 2 | Deterministic decision baseline, own tensor operations, small learned policy/dynamics model | Prediction/observation error, closed-loop success, CPU/GPU parity |
 | 3 | One supported small local language model and shared GPU management | LLM, decisions, and scene meet quality/resource limits together |
 | 4 | Experience records, human corrections, first Unsloth recipe/model acceptance | Traceable data-to-model improvement on separated evaluation tasks |
 | 5 | Large-AI team orchestration, GitHub PR workflow, hardware-based team release | Real requirement-to-PR flow; justified assignment on two resource profiles |
 | 6 | Production web features and contribution ecosystem | Selected production protocols and independent contribution compatibility |
 
-API and evaluation definitions belong in every slice. A small 3D warehouse/placement environment is a proposed starting point: move objects, predict outcomes, decide, observe reality, and record corrections. A later LLM connects natural-language goals to those actions. This scenario has not been implemented.
+API and evaluation definitions belong in every slice. The maintainer selected the task core and web flow as the first working application. [Project structure and acceptance scenarios](project-structure.md) describe the proposed implementation. A small 3D warehouse/placement environment follows that proof, with learned decisions and natural-language goals added at later milestones. None of these runtime scenarios has been implemented.
 
 Building our own web engine, renderer, model runtime, and training ecosystem is substantial work. AI teams may accelerate development; hardware validation and maturation remain necessary. Scope expands through executed evidence, without universal model/device compatibility promises.
 
 ## Detailed contracts
 
-- [Development and local operations team protocols](ai-team-protocols-v0.1.en.md)
-- [Learning data and training protocol](learning-data-training-protocol-v0.1.en.md)
-- [English API reference](api/en/reference-v0.1.md)
-- [Development request JSON Schema](ai-team-protocol/request.schema.json)
-- [Local model team JSON Schema](ai-team-protocol/model-set-release.schema.json)
+- [Development and local operations team protocols](development-and-operations.md)
+- [Learning data and training protocol](learning-and-training.md)
+- [English API reference](api-reference.md)
+- [Development request JSON Schema](../../ai-team-protocol/request.schema.json)
+- [Local model team JSON Schema](../../ai-team-protocol/model-set-release.schema.json)
 
-These are architecture and structural-contract deliverables. This design exercise has not performed training, model/device benchmarks, framework execution, GitHub PR creation, or scheduled monitoring.
+These are architecture and structural-contract deliverables. Repository contribution tooling and PR work are separate from the planned autonomous development team. No training, model/device benchmark, framework execution or scheduled monitoring is demonstrated by these documents.

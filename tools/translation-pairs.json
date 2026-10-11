@@ -1,0 +1,78 @@
+{
+  "version": "0.1.0",
+  "purpose": "Reviewed byte fingerprints for current bilingual documentation; not semantic translation proof. Historical originals, English technical task records and provider adapters are excluded.",
+  "pairs": [
+    {
+      "en": "README.md",
+      "tr": "README.tr.md",
+      "en_sha256": "5fd5b83aca4ddb6a4fc7cb4803ca8aa80128f4b47873c3c8c51584154b5a44a5",
+      "tr_sha256": "a20fcc99de0fbfa4de537f789edf36a1806d54270b6a25127e24d2b63ffa1a0e"
+    },
+    {
+      "en": "CONTRIBUTING.md",
+      "tr": "CONTRIBUTING.tr.md",
+      "en_sha256": "7f22a583d3a67aac0e8482134dcb998bd8561d039932dd9e5244d5f973613a30",
+      "tr_sha256": "cf7cf02d1c8099d12e8803c192a5d78ec22c8490a56535c5d170588beab74f60"
+    },
+    {
+      "en": "ROADMAP.md",
+      "tr": "ROADMAP.tr.md",
+      "en_sha256": "315d67102d13828e55cd5c64913a1901f7e43ba62231b86d14873eae79083313",
+      "tr_sha256": "5cdabdb37771c11eae4e744bf9d67bdce4c7a8ca99632c614eef8223654c8b9e"
+    },
+    {
+      "en": "docs/en/architecture.md",
+      "tr": "docs/tr/architecture.md",
+      "en_sha256": "f0a7bc8b3bea63e07d633552491ef70a3c7fa8a7aa5e5b4ba33ea6a88fc7d366",
+      "tr_sha256": "076305b3b448fe480da9da3c2eff4cee5fbe3826005292d2912c4fdf27e3fea9"
+    },
+    {
+      "en": "docs/en/development-and-operations.md",
+      "tr": "docs/tr/development-and-operations.md",
+      "en_sha256": "82d4296edeb9c2d93e14a5e63d6e0ae5c412858e85f8c596ae5a888e4751c9af",
+      "tr_sha256": "cff554f1760b29d2ae353ef3617472e529cbbd767e9624bb0a8dfe463cb0ec75"
+    },
+    {
+      "en": "docs/en/learning-and-training.md",
+      "tr": "docs/tr/learning-and-training.md",
+      "en_sha256": "a2190216e2b3faff75753349524e91b380e44708169af55a74a8b2f45ba18b5d",
+      "tr_sha256": "b5a72ac137c75061713e2c39e4889403de507b987854d2bf91e11644a5c8d449"
+    },
+    {
+      "en": "docs/en/api-reference.md",
+      "tr": "docs/tr/api-reference.md",
+      "en_sha256": "53902cdc043f82b095306641e86cbdd6088b3f4be4febe4d0fc63561dd058301",
+      "tr_sha256": "f0e3325b2d679fa34d4b9a64a94231b0774e61ba8f34a38da14f257762ac3907"
+    },
+    {
+      "en": "docs/en/name-availability.md",
+      "tr": "docs/tr/name-availability.md",
+      "en_sha256": "9abe7e92afa6ac1bb4c27eba3ae8cfaf5cb9e57c356098f7266b972463d5897c",
+      "tr_sha256": "f41c7ab250c214c127a4a4ed02520e2143a187cd867bd6668c3f39bdf6ce3035"
+    },
+    {
+      "en": "docs/en/quality-gates.md",
+      "tr": "docs/tr/quality-gates.md",
+      "en_sha256": "18ef378cbc9fbb6ce399b28b93540e636570125ad804e298b75573a76e10e6f2",
+      "tr_sha256": "2675c7cdab05c04e40017549ade492736ac55e595e622b7e41536b6b47d6a0d7"
+    },
+    {
+      "en": "docs/en/tooling.md",
+      "tr": "docs/tr/tooling.md",
+      "en_sha256": "a045528e82bd0c42a3866eaaeac4862a2a4fe0d8203cd741cbcca6b4112d79e8",
+      "tr_sha256": "0cb176ae9cd2aaa384f0d78fd76ae407917df3d7ea7dc4d53001eba9cbe2dedf"
+    },
+    {
+      "en": "docs/en/project-structure.md",
+      "tr": "docs/tr/project-structure.md",
+      "en_sha256": "6ce7c363636992d953a2af7ed69e764736fb463b449921f6eccd214b9c8fc68b",
+      "tr_sha256": "7306d26bd1b05605cfcfdad2eb3ca03e15fceab547c6ed9e58710ac1c249c079"
+    },
+    {
+      "en": "assets/eylema-logo/README.md",
+      "tr": "assets/eylema-logo/README.tr.md",
+      "en_sha256": "32f6b6331166160ba38f0382a87526937fd2cf27c16dd06778e43cc6616aa4a8",
+      "tr_sha256": "7628d6dc5c5d61cf47129803f32acdc60323464fe1962213dac34bc96bf71dae"
+    }
+  ]
+}

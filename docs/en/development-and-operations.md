@@ -1,10 +1,10 @@
-Revision: **0.1.0** · Canonical language: **EN** · Secondary language: **TR** · [Turkish companion](ai-takim-protokolleri-v0.1.md)
+Revision: **0.1.0** · Canonical language: **EN** · Secondary language: **TR** · [Turkish companion](../tr/development-and-operations.md)
 
 # Eylema — Development and local operations team protocols — v0.1
 
-Date: 11 October 2026. Status: **protocol design to implement**. No working orchestrator, model selection, GitHub automation, or scheduled monitoring has been installed. Schema version: 0.1.0. Examples are not actual tasks, models, or measurements.
+Date: 11 October 2026. Status: **protocol design to implement**. No working orchestrator, model selection, autonomous PR generation, or scheduled monitoring has been installed. Repository contribution templates and CI gates are defined separately in [CONTRIBUTING.md](../../CONTRIBUTING.md). Schema version: 0.1.0. Examples are not actual tasks, models, or measurements.
 
-Related designs: [architecture](architecture-v0.3.en.md), [behavioral API and human oversight](api/en/reference-v0.1.md), and [learning data and training](learning-data-training-protocol-v0.1.en.md).
+Related designs: [architecture](architecture.md), [behavioral API and human oversight](api-reference.md), and [learning data and training](learning-and-training.md).
 
 ## Two teams, one evidence discipline
 
@@ -105,7 +105,7 @@ Reading a model file is not executing its architecture, operators, data types, a
 
 Behavioral contracts cover language, perception, decision/policy, value, and world models alongside deterministic Rust skills. `behavior_contract_ref` and its content hash bind observations, states, actions, timing, units, model connections, capabilities, and reset/transfer rules. World models predict action-conditioned transitions; policies/planners select actions; authorized executors apply them. Observed state, estimates, and imagined futures remain distinct. Evaluate world models and policies together: separately loading their files does not establish behavioral compatibility. Visual generation alone does not establish closed-loop control suitability.
 
-Use the common API's oversight contract: **HITL** requires approval before designated actions; **HOTL** enables observation/intervention during execution; **HIC** governs goals, budgets, and delegated authority. Roles do not grant permissions. Required approvals bind the exact plan/payload, state/policy revisions, resource scope, and expiry. Stop acknowledgement and actual termination differ; cancellation is not rollback. The [API reference](api/en/reference-v0.1.md) defines these semantics.
+Use the common API's oversight contract: **HITL** requires approval before designated actions; **HOTL** enables observation/intervention during execution; **HIC** governs goals, budgets, and delegated authority. Roles do not grant permissions. Required approvals bind the exact plan/payload, state/policy revisions, resource scope, and expiry. Stop acknowledgement and actual termination differ; cancellation is not rollback. The [API reference](api-reference.md) defines these semantics.
 
 ### Selection sequence
 
@@ -145,7 +145,7 @@ Track unsupported/rejected candidates and `rolled_back` releases. Pin exact revi
 
 Source releases, engine/backend changes, hardware profiles, or quality drift may trigger evaluation. Periodic discovery is configurable with frequency/download/evaluation budgets; every device need not constantly test every model. No scheduled monitoring has been created here.
 
-The development team prepares model-set and necessary Rust-engine changes through protocol A. Do not lower existing tests to admit candidates. Merge is not deployment; deployment checks release authority and device compatibility separately. Unsloth training follows the [learning protocol](learning-data-training-protocol-v0.1.en.md), with pinned recipes and distinct dataset/training/evaluation/model lineage, without adding a hidden production engine.
+The development team prepares model-set and necessary Rust-engine changes through protocol A. Do not lower existing tests to admit candidates. Merge is not deployment; deployment checks release authority and device compatibility separately. Unsloth training follows the [learning protocol](learning-and-training.md), with pinned recipes and distinct dataset/training/evaluation/model lineage, without adding a hidden production engine.
 
 Canary observes limited usage. Threshold violations reactivate the previous compatible team. Weight rollback does not undo external actions or written data; outcome/state compatibility requires separate handling. Offline devices may keep their latest compatible accepted team while displaying catalog/evidence freshness.
 

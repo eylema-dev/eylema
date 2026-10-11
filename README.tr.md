@@ -5,19 +5,23 @@
   </picture>
 </p>
 
-# Eylema — Tasarım Paketi
+# Eylema
 
 **Basit, Performanslı Eylemci Yapay Zeka Sürekli Geliştirme ve İşletme Web Platformu.**
 
-Projenin kaynak dili [İngilizce](README.md), ikinci dili Türkçedir. **Eylema** ürün adı **11 Ekim 2026** tarihinde kabul edildi; yukarıdaki tanım ürünün amacını anlatır.
+Kod, kimlikler, dosya adları ve katkı şablonları İngilizcedir. Dokümantasyon [İngilizce](README.md) ve Türkçe sunulur; kaynak dil İngilizcedir. **Eylema** ürün adı **11 Ekim 2026** tarihinde kabul edildi; yukarıdaki tanım ürünün amacını anlatır.
 
 Herkese açık dokümantasyon deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Önerilen CLI adı ve paket öneki `eylema`; henüz uygulanmış veya yayımlanmış değildir. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Lisans seçimi henüz tamamlanmadı.
 
-`eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](name-availability.tr.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Ana alan adı `eylema.dev`; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez.
+`eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](docs/tr/name-availability.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Ana alan adı `eylema.dev`; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez.
 
 Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/README.tr.md), [önizleme](assets/eylema-logo/brand-preview.png), [logo paketini indir](assets/eylema-logo.zip).
 
-**Durum: mimari ve API sözleşmesi taslakları.** Bu dokümantasyon çalışmasında çalışan framework, eğitilmiş model, üretim API’si, GitHub otomasyonu veya performans kıyası teslim edilmedi.
+**Durum: mimari/API taslakları ve katkı araçları.** Depo CI kontrolleri belgeleri, şemaları ve PR yapısını doğrular; Rust runtime, model yürütmesi, otonom AI geliştirme takımı veya performans kıyası sağlamaz.
+
+## Katkıda bulunma
+
+[Katkı kuralları](CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](ROADMAP.tr.md), [kalite kontrollerini](docs/tr/quality-gates.md) ve [CI araç envanterini](docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.
 
 ## Ürün yönü
 
@@ -51,17 +55,18 @@ Hız veya maliyet iyileştirilmeden önce asgari kalite karşılanır. Kernel ya
 
 | Belge | İngilizce kaynak | Türkçe karşılık |
 |---|---|---|
-| Mimari 0.3.0 | [Architecture](architecture-v0.3.en.md) | [Mimari](framework-mimari-taslagi-v0.3.md) |
-| API ve denetim 0.1.0 | [API reference](api/en/reference-v0.1.md) | [API referansı](api/tr/reference-v0.1.md) |
-| Geliştirme ve işletim 0.1.0 | [Team protocols](ai-team-protocols-v0.1.en.md) | [Takım protokolleri](ai-takim-protokolleri-v0.1.md) |
-| Öğrenme ve eğitim 0.1.0 | [Learning protocol](learning-data-training-protocol-v0.1.en.md) | [Öğrenme protokolü](ogrenme-verisi-ve-egitim-protokolu-v0.1.md) |
+| Proje yapısı 0.1.0 | [First application and component proposal](docs/en/project-structure.md) | [İlk uygulama ve bileşen önerisi](docs/tr/project-structure.md) |
+| Mimari 0.3.1 | [Architecture](docs/en/architecture.md) | [Mimari](docs/tr/architecture.md) |
+| API ve denetim 0.1.0 | [API reference](docs/en/api-reference.md) | [API referansı](docs/tr/api-reference.md) |
+| Geliştirme ve işletim 0.1.0 | [Team protocols](docs/en/development-and-operations.md) | [Takım protokolleri](docs/tr/development-and-operations.md) |
+| Öğrenme ve eğitim 0.1.0 | [Learning protocol](docs/en/learning-and-training.md) | [Öğrenme protokolü](docs/tr/learning-and-training.md) |
 
 Makinece okunabilir taslaklar: [geliştirme isteği şeması](ai-team-protocol/request.schema.json), [örnek istek](ai-team-protocol/request.example.json), [model takımı sürüm şeması](ai-team-protocol/model-set-release.schema.json). Şemaya uygunluk, yetki veya başarılı çalışma kanıtı değildir.
 
-İşlem kimlikleri, yollar, alanlar, enum değerleri ve hata kodları iki dilde aynı İngilizce tanımları kullanır. Çeviriler kaynak sürümünü izler. Eski v0.1/v0.2 mimari dosyaları ve ilk Türkçe API özeti tarihsel tasarım kayıtlarıdır; güncel belgeler bu dizinde belirtilmiştir.
+İşlem kimlikleri, yollar, alanlar, enum değerleri ve hata kodları iki dilde aynı İngilizce tanımları kullanır. Güncel belgeler `docs/en/` ve `docs/tr/` altında eşleşen İngilizce dosya adları taşır; çeviriler kaynak sürümünü izler. Önceki mimari sürümleri ve ilk API özeti tarihsel kayıt olarak `docs/archive/` altında korunur. Düzen ve taşıma notları [proje yapısı belgesindedir](docs/tr/project-structure.md).
 
 ## İlk kanıt
 
-Kendi web arayüzümüz, Rust yürütmesi ve kalıcılığıyla küçük bir 3B görev ortamı geliştirilecek. Deterministik karar başlangıcının ardından küçük öğrenilmiş politika/dinamik modeli ve desteklenen bir yerel dil modeli ortak GPU yükünde değerlendirilecek. İzinli bir deneyim ve düzeltme kaydedilecek; sabitlenmiş tarifle eğitilen aday ancak iyileşme kanıtından sonra etkinleştirilecek. Geliştirme takımının gerçek, doğrulanmış bir PR üretmesi ve iki kaynak profilinde gerekçeli model ataması göstermesi gerekecek.
+Seçilen ilk çalışan uygulama bir görev konsoludur: görev oluşturma, deterministik adımları çalıştırma, ilerlemeyi inceleme, kalan işi durdurma, durumu kaydetme ve hizmet yeniden başladıktan sonra tekrar açma. Önce Rust sözleşmeleri, yürütücü ve günlük kurulur, ardından asgari web arayüzü gösterilir. [Kabul senaryoları ve önerilen bileşenler](docs/tr/project-structure.md), gösterimin neyi kanıtlaması gerektiğini tanımlar.
 
-Her adım ayrı kabul aşamasıdır. İlk üründe bütün model aileleri, CAD çekirdeği veya her native GPU backend’i tamamlanmış olmak zorunda değildir.
+Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinli eğitim döngüsü ve geliştirme takımının PR akışı ayrı yol haritası aşamalarıdır. İlk tarayıcı gösterimi model erişimi veya GPU gerektirmez. Bu dokümantasyon revizyonu çalışan uygulama sağlamaz.

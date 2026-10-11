@@ -1,6 +1,6 @@
 # Eylema — Rust merkezli, yerel eylemci odaklı framework — mimari taslak v0.1
 
-Bu belge Eylema'nın tarihsel taslağıdır. Kullanıcının kendi Rust bileşenlerini geliştirme kararıyla Leptos/SQLx ve diğer hazır motor seçimleri geçersiz kalmıştır. Sonraki tasarım: [v0.2](framework-mimari-taslagi-v0.2.md). Ürün adı 11 Ekim 2026 tarihinde Eylema olarak kabul edilmiştir; bu adlandırma güncellemesi eski mimari seçimleri yeniden geçerli kılmaz.
+Bu belge Eylema'nın tarihsel taslağıdır. Kullanıcının kendi Rust bileşenlerini geliştirme kararıyla Leptos/SQLx ve diğer hazır motor seçimleri geçersiz kalmıştır. Sonraki tasarım: [v0.2](architecture-v0.2.tr.md). Ürün adı 11 Ekim 2026 tarihinde Eylema olarak kabul edilmiştir; bu adlandırma güncellemesi eski mimari seçimleri yeniden geçerli kılmaz.
 
 Tarih: 11 Ekim 2026. Durum: araştırma ve tasarım; çalışan framework veya ölçülmüş performans sonucu değildir. Örnek API adları öneridir, derlenmemiştir.
 

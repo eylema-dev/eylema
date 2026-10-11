@@ -1,6 +1,6 @@
 # Eylema — Basit, performanslı eylemci yapay zekâ web platformu — v0.3
 
-Dil: Türkçe. Kaynak sürüm: 0.3.0. İngilizce kaynak belge: [Architecture v0.3](architecture-v0.3.en.md). Kod, API işlem adları, şemalar ve hata kodları İngilizce; rehber ve açıklamalar İngilizce ve Türkçe yayımlanır. Çeviri aynı sözleşme kimliklerini korur ve kaynak sürümüne bağlanır.
+Dil: Türkçe. Kaynak sürüm: 0.3.1. İngilizce kaynak belge: [Architecture v0.3](../en/architecture.md). Kod, yorumlar, dosya adları, API işlem adları, şemalar, hata kodları ve katkı kayıtları İngilizce; rehber ve açıklamalar İngilizce ve Türkçe yayımlanır. Çeviri aynı sözleşme kimliklerini korur ve kaynak sürümüne bağlanır. Depo araçları çeviri dosya özetlerini ve API kimliği eşliğini denetler; kaydedilmemiş değişiklikler hata verir. Anlamsal eşdeğerlik yine inceleme gerektirir.
 
 Tarih: 11 Ekim 2026. Ürün: **Eylema**. Ürün çerçevesi: **Basit, Performanslı Eylemci Yapay Zeka Sürekli Geliştirme ve İşletme Web Platformu.** Durum: araştırmaya dayanan tasarım; çalışan framework, model desteği veya performans sonucu değildir.
 
@@ -137,23 +137,25 @@ Doküman her işlem için amaç, girdi/çıktı, önkoşul, yan etki, yetki, zam
 | Dilim | Teslim | Kabul kanıtı |
 |---|---|---|
 | 0 | Dar hedef, API/durum/eylem sözleşmeleri, destek ve bağımlılık matrisi | Aynı ihtiyacı insan ve AI araçlarının tutarlı okuyabilmesi |
-| 1 | Küçük web UI + yerel Rust sunucu/kalıcılık + WebGPU 3B sahne | Bir görev, nesne hareketi, kayıt ve tekrar açma akışı |
+| 1a | Rust görev sözleşmeleri, deterministik yürütücü ve yerel günlük | Yetkili yürütme, sınırlı iş, doğru iptal bildirimi ve yeniden başlatma sonrası kurtarma |
+| 1b | Asgari web arayüzü ve yerel ana hizmet | Tarayıcıda görev oluşturma, çalıştırma, inceleme, durdurma, kaydetme ve yeniden açma |
+| 1c | Seçilebilir WebGPU 3B sahne | Nesne hareketi ve gerçek tarayıcı/cihaz yürütmesi |
 | 2 | Deterministik karar başlangıcı + kendi tensor işlemleri + küçük öğrenilmiş politika/dinamik model | Tahmin–gerçek farkı, kapalı döngü başarı ve CPU/GPU uyum testi |
 | 3 | Desteklenen bir küçük yerel dil modeli ve ortak GPU yönetimi | LLM + karar + sahne aynı cihazda hedef kalite/kaynak sınırında |
 | 4 | Deneyim kaydı, insan düzeltmesi, ilk Unsloth tarifi ve model kabulü | Kaydı modele kadar izlenen, ayrılmış görevlerde ölçülen iyileşme |
 | 5 | Büyük AI geliştirme takımı, GitHub PR ve donanıma göre takım sürümü | Gerçek ihtiyaçtan PR’a; iki kaynak profilinde gerekçeli atama |
 | 6 | Üretim web özellikleri ve açık katkı ekosistemi | Seçilen üretim protokolleri ve bağımsız katkıların uyumluluk kanıtı |
 
-API ve değerlendirme tanımları her dilimin içindedir. İlk iki dilimde küçük bir 3B depo/yerleştirme ortamı iyi bir başlangıçtır: nesneleri hareket ettir, sonucu tahmin et, karar ver, gerçek sonucu gözle, düzeltmeyi kaydet. Bir LLM sonraki dilimde doğal dil hedefini bu eylemlere bağlar. Bu senaryo öneridir; henüz uygulanmamıştır.
+API ve değerlendirme tanımları her dilimin içindedir. Bakımcı, ilk çalışan uygulama olarak görev çekirdeği ve web akışını seçti. [Proje yapısı ve kabul senaryoları](project-structure.md) önerilen uygulamayı açıklar. Küçük bir 3B depo/yerleştirme ortamı bu kanıttan sonra gelir; öğrenilmiş kararlar ve doğal dil hedefleri sonraki aşamalarda eklenir. Bu runtime senaryolarının hiçbiri henüz uygulanmadı.
 
 Tam özellikli kendi web motoru, 3B motor, model yürütücüsü ve eğitim ekosistemi ciddi bir kapsamdır. AI ekipleri geliştirmeyi hızlandırabilir; donanım doğrulaması ve olgunlaşma ihtiyacını ortadan kaldırmaz. Dilimler bu nedenle çalıştırılmış kanıtla genişler; “her model/her cihazda sorunsuz” taahhüdü verilmez.
 
 ## Ayrıntılı sözleşmeler
 
-- [Geliştirme ve yerel işletim takımı protokolleri](ai-takim-protokolleri-v0.1.md)
-- [Öğrenme verisi ve eğitim protokolü](ogrenme-verisi-ve-egitim-protokolu-v0.1.md)
-- [API sözleşmesi ve insan denetimi](api/tr/reference-v0.1.md)
-- [Geliştirme isteği JSON şeması](ai-team-protocol/request.schema.json)
-- [Yerel model takımı JSON şeması](ai-team-protocol/model-set-release.schema.json)
+- [Geliştirme ve yerel işletim takımı protokolleri](development-and-operations.md)
+- [Öğrenme verisi ve eğitim protokolü](learning-and-training.md)
+- [API sözleşmesi ve insan denetimi](api-reference.md)
+- [Geliştirme isteği JSON şeması](../../ai-team-protocol/request.schema.json)
+- [Yerel model takımı JSON şeması](../../ai-team-protocol/model-set-release.schema.json)
 
-Bu belgeler mimari ve yapısal sözleşme teslimidir. Gerçek eğitim, model/device ölçümü, framework çalıştırması, GitHub PR veya zamanlanmış izleme bu tasarım çalışmasında yapılmamıştır.
+Bu belgeler mimari ve yapısal sözleşme teslimidir. Depo katkı araçları ve PR çalışması, planlanan otonom geliştirme takımından ayrıdır. Bu belgeler eğitim, model/cihaz kıyası, framework yürütmesi veya zamanlanmış izleme kanıtı sunmaz.

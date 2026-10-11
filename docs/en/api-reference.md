@@ -7,7 +7,7 @@ canonical_language: en
 
 # Eylema — Shared API and human oversight — v0.1
 
-English is the canonical source; [Türkçe](../tr/reference-v0.1.md) is its complete translation. Operation identifiers, field names, states and error codes remain English in every language. This document specifies a proposed contract. The named endpoints, SDK, generators and conformance suite are not implemented or demonstrated by this document. No OpenAPI specification is delivered in this revision.
+English is the canonical source; [Türkçe](../tr/api-reference.md) is its complete translation. Operation identifiers, field names, states and error codes remain English in every language. This document specifies a proposed contract. The named endpoints, SDK, generators and conformance suite are not implemented or demonstrated by this document. No OpenAPI specification is delivered in this revision.
 
 ## One contract, several clients
 
@@ -119,4 +119,4 @@ Human documentation provides task tutorials, approval previews, inspection and r
 
 Conformance checks will compare generated surfaces, exercise authorization and replay semantics, and verify language parity for identifiers. Native, browser and GPU evidence remain separate; unrun checks remain `not_run` or justified `not_applicable`.
 
-Related contracts: [architecture](../../architecture-v0.3.en.md), [team protocols](../../ai-team-protocols-v0.1.en.md), [learning and training](../../learning-data-training-protocol-v0.1.en.md), [NeedSpec schema](../../ai-team-protocol/request.schema.json), [synthetic request example](../../ai-team-protocol/request.example.json), [model-set release schema](../../ai-team-protocol/model-set-release.schema.json). Schema validation checks structure; authorization, reference integrity, compatibility and executed evidence require independent semantic checks.
+Related contracts: [architecture](architecture.md), [team protocols](development-and-operations.md), [learning and training](learning-and-training.md), [NeedSpec schema](../../ai-team-protocol/request.schema.json), [synthetic request example](../../ai-team-protocol/request.example.json), [model-set release schema](../../ai-team-protocol/model-set-release.schema.json). Schema validation checks structure; authorization, reference integrity, compatibility and executed evidence require independent semantic checks.

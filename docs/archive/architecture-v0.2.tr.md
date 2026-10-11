@@ -1,6 +1,6 @@
 # Eylema — AI ile geliştirilen ve AI çalıştıran Rust web platformu — v0.2
 
-> Eylema'nın güncel ürün yönü ve geliştirme sırası [v0.3 taslağındadır](framework-mimari-taslagi-v0.3.md). Bu sürüm önceki mimari kararların kaydıdır. Ürün adı 11 Ekim 2026 tarihinde Eylema olarak kabul edilmiştir; bu adlandırma güncellemesi tarihsel taslağın mimari kapsamını değiştirmez.
+> Eylema'nın güncel ürün yönü ve geliştirme sırası [v0.3 taslağındadır](../tr/architecture.md). Bu sürüm önceki mimari kararların kaydıdır. Ürün adı 11 Ekim 2026 tarihinde Eylema olarak kabul edilmiştir; bu adlandırma güncellemesi tarihsel taslağın mimari kapsamını değiştirmez.
 
 Tarih: 11 Ekim 2026. Durum: mimari karar ve geliştirme taslağı. Henüz uygulama kodu, eğitim veya performans sonucu değildir. Bu belge v0.1’in Leptos/SQLx ve diğer hazır motor seçimlerinin yerini alır.
 
@@ -14,7 +14,7 @@ Başarı ölçütü, AI’ın platform üzerinde doğru değişiklik yapabilmesi
 
 Platformun hedefi herkese açık yayımlanmak ve kullanıcıların kendi AI araçlarıyla GitHub üzerinden katkı verebilmesidir. AI ile geliştirme, uygulama içi AI ve topluluk katkıları aynı belgelenmiş sözleşmelerden yararlanır. Bu belge yayımlanmış bir GitHub deposu veya tamamlanmış public ürün olduğunu ifade etmez.
 
-Güncel takım kararı: büyük dış modeller geliştirme ekibini, donanıma göre seçilen yerel modeller işletim ekibini oluşturur. İhtiyaçtan GitHub PR’a gidiş ile yerel model takımının ölçüm, atama ve güncelleme akışları ayrı sürümlü protokollerdir. Ayrıntılar [AI takım protokolleri v0.1](ai-takim-protokolleri-v0.1.md) belgesindedir.
+Güncel takım kararı: büyük dış modeller geliştirme ekibini, donanıma göre seçilen yerel modeller işletim ekibini oluşturur. İhtiyaçtan GitHub PR’a gidiş ile yerel model takımının ölçüm, atama ve güncelleme akışları ayrı sürümlü protokollerdir. Ayrıntılar [AI takım protokolleri v0.1](../tr/development-and-operations.md) belgesindedir.
 
 ## Bağlayıcı mimari kararlar
 

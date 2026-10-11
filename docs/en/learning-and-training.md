@@ -1,10 +1,10 @@
-Revision: **0.1.0** · Canonical language: **EN** · Secondary language: **TR** · [Turkish companion](ogrenme-verisi-ve-egitim-protokolu-v0.1.md)
+Revision: **0.1.0** · Canonical language: **EN** · Secondary language: **TR** · [Turkish companion](../tr/learning-and-training.md)
 
 # Eylema — Learning data and training protocol — v0.1
 
 Date: 11 October 2026. Status: **design proposal**. This document does not enable collection, training, or deployment. No training, export, performance measurement, or model acceptance test has run.
 
-Related designs: [architecture](architecture-v0.3.en.md), [AI team protocols](ai-team-protocols-v0.1.en.md), and [behavioral API and human oversight](api/en/reference-v0.1.md). Identifiers remain English across language editions.
+Related designs: [architecture](architecture.md), [AI team protocols](development-and-operations.md), and [behavioral API and human oversight](api-reference.md). Identifiers remain English across language editions.
 
 ## Purpose and architectural boundary
 

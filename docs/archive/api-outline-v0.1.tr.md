@@ -1,6 +1,6 @@
 # Eylema — API sözleşmesi ve insan denetimi — v0.1
 
-> Eylema'nın güncel esas kaynağı [English API reference](api/en/reference-v0.1.md), tam çevirisi [Türkçe API referansı](api/tr/reference-v0.1.md) olarak taşındı. Kaynak revizyonu: `0.1.0`. Aşağıdaki metin önceki taslaktır; güncel işlem kataloğu ve HITL/HOTL/HIC tanımları için yeni referansları kullanın.
+> Eylema'nın güncel esas kaynağı [English API reference](../en/api-reference.md), tam çevirisi [Türkçe API referansı](../tr/api-reference.md) olarak taşındı. Kaynak revizyonu: `0.1.0`. Aşağıdaki metin önceki taslaktır; güncel işlem kataloğu ve HITL/HOTL/HIC tanımları için yeni referansları kullanın.
 
 Bu belge, kendi Rust bileşenlerimizle geliştirilecek platformun API ve dokümantasyon tasarımını tanımlar. Buradaki işlem adları, alanlar ve örnekler öneridir; uygulanmış, çağrılmış veya üretimde doğrulanmış bir API’yi temsil etmez. Amaç, yerel eylemcilerin, büyük modellerin ve insanların aynı davranış sözleşmesini kullanmasını sağlamaktır. Arayüzler farklı olabilir; yetki, veri anlamı ve işlem sonuçları aynı kaynaktan türetilmelidir.
 
@@ -75,6 +75,6 @@ Politika onay istiyorsa insan değişiklik farkını inceler; onay tam plan ve y
 
 İnsan belgeleri görev odaklı öğreticiler, rol açıklamaları, onay ekranı örnekleri ve hata çözüm yolları içerir. AI belgeleri kesin şemaları, yetenek listesini, birimleri, kısıtları, geçerli/geçersiz yükleri ve sürüm geçişlerini içerir. Aynı işlemin anlamı iki belgede değişemez.
 
-Temel tasarım kayıtları: [ihtiyaç şeması](ai-team-protocol/request.schema.json), [ihtiyaç örneği](ai-team-protocol/request.example.json) ve [model takımı sürüm şeması](ai-team-protocol/model-set-release.schema.json). Bunların mevcut olması çalışan API anlamına gelmez; şema doğrulaması yetki ve davranış doğrulamasının yerini tutmaz.
+Temel tasarım kayıtları: [ihtiyaç şeması](../../ai-team-protocol/request.schema.json), [ihtiyaç örneği](../../ai-team-protocol/request.example.json) ve [model takımı sürüm şeması](../../ai-team-protocol/model-set-release.schema.json). Bunların mevcut olması çalışan API anlamına gelmez; şema doğrulaması yetki ve davranış doğrulamasının yerini tutmaz.
 
 Hızlı başlangıç ve “test edilmiş örnek” etiketi ancak uygulama tamamlandığında yayımlanır. Her örnek çalıştırıldığı kod sürümüne, ortamına ve sonucuna bağlanır. Uyumluluk kapısı; üretilen belgelerin eşleşmesini, örnek yük doğrulamasını, ret senaryolarını, tekrar davranışını, olay devamını ve gerçek iptal sonuçlarını denetler. Çalıştırılmayan donanım veya adapter için başarı iddiası yapılmaz. Bu belge tasarım sınırını tanımlar; herhangi bir erişim bilgisi, çalıştırma yetkisi veya dış işlem oluşturmaz.

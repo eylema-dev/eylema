@@ -1,6 +1,6 @@
 # Eylema — Öğrenme verisi ve eğitim protokolü — v0.1
 
-Dil: Türkçe. Kaynak sürüm: 0.1.0. İngilizce kaynak belge: [Learning data and training protocol](learning-data-training-protocol-v0.1.en.md). Makinece okunabilir kimlik ve alan adları iki dilde aynıdır.
+Dil: Türkçe. Kaynak sürüm: 0.1.0. İngilizce kaynak belge: [Learning data and training protocol](../en/learning-and-training.md). Makinece okunabilir kimlik ve alan adları iki dilde aynıdır.
 
 Tarih: 11 Ekim 2026. Durum: tasarım önerisi. Bu belge veri toplamayı, eğitim başlatmayı veya model dağıtmayı etkinleştirmez. Gerçek eğitim, dışa aktarma, performans ölçümü veya model kabul testi çalıştırılmadı.
 

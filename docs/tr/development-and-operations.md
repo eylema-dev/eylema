@@ -1,8 +1,8 @@
 # Eylema — Geliştirme ve yerel işletim takımı protokolleri — v0.1
 
-Dil: Türkçe. Kaynak sürüm: 0.1.0. İngilizce kaynak belge: [AI team protocols](ai-team-protocols-v0.1.en.md). Projenin API kimlikleri, alanları ve hata kodları İngilizce kalır.
+Dil: Türkçe. Kaynak sürüm: 0.1.0. İngilizce kaynak belge: [AI team protocols](../en/development-and-operations.md). Projenin API kimlikleri, alanları ve hata kodları İngilizce kalır.
 
-Tarih: 11 Ekim 2026. Durum: uygulanacak protokol tasarımı; çalışan orkestratör, model seçimi, GitHub otomasyonu veya zamanlanmış izleme kurulmuş değildir. Şema sürümü: 0.1.0. Örnekler gerçek görev, model veya ölçüm değildir.
+Tarih: 11 Ekim 2026. Durum: uygulanacak protokol tasarımı; çalışan orkestratör, model seçimi, otonom PR üretimi veya zamanlanmış izleme kurulmuş değildir. Depo katkı şablonları ve CI kontrolleri [CONTRIBUTING.tr.md](../../CONTRIBUTING.tr.md) içinde ayrıca tanımlanır. Şema sürümü: 0.1.0. Örnekler gerçek görev, model veya ölçüm değildir.
 
 ## İki takım, ortak kanıt düzeni
 
@@ -99,7 +99,7 @@ Ajanın/test edilen kodun çalıştığı ortam ile GitHub yazma/model servis ki
 
 Takım; dil, algı, karar/politika, değer ve dünya modelleri ile deterministik Rust becerilerini kapsar. `behavior_contract_ref` ve içerik özeti; gözlem, durum, eylem, zaman, birimler, model bağlantıları ve reset/taşıma kurallarını sabitler. Dünya modeli ile politika birlikte değerlendirilir; dosyaların ayrı ayrı yüklenmesi ortak davranış uyumunu kanıtlamaz. Gözlenmiş durum, kestirim ve hayal edilen gelecek ayrı tutulur.
 
-Ortak API’de HITL belirlenen eylemden önce insan kararını, HOTL izleme ve müdahaleyi, HIC hedef/bütçe/yetki yönetimini tanımlar. Rol adları kendi başına izin vermez. Gerekli onay tam plan/girdi, durum/politika sürümleri, kaynak kapsamı ve süreye bağlanır. Durdurma isteğinin alınması ile gerçekten durma ayrı sonuçtur; iptal geri alma değildir. Ayrıntılar [API referansındadır](api/tr/reference-v0.1.md).
+Ortak API’de HITL belirlenen eylemden önce insan kararını, HOTL izleme ve müdahaleyi, HIC hedef/bütçe/yetki yönetimini tanımlar. Rol adları kendi başına izin vermez. Gerekli onay tam plan/girdi, durum/politika sürümleri, kaynak kapsamı ve süreye bağlanır. Durdurma isteğinin alınması ile gerçekten durma ayrı sonuçtur; iptal geri alma değildir. Ayrıntılar [API referansındadır](api-reference.md).
 
 Kalıcı donanım yetenekleri ile anlık kullanılabilir kaynaklar ayrı kaydedilir. Browser’ın göstermediği boş VRAM kesin bilgi gibi yazılmaz; bilinmeyen değer `unknown` kalır. Sürücü/backend/işletim sistemi değişikliği önceki uyumluluk kanıtının yeniden değerlendirilmesini gerektirebilir.
 
@@ -157,7 +157,7 @@ Bir katkıcı görev sınıflandırmasının bir cihaz sınıfında yavaş oldu�
 
 ## Makinece okunabilir başlangıç dosyaları
 
-Öğrenme verisi ve Unsloth eğitim akışı [eğitim protokolünde](ogrenme-verisi-ve-egitim-protokolu-v0.1.md); insan katılımı, gözetimi ve yönetimi [API referansında](api/tr/reference-v0.1.md) tanımlanır. Eğitim araçları ayrı bağımlılık envanterindedir. Model atama yetkisi, eğitim verisini paylaşma veya yeni ağırlığı etkinleştirme yetkisi oluşturmaz.
+Öğrenme verisi ve Unsloth eğitim akışı [eğitim protokolünde](learning-and-training.md); insan katılımı, gözetimi ve yönetimi [API referansında](api-reference.md) tanımlanır. Eğitim araçları ayrı bağımlılık envanterindedir. Model atama yetkisi, eğitim verisini paylaşma veya yeni ağırlığı etkinleştirme yetkisi oluşturmaz.
 
 - `ai-team-protocol/request.schema.json`: geliştirme isteğinin yapısal sözleşmesi.
 - `ai-team-protocol/request.example.json`: örnek bir istek; gerçek yetki veya görev değildir.

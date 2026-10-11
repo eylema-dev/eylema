@@ -21,5 +21,7 @@
     "This run did not repeat earlier synthetic release or negative schema fixtures.",
     "Historical name availability evidence is preserved; current organization and repository creation is recorded separately.",
     "Identifier parity is not automatic proof of complete translation equivalence."
-  ]
+  ],
+  "historical_snapshot": true,
+  "current_evidence": "This is the original publication snapshot, not the current commit status. Run tools/check_repository.py and inspect the current GitHub Actions run."
 }

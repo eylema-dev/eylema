@@ -1,10 +1,10 @@
 # Eylema — İsim ve uygunluk kaydı
 
-[İngilizce](name-availability.md) kaynak belgedir; Türkçe ikinci dildir.
+[İngilizce](../en/name-availability.md) kaynak belgedir; Türkçe ikinci dildir.
 
 **Marka kararı:** Eylema adı proje sahibi tarafından 11 Ekim 2026'da kabul edildi. Görünen ürün adı **Eylema**. Önerilen CLI adı ve paket öneki `eylema`; bunlar tasarım kararlarıdır, yayımlanmış paket veya çalışan komut değildir.
 
-**Kontrol:** 11 Ekim 2026, yaklaşık 15:49–15:56, Europe/Istanbul. Kayıt/API zaman damgası ve tarayıcı gözlemlerinin zaman aralığı [makinece okunabilir kayıtta](name-availability.json) bulunur. Uygunluk, kayıt yapılana kadar değişebilir.
+**Kontrol:** 11 Ekim 2026, yaklaşık 15:49–15:56, Europe/Istanbul. Kayıt/API zaman damgası ve tarayıcı gözlemlerinin zaman aralığı [makinece okunabilir kayıtta](../records/name-availability.json) bulunur. Uygunluk, kayıt yapılana kadar değişebilir.
 
 **GitHub güncellemesi — 11 Ekim 2026:** [eylema-dev organizasyonu](https://github.com/eylema-dev) ve public [eylema-dev/eylema deposu](https://github.com/eylema-dev/eylema) artık oluşturuldu. Aşağıdaki sonuçlar, oluşturma öncesindeki uygunluk kontrolünün tarihsel kaydıdır. Güncel dokümantasyon adresi bu depodur.
 
