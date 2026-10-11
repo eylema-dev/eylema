@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "2bf561e3ee6d6410938139ab51a378844a9bac171ef7393f45b460ecef8579f1",
-      "tr_sha256": "eb11899e66b9070cc33b54c4812896dc05a0a9db4ce068997481d0a7b437a7a7"
+      "en_sha256": "543861b81f71de3c1a98db0e53bc47717d4db0cb8f7700541ffe52ad35d72f22",
+      "tr_sha256": "90009409324f79ed420d1d50eedcab7aa5b420974e652d307deb34244c8315c4"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -25,6 +25,12 @@
       "tr": "docs/tr/development-environment.md",
       "en_sha256": "52114588673ee2bb76e93a21fa8c3bddb34e9da6e691024a0a9486089fbc010b",
       "tr_sha256": "1e3979926bb118188b8f169cd527b36a0a4642d116af8773319f9b8ca64dea48"
+    },
+    {
+      "en": "docs/en/rust-workspace.md",
+      "tr": "docs/tr/rust-workspace.md",
+      "en_sha256": "923860c11d3556f9b554a4284ea644d5f4c6e03f3b7d2aa9969dd0aacc0fe60b",
+      "tr_sha256": "69bc577a3650a4c0dd0131c9ed90b1875e4e3f6e67f431e7d90ae9a37213a73d"
     }
   ],
   "documents": []

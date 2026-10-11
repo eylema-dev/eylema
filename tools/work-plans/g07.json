@@ -1,0 +1,58 @@
+{
+  "goal": "G07",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/9",
+  "base": "ba4f3e2bd73688c3e39372c7ad24daf7336e9768",
+  "dependencies": {
+    "G02": "8501e496f5c1f93764a253869ea0d7fb673c349f",
+    "G03": "a07f3f6ccf3b564635da70f00bd73aadbb7d6a7f",
+    "G04": "ba4f3e2bd73688c3e39372c7ad24daf7336e9768"
+  },
+  "authority": "Actual maintainer request to execute all accepted Goals; standing merge authorization after current CI and separate review. A reference string itself grants no permission.",
+  "parallel_boundary": "G05 is in review awaiting separate settings authority; G06 license choice awaits user. G07 has only accepted G02/G03/G04 prerequisites and is the sole implementation Goal. Reconcile the versioned tracking snapshot before any G05 merge; do not pretend historical labels are continuous synchronization.",
+  "allowed_paths": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "rust-toolchain.toml",
+    "crates/eylema-contracts/",
+    "apps/eylema/",
+    "repository.json",
+    ".gitignore",
+    "README.md",
+    "README.tr.md",
+    "docs/en/rust-workspace.md",
+    "docs/tr/rust-workspace.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g07.json"
+  ],
+  "guide_delivery": "A reviewed core change requires the guide integration pin. Prepare only after stable core head; preserve the pending G05 branch/records, base any guide delivery on current main and renew affected review/CI if G05 merges first.",
+  "acceptance_checks": [
+    "Exact six AGENTS commands",
+    "Existing unchanged rust-v1 checker: offline/locked metadata, fmt/clippy warnings denied, native test/build, explicitly portable contracts Wasm build",
+    "Actual bootstrap host process execution and failure/invalid-argument integration tests",
+    "No external Cargo dependencies/build scripts; native host never selected for Wasm",
+    "EN/TR meaning/fingerprints, scoped/private-path diff and fetched guide integration",
+    "Fresh separate final-head review, current exact-head PR CI, standing-authorized merge then main CI/tree audit"
+  ],
+  "design": "Minimal first-party contracts library exporting package build identity and one actual native host consumer. The host supports bootstrap help/version only; it implements no task API/service, CLI task lifecycle, GPU/model/training or first proof. G08 adds typed task contracts; G14/G15 later supply service/CLI behavior. No empty planned crates without a consumer are created.",
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context using actual Python/Rust/Git/gh",
+    "reviewer": "Fresh separate context at final head; invocation gpt-6.1-sol/high, hidden identity not independently verified"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "risk": "Repository runtime_implemented flag means implementation-stage source exists, not completed task runtime/product acceptance. Do not weaken shared source/environment guards. PATH selects installed official Rust, and only unrelated inherited RUST_LOG is cleared explicitly. Distribution license remains pending; no publish/deploy/admin/weights/private data.",
+  "rollback": "Revert scoped source/docs/profile/pins through reviewed PRs; preserve earlier accepted environment and unrelated work. No branch protection or license choice in G07.",
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g07-rust-workspace.md",
+      "tools/repository-set.json"
+    ]
+  },
+  "guide_base": "ac2d950026cac79128df48492aae62f3f93be37e"
+}

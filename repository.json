@@ -2,9 +2,12 @@
   "format_version": 1,
   "repository": "eylema-dev/eylema",
   "role": "core",
-  "stage": "documentation",
+  "stage": "implementation",
   "tooling_version": "0.3.0",
-  "runtime_implemented": false,
+  "runtime_implemented": true,
   "license_status": "pending maintainer decision",
-  "gate_profile": "documentation-v1"
+  "gate_profile": "rust-v1",
+  "wasm_packages": [
+    "eylema-contracts"
+  ]
 }
