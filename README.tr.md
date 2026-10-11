@@ -1,12 +1,21 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/eylema-logo/logo-dark.png">
+    <img src="assets/eylema-logo/logo.png" alt="Eylema" width="520">
+  </picture>
+</p>
+
 # Eylema — Tasarım Paketi
 
 **Basit, Performanslı Eylemci Yapay Zeka Sürekli Geliştirme ve İşletme Web Platformu.**
 
 Projenin kaynak dili [İngilizce](README.md), ikinci dili Türkçedir. **Eylema** ürün adı **11 Ekim 2026** tarihinde kabul edildi; yukarıdaki tanım ürünün amacını anlatır.
 
-Herkese açık dokümantasyon deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Önerilen CLI adı ve paket öneki `eylema`; henüz uygulanmış veya yayımlanmış değildir. Alan adı kaydı ve lisans seçimi henüz tamamlanmadı.
+Herkese açık dokümantasyon deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Önerilen CLI adı ve paket öneki `eylema`; henüz uygulanmış veya yayımlanmış değildir. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Lisans seçimi henüz tamamlanmadı.
 
-`eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](name-availability.tr.md), organizasyon oluşturulmadan önceki kontrolleri korur. Önerilen ana alan adı `eylema.dev`; bu çalışmada alan adı satın alınmadı.
+`eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](name-availability.tr.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Ana alan adı `eylema.dev`; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez.
+
+Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/README.tr.md), [önizleme](assets/eylema-logo/brand-preview.png), [logo paketini indir](assets/eylema-logo.zip).
 
 **Durum: mimari/API taslakları ve katkı araçları.** Depo CI kontrolleri belgeleri, şemaları ve PR yapısını doğrular; Rust runtime, model yürütmesi, otonom AI geliştirme takımı veya performans kıyası sağlamaz.
 

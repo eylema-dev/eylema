@@ -1,12 +1,21 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/eylema-logo/logo-dark.png">
+    <img src="assets/eylema-logo/logo.png" alt="Eylema" width="520">
+  </picture>
+</p>
+
 # Eylema — Design Pack
 
 **A Simple, High-Performance Agentic AI Web Platform for Continuous Development and Operations.**
 
 English is the canonical project language. [Türkçe](README.tr.md) is the second language. The product name **Eylema** was accepted on **11 October 2026**; the description above states its intended purpose.
 
-Public documentation repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The proposed CLI name and package prefix are `eylema`; they are not implemented or published. Domain registration and license selection remain pending.
+Public documentation repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The proposed CLI name and package prefix are `eylema`; they are not implemented or published. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. License selection remains pending.
 
-The [name and availability record](name-availability.md) preserves the checks made before organization creation. `eylema-dev` and this public repository were established on 11 October 2026. `eylema.dev` remains the proposed primary domain; no domain was purchased by this work.
+The [name and availability record](name-availability.md) preserves the checks made before organization creation and the subsequent registration update. `eylema-dev` and this public repository were established on 11 October 2026. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
+
+Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
 **Status: architecture/API drafts and contribution tooling.** Repository CI validates documents, schemas and PR structure; it does not implement the Rust runtime, model execution, autonomous AI development team or performance benchmarks.
 
