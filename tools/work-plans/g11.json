@@ -1,0 +1,86 @@
+{
+  "goal": "G11",
+  "task_revision": 4,
+  "issue": "https://github.com/eylema-dev/eylema/issues/13",
+  "base": "9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841",
+  "guide_base": "9ec707de516f2393b4930f64a051f790da26a177",
+  "dependencies": {
+    "G10": {
+      "eylema": {
+        "head": "6953a52ef24d6d53203f48764e7ee5e48bb6f471",
+        "main": "9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841",
+        "pr_url": "https://github.com/eylema-dev/eylema/pull/43",
+        "final_pr_ci": 38170113662,
+        "reviewed_tree_matches_main": true,
+        "main_ci": {
+          "conclusion": "success",
+          "createdAt": "2026-10-11T19:57:25Z",
+          "databaseId": 38170174463,
+          "event": "push",
+          "headSha": "9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841",
+          "status": "completed"
+        }
+      },
+      "devguide": {
+        "head": "348571e6b9c50dd81e0d7349284f90ae529739d2",
+        "main": "9ec707de516f2393b4930f64a051f790da26a177",
+        "pr_url": "https://github.com/eylema-dev/devguide/pull/16",
+        "final_pr_ci": 38170115920,
+        "reviewed_tree_matches_main": true,
+        "main_ci": {
+          "conclusion": "success",
+          "createdAt": "2026-10-11T19:57:31Z",
+          "databaseId": 38170181946,
+          "event": "push",
+          "headSha": "9ec707de516f2393b4930f64a051f790da26a177",
+          "status": "completed"
+        }
+      }
+    }
+  },
+  "authority": "Actual user requests all accepted Goals and standing scoped merges after separate review/currentCI. G05 retained settings/prepared proposal. No license/deploy/admin/access/spending authority.",
+  "allowed_paths": [
+    "crates/eylema-runtime/",
+    "tools/work-plans/g11.json",
+    "docs/en/human-oversight.md",
+    "docs/tr/human-oversight.md",
+    "docs/en/deterministic-runtime.md",
+    "docs/tr/deterministic-runtime.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json"
+  ],
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g11-human-oversight.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
+    ]
+  },
+  "scope_revision": "Adapt proposed runtime path to accepted crates/eylema-runtime; keep embedded typed oversight records/handles in runtime, no wire version or Cargo dependency/profile/shared gate change. Update current paired status and explicit G10 historical boundaries. Revision3 makes accepted task oversight immutable and host-installed, checked independently of request declarations; policy-revision advance cannot remove obligations. Revision4 repairs separately reproduced multi-resource intervention scope: task/execution controls and streams require full task scope for both accepted and declared obligations; add multi-resource regressions.",
+  "design": "Opaque trusted-host verified-human enrollment distinct from ordinary sessions; host must independently verify person identity before use, fixtures do not prove real human authentication. Bounded immutable approval records bind canonical exact task/proposal hash, IDs/revisions/scope/expiry/checkpoints/verified approver; recheck before admission and each effect, preserve revocation history. Scoped trusted-human intervention and registered governance references resolve actual runtime records, task policy advancement invalidates stale execution/decisions; delegation revocation denies future actions. Cancellation reserves receipt/effective metadata at cancellable admission, records CancelRequested without stop proof, next cooperative step supplies Cancelled/effective-stop evidence and preserves applied effects. Repeated requests return same receipt; completed late request preserves terminal result. No compensation/external stop/recovery/network/GUI claim. Initial trusted host installs protected task obligations; request omission cannot weaken accepted checkpoints/observation/intervention/governance.",
+  "acceptance_checks": [
+    "Meaningful expired/hash/plan/state/policy/scope/claimed-human/cross-instance approval denial before effects; valid approval; expiry/revocation between steps retains partial effects; stale policy/delegation revocation; authenticated scoped observation/intervention/governance",
+    "Queued/running cancellation receipt distinct from effective evidence; full reserved capacity; duplicate/late stop preserves results; clock/authority failures no control writes",
+    "Actual OS-backed native oversight consumer with clearly simulated host human verification, no real login claim",
+    "Exact six AGENTS, unchanged Rust guard/fmt/clippy/native tests/build/selected contracts-platform Wasm, populated body, EN/TR meaning/fingerprints/privacy/integration/live47Goals/original14checkout preservation",
+    "Fresh separate final-head review/currentCI/standing merge/exact-mainCI/tree equality"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context actual Rust/Python/Git/gh/OS services",
+    "reviewer": "Fresh separate exact-head context; planned accepted gpt-6.1-sol/high invocation, hidden identity unverifiable"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "risks": [
+    "Verified-human capability trusts embedding host; public authentication belongs to G14/G16",
+    "Owned synchronous memory only; cancellation cannot undo applied state or prove physical interruption",
+    "Finite process-lifetime records, no journal/restart/browser/GPU/models/training/performance"
+  ],
+  "rollback": "Revert scoped runtime/docs/pins/tracking through reviewed PR; preserve accepted G10, settings, license boundary, frozen records and original dirty work."
+}

@@ -8,6 +8,9 @@ use eylema_contracts::{
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::sync::Arc;
 
+mod oversight;
+pub use oversight::*;
+
 pub type Result<T> = std::result::Result<T, ErrorCode>;
 /// The embedding host supplies observed time, standard crypto and fresh IDs.
 /// This boundary is trusted and fallible; request data cannot install a provider.
@@ -99,6 +102,8 @@ struct TaskState {
     snapshot: TaskSnapshot,
     owner: PrincipalRef,
     lease: Option<ExecutionId>,
+    policy_revision: Revision,
+    oversight: OversightRequirements,
 }
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 struct Key(PrincipalRef, OperationId, Vec<ResourceId>, IdempotencyKey);
@@ -114,6 +119,10 @@ struct Entry {
     next: usize,
     expected_live: Revision,
     event_ids: VecDeque<EventId>,
+    cancel_ids: VecDeque<EventId>,
+    cancellation: Option<CancellationReceipt>,
+    approval_ids: Vec<EventId>,
+    payload_hash: [u8; 32],
 }
 struct EventMetadata<'a> {
     task: &'a TaskId,
@@ -127,6 +136,11 @@ pub struct Runtime<S: HostServices> {
     services: S,
     limits: Limits,
     grants: Vec<Grant>,
+    human_slots: BTreeSet<usize>,
+    revoked_slots: BTreeMap<usize, Revocation>,
+    approvals: BTreeMap<EventId, ApprovalRecord>,
+    governance: BTreeMap<GovernanceRef, GovernanceRecord>,
+    policy_changes: Vec<PolicyChange>,
     tasks: BTreeMap<TaskId, TaskState>,
     executions: BTreeMap<ExecutionId, Entry>,
     queue: VecDeque<ExecutionId>,
@@ -151,6 +165,11 @@ impl<S: HostServices> Runtime<S> {
                 services,
                 limits,
                 grants: vec![],
+                human_slots: BTreeSet::new(),
+                revoked_slots: BTreeMap::new(),
+                approvals: BTreeMap::new(),
+                governance: BTreeMap::new(),
+                policy_changes: vec![],
                 tasks: BTreeMap::new(),
                 executions: BTreeMap::new(),
                 queue: VecDeque::new(),
@@ -190,7 +209,9 @@ impl<S: HostServices> Runtime<S> {
         })
     }
     fn grant(&self, session: &Session) -> Result<&Grant> {
-        if !Arc::ptr_eq(&self.identity, &session.identity) {
+        if !Arc::ptr_eq(&self.identity, &session.identity)
+            || self.revoked_slots.contains_key(&session.slot)
+        {
             return Err(ErrorCode::Forbidden);
         }
         self.grants.get(session.slot).ok_or(ErrorCode::Forbidden)
@@ -225,15 +246,17 @@ impl<S: HostServices> Runtime<S> {
             {
                 return Err(ErrorCode::Forbidden);
             }
-            let oversight = required.oversight();
-            if !oversight.checkpoints().is_empty() {
-                return Err(ErrorCode::ApprovalRequired);
-            }
-            if oversight.requires_intervention() || oversight.governance().is_some() {
-                return Err(ErrorCode::CapabilityUnavailable);
-            }
-            if oversight.requires_observation() {
-                self.permission(session, &a.resource_scope, Permission::ObserveEvents)?;
+            self.check_oversight(session, &a.task_id, &a.resource_scope, required.oversight())?;
+            if let Some(state) = self.tasks.get(&a.task_id) {
+                if state.policy_revision != grant.policy_revision {
+                    return Err(ErrorCode::RevisionConflict);
+                }
+                self.check_oversight(
+                    session,
+                    &a.task_id,
+                    &state.snapshot.task.fields().resource_scope,
+                    &state.oversight,
+                )?;
             }
             if a.target.context() != ExecutionContext::NativeMacos
                 || a.target.backend() != Backend::NativeCpu
@@ -287,6 +310,33 @@ impl<S: HostServices> Runtime<S> {
         Ok(())
     }
     pub fn create_task(&mut self, session: &Session, task: TaskSpec) -> Result<()> {
+        self.create_task_policy(
+            session,
+            task,
+            OversightRequirements::new(vec![], false, false, None).expect("empty oversight"),
+        )
+    }
+    /// Initial accepted policy is supplied by the trusted host, never a task request.
+    /// It remains immutable; policy revision advance cannot remove obligations.
+    pub fn create_governed_task(
+        &mut self,
+        host: &HostKey,
+        session: &Session,
+        task: TaskSpec,
+        oversight: OversightRequirements,
+    ) -> Result<()> {
+        if !Arc::ptr_eq(&self.identity, &host.identity) {
+            return Err(ErrorCode::Forbidden);
+        }
+        self.create_task_policy(session, task, oversight)
+    }
+    fn create_task_policy(
+        &mut self,
+        session: &Session,
+        task: TaskSpec,
+        oversight: OversightRequirements,
+    ) -> Result<()> {
+        let policy_revision = self.grant(session)?.policy_revision;
         let owner = self
             .permission(
                 session,
@@ -307,7 +357,14 @@ impl<S: HostServices> Runtime<S> {
         }
         let bytes = codec::encode_record(&codec::WireRecord::Task(task.clone()))
             .map_err(|_| ErrorCode::InvalidRequest)?
-            .len();
+            .len()
+            + 64
+            + oversight
+                .checkpoints()
+                .iter()
+                .map(|r| r.as_str().len())
+                .sum::<usize>()
+            + oversight.governance().map_or(0, |r| r.as_str().len());
         self.capacity(bytes, 1)?;
         let event = self
             .reserve_ids(1)?
@@ -347,6 +404,8 @@ impl<S: HostServices> Runtime<S> {
                 },
                 owner,
                 lease: None,
+                policy_revision,
+                oversight,
             },
         );
         Ok(())
@@ -356,6 +415,15 @@ impl<S: HostServices> Runtime<S> {
         session: &Session,
         task: TaskSpec,
         proposal: ActionProposal,
+    ) -> Result<ExecutionId> {
+        self.admit_with_approvals(session, task, proposal, &[])
+    }
+    pub fn admit_with_approvals(
+        &mut self,
+        session: &Session,
+        task: TaskSpec,
+        proposal: ActionProposal,
+        approval_ids: &[EventId],
     ) -> Result<ExecutionId> {
         ActionProposal::new(proposal.fields().clone(), &task)
             .map_err(|_| ErrorCode::InvalidRequest)?;
@@ -399,6 +467,8 @@ impl<S: HostServices> Runtime<S> {
             }
             return Ok(prior[0].execution.clone());
         }
+        let approval_now = self.services.now()?;
+        self.check_approvals(&task, &proposal, approval_ids, hash, approval_now)?;
         let task_id = &task.fields().task_id;
         let stored = self.tasks.get(task_id).ok_or(ErrorCode::InvalidRequest)?;
         if stored.owner != principal {
@@ -422,7 +492,11 @@ impl<S: HostServices> Runtime<S> {
         }
         let value = stored.snapshot.value;
         let n = proposal.fields().actions.len();
-        let event_slots = n + 3;
+        let cancellable = self.intervention_available(
+            &task.fields().resource_scope,
+            proposal.fields().policy_revision,
+        );
+        let event_slots = n + 3 + if cancellable { 2 } else { 0 };
         if stored
             .snapshot
             .charged_steps
@@ -458,6 +532,11 @@ impl<S: HostServices> Runtime<S> {
             return Err(ErrorCode::IdempotencyConflict);
         }
         let mut event_ids = self.reserve_ids(event_slots)?;
+        let mut cancel_ids = VecDeque::new();
+        if cancellable {
+            cancel_ids.push_front(event_ids.pop_back().expect("reserved cancellation ID"));
+            cancel_ids.push_front(event_ids.pop_back().expect("reserved cancellation ID"));
+        }
         let draft = ExecutionDraft {
             context: proposal.fields().context.clone(),
             execution_id: execution.clone(),
@@ -480,6 +559,10 @@ impl<S: HostServices> Runtime<S> {
             next: 0,
             expected_live: task.fields().revision,
             event_ids: VecDeque::new(),
+            cancel_ids,
+            cancellation: None,
+            approval_ids: approval_ids.to_vec(),
+            payload_hash: hash,
         };
         let now = self.services.now()?;
         if now.unix_ms() >= task.fields().budget.deadline().unix_ms()
@@ -492,8 +575,10 @@ impl<S: HostServices> Runtime<S> {
         {
             return Err(ErrorCode::DeadlineExceeded);
         }
+        self.check_approvals(&task, &entry.proposal, approval_ids, hash, now)?;
         // All input checks/metadata reservations precede any owned-state commit.
         self.event_ids.extend(event_ids.iter().cloned());
+        self.event_ids.extend(entry.cancel_ids.iter().cloned());
         self.charged_event_slots += event_slots;
         self.resident_wire_bytes += wire_bytes;
         let accepted = event_ids.pop_front().expect("reserved acceptance event");
@@ -598,6 +683,9 @@ impl<S: HostServices> Runtime<S> {
         let task_id = entry.draft.task_id.clone();
         let state = self.tasks.get(&task_id).expect("leased task");
         let before = state.snapshot.value;
+        if entry.draft.state == ExecutionState::CancelRequested {
+            return self.stop_remaining(id, entry, now);
+        }
         if entry.draft.state == ExecutionState::Queued {
             entry.draft.state = ExecutionState::Running;
             let event = entry.event_ids.pop_front().expect("reserved running event");
@@ -618,6 +706,13 @@ impl<S: HostServices> Runtime<S> {
         let checks = self
             .authorized(&entry.session, &entry.proposal)
             .and_then(|_| {
+                self.check_approvals(
+                    &entry.task,
+                    &entry.proposal,
+                    &entry.approval_ids,
+                    entry.payload_hash,
+                    now,
+                )?;
                 let state = self.tasks.get(&task_id).expect("leased task");
                 if state.lease.as_ref() != Some(id)
                     || state.snapshot.task.fields().revision != entry.expected_live
