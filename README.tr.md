@@ -11,13 +11,13 @@
 
 Kod, kimlikler, dosya adları ve katkı şablonları İngilizcedir. Dokümantasyon [İngilizce](README.md) ve Türkçe sunulur; kaynak dil İngilizcedir. **Eylema** ürün adı **11 Ekim 2026** tarihinde kabul edildi; yukarıdaki tanım ürünün amacını anlatır.
 
-Herkese açık çekirdek proje deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Önerilen CLI adı ve paket öneki `eylema`; henüz uygulanmış veya yayımlanmış değildir. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Lisans seçimi henüz tamamlanmadı.
+Herkese açık çekirdek proje deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Paket öneki ve native başlangıç host’u `eylema`; help/version yerelde çalışır, görev/servis işlemleri ve yayın sonraki kapılardır. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Lisans seçimi henüz tamamlanmadı.
 
 `eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/name-availability.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Ana alan adı `eylema.dev`; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez.
 
 Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/README.tr.md), [önizleme](assets/eylema-logo/brand-preview.png), [logo paketini indir](assets/eylema-logo.zip).
 
-**Durum: mimari/API taslakları ve katkı araçları.** Depo CI kontrolleri belgeleri, şemaları ve PR yapısını doğrular; Rust runtime, model yürütmesi, otonom AI geliştirme takımı veya performans kıyası sağlamaz.
+**Durum: ilk kendi Rust workspace’imiz ve başlangıç host’u.** [G07 workspace kanıtı](docs/tr/rust-workspace.md) gerçek native derleme/süreç testlerini ve seçilen taşınabilir kütüphanenin Wasm derlemesini kapsar. Depo CI’ı belge/şema/PR doğrulamasının yanında artık Rust kapılarını çalıştırır; görev yürütümü, model yürütümü, otonom geliştirme ve performans kabulü sonraki Goal’lerde kalır.
 
 ## Katkıda bulunma
 
@@ -69,12 +69,12 @@ Makinece okunabilir taslaklar: [geliştirme isteği şeması](ai-team-protocol/r
 
 Seçilen ilk çalışan uygulama bir görev konsoludur: görev oluşturma, deterministik adımları çalıştırma, ilerlemeyi inceleme, kalan işi durdurma, durumu kaydetme ve hizmet yeniden başladıktan sonra tekrar açma. Önce Rust sözleşmeleri, yürütücü ve günlük kurulur, ardından asgari web arayüzü gösterilir. [Kabul senaryoları ve önerilen bileşenler](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md), gösterimin neyi kanıtlaması gerektiğini tanımlar.
 
-Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinli eğitim döngüsü ve geliştirme takımının PR akışı ayrı yol haritası aşamalarıdır. İlk tarayıcı gösterimi model erişimi veya GPU gerektirmez. Bu dokümantasyon revizyonu çalışan uygulama sağlamaz.
+Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinli eğitim döngüsü ve geliştirme takımının PR akışı ayrı yol haritası aşamalarıdır. İlk tarayıcı gösterimi model erişimi veya GPU gerektirmez. G07 başlangıcı yalnız help/version sunar; çalışan görev konsolu akışı hâlâ G08–G17 gerektirir.
 
 ## Organizasyon depoları
 
 [İngilizce ürün belgeleri](https://github.com/eylema-dev/eylema-docs-en) · [Türkçe ürün belgeleri](https://github.com/eylema-dev/eylema-docs-tr) · [Geliştirici rehberi](https://github.com/eylema-dev/devguide) · [Depo haritası](https://github.com/eylema-dev/devguide/blob/main/docs/tr/repository-map.md)
 
-`eylema`; planlanan Rust çalışma alanını, CLI'ı, birinci taraf bileşenleri, makine şemalarını ve mevcut marka varlıklarını tutar. Ürün metinleri dil depolarına, ortak katkı politikası devguide'a taşınır. Örnekler, değerlendirmeler, model üstverileri ve eğitim tarifleri için açıkça iskelet aşamasında ayrı depolar vardır. Web sitesi [eylemadotdev](https://github.com/eylema-dev/eylemadotdev) içinde ayrı yönetilir. Bu bölünmeyle çalışma zamanı uygulanmış değildir.
+`eylema`; ilk Rust workspace/başlangıç host’unu, gelecek görev CLI/bileşenlerini, makine şemalarını ve mevcut marka varlıklarını sahiplenir. Ürün metinleri dil depolarına, ortak katkı politikası devguide'a taşınır. Örnekler, değerlendirmeler, model üstverileri ve eğitim tarifleri için açıkça iskelet aşamasında ayrı depolar vardır. Web sitesi [eylemadotdev](https://github.com/eylema-dev/eylemadotdev) içinde ayrı yönetilir. Bu bölünmeyle çalışma zamanı uygulanmış değildir.
 
 [Taşıma kaydı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/repository-migration.md) kaynakları, hedefleri, ilişkili PR'ları, entegrasyon kontrollerini ve geri dönüşü açıklar. Yeni belge bağlantıları eşgüdümlü birleştirme sonrası yerleşimi hedefler; öncesinde PR'lar ve sabitlenmiş depo kümesi inceleme kopyalarını sağlar.

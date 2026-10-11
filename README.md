@@ -11,13 +11,13 @@
 
 Code, identifiers, file names and contribution templates use English. Documentation is available in English and [Turkish](README.tr.md), with English as the canonical source. The product name **Eylema** was accepted on **11 October 2026**; the description above states its intended purpose.
 
-Core project repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The proposed CLI name and package prefix are `eylema`; they are not implemented or published. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. License selection remains pending.
+Core project repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The package prefix and native bootstrap host are `eylema`; help/version work locally, while task/service operations and publication remain later gates. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. License selection remains pending.
 
 The [name and availability record](https://github.com/eylema-dev/devguide/blob/main/docs/en/name-availability.md) preserves the checks made before organization creation and the subsequent registration update. `eylema-dev` and this public repository were established on 11 October 2026. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
 
 Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
-**Status: architecture/API drafts and contribution tooling.** Repository CI validates documents, schemas and PR structure; it does not implement the Rust runtime, model execution, autonomous AI development team or performance benchmarks.
+**Status: first owned Rust workspace and bootstrap host.** [G07 workspace evidence](docs/en/rust-workspace.md) covers real native compilation/process tests and selected portable-library Wasm compilation. Repository CI now runs Rust gates alongside document/schema/PR validation; task execution, model execution, autonomous development and performance acceptance remain later Goals.
 
 ## Contribute
 
@@ -69,12 +69,12 @@ English identifiers, paths, fields, enums and error codes are shared across lang
 
 The selected first working application is a task console: create a task, run deterministic steps, inspect progress, stop remaining work, save state and reopen it after a service restart. Build the Rust contracts, executor and journal, then demonstrate the minimal web interface. [Acceptance scenarios and proposed components](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) define what that demonstration must prove.
 
-The later 3D environment, learned policy/dynamics model, local language model, permitted training loop and development-team PR flow remain separate roadmap milestones. The first browser demonstration requires neither model access nor a GPU. No working application is delivered by this documentation revision.
+The later 3D environment, learned policy/dynamics model, local language model, permitted training loop and development-team PR flow remain separate roadmap milestones. The first browser demonstration requires neither model access nor a GPU. The G07 bootstrap supplies help/version only; the working task-console flow still requires G08–G17.
 
 ## Organization repositories
 
 [English product docs](https://github.com/eylema-dev/eylema-docs-en) · [Turkish product docs](https://github.com/eylema-dev/eylema-docs-tr) · [Developer guide](https://github.com/eylema-dev/devguide) · [Repository map](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-map.md)
 
-`eylema` keeps the planned Rust workspace, CLI, first-party components, machine-readable schemas and existing brand assets. Product prose moves to the language repositories; shared contribution policy moves to devguide. Examples, evaluations, model metadata and training recipes have separate repositories with explicit scaffold-only status. The website is managed separately in [eylemadotdev](https://github.com/eylema-dev/eylemadotdev). No runtime has been implemented by this split.
+`eylema` owns the initial Rust workspace/bootstrap host, future task CLI/components, machine-readable schemas and existing brand assets. Product prose moves to the language repositories; shared contribution policy moves to devguide. Examples, evaluations, model metadata and training recipes have separate repositories with explicit scaffold-only status. The website is managed separately in [eylemadotdev](https://github.com/eylema-dev/eylemadotdev). No runtime has been implemented by this split.
 
 Read [the migration record](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-migration.md) for exact sources, destinations, linked PRs, integration checks and rollback. New document links target the coordinated post-merge layout; the PRs and pinned repository set provide review copies before then.
