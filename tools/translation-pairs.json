@@ -31,6 +31,12 @@
       "tr": "docs/tr/rust-workspace.md",
       "en_sha256": "923860c11d3556f9b554a4284ea644d5f4c6e03f3b7d2aa9969dd0aacc0fe60b",
       "tr_sha256": "69bc577a3650a4c0dd0131c9ed90b1875e4e3f6e67f431e7d90ae9a37213a73d"
+    },
+    {
+      "en": "docs/en/typed-contracts.md",
+      "tr": "docs/tr/typed-contracts.md",
+      "en_sha256": "ba2b65854ad07494f87942069872021ead9e732a9159acae7e57a8709ff2d497",
+      "tr_sha256": "540b4a3a179651f3bc675e38e49fd3a170fb944da95164a8d255251e785b8faa"
     }
   ],
   "documents": []

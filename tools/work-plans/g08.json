@@ -1,0 +1,62 @@
+{
+  "goal": "G08",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/10",
+  "base": "748d233d7653ca50bee8036a9131a8057b5be729",
+  "dependencies": {
+    "G07": {
+      "core_main": "748d233d7653ca50bee8036a9131a8057b5be729",
+      "guide_main": "effe36587d45a341f8c38292f4bfb3bf09dee540",
+      "main_ci": [
+        38164005434,
+        38164012164
+      ]
+    }
+  },
+  "authority": "Actual maintainer request to execute all accepted Goals; standing merge authorization after current CI and separate review. References do not grant permissions.",
+  "allowed_paths": [
+    "crates/eylema-contracts/",
+    "apps/eylema/tests/contracts.rs",
+    "docs/en/typed-contracts.md",
+    "docs/tr/typed-contracts.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g08.json"
+  ],
+  "scope_revision": "Replace proposed crates/contracts with accepted G03 actual crates/eylema-contracts; add a real native host consumer test and paired reproduction notes. No workspace dependency change.",
+  "design": "Private validated owned Rust values for version, bounded IDs/text/resources, task/action/proposal/execution/event, authority requirements, composed oversight, budget and stable errors. Native client and portable library share exact types; construction validates structure and internal bindings, never establishes authentication, permission, availability, durable effects or hash trust. Wire codec/hash/entropy G09, admission/executor G10, actual policy approval G11.",
+  "acceptance_checks": [
+    "Exact six AGENTS commands",
+    "Existing unchanged Rust gate including real native valid/invalid/version contract tests and selected portable-library Wasm compilation",
+    "Native consumer tests use the same public contract types and reject invalid shared fixtures",
+    "Bounded input/duplicate identifiers/version/context-backend pairing/resource and revision bindings, truthful cancellation/outcome negative examples",
+    "Paired EN/TR meaning/fingerprints and scoped privacy diff",
+    "Guide integration pin and fetched workspace; fresh separate exact-head review/current CI/merge/main-tree-CI proof"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context using actual Rust/Python/Git/gh",
+    "reviewer": "Fresh separate context at final head; accepted invocation gpt-6.1-sol/high; hidden identity not independently verified"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "risks": [
+    "Bound constants are protocol input limits, not measured performance thresholds",
+    "Opaque references/claimed evidence never permission or proof; no authorization API advertised",
+    "Exact protocol0.1.0 independently of package0.1.0 and model-set0.2.0; future versions rejected until reviewed",
+    "Native/browser backend combinations describe requests, not supported execution; compilation does not prove browser/GPU"
+  ],
+  "rollback": "Revert scoped Rust/docs/native contract tests and guide integration pin through reviewed PRs; preserve G07 workspace, pending G05 and all original work.",
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g08-typed-contracts.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
+    ]
+  },
+  "guide_base": "f223c4d5f3aee4ae0a60d200dd578137d278da51",
+  "boundary": "G05 accepted through actual maintainer retain-settings/prepared-proposal decision, separate exact-head review, scoped merges and mainCI38165218414/38165212246. G06 license decision pending. G08 sole active implementation, direct G07 accepted. Guide delivery records actual G05 acceptance and G08 review metadata; no settings, license, publish/deploy/provider/weights/private data or spending."
+}
