@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-team-protocol:request:0.1.0",
+  "title": "Eylema NeedSpec development request",
+  "description": "Defines a human need, acceptance criteria and development boundaries for Eylema. Schema validity does not establish authorization, model availability, repository access or satisfied acceptance criteria.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "request_id",
+    "revision",
+    "source",
+    "objective",
+    "acceptance_criteria",
+    "scope",
+    "constraints",
+    "execution"
+  ],
+  "properties": {
+    "protocol_version": {
+      "const": "0.1.0"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable request identifier. Uniqueness is enforced by the controller."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Revision of the same request. Monotonic progression is enforced by the protocol."
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the source repository; not evidence of access or ownership."
+        },
+        "issue_number": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The concrete outcome expected by the contributor."
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "scenario",
+          "expected"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Criterion identifier within the request. Identifier uniqueness is checked separately."
+          },
+          "scenario": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Initial conditions and the user action or event."
+          },
+          "expected": {
+            "type": "string",
+            "minLength": 1,
+            "description": "An observable and verifiable expected outcome."
+          }
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_paths",
+        "out_of_scope"
+      ],
+      "properties": {
+        "allowed_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "Allowed paths or patterns relative to the target repository. Pattern semantics, normalization, symbolic links and actual write boundaries are enforced separately.",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "out_of_scope": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency_policy",
+        "targets"
+      ],
+      "properties": {
+        "dependency_policy": {
+          "const": "first_party_rust",
+          "description": "First-party Rust production policy. The dependency inventory is checked separately; explicitly approved development and training tools have a separate inventory."
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Target environment identifiers. Support and actual execution evidence are checked separately."
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorization_ref",
+        "budget",
+        "publish_target",
+        "repo_identifier"
+      ],
+      "properties": {
+        "authorization_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Opaque reference to a trusted authorization record. Its presence or contents grant no permission; identity, scope and validity are verified separately."
+        },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_model_calls",
+            "max_repair_cycles",
+            "max_wall_seconds"
+          ],
+          "properties": {
+            "max_model_calls": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_repair_cycles": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max_wall_seconds": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "description": "Upper bounds for this request. Counters, stopping behavior and any narrower deployment budget are enforced at execution."
+        },
+        "publish_target": {
+          "type": "string",
+          "enum": [
+            "draft_pr"
+          ],
+          "description": "Requested delivery type; it grants neither publication permission nor merge authority."
+        },
+        "repo_identifier": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target repository. Its relationship to the source repository and access authorization are verified separately."
+        }
+      }
+    },
+    "roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architect",
+        "implementer",
+        "reviewer"
+      ],
+      "description": "Optional role assignments. These are configuration references, not claims that models are available; deployment configuration resolves them.",
+      "properties": {
+        "architect": {
+          "$ref": "#/$defs/model_assignment"
+        },
+        "implementer": {
+          "$ref": "#/$defs/model_assignment"
+        },
+        "reviewer": {
+          "$ref": "#/$defs/model_assignment"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "model_assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

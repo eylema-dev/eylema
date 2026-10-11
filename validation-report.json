@@ -1,0 +1,25 @@
+{
+  "brand": "Eylema",
+  "checked_at": "2026-10-11T16:09:14.092608+03:00",
+  "scope": "Publication-tree documentation, portable relative links and structural schema validation. No application, API server, model, training, hardware benchmark or automated GitHub development workflow was executed.",
+  "checks": {
+    "publication_files": 20,
+    "eylema_markdown_documents": 15,
+    "draft_2020_12_schemas_valid": 2,
+    "request_example_valid": true,
+    "portable_local_markdown_links_resolved": 79,
+    "bilingual_api_operations_matching": 20,
+    "bilingual_api_inline_identifiers_matching": true,
+    "local_filesystem_paths_absent": true,
+    "private_contact_email_absent": true
+  },
+  "schema_sha256": {
+    "model-set-release.schema.json": "e9ceecffdda5cc9ec7751a6d797ed00dfbe092b5ac260f829b2f72fcdf0bfd28",
+    "request.schema.json": "60527cefe9f9d95967b3d4101fa137274dd9114d99afd4037b9ccd7cf7650b9f"
+  },
+  "limits": [
+    "This run did not repeat earlier synthetic release or negative schema fixtures.",
+    "Historical name availability evidence is preserved; current organization and repository creation is recorded separately.",
+    "Identifier parity is not automatic proof of complete translation equivalence."
+  ]
+}

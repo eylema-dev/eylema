@@ -1,0 +1,379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ai-team-protocol:model-set-release:0.1.0",
+  "title": "Eylema model team release manifest",
+  "description": "Describes Eylema language, perception, decision and world models, their engine, and assignments to deterministic Rust skills. Schema validity does not establish trust, approval, hardware support or successful execution. Exact revisions, content hashes, cross-references, behavior compatibility, role coverage, state transitions and approval authority require separate semantic validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "runtime_protocol_version",
+    "release_id",
+    "status",
+    "behavior_contract_ref",
+    "behavior_contract_sha256",
+    "engine",
+    "models",
+    "hardware_profiles",
+    "assignments",
+    "evidence",
+    "objectives"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "runtime_protocol_version": {
+      "const": "0.1.0"
+    },
+    "release_id": {
+      "$ref": "#/$defs/nonempty_string",
+      "description": "Stable release identifier. The registry enforces uniqueness and immutable release contents."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "approved",
+        "canary",
+        "active",
+        "rejected",
+        "rolled_back",
+        "retired"
+      ],
+      "description": "Reported lifecycle state. This text grants neither approval nor transition authority. State changes are recorded separately from immutable release contents."
+    },
+    "behavior_contract_ref": {
+      "$ref": "#/$defs/exact_reference",
+      "description": "Exact reference to the versioned, content-addressed team behavior contract. It fixes observation, state, action, time and unit semantics, policy/world-model links, latent representation compatibility, and reset or migration rules. Contents, hashes and model compatibility require separate verification."
+    },
+    "behavior_contract_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "SHA-256 of the exact contract bytes. Reading model files does not establish correct joint execution under this contract."
+    },
+    "engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "build_sha256"
+      ],
+      "description": "Exact engine build identity for models and deterministic Rust skills. Skills resolve through this engine and their contracts.",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonempty_string"
+        },
+        "version": {
+          "$ref": "#/$defs/nonempty_string"
+        },
+        "build_sha256": {
+          "$ref": "#/$defs/sha256",
+          "description": "SHA-256 of the executable engine artifact. Syntax alone does not verify the file; compare against actual bytes."
+        }
+      }
+    },
+    "models": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "source_ref",
+          "artifact_ref",
+          "artifact_sha256",
+          "architecture",
+          "format",
+          "quantization",
+          "required_operators"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/nonempty_string",
+            "description": "Model identifier within this release. Uniqueness and assignment references are validated separately."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "language",
+              "perception",
+              "policy",
+              "value",
+              "world_dynamics",
+              "world_generative",
+              "embedding"
+            ]
+          },
+          "source_ref": {
+            "$ref": "#/$defs/exact_reference",
+            "description": "Exact immutable source revision. A branch, latest tag or repository home page is insufficient. The resolver verifies source and revision; text alone does not establish trust."
+          },
+          "artifact_ref": {
+            "$ref": "#/$defs/exact_reference",
+            "description": "Immutable location or content address of the loaded artifact. artifact_sha256 applies to its exact bytes. For multi-file models, this may identify an immutable manifest fixing every component and hash; component bytes must also be verified."
+          },
+          "artifact_sha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "architecture": {
+            "$ref": "#/$defs/nonempty_string",
+            "description": "Exact model architecture identifier. Engine support is verified separately."
+          },
+          "format": {
+            "$ref": "#/$defs/nonempty_string",
+            "description": "Artifact format identifier including required version information."
+          },
+          "quantization": {
+            "$ref": "#/$defs/nonempty_string",
+            "description": "Numeric representation or quantization identifier; use none when not quantized. The artifact contract specifies the layout."
+          },
+          "required_operators": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/nonempty_string"
+            },
+            "description": "Required operator identifiers. List completeness and engine/device support are validated separately."
+          },
+          "state_contract_ref": {
+            "$ref": "#/$defs/exact_reference",
+            "description": "Exact revision of the state, timestep, observation/action-space and numeric representation contract. Semantic validation determines when this is required."
+          },
+          "tokenizer_sha256": {
+            "$ref": "#/$defs/sha256",
+            "description": "Tokenizer artifact hash, when applicable. Presence, exact correspondence and model compatibility are validated separately."
+          }
+        }
+      }
+    },
+    "hardware_profiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "target",
+          "backend",
+          "capabilities"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/nonempty_string",
+            "description": "Hardware profile identifier within this release. Uniqueness and correspondence to actual hardware are verified separately."
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "browser",
+              "native_linux"
+            ]
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "wasm_cpu",
+              "webgpu",
+              "native_cpu",
+              "native_gpu"
+            ]
+          },
+          "capabilities": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/nonempty_string"
+            },
+            "description": "Required capability identifiers. This list is not evidence that a device provides them."
+          }
+        }
+      }
+    },
+    "assignments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "hardware_profile_id",
+          "model_ids",
+          "max_concurrency",
+          "fallback",
+          "budget",
+          "contract_ref"
+        ],
+        "properties": {
+          "role": {
+            "$ref": "#/$defs/nonempty_string",
+            "description": "Assigned task or skill role, resolved through the engine and contract."
+          },
+          "hardware_profile_id": {
+            "$ref": "#/$defs/nonempty_string"
+          },
+          "model_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/nonempty_string"
+            },
+            "description": "Models used by this assignment. An empty list is allowed only for a deterministic Rust skill whose existence is verified through contract_ref. The contract defines ordering and joint execution."
+          },
+          "max_concurrency": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "fallback": {
+            "type": "string",
+            "enum": [
+              "queue",
+              "cpu",
+              "reduced_quality",
+              "fail"
+            ],
+            "description": "Behavior when the preferred execution path is unavailable. CPU or reduced-quality paths must already exist, be compatible and be accepted; this field grants no new authority."
+          },
+          "budget": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "max_latency_ms",
+              "max_resident_bytes"
+            ],
+            "properties": {
+              "max_latency_ms": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "max_resident_bytes": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "description": "Latency and resident-memory budgets. contract_ref defines queueing, cold/warm operation, percentile, shared memory and GPU-memory accounting. Compliance requires actual measurements."
+          },
+          "contract_ref": {
+            "$ref": "#/$defs/exact_reference",
+            "description": "Exact contract revision defining role inputs, outputs, units, execution, fallbacks and budget measurement."
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "check_id",
+          "status",
+          "report_ref",
+          "hardware_profile_id",
+          "model_ids"
+        ],
+        "properties": {
+          "check_id": {
+            "$ref": "#/$defs/nonempty_string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "skipped",
+              "not_run",
+              "not_applicable"
+            ]
+          },
+          "report_ref": {
+            "$ref": "#/$defs/exact_reference",
+            "description": "Immutable record of the result or the reason a check was not run or not applicable. Authenticity and linkage to engine/model hashes and hardware are verified separately."
+          },
+          "hardware_profile_id": {
+            "$ref": "#/$defs/nonempty_string"
+          },
+          "model_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/$defs/nonempty_string"
+            },
+            "description": "Checked model identifiers; may be empty for engine or deterministic-skill checks."
+          }
+        }
+      },
+      "description": "Result records. Record count or a passed label alone is insufficient for acceptance; required coverage, freshness and outcomes are verified separately."
+    },
+    "objectives": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "quality",
+          "latency",
+          "memory",
+          "energy",
+          "frame_pacing"
+        ]
+      },
+      "description": "Descending priority order, highest first. Priorities cannot relax mandatory acceptance constraints."
+    },
+    "rollback_release_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Previous release to restore, when specified. Null or absence means no target is declared. Existence, compatibility, availability and difference from this release are verified separately."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "enum": [
+              "approved",
+              "canary",
+              "active"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonempty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exact_reference": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque reference that must resolve to an exact revision or immutable artifact. The schema does not dereference it, verify contents or infer trust or authorization."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Lowercase 64-character hexadecimal SHA-256 digest. Valid syntax does not prove correspondence to actual contents."
+    }
+  }
+}

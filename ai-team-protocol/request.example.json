@@ -1,0 +1,70 @@
+{
+  "protocol_version": "0.1.0",
+  "request_id": "example-request-001",
+  "revision": 1,
+  "source": {
+    "repository": "example/eylema"
+  },
+  "objective": "Eylema design example: a user can start a local task and inspect its completion state and result on the same screen. Repository identifiers are placeholders. This record is an example, not an instruction to execute or publish.",
+  "acceptance_criteria": [
+    {
+      "id": "AC-1",
+      "scenario": "A user selects Start with a valid task definition on the empty task screen.",
+      "expected": "One task identifier is created; queued, running and succeeded states can be observed under that identifier."
+    },
+    {
+      "id": "AC-2",
+      "scenario": "The local executor successfully completes the task.",
+      "expected": "The result is available under the task identifier and can be read without executing the completed task again."
+    },
+    {
+      "id": "AC-3",
+      "scenario": "The local executor returns a defined error during the task.",
+      "expected": "The task is marked failed, the user sees the error, and creating another task remains available."
+    }
+  ],
+  "scope": {
+    "allowed_paths": [
+      "crates/core/**",
+      "crates/web/**",
+      "crates/server/**",
+      "tests/**"
+    ],
+    "out_of_scope": [
+      "Adding third-party production libraries",
+      "Changing the Linux kernel or GPU drivers",
+      "Deploying to production or merging a pull request"
+    ]
+  },
+  "constraints": {
+    "dependency_policy": "first_party_rust",
+    "targets": [
+      "native-linux",
+      "wasm-browser"
+    ]
+  },
+  "execution": {
+    "authorization_ref": "example-opaque-reference-not-an-authorization",
+    "budget": {
+      "max_model_calls": 12,
+      "max_repair_cycles": 2,
+      "max_wall_seconds": 1800
+    },
+    "publish_target": "draft_pr",
+    "repo_identifier": "example/eylema"
+  },
+  "roles": {
+    "architect": {
+      "provider": "deployment-configured",
+      "model": "deployment-configured"
+    },
+    "implementer": {
+      "provider": "deployment-configured",
+      "model": "deployment-configured"
+    },
+    "reviewer": {
+      "provider": "deployment-configured",
+      "model": "deployment-configured"
+    }
+  }
+}
