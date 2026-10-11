@@ -2,8 +2,8 @@
   "format_version": 1,
   "goal": "G04",
   "status": "passed",
-  "observed_at": "2026-10-11T17:36:05.145746+00:00",
-  "doctor_source_sha256": "d58d597a8e6ab72097c03c5cc9fb06b6d6422d1e60ce4107b9d4aaa0d6bf29f6",
+  "observed_at": "2026-10-11T17:42:58.548025+00:00",
+  "doctor_source_sha256": "7c7c01a8089b50defd11ef7e634b1828d72e15657c8a325fbf963127365ce0ee",
   "hardware": {
     "physical_devices": 1,
     "chip": "Apple M4 Pro",
@@ -63,7 +63,7 @@
       "source_sha256": "93bc047f9bc24f3d7dbca2ac9376e05d2248103fc88a2dfafe0c0cf9d9a7210c",
       "air": {
         "bytes": 3520,
-        "sha256": "d0316a6c985fc33de08122be13a293f2d7d6e5d44222ff22c2f95cbb1fb3772f"
+        "sha256": "6bccd299a1f82c92147d37a16f9c276ab613b107557eeb166e442bd40fafda04"
       },
       "library": {
         "bytes": 3520,

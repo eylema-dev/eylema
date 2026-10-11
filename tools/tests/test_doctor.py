@@ -8,10 +8,36 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from doctor.doctor import DoctorError, HOST, RUST_COMMIT, TOOLCHAIN, Runner, artifact, collect, public_text, rust_identity
+from doctor.doctor import (DoctorError, EXPECTED_VERSIONS, HOST, RUST_COMMIT, TOOLCHAIN,
+                           Runner, artifact, collect, probe_workspace, public_text,
+                           rust_identity, validate_versions)
 
 
 class DoctorTests(unittest.TestCase):
+    def test_every_required_tool_rejects_empty_wrong_and_missing_identity(self):
+        validate_versions(dict(EXPECTED_VERSIONS))
+        for name in EXPECTED_VERSIONS:
+            for value in ['', 'unexpected tool', EXPECTED_VERSIONS[name] + ' modified']:
+                with self.subTest(tool=name, value=value), self.assertRaises(DoctorError):
+                    validate_versions(dict(EXPECTED_VERSIONS, **{name: value}))
+            missing = dict(EXPECTED_VERSIONS)
+            del missing[name]
+            with self.assertRaises(DoctorError): validate_versions(missing)
+
+    def test_probe_filesystem_error_remains_redacted_in_failed_cli_json(self):
+        from doctor.doctor import main
+        observed = {}
+        def fail():
+            with probe_workspace() as scratch:
+                observed['scratch'] = str(scratch)
+                raise PermissionError(13, 'Permission denied', str(scratch / 'native.rs'))
+        with patch('sys.argv', ['doctor']), patch('doctor.doctor.collect', side_effect=fail), patch('builtins.print') as output:
+            self.assertEqual(main(), 1)
+        result = json.loads(output.call_args.args[0])
+        self.assertEqual(result['status'], 'failed')
+        self.assertNotIn(observed['scratch'], result['reason'])
+        self.assertIn('$PROBE/native.rs', result['reason'])
+
     def test_rust_pin_and_native_host_reject_drift_and_duplicate_fields(self):
         valid = f'release: {TOOLCHAIN}\nhost: {HOST}\ncommit-hash: ' + RUST_COMMIT
         self.assertEqual(rust_identity(valid)['release'], TOOLCHAIN)
@@ -46,6 +72,7 @@ class DoctorTests(unittest.TestCase):
             command.assert_not_called()
         home = str(Path.home())
         self.assertEqual(public_text(home + '/file /scratch/probe', Path('/scratch')), '$HOME/file $PROBE/probe')
+        self.assertEqual(public_text('/tmp/eylema-doctor-test/native.rs', Path('/private/tmp/eylema-doctor-test')), '$PROBE/native.rs')
         self.assertEqual(public_text('InstalledDir: /private/transient/mount'), 'InstalledDir: $METAL_TOOLCHAIN')
         self.assertEqual(public_text('/var/run/mnt/com.apple.MobileAsset.MetalToolchain-version/usr/bin/metallib'), '$METAL_TOOLCHAIN/metallib')
 

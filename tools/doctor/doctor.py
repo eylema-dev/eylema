@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -19,6 +20,12 @@ TOOLCHAIN = '1.99.0'
 HOST = 'aarch64-apple-darwin'
 RUST_COMMIT = 'b940084d7eb6a299eb4bfeb8e34901bc051e7ac4'
 WASM = 'wasm32-unknown-unknown'
+EXPECTED_VERSIONS = {
+    'rustup': 'rustup 1.29.1 (d95a37b6a 2026-08-13)',
+    'cargo': 'cargo 1.99.0 (5f94df478 2026-08-27)',
+    'rustfmt': 'rustfmt 1.10.0-stable (b940084d7e 2026-09-28)',
+    'clippy': 'clippy 0.1.99 (b940084d7e 2026-09-28)',
+}
 NATIVE_SOURCE = 'fn main() { println!("G04-native-arm64-ok"); }\n'
 WASM_SOURCE = '#[unsafe(no_mangle)]\npub extern "C" fn eylema_doctor_add(a: u32, b: u32) -> u32 { a.wrapping_add(b) }\n'
 METAL_SOURCE = '''#include <metal_stdlib>
@@ -46,6 +53,8 @@ def public_text(value, scratch=None):
     value = value.replace(str(Path.home()), '$HOME')
     if scratch:
         value = value.replace(str(scratch), '$PROBE')
+        if str(scratch).startswith('/private/'):
+            value = value.replace(str(scratch).removeprefix('/private'), '$PROBE')
     # Cryptex mount suffixes are transient paths, not stable tool identities.
     value = re.sub(r'(?m)^InstalledDir: .+$', 'InstalledDir: $METAL_TOOLCHAIN', value)
     if value.startswith('/') and '.MetalToolchain-' in value:
@@ -85,6 +94,24 @@ def rust_identity(output):
     return values
 
 
+def validate_versions(versions):
+    require(set(versions) == set(EXPECTED_VERSIONS), 'Required tool identity inventory is incomplete')
+    for name, expected in EXPECTED_VERSIONS.items():
+        require(versions[name] == expected, 'Required tool identity differs from pin: ' + name)
+
+
+@contextmanager
+def probe_workspace():
+    scratch = None
+    try:
+        with tempfile.TemporaryDirectory(prefix='eylema-doctor-') as temporary:
+            scratch = Path(temporary).resolve()
+            yield scratch
+    except OSError as exc:
+        # Preserve the workspace boundary through probe access and cleanup.
+        raise DoctorError(public_text(str(exc), scratch)) from exc
+
+
 def artifact(path, magic=None):
     require(path.is_file(), 'Required probe output was not created')
     value = path.read_bytes()
@@ -100,8 +127,7 @@ def collect():
     validate_environment()
     rustup = Path(os.environ.get('CARGO_HOME', str(Path.home() / '.cargo'))) / 'bin/rustup'
     require(rustup.is_file(), 'Install official rustup before running doctor')
-    with tempfile.TemporaryDirectory(prefix='eylema-doctor-') as temporary:
-        scratch = Path(temporary).resolve()
+    with probe_workspace() as scratch:
         runner = Runner(scratch)
         rust = [str(rustup), 'run', TOOLCHAIN]
         identity = rust_identity(runner.run(rust + ['rustc', '--version', '--verbose']))
@@ -111,8 +137,7 @@ def collect():
             'rustfmt': runner.run(rust + ['rustfmt', '--version']),
             'clippy': runner.run(rust + ['cargo-clippy', '--version']),
         }
-        require(versions['cargo'].startswith('cargo 1.99.0 '), 'Cargo release differs from Rust pin')
-        require(versions['clippy'].startswith('clippy 0.1.99 '), 'Clippy release differs from Rust pin')
+        validate_versions(versions)
         installed = runner.run([str(rustup), 'target', 'list', '--toolchain', TOOLCHAIN, '--installed']).splitlines()
         require({HOST, WASM} <= set(installed), 'Required native/Wasm target missing')
         chip = runner.run(['/usr/sbin/sysctl', '-n', 'machdep.cpu.brand_string'])
