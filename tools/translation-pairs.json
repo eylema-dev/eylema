@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "8d4ef7da5c6d76ce00d6afa1196fdc5d80cff79c769995a3368d2e897e6695b5",
-      "tr_sha256": "5658897f5691e7c7796e755bbe6521702baa441c2340a15e4733eaaf6b3c3419"
+      "en_sha256": "9291094de1ffa61ca8cd81826b0c18ad0f8123ac5743f00fea127933288051c8",
+      "tr_sha256": "f59509f48a454a1706f34aac867c15aeedd71abfe3872094dc7ad4b193cc9e02"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -47,8 +47,8 @@
     {
       "en": "name-availability.md",
       "tr": "name-availability.tr.md",
-      "en_sha256": "ca00b33e126cd6f8f026f2d9e3ade2d48dd6925b96a00db2cad92a88fedcce03",
-      "tr_sha256": "2af3772208d63212d0d0869a64d4ca1d862947550218ba36d6f3106f47920860"
+      "en_sha256": "f659f0663e0340f702f1e4ab97797039b5dcf5f81f0543d6cb6f2352d9b02613",
+      "tr_sha256": "3484fd7ce17e95ef6efab7a93207af476ac840d21c49ef190cbf2cf1b118f6e7"
     },
     {
       "en": "docs/en/quality-gates.md",
@@ -59,8 +59,8 @@
     {
       "en": "docs/en/tooling.md",
       "tr": "docs/tr/tooling.md",
-      "en_sha256": "c19c31fcffb9fe6120d57c0020d372a28fc03caf42b1a50845b3bed92daa7aee",
-      "tr_sha256": "9b336b91d6b8b4797b64dbb73aeb7cfad79c2ed23bd8ab1576a30a18dc2e3c2b"
+      "en_sha256": "a045528e82bd0c42a3866eaaeac4862a2a4fe0d8203cd741cbcca6b4112d79e8",
+      "tr_sha256": "0cb176ae9cd2aaa384f0d78fd76ae407917df3d7ea7dc4d53001eba9cbe2dedf"
     }
   ]
 }

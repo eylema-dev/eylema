@@ -11,6 +11,7 @@ The production target is owned Rust components with no third-party Cargo package
 | GitHub checkout | actions/checkout v7.0.1, `3d3c42e5aac5ba805825da76410c181273ba90b1` | Official GitHub action; credentials not persisted |
 | Python provisioning | actions/setup-python v7.0.0, `5fda3b95a4ea91299a34e894583c3862153e4b97` | Official GitHub action; Python minor fixed to 3.14, patch version printed in CI |
 | Hosted environment | GitHub `ubuntu-24.04`, Git | Hosted image revisions may change; record runner/runtime versions when reproducing results |
+| Existing brand-asset rebuild only | Node.js and sharp | The [brand guide](../../assets/eylema-logo/README.md) records sharp 0.35.5 for the original export. Optional artwork tooling inherited from main; not installed by CI or used by the application. A reproducible rebuild lock is not supplied by this contribution change |
 | Planned production toolchain | Rust/Cargo, Wasm target tools | Exact version, target inventory and Rust checks selected in EYL-003; no Rust test is claimed today |
 | Planned training environment | Unsloth and its Python/accelerator dependencies | Separate pinned training image/recipe at M6; not installed or used by repository CI |
 

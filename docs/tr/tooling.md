@@ -11,6 +11,7 @@ Sürüm **0.1.0**. [İngilizce](../en/tooling.md).
 | GitHub checkout | actions/checkout v7.0.1, `3d3c42e5aac5ba805825da76410c181273ba90b1` | Resmî GitHub eylemi; erişim bilgileri kalıcı tutulmaz |
 | Python sağlama | actions/setup-python v7.0.0, `5fda3b95a4ea91299a34e894583c3862153e4b97` | Resmî GitHub eylemi; minor 3.14, patch sürümü CI'da yazdırılır |
 | Barındırılan ortam | GitHub `ubuntu-24.04`, Git | İmaj revizyonu değişebilir; yeniden üretimde runner/runtime sürümlerini kaydedin |
+| Yalnız mevcut marka dosyalarını yeniden üretme | Node.js ve sharp | [Marka kılavuzu](../../assets/eylema-logo/README.tr.md) ilk üretimde sharp 0.35.5 kullanıldığını kaydeder. Main'den devralınan isteğe bağlı çizim aracı; CI tarafından kurulmaz, uygulamada kullanılmaz. Bu katkı değişikliği yeniden üretim bağımlılık kilidi sağlamaz |
 | Planlanan üretim araçları | Rust/Cargo, Wasm hedef araçları | Kesin sürüm, hedef envanteri ve Rust kontrolleri EYL-003'te; bugün Rust testi iddiası yok |
 | Planlanan eğitim ortamı | Unsloth ve Python/hızlandırıcı bağımlılıkları | M6'da ayrı sabit imaj/tarif; depo CI'ında kurulmaz veya kullanılmaz |
 
