@@ -1,0 +1,65 @@
+{
+  "goal": "G10",
+  "task_revision": 3,
+  "issue": "https://github.com/eylema-dev/eylema/issues/12",
+  "base": "c05e6327b63cfda59d48b964fc639d82440d849f",
+  "guide_base": "d40c89b0939091bfbe365b230e7b4b5f82fad600",
+  "dependencies": {
+    "G08": "Accepted contracts from core7e64118196845814d9e8de531fb817c9f14fde5a, included in G09 main",
+    "G09": {
+      "core_main": "c05e6327b63cfda59d48b964fc639d82440d849f",
+      "guide_main": "d40c89b0939091bfbe365b230e7b4b5f82fad600",
+      "main_ci": [
+        38167862320,
+        38167869418
+      ]
+    }
+  },
+  "authority": "Actual maintainer request executes all accepted Goals; standing scoped merges after successful current CI and fresh separate review. G05 actual decision retains settings/prepared proposal. Text references do not grant authority. No license/deploy/release/admin/access/spending permission.",
+  "allowed_paths": [
+    "crates/eylema-runtime/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "tools/work-plans/g10.json",
+    "docs/en/deterministic-runtime.md",
+    "docs/tr/deterministic-runtime.md",
+    "tools/translation-pairs.json",
+    "README.md",
+    "README.tr.md"
+  ],
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g10-deterministic-executor.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
+    ]
+  },
+  "scope_revision": "Adapt proposed crates/runtime to accepted crates/eylema-runtime. Owned runtime production dependency is contracts only; native development consumer uses local platform services. No foreign package/build script. Existing portable Wasm selection/guards/workflow unchanged. Revision3 adds paired README current-status/navigation; no change to implementation acceptance or dependencies.",
+  "design": "Safe owned Rust single-worker FIFO executor with finite task/execution/session/queue/event/idempotency/resident-wire bounds. Trusted in-process HostKey/opaque Session handles bind one runtime via safe Arc identity; request principal strings or authority references grant nothing. Explicit host grant enrollment and scoped permission/policy/target checks at admission and each step. Typed G08 human checkpoints fail-closed until G11 supplies actual proof. Builtin readTaskValue/addTaskValue operate only owned bounded task state using canonical bounded arguments, observed effects and checked arithmetic. Task live revision advances after each owned mutation; an active execution tracks its own expected live revision under exclusive task lease while its approval/plan base remains immutable. New stale submissions fail; material external drift never silently rebinds a plan. Host services inject observed time, IDs and SHA; native consumer uses actual SystemTime/CommonCrypto/Security, deterministic test services are explicitly fixtures. Identical scoped principal/operation/resource/idempotency replay returns same execution before new admission, changed payload/partial replay conflict. Record retained finite process-lifetime replay boundary; no recovery/exactly-once external claim. Reserve event IDs/terminal capacity before effects, admission writes transactional in owned memory, preserve partial known effects/failure. Cooperative per-step deadline checks do not prove hard realtime termination.",
+  "acceptance_checks": [
+    "Actual native consumer creates authorized task, queues and executes bounded steps, observes real state/result/events, uses OS services",
+    "Behavioral tests: success, arithmetic/operation failure and truthful partial effects, denied/cross-runtime/claimed authority, required approval denied, policy/resource/revision/target/capability drift before effect, identical replay/conflict, FIFO queue/lease, admission/step deadline, steps/events/queue/resident/ID bounds and no writes on rejected admission",
+    "Unchanged Rust metadata/offline/locked fmt/clippy/native tests/build and selected contracts/platform Wasm compilation; exact six AGENTS commands and populated body",
+    "EN/TR semantic review then fingerprints, privacy/first-party diff, guide pins/live47Goal/fetched integration and original14checkout preservation",
+    "Fresh separate final-head review and current CI; standing-authorized scoped merge then exact-main CI/reviewed tree proof"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context using actual Rust/Python/Git/gh/OS services",
+    "reviewer": "Fresh separate final-head context; accepted invocation gpt-6.1-sol/high; hidden identity unverifiable"
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "risks": [
+    "Opaque handles are a trusted in-process host boundary; network/local-session authentication belongs to G14",
+    "One worker/concurrency1 and structural limits, not performance acceptance",
+    "Only owned task state; no external operation, production persistence or unknown external effect substitution",
+    "Running plan follows its own observed revisions under task lease; new state/policy bindings require new admission/decision",
+    "G11 actual approval/revocation/effective cancellation, G12journal/G13recovery/G14HTTP/G15CLI/G16browser are separate"
+  ],
+  "rollback": "Revert scoped runtime/workspace/native consumer/docs/pins/tracking through reviewed PRs; retain G08/G09, existing settings/license boundary/frozen history and all unrelated dirty checkouts. No publishing/credentials/private data/model/training/admin/extra spending."
+}

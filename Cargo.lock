@@ -19,3 +19,11 @@ version = "0.1.0"
 dependencies = [
  "eylema-contracts",
 ]
+
+[[package]]
+name = "eylema-runtime"
+version = "0.1.0"
+dependencies = [
+ "eylema-contracts",
+ "eylema-platform",
+]

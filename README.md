@@ -17,7 +17,7 @@ The [name and availability record](https://github.com/eylema-dev/devguide/blob/m
 
 Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
-**Status: first owned Rust workspace and bootstrap host.** [G07 workspace evidence](docs/en/rust-workspace.md) covers real native compilation/process tests and selected portable-library Wasm compilation. Repository CI now runs Rust gates alongside document/schema/PR validation; task execution, model execution, autonomous development and performance acceptance remain later Goals.
+**Status: owned Rust contracts, canonical codec and deterministic embedded task core.** [G10 executor evidence](docs/en/deterministic-runtime.md) covers bounded native admission/steps/events and actual owned state; [G09 codec/platform evidence](docs/en/codec-platform.md) covers actual native/Node-hosted Wasm comparison. [G07 workspace evidence](docs/en/rust-workspace.md) covers real native compilation/process tests and selected portable-library Wasm compilation. Repository CI now runs Rust gates alongside document/schema/PR validation; the public task console, persistence, human oversight, model execution, autonomous development and performance acceptance remain later Goals.
 
 ## Contribute
 
