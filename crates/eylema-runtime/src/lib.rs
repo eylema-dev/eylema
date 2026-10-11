@@ -251,7 +251,12 @@ impl<S: HostServices> Runtime<S> {
                 if state.policy_revision != grant.policy_revision {
                     return Err(ErrorCode::RevisionConflict);
                 }
-                self.check_oversight(session, &a.task_id, &a.resource_scope, &state.oversight)?;
+                self.check_oversight(
+                    session,
+                    &a.task_id,
+                    &state.snapshot.task.fields().resource_scope,
+                    &state.oversight,
+                )?;
             }
             if a.target.context() != ExecutionContext::NativeMacos
                 || a.target.backend() != Backend::NativeCpu

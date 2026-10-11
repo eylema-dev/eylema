@@ -1,6 +1,6 @@
 {
   "goal": "G11",
-  "task_revision": 3,
+  "task_revision": 4,
   "issue": "https://github.com/eylema-dev/eylema/issues/13",
   "base": "9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841",
   "guide_base": "9ec707de516f2393b4930f64a051f790da26a177",
@@ -57,7 +57,7 @@
       "records/goal-tracking.json"
     ]
   },
-  "scope_revision": "Adapt proposed runtime path to accepted crates/eylema-runtime; keep embedded typed oversight records/handles in runtime, no wire version or Cargo dependency/profile/shared gate change. Update current paired status and explicit G10 historical boundaries. Revision3 makes accepted task oversight immutable and host-installed, checked independently of request declarations; policy-revision advance cannot remove obligations.",
+  "scope_revision": "Adapt proposed runtime path to accepted crates/eylema-runtime; keep embedded typed oversight records/handles in runtime, no wire version or Cargo dependency/profile/shared gate change. Update current paired status and explicit G10 historical boundaries. Revision3 makes accepted task oversight immutable and host-installed, checked independently of request declarations; policy-revision advance cannot remove obligations. Revision4 repairs separately reproduced multi-resource intervention scope: task/execution controls and streams require full task scope for both accepted and declared obligations; add multi-resource regressions.",
   "design": "Opaque trusted-host verified-human enrollment distinct from ordinary sessions; host must independently verify person identity before use, fixtures do not prove real human authentication. Bounded immutable approval records bind canonical exact task/proposal hash, IDs/revisions/scope/expiry/checkpoints/verified approver; recheck before admission and each effect, preserve revocation history. Scoped trusted-human intervention and registered governance references resolve actual runtime records, task policy advancement invalidates stale execution/decisions; delegation revocation denies future actions. Cancellation reserves receipt/effective metadata at cancellable admission, records CancelRequested without stop proof, next cooperative step supplies Cancelled/effective-stop evidence and preserves applied effects. Repeated requests return same receipt; completed late request preserves terminal result. No compensation/external stop/recovery/network/GUI claim. Initial trusted host installs protected task obligations; request omission cannot weaken accepted checkpoints/observation/intervention/governance.",
   "acceptance_checks": [
     "Meaningful expired/hash/plan/state/policy/scope/claimed-human/cross-instance approval denial before effects; valid approval; expiry/revocation between steps retains partial effects; stale policy/delegation revocation; authenticated scoped observation/intervention/governance",

@@ -128,13 +128,23 @@ impl<S: HostServices> Runtime<S> {
         oversight: &OversightRequirements,
     ) -> Result<()> {
         let grant = self.grant(session)?;
+        // Streams and cancellation act on the whole task/execution. A narrow
+        // action controller cannot satisfy these full-task capabilities.
+        let task_scope = &self
+            .tasks
+            .get(task)
+            .ok_or(ErrorCode::InvalidRequest)?
+            .snapshot
+            .task
+            .fields()
+            .resource_scope;
         if oversight.requires_intervention()
-            && !self.intervention_available(scope, grant.policy_revision)
+            && !self.intervention_available(task_scope, grant.policy_revision)
         {
             return Err(ErrorCode::CapabilityUnavailable);
         }
         if oversight.requires_observation() {
-            self.permission(session, scope, Permission::ObserveEvents)?;
+            self.permission(session, task_scope, Permission::ObserveEvents)?;
         }
         if let Some(reference) = oversight.governance() {
             let record = self

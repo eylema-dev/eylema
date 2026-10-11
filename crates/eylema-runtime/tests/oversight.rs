@@ -600,3 +600,133 @@ fn no_cancellation_capability_is_claimed_for_admission_without_reserved_controls
         ExecutionState::Queued
     );
 }
+#[test]
+fn required_intervention_on_multi_resource_task_needs_a_full_task_controller() {
+    for accepted in [false, true] {
+        let (mut r, host, _, _, _) = fixture(Limits::default());
+        let broad = ResourceScope::new(vec![
+            ResourceId::new("state:1").unwrap(),
+            ResourceId::new("state:2").unwrap(),
+        ])
+        .unwrap();
+        let mut eg = grant();
+        eg.resource_scope = broad.clone();
+        let s = r.enroll(&host, eg).unwrap();
+        let mut hg = grant();
+        hg.principal = PrincipalRef::new("principal:narrow-controller").unwrap();
+        hg.permissions.push(Permission::RequestCancellation);
+        let narrow = r.enroll_verified_human(&host, hg.clone()).unwrap();
+        let mut td = task(
+            if accepted {
+                "task:accepted-wide"
+            } else {
+                "task:declared-wide"
+            },
+            10,
+            40,
+        )
+        .fields()
+        .clone();
+        td.resource_scope = broad.clone();
+        let t = TaskSpec::new(td).unwrap();
+        r.create_governed_task(
+            &host,
+            &s,
+            t.clone(),
+            OversightRequirements::new(vec![], true, accepted, None).unwrap(),
+        )
+        .unwrap();
+        let mut pd = proposal(&t, &[2, 3]).fields().clone();
+        if !accepted {
+            for action in &mut pd.actions {
+                let mut ad = action.fields().clone();
+                ad.authority = AuthorityRequirement::new(
+                    grant().principal,
+                    rev(3),
+                    scope(),
+                    vec![Permission::ExecuteAction],
+                    OversightRequirements::new(vec![], true, true, None).unwrap(),
+                )
+                .unwrap();
+                *action = ActionSpec::new(ad).unwrap();
+            }
+        }
+        let p = ActionProposal::new(pd, &t).unwrap();
+        assert_eq!(
+            r.admit(&s, t.clone(), p.clone()),
+            Err(ErrorCode::CapabilityUnavailable)
+        );
+        assert_eq!(r.task(&s, &t.fields().task_id).unwrap().charged_events, 1);
+        assert_eq!(r.task(&s, &t.fields().task_id).unwrap().value, 0);
+        assert_eq!(r.step().unwrap(), None);
+        hg.resource_scope = broad;
+        let controller = r.enroll_verified_human(&host, hg).unwrap();
+        let e = r.admit(&s, t.clone(), p).unwrap();
+        assert_eq!(
+            r.request_cancellation(&narrow, &e),
+            Err(ErrorCode::Forbidden)
+        );
+        r.request_cancellation(&controller, &e).unwrap();
+        r.step().unwrap();
+        assert_eq!(
+            r.execution(&s, &e).unwrap().fields().state,
+            ExecutionState::Cancelled
+        );
+        assert_eq!(r.task(&s, &t.fields().task_id).unwrap().value, 0);
+    }
+}
+#[test]
+fn required_observation_cannot_be_satisfied_by_action_subset_stream_permission() {
+    for accepted in [false, true] {
+        let (mut r, host, _, _, _) = fixture(Limits::default());
+        let broad = ResourceScope::new(vec![
+            ResourceId::new("state:1").unwrap(),
+            ResourceId::new("state:2").unwrap(),
+        ])
+        .unwrap();
+        let mut eg = grant();
+        eg.resource_scope = broad.clone();
+        let owner = r.enroll(&host, eg).unwrap();
+        let narrow = r.enroll(&host, grant()).unwrap();
+        let mut td = task(
+            if accepted {
+                "task:accepted-observe"
+            } else {
+                "task:declared-observe"
+            },
+            10,
+            30,
+        )
+        .fields()
+        .clone();
+        td.resource_scope = broad;
+        let t = TaskSpec::new(td).unwrap();
+        r.create_governed_task(
+            &host,
+            &owner,
+            t.clone(),
+            OversightRequirements::new(vec![], accepted, false, None).unwrap(),
+        )
+        .unwrap();
+        let mut pd = proposal(&t, &[2]).fields().clone();
+        if accepted {
+            let mut ad = pd.actions[0].fields().clone();
+            ad.authority = AuthorityRequirement::new(
+                grant().principal,
+                rev(3),
+                scope(),
+                vec![Permission::ExecuteAction],
+                OversightRequirements::new(vec![], false, false, None).unwrap(),
+            )
+            .unwrap();
+            pd.actions[0] = ActionSpec::new(ad).unwrap();
+        }
+        let p = ActionProposal::new(pd, &t).unwrap();
+        assert_eq!(r.admit(&narrow, t.clone(), p), Err(ErrorCode::Forbidden));
+        assert_eq!(r.task(&owner, &t.fields().task_id).unwrap().value, 0);
+        assert_eq!(
+            r.task(&owner, &t.fields().task_id).unwrap().charged_events,
+            1
+        );
+    }
+}
