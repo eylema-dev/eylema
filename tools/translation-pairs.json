@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "purpose": "Reviewed local bytes; split product translations are paired and pinned in devguide/tools/repository-set.json. Hashes do not prove semantic equivalence.",
+  "pairs": [
+    {
+      "en": "README.md",
+      "tr": "README.tr.md",
+      "en_sha256": "faea3ea22e588c0e2328da0a19350e7b78c843fde9ad944c37f840710a24379b",
+      "tr_sha256": "7c6523c5d8d14194b1221bb32d2c5c221464a7e6e5171c54d1d7d0e821e60b8b"
+    },
+    {
+      "en": "CONTRIBUTING.md",
+      "tr": "CONTRIBUTING.tr.md",
+      "en_sha256": "0f5d0e15050583a13ef54d31a14b604b439a6b2f7eb38920918e62fe6bd0bbfb",
+      "tr_sha256": "4f4c5281cd0e39d18bccbf14da2ee0f61d573e46fd66a9e1687f5232c624cf2a"
+    },
+    {
+      "en": "assets/eylema-logo/README.md",
+      "tr": "assets/eylema-logo/README.tr.md",
+      "en_sha256": "32f6b6331166160ba38f0382a87526937fd2cf27c16dd06778e43cc6616aa4a8",
+      "tr_sha256": "7628d6dc5c5d61cf47129803f32acdc60323464fe1962213dac34bc96bf71dae"
+    }
+  ],
+  "documents": []
+}

@@ -5,19 +5,23 @@
   </picture>
 </p>
 
-# Eylema — Design Pack
+# Eylema
 
 **A Simple, High-Performance Agentic AI Web Platform for Continuous Development and Operations.**
 
-English is the canonical project language. [Türkçe](README.tr.md) is the second language. The product name **Eylema** was accepted on **11 October 2026**; the description above states its intended purpose.
+Code, identifiers, file names and contribution templates use English. Documentation is available in English and [Turkish](README.tr.md), with English as the canonical source. The product name **Eylema** was accepted on **11 October 2026**; the description above states its intended purpose.
 
-Public documentation repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The proposed CLI name and package prefix are `eylema`; they are not implemented or published. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. License selection remains pending.
+Core project repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The proposed CLI name and package prefix are `eylema`; they are not implemented or published. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. License selection remains pending.
 
-The [name and availability record](name-availability.md) preserves the checks made before organization creation and the subsequent registration update. `eylema-dev` and this public repository were established on 11 October 2026. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
+The [name and availability record](https://github.com/eylema-dev/devguide/blob/main/docs/en/name-availability.md) preserves the checks made before organization creation and the subsequent registration update. `eylema-dev` and this public repository were established on 11 October 2026. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
 
 Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
-**Status: architecture and API contract drafts.** No framework, trained model, production API, GitHub automation or performance benchmark has been delivered by this documentation work.
+**Status: architecture/API drafts and contribution tooling.** Repository CI validates documents, schemas and PR structure; it does not implement the Rust runtime, model execution, autonomous AI development team or performance benchmarks.
+
+## Contribute
+
+Start with [contribution rules](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.md) and the shared [AI agent contract](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md). Follow the [first-release roadmap](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/roadmap.md), [quality gates](https://github.com/eylema-dev/devguide/blob/main/docs/en/quality-gates.md) and [CI tooling inventory](https://github.com/eylema-dev/devguide/blob/main/docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.
 
 ## Product direction
 
@@ -51,17 +55,26 @@ Quality floors are mandatory before optimizing speed or cost. Compare complete a
 
 | Document | English source | Turkish companion |
 |---|---|---|
-| Architecture 0.3.0 | [Architecture](architecture-v0.3.en.md) | [Mimari](framework-mimari-taslagi-v0.3.md) |
-| API and oversight 0.1.0 | [API reference](api/en/reference-v0.1.md) | [API referansı](api/tr/reference-v0.1.md) |
-| Development and operations 0.1.0 | [Team protocols](ai-team-protocols-v0.1.en.md) | [Takım protokolleri](ai-takim-protokolleri-v0.1.md) |
-| Learning and training 0.1.0 | [Learning protocol](learning-data-training-protocol-v0.1.en.md) | [Öğrenme protokolü](ogrenme-verisi-ve-egitim-protokolu-v0.1.md) |
+| Project structure 0.1.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Architecture 0.3.1 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| API and oversight 0.1.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
+| Development and operations 0.1.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
+| Learning and training 0.1.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
 
 Machine-readable drafts: [development request schema](ai-team-protocol/request.schema.json), [illustrative request](ai-team-protocol/request.example.json), [model team release schema](ai-team-protocol/model-set-release.schema.json). Schema validity is not authorization or evidence of successful execution.
 
-English identifiers, paths, fields, enums and error codes are shared across languages. Translations track source revisions. Earlier v0.1/v0.2 architecture files and the original Turkish API outline are historical design records; this index identifies current documents.
+English identifiers, paths, fields, enums and error codes are shared across languages. Current documents use matching English file names under `docs/` in `eylema-docs-en` and `eylema-docs-tr`; translations track source revisions. Earlier Turkish architecture versions and the original API outline are retained in `eylema-docs-tr/archive/` as historical records. See [project structure](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) for the layout and migration notes.
 
 ## First proof
 
-Build a small 3D task environment with our web UI, Rust execution and persistence. Establish a deterministic decision baseline, then evaluate a small learned policy/dynamics model and one supported local language model under shared GPU load. Capture a permitted episode and correction, train a candidate through a pinned recipe, and prove an improvement before promoting it. Demonstrate the development team producing a real, checked PR and a justified model assignment on two resource profiles.
+The selected first working application is a task console: create a task, run deterministic steps, inspect progress, stop remaining work, save state and reopen it after a service restart. Build the Rust contracts, executor and journal, then demonstrate the minimal web interface. [Acceptance scenarios and proposed components](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) define what that demonstration must prove.
 
-Each step is a separate acceptance milestone. The first product does not need every optional model family, a CAD kernel, or every native GPU backend.
+The later 3D environment, learned policy/dynamics model, local language model, permitted training loop and development-team PR flow remain separate roadmap milestones. The first browser demonstration requires neither model access nor a GPU. No working application is delivered by this documentation revision.
+
+## Organization repositories
+
+[English product docs](https://github.com/eylema-dev/eylema-docs-en) · [Turkish product docs](https://github.com/eylema-dev/eylema-docs-tr) · [Developer guide](https://github.com/eylema-dev/devguide) · [Repository map](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-map.md)
+
+`eylema` keeps the planned Rust workspace, CLI, first-party components, machine-readable schemas and existing brand assets. Product prose moves to the language repositories; shared contribution policy moves to devguide. Examples, evaluations, model metadata and training recipes have separate repositories with explicit scaffold-only status. The website is managed separately in [eylemadotdev](https://github.com/eylema-dev/eylemadotdev). No runtime has been implemented by this split.
+
+Read [the migration record](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-migration.md) for exact sources, destinations, linked PRs, integration checks and rollback. New document links target the coordinated post-merge layout; the PRs and pinned repository set provide review copies before then.
