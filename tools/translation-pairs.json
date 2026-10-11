@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "543861b81f71de3c1a98db0e53bc47717d4db0cb8f7700541ffe52ad35d72f22",
-      "tr_sha256": "90009409324f79ed420d1d50eedcab7aa5b420974e652d307deb34244c8315c4"
+      "en_sha256": "423eaf4a1d576a81790ca493b6ec8cb6ad928f9317f9416d9fe65baea9f69b55",
+      "tr_sha256": "f0e4036c16de26f35ecc9cec902b02f86be3965775ae5fa2ed4769cbdd6a3336"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -43,6 +43,12 @@
       "tr": "docs/tr/codec-platform.md",
       "en_sha256": "f3979b3b1a7d20e5b20f28747baea2acf5ed4b9e98f2ca13f2f8031f3a7a7eff",
       "tr_sha256": "bd5b053fd478eed489781e0267a87bbe108d1736a9c4a4a642d14061f0cb051d"
+    },
+    {
+      "en": "docs/en/deterministic-runtime.md",
+      "tr": "docs/tr/deterministic-runtime.md",
+      "en_sha256": "60f73a87ed6d70aedbfd7b8227fe288bfeab05002f7adb76483dd7e323040e0a",
+      "tr_sha256": "0f69c32f5351adf145160240b0a049e054c3f7bfeff5fbd5ad7e841bbcf4f9a1"
     }
   ],
   "documents": []
