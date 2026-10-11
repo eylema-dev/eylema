@@ -159,11 +159,16 @@ def validate_workflow(workflow):
     pr_steps = [s for s in job["steps"] if "tools/check_pr.py" in s.get("run", "")]
     require(len(pr_steps) == 1 and pr_steps[0].get("if") == "github.event_name == 'pull_request'", "Real PR gate must run on PR events")
     require("--allow-template" not in joined, "CI must not treat actual PR bodies as blank templates")
+    integration = [s for s in job['steps'] if 'tools/check_workspace.py' in s.get('run', '')]
+    require(len(integration) == 1 and integration[0].get('if') == "github.repository == 'eylema-dev/devguide'"
+            and integration[0]['run'] == '.venv/bin/python tools/check_workspace.py --fetch',
+            'Devguide must run the pinned repository-set gate')
 
 
 def verify_translations(root, manifest, write=False):
     pairs = manifest.get("pairs", [])
-    require(bool(pairs), "Missing translation pairs")
+    documents = manifest.get("documents", [])
+    require(bool(pairs or documents), "Missing translation records")
     seen = set()
     for pair in pairs:
         for language in ["en", "tr"]:
@@ -177,7 +182,66 @@ def verify_translations(root, manifest, write=False):
                 pair[key] = digest
             else:
                 require(pair.get(key) == digest, f"Translation review fingerprint is stale: {name}")
-    return len(pairs)
+    for document in documents:
+        name = document['path']
+        path = root / name
+        require(name not in seen and path.resolve().is_relative_to(root.resolve()) and path.is_file(), f"Invalid translation path: {name}")
+        seen.add(name)
+        require(document.get('language') in {'en', 'tr'}, f"Missing document language: {name}")
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if write:
+            document['sha256'] = digest
+        else:
+            require(document.get('sha256') == digest, f"Translation review fingerprint is stale: {name}")
+    return len(pairs) + len(documents)
+
+
+ROLES = {
+    'eylema': 'core', 'eylema-docs-en': 'docs-en', 'eylema-docs-tr': 'docs-tr',
+    'devguide': 'guide', '.github': 'community', 'eylema-examples': 'reserved',
+    'eylema-evals': 'reserved', 'eylema-models': 'reserved', 'eylema-training': 'reserved',
+}
+PRODUCT_DOCS = ('architecture', 'api-reference', 'development-and-operations',
+                'learning-and-training', 'project-structure', 'roadmap')
+SHARED_FILES = {
+    'tools/check_repository.py', 'tools/check_pr.py', 'tools/requirements-ci.txt',
+    'tools/tests/test_gates.py', '.github/PULL_REQUEST_TEMPLATE.md',
+    '.github/CODEOWNERS', '.github/copilot-instructions.md', '.github/workflows/ci.yml',
+    '.github/ISSUE_TEMPLATE/config.yml', '.github/ISSUE_TEMPLATE/feature.yml',
+    '.github/ISSUE_TEMPLATE/bug.yml', '.github/ISSUE_TEMPLATE/architecture.yml',
+}
+
+
+def validate_repository_config(config):
+    name = config.get('repository', '').removeprefix('eylema-dev/')
+    require(config.get('repository') == 'eylema-dev/' + name and name in ROLES, 'Unexpected repository identity')
+    require(config.get('format_version') == 1 and config.get('role') == ROLES[name], 'Invalid repository role/version')
+    require(config.get('stage') == 'documentation' and config.get('runtime_implemented') is False,
+            'Replace documentation gates with reviewed implementation gates before changing stage')
+    require(config.get('tooling_version') == '0.2.0', 'Unexpected tooling version')
+    return name
+
+
+def verify_document_coverage(names, manifest):
+    expected = {n for n in names if n in {'README.md', 'README.tr.md', 'CONTRIBUTING.md', 'CONTRIBUTING.tr.md'}
+                or (n.endswith('.md') and (n.startswith(('docs/en/', 'docs/tr/', 'profile/'))
+                    or n in {f'docs/{d}.md' for d in PRODUCT_DOCS}
+                    or n.startswith('assets/eylema-logo/README')))}
+    covered = {p[lang] for p in manifest.get('pairs', []) for lang in ('en', 'tr')}
+    covered.update(d['path'] for d in manifest.get('documents', []))
+    require(covered == expected, f'Translation coverage mismatch: missing={sorted(expected-covered)}, unexpected={sorted(covered-expected)}')
+
+
+def verify_vendor(root, manifest):
+    require(manifest.get('source_repository') == 'eylema-dev/devguide'
+            and manifest.get('tooling_version') == '0.2.0', 'Unknown shared tooling source')
+    files = manifest.get('files', {})
+    require(set(files) == SHARED_FILES, 'Incomplete or unexpected tooling inventory')
+    for name, digest in files.items():
+        path = root / name
+        require(path.resolve().is_relative_to(root.resolve()) and path.is_file(), f'Invalid vendored path: {name}')
+        require(hashlib.sha256(path.read_bytes()).hexdigest() == digest, f'Shared tooling copy changed: {name}')
+    return len(files)
 
 
 def validate_api(en, tr):
@@ -191,6 +255,17 @@ def validate_api(en, tr):
 
 def check(root, event=None):
     names = repository_files(root)
+    repository = validate_repository_config(load_json(root / 'repository.json'))
+    required = ['README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'CONTRIBUTING.tr.md']
+    if repository in {'eylema-docs-en', 'eylema-docs-tr'}:
+        required += [f'docs/{d}.md' for d in PRODUCT_DOCS]
+    else:
+        required += ['README.tr.md']
+    if repository == 'devguide':
+        required += ['tools/repository-set.json', 'tools/check_workspace.py', 'records/document-migration.json']
+    if repository == '.github':
+        required += ['profile/README.md', 'profile/README.tr.md']
+    require(set(required) <= set(names), f'Missing required repository files: {sorted(set(required)-set(names))}')
     for name in names:
         path = root / name
         if path.suffix in {".md", ".json", ".yml", ".yaml"}:
@@ -205,7 +280,8 @@ def check(root, event=None):
             require(not errors, "; ".join(errors))
     require(not any(Path(n).suffix == ".rs" or Path(n).name == "Cargo.toml" for n in names), "Documentation-only gate cannot accept Rust source; implement EYL-003 Rust CI and replace this guard together")
     schemas = [n for n in names if n.endswith(".schema.json")]
-    require(bool(schemas), "No schemas found")
+    expected_schemas = {'ai-team-protocol/request.schema.json', 'ai-team-protocol/model-set-release.schema.json'} if repository == 'eylema' else set()
+    require(set(schemas) == expected_schemas, 'Schema ownership changed; machine contracts belong in eylema')
     for name in schemas:
         validate_schema(load_json(root / name))
     for name in names:
@@ -215,9 +291,9 @@ def check(root, event=None):
             Draft202012Validator(load_json(schema)).validate(load_json(root / name))
     manifest = load_json(root / "tools/translation-pairs.json")
     pair_count = verify_translations(root, manifest)
-    api_count = validate_api((root / "api/en/reference-v0.1.md").read_text(), (root / "api/tr/reference-v0.1.md").read_text())
-    ids = lambda name: re.findall(r"^\| (M\d+|EYL-\d+) \|", (root / name).read_text(), re.M)
-    require(bool(ids("ROADMAP.md")) and ids("ROADMAP.md") == ids("ROADMAP.tr.md"), "Roadmap ID mismatch")
+    verify_document_coverage(names, manifest)
+    if repository != 'devguide':
+        verify_vendor(root, load_json(root / 'tools/vendor.json'))
     forms = [n for n in names if n.startswith(".github/ISSUE_TEMPLATE/") and n.endswith(".yml") and Path(n).name != "config.yml"]
     require(len(forms) == 3, "Expected feature, bug and architecture issue forms")
     for name in forms:
@@ -237,7 +313,8 @@ def check(root, event=None):
     command = ["git", "diff", "--check", base, "HEAD"] if base else ["git", "show", "--format=", "--check", "HEAD"]
     subprocess.run(command, cwd=root, check=True)
     subprocess.run(["git", "diff", "--check"], cwd=root, check=True)
-    print(f"PASS: {len(names)} files, {len(schemas)} schemas, {pair_count} translation pairs, {api_count} bilingual API operations, {len(forms)} issue forms")
+    print(f"PASS: {repository}: {len(names)} files, {len(schemas)} schemas, {pair_count} local language records, {len(forms)} issue forms")
+    print('Cross-repository API/roadmap/translation/link checks run separately in devguide against pinned member commits.')
     print("Scope: documentation and repository tooling only; Rust/GPU/model execution is NOT RUN")
 
 

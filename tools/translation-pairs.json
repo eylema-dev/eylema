@@ -1,66 +1,25 @@
 {
-  "version": "0.1.0",
-  "purpose": "Reviewed byte fingerprints; not semantic translation proof. Historical monolingual drafts and provider adapters are excluded.",
+  "version": "0.2.0",
+  "purpose": "Reviewed local bytes; split product translations are paired and pinned in devguide/tools/repository-set.json. Hashes do not prove semantic equivalence.",
   "pairs": [
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "9291094de1ffa61ca8cd81826b0c18ad0f8123ac5743f00fea127933288051c8",
-      "tr_sha256": "f59509f48a454a1706f34aac867c15aeedd71abfe3872094dc7ad4b193cc9e02"
+      "en_sha256": "faea3ea22e588c0e2328da0a19350e7b78c843fde9ad944c37f840710a24379b",
+      "tr_sha256": "7c6523c5d8d14194b1221bb32d2c5c221464a7e6e5171c54d1d7d0e821e60b8b"
     },
     {
       "en": "CONTRIBUTING.md",
       "tr": "CONTRIBUTING.tr.md",
-      "en_sha256": "6747c5ecf3fe9237b188d7cbe5f85fdf84d994616739a8420574f12bfadc895a",
-      "tr_sha256": "2f87a2ec64ad766568edee14aca5de53d6792a4fa0d7753b0bb103297b6012e0"
+      "en_sha256": "0f5d0e15050583a13ef54d31a14b604b439a6b2f7eb38920918e62fe6bd0bbfb",
+      "tr_sha256": "4f4c5281cd0e39d18bccbf14da2ee0f61d573e46fd66a9e1687f5232c624cf2a"
     },
     {
-      "en": "ROADMAP.md",
-      "tr": "ROADMAP.tr.md",
-      "en_sha256": "f4c2ce2b380f9ae8cf1ac0e6332145901b72f67bf3fac3078008ccaca889d7cb",
-      "tr_sha256": "f954d5182090c9e1408ebd15145c6d5b4971c13bf5099da4c56f68ea443f0eda"
-    },
-    {
-      "en": "architecture-v0.3.en.md",
-      "tr": "framework-mimari-taslagi-v0.3.md",
-      "en_sha256": "5ecbd5765344ac9d606330928af51e63c41aa869d23c3bf6ec619f46948b817f",
-      "tr_sha256": "b265622df658317933bf6e5f378bf10d473612b00baae190f82480f2b4879606"
-    },
-    {
-      "en": "ai-team-protocols-v0.1.en.md",
-      "tr": "ai-takim-protokolleri-v0.1.md",
-      "en_sha256": "c7c4cdb6794c09b089bd8e12dd1a73ccf680757befda5daf8b5ed832bc1bfd05",
-      "tr_sha256": "5f4604b5580e3012c67b829c3dc9a4df2e539d65cde949fecc4cef45e4249c6d"
-    },
-    {
-      "en": "learning-data-training-protocol-v0.1.en.md",
-      "tr": "ogrenme-verisi-ve-egitim-protokolu-v0.1.md",
-      "en_sha256": "cace32904a9e8bb467963997c85f5e2ee8d9569a492f2d9f0fd91c573cd1922f",
-      "tr_sha256": "7bd197a84c712ff7a924da40871af50ec7f50d46d975f55af2cff4f5e7507e88"
-    },
-    {
-      "en": "api/en/reference-v0.1.md",
-      "tr": "api/tr/reference-v0.1.md",
-      "en_sha256": "99289f1398d0aca31ef8936a1b771d5162d611d59500d1f4cd764bf725c43af0",
-      "tr_sha256": "e7b3596e7622f01f349caf00dbecabd18b4c0c544e31cc381df18e79356714d6"
-    },
-    {
-      "en": "name-availability.md",
-      "tr": "name-availability.tr.md",
-      "en_sha256": "f659f0663e0340f702f1e4ab97797039b5dcf5f81f0543d6cb6f2352d9b02613",
-      "tr_sha256": "3484fd7ce17e95ef6efab7a93207af476ac840d21c49ef190cbf2cf1b118f6e7"
-    },
-    {
-      "en": "docs/en/quality-gates.md",
-      "tr": "docs/tr/quality-gates.md",
-      "en_sha256": "362b974bfae88288abcf504645672fe9d8eef62fb639d00d42cc72e2ae648086",
-      "tr_sha256": "5c0f253a02ecd2afdce5e07382b88538737c3f09cc5ea659c094f26ac8c59e8f"
-    },
-    {
-      "en": "docs/en/tooling.md",
-      "tr": "docs/tr/tooling.md",
-      "en_sha256": "a045528e82bd0c42a3866eaaeac4862a2a4fe0d8203cd741cbcca6b4112d79e8",
-      "tr_sha256": "0cb176ae9cd2aaa384f0d78fd76ae407917df3d7ea7dc4d53001eba9cbe2dedf"
+      "en": "assets/eylema-logo/README.md",
+      "tr": "assets/eylema-logo/README.tr.md",
+      "en_sha256": "32f6b6331166160ba38f0382a87526937fd2cf27c16dd06778e43cc6616aa4a8",
+      "tr_sha256": "7628d6dc5c5d61cf47129803f32acdc60323464fe1962213dac34bc96bf71dae"
     }
-  ]
+  ],
+  "documents": []
 }

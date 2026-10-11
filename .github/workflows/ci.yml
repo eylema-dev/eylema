@@ -48,3 +48,6 @@ jobs:
       - name: Validate actual PR description
         if: github.event_name == 'pull_request'
         run: .venv/bin/python tools/check_pr.py --event "$GITHUB_EVENT_PATH"
+      - name: Verify pinned repository set as data
+        if: github.repository == 'eylema-dev/devguide'
+        run: .venv/bin/python tools/check_workspace.py --fetch

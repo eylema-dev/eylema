@@ -5,9 +5,9 @@ import re
 from pathlib import Path
 
 SECTIONS = (
-    "Need / İhtiyaç", "Change / Değişiklik", "Acceptance / Kabul",
-    "Evidence / Kanıt", "Risk and rollback / Risk ve geri dönüş",
-    "AI and review / AI ve inceleme", "Languages / Diller",
+    "Need", "Change", "Acceptance",
+    "Evidence", "Risk and rollback",
+    "AI and review", "Documentation",
 )
 
 

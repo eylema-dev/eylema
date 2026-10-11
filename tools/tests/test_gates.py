@@ -9,31 +9,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from check_pr import SECTIONS, validate_body
 from check_repository import (ROOT, CheckFailure, load_json, load_yaml, local_link_errors,
                               validate_api, validate_form, validate_schema, validate_workflow,
-                              verify_translations)
+                              verify_translations, validate_repository_config, verify_document_coverage, verify_vendor)
 
 
 def body():
     return '\n\n'.join(f'## {s}\n\nSpecific command, environment and observed result.' for s in SECTIONS)
-
-
-def candidate():
-    return {
-        'schema_version': '0.1.0', 'runtime_protocol_version': '0.1.0',
-        'release_id': 'synthetic-candidate', 'status': 'candidate',
-        'behavior_contract_ref': 'synthetic-v1', 'behavior_contract_sha256': '0' * 64,
-        'engine': {'id': 'synthetic', 'version': 'test-only', 'build_sha256': '0' * 64},
-        'models': [{'id': 'synthetic-policy', 'kind': 'policy', 'source_ref': 'synthetic-source-v1',
-                    'artifact_ref': 'synthetic-artifact-v1', 'artifact_sha256': '0' * 64,
-                    'architecture': 'test-only', 'format': 'test-only', 'quantization': 'none',
-                    'required_operators': ['synthetic-op']}],
-        'hardware_profiles': [{'id': 'synthetic-cpu', 'target': 'native_linux',
-                               'backend': 'native_cpu', 'capabilities': []}],
-        'assignments': [{'role': 'synthetic', 'hardware_profile_id': 'synthetic-cpu',
-                         'model_ids': ['synthetic-policy'], 'max_concurrency': 1, 'fallback': 'fail',
-                         'budget': {'max_latency_ms': 1, 'max_resident_bytes': 1},
-                         'contract_ref': 'synthetic-v1'}],
-        'evidence': [], 'objectives': ['quality'],
-    }
 
 
 class PRTests(unittest.TestCase):
@@ -46,8 +26,8 @@ class PRTests(unittest.TestCase):
         self.assertEqual(len(validate_body(text)), len(SECTIONS))
 
     def test_missing_duplicate_and_placeholder_sections_fail(self):
-        for text in [body().replace('## Need / İhtiyaç', '## Other'),
-                     body() + '\n## Need / İhtiyaç\nDuplicate need details.',
+        for text in [body().replace('## Need', '## Other'),
+                     body() + '\n## Need\nDuplicate need details.',
                      body().replace('Specific command, environment and observed result.', 'TODO: write actual evidence later')]:
             with self.subTest(body=text): self.assertTrue(validate_body(text))
         self.assertTrue(validate_body(None))
@@ -58,6 +38,10 @@ class PRTests(unittest.TestCase):
 
     def test_shell_payload_is_only_data(self):
         self.assertEqual(validate_body(body() + '\nLiteral example: $(exit 99); `touch /tmp/do-not-run`'), [])
+
+    def test_bilingual_heading_suffixes_do_not_replace_english_sections(self):
+        old_style = '\n\n'.join(f'## {section} / Translated heading\n\nSpecific evidence for the task.' for section in SECTIONS)
+        self.assertEqual(len(validate_body(old_style)), len(SECTIONS))
 
 
 class RepositoryTests(unittest.TestCase):
@@ -90,6 +74,7 @@ class RepositoryTests(unittest.TestCase):
         x = copy.deepcopy(original); x['permissions']['contents'] = 'write'; variants.append(x)
         x = copy.deepcopy(original); x['jobs']['repository-checks']['steps'][0]['uses'] = 'actions/checkout@main'; variants.append(x)
         x = copy.deepcopy(original); x['jobs']['repository-checks']['steps'][0]['with']['persist-credentials'] = True; variants.append(x)
+        x = copy.deepcopy(original); x['jobs']['repository-checks']['steps'] = [step for step in x['jobs']['repository-checks']['steps'] if 'tools/check_workspace.py' not in step.get('run', '')]; variants.append(x)
         for value in variants:
             with self.subTest(value=value):
                 with self.assertRaises(CheckFailure): validate_workflow(value)
@@ -107,7 +92,7 @@ class RepositoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             (root / 'en.md').write_text('English')
-            (root / 'tr.md').write_text('Türkçe')
+            (root / 'tr.md').write_text('Translated content')
             manifest = {'pairs': [{'en': 'en.md', 'tr': 'tr.md'}]}
             verify_translations(root, manifest, write=True)
             self.assertEqual(verify_translations(root, manifest), 1)
@@ -115,48 +100,56 @@ class RepositoryTests(unittest.TestCase):
             with self.assertRaises(CheckFailure): verify_translations(root, manifest)
 
     def test_api_method_drift_fails(self):
-        en = (ROOT / 'api/en/reference-v0.1.md').read_text()
-        tr = (ROOT / 'api/tr/reference-v0.1.md').read_text()
-        self.assertEqual(validate_api(en, tr), 20)
+        en = 'source_revision: 0.1.0\n| `getTask` | `GET /tasks/{task_id}` | Read |\n'
+        tr = en.replace('Read', 'Oku')
+        self.assertEqual(validate_api(en, tr), 1)
         with self.assertRaises(CheckFailure): validate_api(en, tr.replace('`GET ', '`POST ', 1))
 
+    def test_single_language_edit_invalidates_fingerprint(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'doc.md').write_text('Reviewed English')
+            manifest = {'documents': [{'path': 'doc.md', 'language': 'en'}]}
+            verify_translations(root, manifest, write=True)
+            verify_translations(root, manifest)
+            (root / 'doc.md').write_text('Unreviewed change')
+            with self.assertRaises(CheckFailure): verify_translations(root, manifest)
+            manifest['documents'][0]['path'] = '../outside.md'
+            with self.assertRaises(CheckFailure): verify_translations(root, manifest, write=True)
 
-class SchemaTests(unittest.TestCase):
-    def test_remote_reference_fails_without_network(self):
-        with self.assertRaises(CheckFailure): validate_schema({'$ref': 'https://example.org/schema.json'})
+    def test_missing_maintained_document_coverage_fails(self):
+        manifest = {'documents': [{'path': 'README.md', 'language': 'en'}]}
+        verify_document_coverage(['README.md'], manifest)
+        with self.assertRaises(CheckFailure):
+            verify_document_coverage(['README.md', 'docs/architecture.md'], manifest)
 
-    def test_request_positive_and_negative_cases(self):
-        schema = load_json(ROOT / 'ai-team-protocol/request.schema.json')
-        validate_schema(schema)
-        validator = Draft202012Validator(schema)
-        example = load_json(ROOT / 'ai-team-protocol/request.example.json')
-        validator.validate(example)
-        variants = []
-        x = copy.deepcopy(example); del x['execution']; variants.append(x)
-        x = copy.deepcopy(example); x['execution']['budget']['max_model_calls'] = 0; variants.append(x)
-        x = copy.deepcopy(example); x['execution']['publish_target'] = 'merge'; variants.append(x)
-        x = copy.deepcopy(example); x['constraints']['dependency_policy'] = 'anything'; variants.append(x)
-        x = copy.deepcopy(example); x['acceptance_criteria'] = []; variants.append(x)
-        x = copy.deepcopy(example); x['unexpected'] = True; variants.append(x)
-        for value in variants:
-            with self.subTest(value=value):
-                with self.assertRaises(ValidationError): validator.validate(value)
+    def test_repository_role_and_stage_cannot_be_relaxed(self):
+        config = {'format_version': 1, 'repository': 'eylema-dev/eylema', 'role': 'core',
+                  'stage': 'documentation', 'runtime_implemented': False, 'tooling_version': '0.2.0'}
+        self.assertEqual(validate_repository_config(config), 'eylema')
+        for key, value in [('repository', 'other/eylema'), ('role', 'reserved'), ('stage', 'runtime'), ('runtime_implemented', True)]:
+            with self.subTest(key=key):
+                bad = dict(config, **{key: value})
+                with self.assertRaises(CheckFailure): validate_repository_config(bad)
 
-    def test_release_positive_and_negative_cases(self):
-        schema = load_json(ROOT / 'ai-team-protocol/model-set-release.schema.json')
-        validate_schema(schema)
-        validator = Draft202012Validator(schema)
-        fixture = candidate()
-        validator.validate(fixture)
-        variants = []
-        x = copy.deepcopy(fixture); x['status'] = 'active'; variants.append(x)
-        x = copy.deepcopy(fixture); x['models'][0]['artifact_sha256'] = 'invalid'; variants.append(x)
-        x = copy.deepcopy(fixture); x['assignments'][0]['max_concurrency'] = 0; variants.append(x)
-        x = copy.deepcopy(fixture); x['models'][0]['kind'] = 'universal'; variants.append(x)
-        for value in variants:
-            with self.subTest(value=value):
-                with self.assertRaises(ValidationError): validator.validate(value)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_shared_tool_copy_drift_fails(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            names = ['tools/check_repository.py', 'tools/check_pr.py', 'tools/requirements-ci.txt',
+                     'tools/tests/test_gates.py', '.github/PULL_REQUEST_TEMPLATE.md',
+                     '.github/CODEOWNERS', '.github/copilot-instructions.md', '.github/workflows/ci.yml',
+                     '.github/ISSUE_TEMPLATE/config.yml', '.github/ISSUE_TEMPLATE/feature.yml',
+                     '.github/ISSUE_TEMPLATE/bug.yml', '.github/ISSUE_TEMPLATE/architecture.yml']
+            manifest = {'source_repository': 'eylema-dev/devguide', 'tooling_version': '0.2.0', 'files': {}}
+            for name in names:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('reviewed bytes')
+                manifest['files'][name] = hashlib.sha256(path.read_bytes()).hexdigest()
+            verify_vendor(root, manifest)
+            incomplete = copy.deepcopy(manifest)
+            del incomplete['files']['.github/workflows/ci.yml']
+            with self.assertRaises(CheckFailure): verify_vendor(root, incomplete)
+            (root / names[0]).write_text('changed checker')
+            with self.assertRaises(CheckFailure): verify_vendor(root, manifest)
