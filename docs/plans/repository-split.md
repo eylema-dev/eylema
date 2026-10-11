@@ -26,3 +26,7 @@ Codex (GPT-6) performs architect, implementer, verifier and self-reviewer roles 
 Risks: split-repository translations can drift, default-branch links require coordinated merges, and older PRs can restore removed documents. Use immutable repository-set pins, explicit merge order and inventory checks; preserve Git source history through immutable provenance links. Shared tooling is maintained in devguide with explicitly inventoried copies so local checks do not silently execute fetched code. These are documentation checks, not runtime/GPU/model evidence.
 
 Budget: at most 150 minutes, 240 tool calls, three repair cycles per failing gate, no paid services, no model-provider calls beyond this Codex session and no automatic merge. Stop and report any remaining failure or exhausted budget.
+
+## Concurrent main integration
+
+During PR creation, contribution PR #2 merged into main as `8e529b4747aef2648c241354858d28aaf416ecaa`. The task branch incorporates that accepted base. Its newly added roadmap and quality/tooling guides also move to their designated repositories, bringing core removals to 21; the three contributor entry files remain as thin adapters. Core PR #3 remains open and overlaps the final layout. Revalidated gates and refreshed immutable member pins are required after this integration. No merge to main is performed by this task.
