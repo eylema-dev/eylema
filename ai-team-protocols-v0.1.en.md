@@ -2,7 +2,7 @@ Revision: **0.1.0** · Canonical language: **EN** · Secondary language: **TR** 
 
 # Eylema — Development and local operations team protocols — v0.1
 
-Date: 11 October 2026. Status: **protocol design to implement**. No working orchestrator, model selection, GitHub automation, or scheduled monitoring has been installed. Schema version: 0.1.0. Examples are not actual tasks, models, or measurements.
+Date: 11 October 2026. Status: **protocol design to implement**. No working orchestrator, model selection, autonomous PR generation, or scheduled monitoring has been installed. Repository contribution templates and CI gates are defined separately in [CONTRIBUTING.md](CONTRIBUTING.md). Schema version: 0.1.0. Examples are not actual tasks, models, or measurements.
 
 Related designs: [architecture](architecture-v0.3.en.md), [behavioral API and human oversight](api/en/reference-v0.1.md), and [learning data and training](learning-data-training-protocol-v0.1.en.md).
 

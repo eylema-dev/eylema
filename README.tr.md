@@ -8,7 +8,11 @@ Herkese açık dokümantasyon deposu [eylema-dev/eylema](https://github.com/eyle
 
 `eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](name-availability.tr.md), organizasyon oluşturulmadan önceki kontrolleri korur. Önerilen ana alan adı `eylema.dev`; bu çalışmada alan adı satın alınmadı.
 
-**Durum: mimari ve API sözleşmesi taslakları.** Bu dokümantasyon çalışmasında çalışan framework, eğitilmiş model, üretim API’si, GitHub otomasyonu veya performans kıyası teslim edilmedi.
+**Durum: mimari/API taslakları ve katkı araçları.** Depo CI kontrolleri belgeleri, şemaları ve PR yapısını doğrular; Rust runtime, model yürütmesi, otonom AI geliştirme takımı veya performans kıyası sağlamaz.
+
+## Katkıda bulunma
+
+[Katkı kuralları](CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](ROADMAP.tr.md), [kalite kontrollerini](docs/tr/quality-gates.md) ve [CI araç envanterini](docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.
 
 ## Ürün yönü
 

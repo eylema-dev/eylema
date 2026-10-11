@@ -1,0 +1,66 @@
+{
+  "version": "0.1.0",
+  "purpose": "Reviewed byte fingerprints; not semantic translation proof. Historical monolingual drafts and provider adapters are excluded.",
+  "pairs": [
+    {
+      "en": "README.md",
+      "tr": "README.tr.md",
+      "en_sha256": "8d4ef7da5c6d76ce00d6afa1196fdc5d80cff79c769995a3368d2e897e6695b5",
+      "tr_sha256": "5658897f5691e7c7796e755bbe6521702baa441c2340a15e4733eaaf6b3c3419"
+    },
+    {
+      "en": "CONTRIBUTING.md",
+      "tr": "CONTRIBUTING.tr.md",
+      "en_sha256": "6747c5ecf3fe9237b188d7cbe5f85fdf84d994616739a8420574f12bfadc895a",
+      "tr_sha256": "2f87a2ec64ad766568edee14aca5de53d6792a4fa0d7753b0bb103297b6012e0"
+    },
+    {
+      "en": "ROADMAP.md",
+      "tr": "ROADMAP.tr.md",
+      "en_sha256": "f4c2ce2b380f9ae8cf1ac0e6332145901b72f67bf3fac3078008ccaca889d7cb",
+      "tr_sha256": "f954d5182090c9e1408ebd15145c6d5b4971c13bf5099da4c56f68ea443f0eda"
+    },
+    {
+      "en": "architecture-v0.3.en.md",
+      "tr": "framework-mimari-taslagi-v0.3.md",
+      "en_sha256": "5ecbd5765344ac9d606330928af51e63c41aa869d23c3bf6ec619f46948b817f",
+      "tr_sha256": "b265622df658317933bf6e5f378bf10d473612b00baae190f82480f2b4879606"
+    },
+    {
+      "en": "ai-team-protocols-v0.1.en.md",
+      "tr": "ai-takim-protokolleri-v0.1.md",
+      "en_sha256": "c7c4cdb6794c09b089bd8e12dd1a73ccf680757befda5daf8b5ed832bc1bfd05",
+      "tr_sha256": "5f4604b5580e3012c67b829c3dc9a4df2e539d65cde949fecc4cef45e4249c6d"
+    },
+    {
+      "en": "learning-data-training-protocol-v0.1.en.md",
+      "tr": "ogrenme-verisi-ve-egitim-protokolu-v0.1.md",
+      "en_sha256": "cace32904a9e8bb467963997c85f5e2ee8d9569a492f2d9f0fd91c573cd1922f",
+      "tr_sha256": "7bd197a84c712ff7a924da40871af50ec7f50d46d975f55af2cff4f5e7507e88"
+    },
+    {
+      "en": "api/en/reference-v0.1.md",
+      "tr": "api/tr/reference-v0.1.md",
+      "en_sha256": "99289f1398d0aca31ef8936a1b771d5162d611d59500d1f4cd764bf725c43af0",
+      "tr_sha256": "e7b3596e7622f01f349caf00dbecabd18b4c0c544e31cc381df18e79356714d6"
+    },
+    {
+      "en": "name-availability.md",
+      "tr": "name-availability.tr.md",
+      "en_sha256": "ca00b33e126cd6f8f026f2d9e3ade2d48dd6925b96a00db2cad92a88fedcce03",
+      "tr_sha256": "2af3772208d63212d0d0869a64d4ca1d862947550218ba36d6f3106f47920860"
+    },
+    {
+      "en": "docs/en/quality-gates.md",
+      "tr": "docs/tr/quality-gates.md",
+      "en_sha256": "362b974bfae88288abcf504645672fe9d8eef62fb639d00d42cc72e2ae648086",
+      "tr_sha256": "5c0f253a02ecd2afdce5e07382b88538737c3f09cc5ea659c094f26ac8c59e8f"
+    },
+    {
+      "en": "docs/en/tooling.md",
+      "tr": "docs/tr/tooling.md",
+      "en_sha256": "c19c31fcffb9fe6120d57c0020d372a28fc03caf42b1a50845b3bed92daa7aee",
+      "tr_sha256": "9b336b91d6b8b4797b64dbb73aeb7cfad79c2ed23bd8ab1576a30a18dc2e3c2b"
+    }
+  ]
+}

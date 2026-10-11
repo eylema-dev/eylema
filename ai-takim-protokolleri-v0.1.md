@@ -2,7 +2,7 @@
 
 Dil: Türkçe. Kaynak sürüm: 0.1.0. İngilizce kaynak belge: [AI team protocols](ai-team-protocols-v0.1.en.md). Projenin API kimlikleri, alanları ve hata kodları İngilizce kalır.
 
-Tarih: 11 Ekim 2026. Durum: uygulanacak protokol tasarımı; çalışan orkestratör, model seçimi, GitHub otomasyonu veya zamanlanmış izleme kurulmuş değildir. Şema sürümü: 0.1.0. Örnekler gerçek görev, model veya ölçüm değildir.
+Tarih: 11 Ekim 2026. Durum: uygulanacak protokol tasarımı; çalışan orkestratör, model seçimi, otonom PR üretimi veya zamanlanmış izleme kurulmuş değildir. Depo katkı şablonları ve CI kontrolleri [CONTRIBUTING.tr.md](CONTRIBUTING.tr.md) içinde ayrıca tanımlanır. Şema sürümü: 0.1.0. Örnekler gerçek görev, model veya ölçüm değildir.
 
 ## İki takım, ortak kanıt düzeni
 

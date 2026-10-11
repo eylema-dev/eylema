@@ -1,0 +1,57 @@
+name: Feature / Özellik
+description: Describe a concrete user need / Somut kullanıcı ihtiyacı
+title: '[Feature] '
+body:
+- type: markdown
+  attributes:
+    value: Read CONTRIBUTING.md before implementation. English or Turkish is welcome. / Uygulamadan önce
+      CONTRIBUTING.tr.md dosyasını okuyun.
+- type: textarea
+  id: need
+  attributes:
+    label: Need / İhtiyaç
+    description: Who needs what outcome, and why? / Kim, hangi sonucu, neden istiyor?
+  validations:
+    required: true
+- type: textarea
+  id: targets
+  attributes:
+    label: Targets and budget / Hedefler ve bütçe
+    description: Browser/Linux, hardware assumptions, task/time/model-call limits. Unknown values may
+      remain unknown until triage. / Ortam, donanım ve bütçe; bilinmeyeni belirtin.
+  validations:
+    required: true
+- type: textarea
+  id: acceptance
+  attributes:
+    label: Acceptance criteria / Kabul koşulları
+    description: Observable scenarios and results; include failure cases. / Gözlenebilir senaryolar, sonuçlar
+      ve hata durumları.
+  validations:
+    required: true
+- type: textarea
+  id: scope
+  attributes:
+    label: Scope and exclusions / Kapsam ve kapsam dışı
+    description: Affected paths/modules; production dependencies, permissions and data boundaries. / Dosyalar,
+      bağımlılıklar, yetki ve veri sınırları.
+  validations:
+    required: true
+- type: textarea
+  id: verification
+  attributes:
+    label: Verification plan / Doğrulama planı
+    description: Commands, tests and required hardware; mark unavailable checks not_run. / Komutlar, testler,
+      gereken donanım ve çalıştırılamayan kontroller.
+  validations:
+    required: true
+- type: checkboxes
+  id: hygiene
+  attributes:
+    label: Submission / Gönderim
+    options:
+    - label: I removed secrets and private data. / Sırları ve özel veriyi çıkardım.
+      required: true
+    - label: I understand this issue is a proposal, not execution authority. / Bu issue öneridir, yürütme
+        yetkisi değildir.
+      required: true

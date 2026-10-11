@@ -1,6 +1,6 @@
 # Eylema — Basit, performanslı eylemci yapay zekâ web platformu — v0.3
 
-Dil: Türkçe. Kaynak sürüm: 0.3.0. İngilizce kaynak belge: [Architecture v0.3](architecture-v0.3.en.md). Kod, API işlem adları, şemalar ve hata kodları İngilizce; rehber ve açıklamalar İngilizce ve Türkçe yayımlanır. Çeviri aynı sözleşme kimliklerini korur ve kaynak sürümüne bağlanır.
+Dil: Türkçe. Kaynak sürüm: 0.3.0. İngilizce kaynak belge: [Architecture v0.3](architecture-v0.3.en.md). Kod, API işlem adları, şemalar ve hata kodları İngilizce; rehber ve açıklamalar İngilizce ve Türkçe yayımlanır. Çeviri aynı sözleşme kimliklerini korur ve kaynak sürümüne bağlanır. Depo araçları çeviri dosya özetlerini ve API kimliği eşliğini denetler; kaydedilmemiş değişiklikler hata verir. Anlamsal eşdeğerlik yine inceleme gerektirir.
 
 Tarih: 11 Ekim 2026. Ürün: **Eylema**. Ürün çerçevesi: **Basit, Performanslı Eylemci Yapay Zeka Sürekli Geliştirme ve İşletme Web Platformu.** Durum: araştırmaya dayanan tasarım; çalışan framework, model desteği veya performans sonucu değildir.
 
