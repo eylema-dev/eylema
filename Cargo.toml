@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/eylema-contracts", "crates/eylema-platform", "crates/eylema-runtime", "crates/eylema-journal", "crates/eylema-host", "apps/eylema"]
+members = ["crates/eylema-contracts", "crates/eylema-platform", "crates/eylema-runtime", "crates/eylema-journal", "crates/eylema-host", "crates/eylema-web", "apps/eylema"]
 resolver = "3"
 
 [workspace.package]

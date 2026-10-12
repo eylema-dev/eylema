@@ -3,6 +3,25 @@ use eylema_contracts::*;
 use eylema_runtime::*;
 use support::*;
 #[test]
+fn scheduler_flag_is_host_bound_read_only_and_tracks_actual_queue() {
+    let (mut r, h, s, _, fail) = fixture(Limits::default());
+    let (_, foreign, _, _, _) = fixture(Limits::default());
+    assert_eq!(r.has_pending_work(&foreign), Err(ErrorCode::Forbidden));
+    assert_eq!(r.has_pending_work(&h), Ok(false));
+    let t = task("task:scheduler", 20, 40);
+    r.create_task(&s, t.clone()).unwrap();
+    r.admit(&s, t.clone(), proposal(&t, &[2, 3])).unwrap();
+    let digest = r.recovery_digest(&h).unwrap();
+    fail.set(true);
+    assert_eq!(r.has_pending_work(&h), Ok(true));
+    assert_eq!(r.recovery_digest(&h).unwrap(), digest);
+    fail.set(false);
+    r.step().unwrap();
+    assert_eq!(r.has_pending_work(&h), Ok(true));
+    r.step().unwrap();
+    assert_eq!(r.has_pending_work(&h), Ok(false));
+}
+#[test]
 fn recovery_retains_confirmed_effects_idempotency_and_terminal_results_with_new_enrollment() {
     let (mut r, h, s, _, _) = fixture(Limits::default());
     let t = task("task:recovery", 20, 40);

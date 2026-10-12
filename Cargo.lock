@@ -46,3 +46,14 @@ dependencies = [
  "eylema-contracts",
  "eylema-platform",
 ]
+
+[[package]]
+name = "eylema-web"
+version = "0.1.0"
+dependencies = [
+ "eylema-contracts",
+ "eylema-host",
+ "eylema-journal",
+ "eylema-platform",
+ "eylema-runtime",
+]

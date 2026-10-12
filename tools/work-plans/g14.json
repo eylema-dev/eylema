@@ -1,0 +1,274 @@
+{
+  "goal": "G14",
+  "task_revision": 2,
+  "revision_2_authorization": "Actual maintainer reply 2026-10-12 06:27 UTC: 'Onayl\u0131yorum; d\u00fczelt, kontroller ge\u00e7ince merge et ve G15\u2019e ge\u00e7'. Authorizes additional 60 active minutes and at most 2 targeted repairs to correct deadline regression; existing standing scoped merge authorization continues after passing controls and fresh separate review.",
+  "revision_2_started_at_utc": "2026-10-12T06:27:33Z",
+  "issue": "https://github.com/eylema-dev/eylema/issues/16",
+  "base": "b75a546a386e1695a5f423d15c88de7ca427c044",
+  "guide_base": "34846219618caa4a7b50b354929c56bfe86dd144",
+  "accepted_dependencies": {
+    "G09": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/41",
+        "head": "4a1638c24e926781e75b94d24dff599577610408",
+        "main": "c05e6327b63cfda59d48b964fc639d82440d849f",
+        "tree": "a5111c0579ef14571e18348c9c46dae987e097c5",
+        "main_ci": {
+          "id": 38167862320,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38167862320",
+          "head": "c05e6327b63cfda59d48b964fc639d82440d849f",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "4a1638c24e926781e75b94d24dff599577610408",
+          "reviewer": "g09_review separate Codex context; no human GitHub approval claimed"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/15",
+        "head": "6349f00a3f865035078e5d5a5a02b10ba075de79",
+        "main": "d40c89b0939091bfbe365b230e7b4b5f82fad600",
+        "tree": "9aa4af0776d8fbf60e4389205d78cd17cb616a01",
+        "main_ci": {
+          "id": 38167869418,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38167869418",
+          "head": "d40c89b0939091bfbe365b230e7b4b5f82fad600",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "6349f00a3f865035078e5d5a5a02b10ba075de79",
+          "reviewer": "g09_review separate Codex context; no human GitHub approval claimed"
+        }
+      }
+    ],
+    "G10": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/43",
+        "head": "6953a52ef24d6d53203f48764e7ee5e48bb6f471",
+        "main": "9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841",
+        "tree": "7e6478709069aee75c6824e2eda2390799bf72e9",
+        "main_ci": {
+          "id": 38170174463,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38170174463",
+          "head": "9dbcb1ca4b48c8ca3ae01df43ebfa19209ec1841",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "6953a52ef24d6d53203f48764e7ee5e48bb6f471",
+          "reviewer": "g10_review separate Codex context; no human GitHub approval claimed"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/16",
+        "head": "348571e6b9c50dd81e0d7349284f90ae529739d2",
+        "main": "9ec707de516f2393b4930f64a051f790da26a177",
+        "tree": "2513a11c301e8e94c301e1a711c84489f15d491a",
+        "main_ci": {
+          "id": 38170181946,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38170181946",
+          "head": "9ec707de516f2393b4930f64a051f790da26a177",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "348571e6b9c50dd81e0d7349284f90ae529739d2",
+          "reviewer": "g10_review separate Codex context; no human GitHub approval claimed"
+        }
+      }
+    ],
+    "G11": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/44",
+        "head": "edbec25f1b44ada352a06a90a02f21f448873b06",
+        "main": "68ba77a95a66370900e4b210ff04d89441109758",
+        "tree": "c044f46946227ac38fa84fdcba853b0849cbf51c",
+        "main_ci": {
+          "id": 38171836336,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38171836336",
+          "head": "68ba77a95a66370900e4b210ff04d89441109758",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "edbec25f1b44ada352a06a90a02f21f448873b06",
+          "reviewer": "g11_review renewed separate Codex context after resolved P1; no human GitHub approval claimed"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/17",
+        "head": "2b0f2687fff0fd4cf93c94ddc9554ab11b16a2ff",
+        "main": "944369280819cdb7d1b1857886d00e6783fae4f5",
+        "tree": "50b851b314fedd9c1e88cd17dcb04f08a6bd18fb",
+        "main_ci": {
+          "id": 38171842796,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38171842796",
+          "head": "944369280819cdb7d1b1857886d00e6783fae4f5",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "2b0f2687fff0fd4cf93c94ddc9554ab11b16a2ff",
+          "reviewer": "g11_review renewed separate Codex context after resolved P1; no human GitHub approval claimed"
+        }
+      }
+    ],
+    "G12": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/45",
+        "head": "b67aac6c80983d95b4280d13246e5d40776fc945",
+        "main": "0d6093564fe2373aa2b68e1d3f745fb09bdf268a",
+        "tree": "6dba1ef4ec80984d995cb93cdb64e38846798b8f",
+        "main_ci": {
+          "id": 38173433713,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38173433713",
+          "head": "0d6093564fe2373aa2b68e1d3f745fb09bdf268a",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "b67aac6c80983d95b4280d13246e5d40776fc945",
+          "reviewer": "g12_review separate exact-head context;78native tests/core43guide45Python/actual9typedrecords/9repo140Markdown/live47Goal; no human GitHub approval"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/18",
+        "head": "9e189bac31807d21f3633228b10abe3a88d4a7d9",
+        "main": "e0380b6248ccaeae477fa9aa47420dc7cd486704",
+        "tree": "e7493877f5ddf76711d3e4ec4a5fcab5ee712a63",
+        "main_ci": {
+          "id": 38173439779,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38173439779",
+          "head": "e0380b6248ccaeae477fa9aa47420dc7cd486704",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "9e189bac31807d21f3633228b10abe3a88d4a7d9",
+          "reviewer": "g12_review separate exact-head context;78native tests/core43guide45Python/actual9typedrecords/9repo140Markdown/live47Goal; no human GitHub approval"
+        }
+      }
+    ],
+    "G13": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/46",
+        "head": "3178d6d12b85703ae32b77d5114459dc417c3c6b",
+        "main": "b75a546a386e1695a5f423d15c88de7ca427c044",
+        "tree": "526161a7dbbb08c97f6c83ee6a31afa4a7a2d034",
+        "main_ci": {
+          "id": 38206238284,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38206238284",
+          "head": "b75a546a386e1695a5f423d15c88de7ca427c044",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "3178d6d12b85703ae32b77d5114459dc417c3c6b",
+          "reviewer": "g13_recheck fresh separate exact-head context;99native/core43guide45Python/nativefour-process/private22boundarytests/integration9repo143Markdown/live47/original14followup preservation; no human GitHub approval"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/19",
+        "head": "b38bafb02f15727f11aa6621cb79d2299aff50fe",
+        "main": "34846219618caa4a7b50b354929c56bfe86dd144",
+        "tree": "8b61b81969bbbc5279e6e238133c822975bfedae",
+        "main_ci": {
+          "id": 38206246116,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38206246116",
+          "head": "34846219618caa4a7b50b354929c56bfe86dd144",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "b38bafb02f15727f11aa6621cb79d2299aff50fe",
+          "reviewer": "g13_recheck fresh separate exact-head context;99native/core43guide45Python/nativefour-process/private22boundarytests/integration9repo143Markdown/live47/original14followup preservation; no human GitHub approval"
+        }
+      }
+    ]
+  },
+  "authority": "Actual all47Goal request; direct maintainer2026-10-12 G13continuation plus merge then nextGoal. Standing scoped completed merge after fresh separate review/currentCI. G05keep settings/prepared proposal, G06license pending. No deployment/release/admin/access/spending authority.",
+  "started_at_utc": "2026-10-12T05:06:08.272943+00:00",
+  "allowed_paths": [
+    "crates/eylema-web/",
+    "crates/eylema-host/src/lib.rs",
+    "crates/eylema-host/src/command.rs",
+    "crates/eylema-host/src/native.rs",
+    "crates/eylema-host/tests/recovery.rs",
+    "Cargo.toml",
+    "Cargo.lock",
+    "tools/work-plans/g14.json",
+    "docs/en/local-http.md",
+    "docs/tr/local-http.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "crates/eylema-runtime/src/lib.rs",
+    "crates/eylema-runtime/tests/recovery.rs",
+    "crates/eylema-contracts/src/lib.rs",
+    "crates/eylema-contracts/src/transport.rs",
+    "crates/eylema-contracts/tests/transport.rs"
+  ],
+  "linked_scope": {
+    "devguide": [
+      "docs/plans/g14-local-http.md",
+      "tools/repository-set.json",
+      "records/goal-tracking.json"
+    ]
+  },
+  "scope_revision": "Bind proposed crates/web/host to current owned eylema-web/eylema-host. Add owned web package/rootworkspace entries; host native service adapter and scoped original execution wire read permit actual native HTTP composition without duplicating domain codec or exposing mutable runtime/journal. No public CLI/frontend/G15/G16 implementation, external Cargo crate/buildscript, profile/guard/workflow/portable target change. Native web composition directly uses only first-party host/storage-service/grant/platform types, delegates all journal mutations to DurableHost and keeps the portable adapter in contracts. This records the actual tested composition rather than pretending the proposed contracts-only web dependency table is already implemented.",
+  "design": "Owned std loopback127.0.0.1 HTTP/1.1 fixed-length single-request profile. ExactHost/Origin, independent CSRF nonce plus OSentropy bearer session, bounded registration/expiry and actual opaque scoped DurableSession or independently host-verified DurableHuman. No request enrollment/human/grant/path/provider claim. Typed versioned EYL taskconsole requests/results using existing contracts; scoped reads/create/admit/cancellation and native worker processing only previously authorized admissions, no authority bypass. Strict header/body/path/method/framing/unknown-field checks and absolute read/write deadlines; no cross-origin CORS/preflight. Trusted embedding host supplies owner-controlled storage and verified enrollment. Native listener/proof restricted to ownedport0; no unrelated listener kill. Credential data never URL/log/journal/source. Host worker remains process-owned, no browser lifetime dependency; task/storage timing distinct from bounded request ingress. No general HTTP/proxy/TLS/remote/person-login/GPU acceptance claim.",
+  "acceptance_checks": [
+    "G14-A1: actual running native loopback service positive durable create/admit/read and denied Origin/Host/session/CSRF/resource/permission/human claims with unchanged journal/state",
+    "Actual malformed/duplicate/framing/oversize/incomplete and slow header/body deadline requests rejected; next authorized request succeeds; deterministic clock/IO regression distinguishes one absolute header+body deadline from per-read reset and rejects a per-read-reset mutant without client pacing wall-clock assertions; finite IO/body/header/response/session bounds and unsupported bind/method/CORS fail",
+    "Unchanged firstpartyRust/native/Wasm and exact6AGENTS, paired meaning/fingerprints, populatedPR/privacy/originalpreservation, integration9/live47, fresh separate finalhead review/latestbodyCI/standingmerge/exactmainCI-tree"
+  ],
+  "roles": {
+    "architect": "Current Codex context",
+    "implementer": "Same context",
+    "verifier": "Same context actual Rust/Python/Git/gh/native sockets/files/platform",
+    "reviewer": "Fresh separate exacthead context required; hidden model identity unverifiable; no human approval fabrication"
+  },
+  "budget": {
+    "active_minutes": 180,
+    "max_targeted_repairs": 5,
+    "new_spending": false,
+    "targeted_repairs_used": 4,
+    "revision_2_additional_minutes": 60,
+    "revision_2_additional_repairs": 2,
+    "revision_2_repairs_used": 1
+  },
+  "risks": [
+    "Closed loopback HTTP profile not general HTTP/TLS/server interoperability",
+    "Transport timeout not hard kernel/fullsync/worker latency cancellation",
+    "Local credential and trusted human fixtures do not prove real person authentication",
+    "Retained host/session/history finite; no silent rotation/migration",
+    "Private local credentials protected by embedding host; no automatic secret classifier"
+  ],
+  "rollback": "Revert scoped web/host/docs/pins/tracking through reviewed PR; preserve accepted G13/frozen history/current original work/settings/license; close only owned proof listener/files.",
+  "primary_references": [
+    "https://www.rfc-editor.org/rfc/rfc9112.html",
+    "https://doc.rust-lang.org/std/net/struct.TcpStream.html",
+    "https://fetch.spec.whatwg.org/"
+  ],
+  "decision_record": "Add immutable HostKey-gated pending-work flag for native scheduler; prevents idle HTTP polling from appending NoWork journals and exhausting bounded history. Web never receives raw HostKey or mutable Runtime; flag carries no task data or authority. Foreign-host regression and actual worker completion required. Portable versioned transport request/reply codec belongs in contracts, allowing future Wasm UI to share it without importing native web/host/socket dependencies. No existing domain/codec/API version changed. Scheduler has no public network step route; every queued action keeps original scoped authority.",
+  "repair_record": [
+    "Cycle1: initial native HTTP compile found AuthorityRequirement accessor principal() unavailable; use existing principal_ref(). No domain or guard change.",
+    "Cycle2: actual native oversize-header rejection lost response body on close/reset. Emit a single bounded response frame, write-side FIN and bounded 8KiB/5ms discard grace; keep ingress/dispatch deadlines intact. Remove unused test import found by unchanged clippy.",
+    "Cycle3: delayed valid-body/expiry test exposed Darwin accepted socket inheriting nonblocking listener flag, producing premature WouldBlock/408. Explicitly select blocking connection IO with unchanged absolute read/write deadlines; add lower elapsed timeout bound so immediate failure cannot masquerade as timeout evidence. Temporary timing diagnostics removed.",
+    "Revision2 authorization: maintainer granted additional60 active minutes and at most2 targeted repairs. Planned acceptance repair isolates absolute-deadline semantics with deterministic clock/IO coverage, proves rejection of per-read-reset mutant, and preserves native408/no-effect/next-valid-request evidence without caller-sleep elapsed measurement.",
+    "Cycle4 (revision2 repair1): Replace the client-sleep elapsed timeout assertion with an injected monotonic clock and timed reader over the real header parser and body read helper. A single RequestDeadline carries the same absolute 90ms budget across both phases. Deterministic regression proves remaining timeout decreases after header progress and times out during body progress; a private per-read-reset mutant makes the test fail. Removed the flaky caller-scheduling upper bound. Targeted web package tests pass; full gates/review/current CI pending."
+  ],
+  "executed_evidence": "Revision2 author verification passed: core exact6AGENTS commands, core43 Python tests, repository/template/populated-structure/whitespace and hash-locked dependencies; guide exact6AGENTS commands and45 Python tests; unchanged Rust checker across seven owned packages/fmt/clippy/105 native tests/build/selected contracts+platform Wasm; native HTTP proof; deterministic shared absolute-deadline regression with private per-read-reset mutant rejected. Integration/live tracking/fresh original14 preservation and final PR bodies/CI/review/main remain pending after the new source head."
+}

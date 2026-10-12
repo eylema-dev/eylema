@@ -77,6 +77,40 @@ fn services(next: u64) -> support::Services {
     }
 }
 type Host = DurableHost<Memory, Hash, support::Services>;
+#[test]
+fn scoped_original_execution_wire_and_idle_scheduler_flag_survive_restart() {
+    let (mut h, owner, s, m) = fixture();
+    let bytes = m.data();
+    assert_eq!(h.has_pending_work(), Ok(false));
+    assert_eq!(m.data(), bytes);
+    let (t, p, id) = task_and_run(&mut h, &s, "task:wire-context");
+    assert_eq!(h.has_pending_work(), Ok(true));
+    h.step().unwrap();
+    h.step().unwrap();
+    let record = codec::encode_record(&h.execution_record(&s, &id).unwrap()).unwrap();
+    assert!(
+        matches!(codec::decode_record(&record).unwrap(),codec::WireRecord::Execution{task,proposal,..} if task==t && proposal==p)
+    );
+    let mut g = support::grant();
+    g.resource_scope = ResourceScope::new(vec![ResourceId::new("state:other").unwrap()]).unwrap();
+    let other = h.enroll(&owner, g).unwrap();
+    assert!(matches!(
+        h.execution_record(&other, &id),
+        Err(HostError::Runtime(ErrorCode::Forbidden))
+    ));
+    assert_eq!(h.has_pending_work(), Ok(false));
+    h.close();
+    let (h, _, fresh) = reopen(&m);
+    assert_eq!(h.has_pending_work(), Ok(false));
+    assert_eq!(
+        codec::encode_record(&h.execution_record(&fresh, &id).unwrap()).unwrap(),
+        record
+    );
+    assert!(matches!(
+        h.execution_record(&s, &id),
+        Err(HostError::Runtime(ErrorCode::Forbidden))
+    ));
+}
 fn fixture() -> (Host, Owner, DurableSession, Memory) {
     let memory = Memory::new();
     let journal = Journal::create_new(memory.clone(), Hash, JournalLimits::default()).unwrap();

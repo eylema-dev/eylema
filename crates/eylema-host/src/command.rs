@@ -154,6 +154,18 @@ pub(crate) struct State<S: HostServices> {
     pub(crate) last_policy: Option<PolicyChange>,
 }
 impl<S: HostServices> State<S> {
+    pub(crate) fn execution_record(
+        &self,
+        id: &ExecutionId,
+        execution: ExecutionRecord,
+    ) -> Result<codec::WireRecord> {
+        let (task, proposal) = self.bindings.get(id).ok_or(HostError::ReplayMismatch)?;
+        Ok(codec::WireRecord::Execution {
+            task: task.clone(),
+            proposal: proposal.clone(),
+            execution: Box::new(execution),
+        })
+    }
     pub(crate) fn new(
         services: services::Services<S>,
         limits: eylema_runtime::Limits,
