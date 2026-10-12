@@ -1,0 +1,147 @@
+{
+  "goal": "G38",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/31",
+  "base": "4c6f5223a981bad839bfbcc2fae7ba532365f7ff",
+  "guide_base": "73223fcdacc33c8f4661539b78f7f3182c2250b2",
+  "started_unix_ms": 1791828561687,
+  "authority": "Direct maintainer complete Goal program and standing merge instruction; current accepted priority schedules G38-G43 before optional models/training. Issue text and this reference grant no authority.",
+  "accepted_dependencies": {
+    "G05": [
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/12",
+        "head": "f7fd6778314b94435a625dc370686ce46ffe2c3f",
+        "main": "f223c4d5f3aee4ae0a60d200dd578137d278da51",
+        "tree": "3c3448f99dd4543c0291ffc046bb31d115f6f121",
+        "main_ci": {
+          "id": 38165218414,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38165218414",
+          "head": "f223c4d5f3aee4ae0a60d200dd578137d278da51",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "f7fd6778314b94435a625dc370686ce46ffe2c3f",
+          "reviewer": "g05_refresh_review separate Codex context; no human GitHub approval claimed"
+        }
+      },
+      {
+        "repository": "eylema-dev/.github",
+        "pr": "https://github.com/eylema-dev/.github/pull/3",
+        "head": "e4e10410ed1b98ed5852ee778f9ddc356ea99525",
+        "main": "f7f3f51228229b153cbcce6e841d08ca2e5dc8c4",
+        "tree": "4076712d568c3b4d3bfcb9c7c6bdecf60ed0daff",
+        "main_ci": {
+          "id": 38165212246,
+          "url": "https://github.com/eylema-dev/.github/actions/runs/38165212246",
+          "head": "f7f3f51228229b153cbcce6e841d08ca2e5dc8c4",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "e4e10410ed1b98ed5852ee778f9ddc356ea99525",
+          "reviewer": "g05_refresh_review separate Codex context; no human GitHub approval claimed"
+        }
+      }
+    ],
+    "G17": [
+      {
+        "repository": "eylema-dev/eylema-examples",
+        "pr": "https://github.com/eylema-dev/eylema-examples/pull/5",
+        "head": "78afa3530ea377dfe51d3a7617edf7e230fb52ae",
+        "main": "67b23a27604f4b887cffd1b133e7dc5dcff7835f",
+        "tree": "c41cb72e5c96945ad0d99aa57f76ec523ec10f0d",
+        "main_ci": {
+          "id": 38233991255,
+          "url": "https://github.com/eylema-dev/eylema-examples/actions/runs/38233991255",
+          "head": "67b23a27604f4b887cffd1b133e7dc5dcff7835f",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "78afa3530ea377dfe51d3a7617edf7e230fb52ae",
+          "reviewer": "g16_review separate Codex context; no human GitHub approval claimed"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/24",
+        "head": "999ac20ba5733aa46c8d406f68fe45b4bc83b784",
+        "main": "7fbff582bea841d32a628ff32d38cc091822e595",
+        "tree": "1ebbe863f509ab5edc82b9a06acb76076bd73821",
+        "main_ci": {
+          "id": 38252765716,
+          "url": "https://github.com/eylema-dev/devguide/actions/runs/38252765716",
+          "head": "7fbff582bea841d32a628ff32d38cc091822e595",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "999ac20ba5733aa46c8d406f68fe45b4bc83b784",
+          "reviewer": "g16_review separate Codex context; no human GitHub approval claimed"
+        }
+      }
+    ]
+  },
+  "allowed_paths": [
+    "crates/eylema-development/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "repository.json",
+    "docs/en/development-coordinator.md",
+    "docs/tr/development-coordinator.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g38.json"
+  ],
+  "acceptance_mapping": {
+    "G38-A1": "Owned Rust coordinator executes bounded NeedSpec/plan/change/verification/independent-review states; malformed scope/input, untrusted authority references, stale evidence/head, finite usage/calls/wall/repairs, cancellation and missing-input failures have behavioral regressions plus native consumer proof."
+  },
+  "scope_limits": [
+    "Portable first-party state machine with trusted host authority/clock inputs; no process/credential/worktree isolation until G39.",
+    "No live provider call, draft-PR creation or autonomous end-to-end acceptance until G40-G43.",
+    "No merge/release authority supplied by coordinator readiness.",
+    "No machine-schema revision or production dependency; existing EYL codec reused for canonical binding if needed."
+  ],
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false,
+    "live_model_calls": 0
+  },
+  "roles": {
+    "architect_implementer_verifier": "Codex current context, inherited GPT-6 family; exact model SKU unavailable",
+    "reviewer": "separate exact-head context /root/g16_review required"
+  },
+  "risks": [
+    "Host-resolved authority/evidence inputs must remain outside contributor/provider code.",
+    "Controller cancellation cannot by itself prove a future OS/provider effect stopped.",
+    "Clock/head/plan changes must invalidate readiness and preserve consumed budgets."
+  ],
+  "checks": [
+    "Exact AGENTS Python/hashed-install/repository/template/diff commands",
+    "Full unchanged Rust gate including new selected portable library Wasm compile",
+    "Targeted state/failure/budget/injection regressions and actual native consumer",
+    "Separate final-head review and current CI, authorized merge/main CI, devguide live Goal/pin integration"
+  ],
+  "verification": {
+    "environment": {
+      "os": "macOS27.0.1",
+      "architecture": "arm64",
+      "python": "3.14.8",
+      "rust": "1.99.0"
+    },
+    "python_tests": "passed47",
+    "repository": "passed178files,3schemas,18localtranslations; EN/TR reviewed and fingerprints refreshed",
+    "rust": "passed unchanged fmt/clippy/native tests/build/dependency inventory and selectedWasmlibrary compilation including eylema-development",
+    "coordinator_tests": "passed20 behavioral tests; fixture inputs, actual native Rust execution",
+    "native_consumer": "passed actual executable coordinator-proof; host authority/check/review observations explicitly synthetic, no provider/reviewer/PR call",
+    "external_process_provider_github": "not_run; G39-G43 separate gates",
+    "gpu_model_training": "not_applicable for G38",
+    "pr_template_diff": "passed",
+    "independent_review_current_ci_merge_main_ci_devguide": "pending"
+  },
+  "targeted_repairs_used": 0
+}
