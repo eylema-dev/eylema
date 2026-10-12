@@ -34,7 +34,7 @@ pub struct ApprovalRecord {
     pub verified_principal: PrincipalRef,
     pub decided_at: Timestamp,
     pub revocation: Option<Revocation>,
-    issuer: Session,
+    pub(super) issuer: Session,
 }
 // Session equality is instance identity plus immutable enrollment slot.
 impl PartialEq for Session {
@@ -54,7 +54,7 @@ pub(super) struct GovernanceRecord {
     pub(super) resource_scope: ResourceScope,
     pub(super) policy_revision: Revision,
     pub(super) issuer: Session,
-    decision: PolicyChange,
+    pub(super) decision: PolicyChange,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PolicyChange {
