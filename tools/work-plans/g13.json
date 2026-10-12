@@ -1,6 +1,6 @@
 {
   "goal": "G13",
-  "task_revision": 3,
+  "task_revision": 4,
   "issue": "https://github.com/eylema-dev/eylema/issues/15",
   "base": "0d6093564fe2373aa2b68e1d3f745fb09bdf268a",
   "guide_base": "e0380b6248ccaeae477fa9aa47420dc7cd486704",
@@ -102,5 +102,30 @@
     "reason": "First test build: rename Memory bytes helper to avoid Read::bytes resolution; import CancellationOutcome, remove unused imports. Correct fixture expectation to current policy-revision precedence; production gates/semantics unchanged. Second targeted correction: new journal capacity regression used nonexistent write_zero field; use existing Faults.zero, no production behavior/check change. In the same capacity-test verification cycle, clippy singleton clone corrected to slice::from_ref; no lint suppression. Third targeted repair: native proof ErrorCode has no Display; use stable as_str instead of generic Display formatter. No production semantic change or gate weakening."
   },
   "decision_record": "Before first full delivery verification, complete typed decision-return capture so Approve/Govern-without-Observe actors receive their authorized operation result only after durable commit; bounded ephemeral reply cache, no new observation permission or authority. Dedicated narrow-permission regression passed.",
-  "executed_evidence": "Full core sixAGENTS/43Python/repository/template/whitespace and unchanged Rust guard6ownedpackages/fmt/clippy/95native tests/build/selected2Wasm passed. Actual scoped4child exit86/restart nativeproof passed and repeated typed narrow-permission regression passed. Three initial targeted repair cycles recorded; no production gate weakened. Service restart evidence is actual childprocess, no physicalpowerloss/person-login/browser/GPU/model/training/performance claim."
+  "executed_evidence": "Full core sixAGENTS/43Python/repository/template/whitespace and unchanged Rust guard6ownedpackages/fmt/clippy/95native tests/build/selected2Wasm passed. Actual scoped4child exit86/restart nativeproof passed and repeated typed narrow-permission regression passed. Three initial targeted repair cycles recorded; no production gate weakened. Service restart evidence is actual childprocess, no physicalpowerloss/person-login/browser/GPU/model/training/performance claim.",
+  "followup": {
+    "authority": "Maintainer explicitly approved additional60active minutes and two targeted repairs on2026-10-12; repair, pass gates/fresh separate review/currentCI, merge then nextGoal. Original three repair cycles retained.",
+    "failed_heads": {
+      "eylema": "648919cfdc6aeb14761e43371a99fa387e807fa9",
+      "devguide": "085db2b73b427c56c30e2cac8617e8f0ad1b729e"
+    },
+    "started_at_utc": "2026-10-12T04:45:21Z",
+    "budget": {
+      "additional_active_minutes": 60,
+      "max_additional_targeted_repairs": 2,
+      "additional_targeted_repairs_used": 2,
+      "new_spending": false
+    },
+    "scope": "Validate bounded exact command encode/decode compatibility before intent, covering all command variants and unvalidated permissions/approvalIDs/checkpoints collections; reject incompatible shapes without journal or runtime mutation. Do not relax decoders, limits, authority or gates. Add exact-bound and over-bound restart regressions with preserved state/events/idempotency. Existing malformed old journals still fail closed; no migration/truncation/history deletion. No G14 implementation until G13 accepted.",
+    "acceptance": [
+      "Reproduce both reviewer failures at failedhead; reject incompatible commands before intent with unchanged bytes/state; valid maximum collection and replayable known semantic errors survive restart",
+      "Full originalG13 acceptance, unchanged Rust/nativeprocess and exact6AGENTS, paired meaning/fingerprints, original14preservation, integration9/live47, populatedbodies, fresh separate exacthead review/latestbodyCI/mainproof"
+    ],
+    "risks": [
+      "Additional CPU/allocation for bounded command roundtrip; no performance claim",
+      "Legacy malformed command records remain incompatible; no production retained journals or deployed runtime supplied"
+    ],
+    "repair_record": "Cycle1: bounded same-version decode/re-encode equality before intent; four collection boundary regressions. Pre-fix run reproduced forbidden writes and exposed test comparison of process-bound opaque issuer; compare complete persisted public approval fields rather than old process identity. Cycle2: approval preview fixture was created after completed task revision advanced; create original valid preview before effects, then mutate only checkpoints for the oversized-command check. No runtime semantics, decoder limit, authority or required gate weakened. Host18 regressions passed after both cycles; no unresolved test failure.",
+    "executed_evidence": "Both original reviewer private regressions reproduced failing at revision3. New over-bound cases cover ordinary/human grant permissions, approval IDs and binding checkpoints: InvalidRequest before intent with unchanged journal bytes/sync count/task/result/events; reopen preserves complete confirmed state and admission idempotency. Exact-limit eight-permission grant and64-checkpoint binding/acceptedoversight succeed durably;64missing-approvalID known error stays replayable. Host18 tests passed. Full delivery gates/review still pending for revised head. Full core exact6AGENTS/43Python and unchanged Rust guard/fmt/clippy/99native tests/build/selected2Wasm and four actual scoped nativeprocess recovery cases passed on the repaired sources."
+  }
 }

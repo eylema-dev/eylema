@@ -65,8 +65,8 @@
     {
       "en": "docs/en/runtime-recovery.md",
       "tr": "docs/tr/runtime-recovery.md",
-      "en_sha256": "0341ac58cd2918fca014d89552d5932c900016f86e0f47c6e31e9889857bf1ee",
-      "tr_sha256": "de49864c7a897ca8f58354d8247e50486c19d8ce0e5a5f6ba051046c90635880"
+      "en_sha256": "285b3a594487d1143a120c308eac6e8356f41eaf24924370d6a9e843f4ad771a",
+      "tr_sha256": "bf4204aa6625830ecb3cee07eae74363df8790afb461cc62c66c29220292b461"
     }
   ],
   "documents": []

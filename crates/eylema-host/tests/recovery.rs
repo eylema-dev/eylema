@@ -597,3 +597,142 @@ fn authorized_decision_returns_are_committed_with_approve_govern_permissions_wit
         vec![policy]
     );
 }
+
+#[test]
+fn incompatible_command_collections_reject_before_intent_and_preserve_confirmed_replay() {
+    for kind in 0..4 {
+        let (mut h, owner, s, m) = fixture();
+        let human = h.enroll_verified_human(&owner, human_grant()).unwrap();
+        let (t, p, id) = task_and_run(&mut h, &s, "task:command-bounds");
+        let mut binding = h
+            .preview_approval(&s, &t, &p, Timestamp::new(1800).unwrap())
+            .unwrap();
+        h.step().unwrap();
+        h.step().unwrap();
+        let task = h.task(&s, &t.fields().task_id).unwrap();
+        let result = h.execution(&s, &id).unwrap();
+        let events = h.events(&s, &t.fields().task_id, None, 256).unwrap();
+        let bytes = m.data();
+        let syncs = m.syncs.get();
+        let rejected = match kind {
+            0 | 1 => {
+                let mut grant = human_grant();
+                grant.permissions = vec![Permission::Read; 9];
+                if kind == 0 {
+                    h.enroll(&owner, grant).map(|_| ())
+                } else {
+                    h.enroll_verified_human(&owner, grant).map(|_| ())
+                }
+            }
+            2 => {
+                let ids = vec![EventId::new("event:oversized").unwrap(); MAX_REFERENCES + 1];
+                h.admit_with_approvals(&s, t.clone(), p.clone(), &ids)
+                    .map(|_| ())
+            }
+            _ => {
+                binding.checkpoints =
+                    vec![CheckpointRef::new("checkpoint:oversized").unwrap(); MAX_REFERENCES + 1];
+                h.create_approval(&human, &t, &p, binding).map(|_| ())
+            }
+        };
+        assert_eq!(rejected, Err(HostError::Runtime(ErrorCode::InvalidRequest)));
+        assert!(
+            m.data() == bytes,
+            "rejected command wrote an intent: {kind}"
+        );
+        assert_eq!(m.syncs.get(), syncs);
+        assert_eq!(h.task(&s, &t.fields().task_id).unwrap(), task);
+        assert_eq!(h.execution(&s, &id).unwrap(), result);
+        assert_eq!(
+            h.events(&s, &t.fields().task_id, None, 256).unwrap(),
+            events
+        );
+        h.close();
+        let (mut h, _, fresh) = reopen(&m);
+        assert_eq!(h.task(&fresh, &t.fields().task_id).unwrap(), task);
+        assert_eq!(h.execution(&fresh, &id).unwrap(), result);
+        assert_eq!(
+            h.events(&fresh, &t.fields().task_id, None, 256).unwrap(),
+            events
+        );
+        assert_eq!(h.admit(&fresh, t, p).unwrap(), id);
+        assert_eq!(h.step().unwrap(), None);
+    }
+}
+
+#[test]
+fn maximum_permission_grant_is_usable_and_survives_replay() {
+    let (mut h, owner, _, m) = fixture();
+    let mut grant = human_grant();
+    grant.permissions.push(Permission::ProposeAction);
+    assert_eq!(grant.permissions.len(), 8);
+    grant.principal = support::grant().principal;
+    let human = h.enroll_verified_human(&owner, grant).unwrap();
+    let (t, p, id) = task_and_run(&mut h, human.session(), "task:all-permissions");
+    h.step().unwrap();
+    h.step().unwrap();
+    let result = h.execution(human.session(), &id).unwrap();
+    h.close();
+    let (mut h, _, fresh) = reopen(&m);
+    assert_eq!(h.execution(&fresh, &id).unwrap(), result);
+    assert_eq!(h.admit(&fresh, t, p).unwrap(), id);
+    assert_eq!(h.step().unwrap(), None);
+}
+
+#[test]
+fn maximum_approval_vector_known_rejection_is_replayable() {
+    let (mut h, _, s, m) = fixture();
+    let t = support::task("task:max-approval-ids", 20, 50);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = support::proposal(&t, &[2, 3]);
+    let ids: Vec<_> = (0..MAX_REFERENCES)
+        .map(|i| EventId::new(format!("event:missing-{i}")).unwrap())
+        .collect();
+    let before = m.data();
+    assert_eq!(
+        h.admit_with_approvals(&s, t.clone(), p, &ids),
+        Err(HostError::Runtime(ErrorCode::ApprovalMismatch))
+    );
+    assert!(m.data().len() > before.len());
+    let task = h.task(&s, &t.fields().task_id).unwrap();
+    let events = h.events(&s, &t.fields().task_id, None, 256).unwrap();
+    h.close();
+    let (h, _, fresh) = reopen(&m);
+    assert_eq!(h.task(&fresh, &t.fields().task_id).unwrap(), task);
+    assert_eq!(
+        h.events(&fresh, &t.fields().task_id, None, 256).unwrap(),
+        events
+    );
+}
+
+#[test]
+fn maximum_checkpoint_binding_and_oversight_are_durable_without_relaxing_limits() {
+    let (mut h, owner, s, m) = fixture();
+    let human = h.enroll_verified_human(&owner, human_grant()).unwrap();
+    let checkpoints = (0..MAX_REFERENCES)
+        .map(|i| CheckpointRef::new(format!("checkpoint:{i}")).unwrap())
+        .collect();
+    let oversight = OversightRequirements::new(checkpoints, false, false, None).unwrap();
+    let t = support::task("task:max-checkpoints", 20, 80);
+    h.create_governed_task(&owner, &s, t.clone(), oversight.clone())
+        .unwrap();
+    let p = support::proposal(&t, &[2, 3]);
+    let binding = h
+        .preview_approval(&s, &t, &p, Timestamp::new(1800).unwrap())
+        .unwrap();
+    assert_eq!(binding.checkpoints.len(), MAX_REFERENCES);
+    let id = h.create_approval(&human, &t, &p, binding).unwrap();
+    let approval = h.approval(&s, &id).unwrap();
+    h.close();
+    let (h, _, fresh) = reopen(&m);
+    let restored = h.approval(&fresh, &id).unwrap();
+    assert_eq!(restored.approval_id, approval.approval_id);
+    assert_eq!(restored.binding, approval.binding);
+    assert_eq!(restored.verified_principal, approval.verified_principal);
+    assert_eq!(restored.decided_at, approval.decided_at);
+    assert_eq!(restored.revocation, approval.revocation);
+    assert_eq!(
+        h.accepted_oversight(&fresh, &t.fields().task_id).unwrap(),
+        oversight
+    );
+}

@@ -298,11 +298,21 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
             .attempt
             .checked_add(1)
             .ok_or(HostError::Runtime(ErrorCode::BudgetExceeded))?;
+        let encoded_command = command.encode()?;
+        encoded_length(&encoded_command, MAX_COMMAND_BYTES)?;
+        // The same-version reader must accept every intent we write. In
+        // particular, public command collections can exceed decoder bounds
+        // even when the runtime would return a known rejection.
+        let replay_command = Command::decode(&encoded_command)
+            .map_err(|_| HostError::Runtime(ErrorCode::InvalidRequest))?;
+        if replay_command.encode()? != encoded_command {
+            return Err(HostError::Runtime(ErrorCode::InvalidRequest));
+        }
         let intent = list(vec![
             text("intent"),
             Value::Unsigned(VERSION),
             Value::Unsigned(attempt),
-            command.encode()?,
+            encoded_command,
         ]);
         let n = encoded_length(&intent, MAX_COMMAND_BYTES)?;
         // One additional worst-case envelope stays available for recovery.
