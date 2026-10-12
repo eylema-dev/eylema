@@ -158,9 +158,13 @@ fn browser_console_cookie_csrf_task_and_stop_flow() {
     assert!(page.contains("name=\"eylema-csrf\""));
     assert!(page.contains("Create task"));
     assert!(page.contains("aria-live=\"assertive\""));
+    assert!(page.contains("<canvas id=\"scene-canvas\""));
+    assert!(page.contains("type=\"module\""));
     for (path, marker) in [
         ("/console.css", "focus-visible"),
         ("/console.js", "localStorage"),
+        ("/webgpu-view.mjs", "initializeWebGpuScene"),
+        ("/scene.wgsl", "vertex_main"),
     ] {
         let asset = f.raw_http(
             format!(
@@ -172,6 +176,10 @@ fn browser_console_cookie_csrf_task_and_stop_flow() {
         assert!(asset.starts_with("HTTP/1.1 200"), "{asset}");
         assert!(asset.contains(marker));
         assert!(asset.contains("Content-Security-Policy: default-src 'self'"));
+        assert!(!asset.contains("Set-Cookie: eylema_session="));
+        if path == "/scene.wgsl" {
+            assert!(asset.contains("Content-Type: text/wgsl; charset=utf-8"));
+        }
     }
     let cookie = page
         .split("Set-Cookie: eylema_session=")

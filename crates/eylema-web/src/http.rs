@@ -181,27 +181,39 @@ fn console_response<T: Storage, H: Sha256, S: HostServices>(
         if headers.get("host") != Some(server.authority.as_str()) {
             return Err(WebError::Forbidden);
         }
-        let (bearer, csrf) = server.console_session()?;
-        let (content_type, source) = match path {
-            "/console" => (
-                "text/html; charset=utf-8",
-                include_str!("console.html").replace("__EYLEMA_CSRF__", &csrf),
-            ),
+        let (content_type, source, cookie) = match path {
+            "/console" => {
+                let (bearer, csrf) = server.console_session()?;
+                (
+                    "text/html; charset=utf-8",
+                    include_str!("console.html").replace("__EYLEMA_CSRF__", &csrf),
+                    Some(format!(
+                        "eylema_session={bearer}; HttpOnly; SameSite=Strict; Path=/console/v1; Max-Age=3600"
+                    )),
+                )
+            }
             "/console.css" => (
                 "text/css; charset=utf-8",
                 include_str!("console.css").to_owned(),
+                None,
             ),
             "/console.js" => (
                 "text/javascript; charset=utf-8",
                 include_str!("console.js").to_owned(),
+                None,
+            ),
+            "/webgpu-view.mjs" => (
+                "text/javascript; charset=utf-8",
+                include_str!("webgpu-view.mjs").to_owned(),
+                None,
+            ),
+            "/scene.wgsl" => (
+                "text/wgsl; charset=utf-8",
+                include_str!("../../../shaders/wgsl/scene.wgsl").to_owned(),
+                None,
             ),
             _ => return Err(WebError::Unsupported),
         };
-        let cookie = (path == "/console").then(|| {
-            format!(
-                "eylema_session={bearer}; HttpOnly; SameSite=Strict; Path=/console/v1; Max-Age=3600"
-            )
-        });
         return Ok(HttpResponse {
             status: 200,
             content_type,

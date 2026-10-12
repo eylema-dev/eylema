@@ -7,7 +7,7 @@
     <meta name="color-scheme" content="light dark">
     <title>Eylema local task console</title>
     <link rel="stylesheet" href="/console.css">
-    <script src="/console.js" defer></script>
+    <script type="module" src="/console.js"></script>
   </head>
   <body>
     <main>
@@ -49,6 +49,20 @@
           <div><dt id="progress-label">Steps completed</dt><dd id="progress">—</dd></div>
           <div><dt id="execution-state-label">Execution state</dt><dd id="execution-state">—</dd></div>
         </dl>
+      </section>
+
+      <section aria-labelledby="scene-title">
+        <h2 id="scene-title">WebGPU scene</h2>
+        <p id="scene-status" role="status" aria-live="polite" aria-atomic="true">Starting WebGPU…</p>
+        <canvas id="scene-canvas" width="720" height="420" tabindex="0" aria-label="Three-object WebGPU scene. Click an object to select it; use arrow keys to move it."></canvas>
+        <p id="scene-selection" aria-live="polite" aria-atomic="true">Selected object: —</p>
+        <div class="buttons" id="scene-controls" aria-label="Scene controls">
+          <button id="scene-select-next" type="button" disabled>Select next object</button>
+          <button id="scene-move-left" type="button" disabled>Move left</button>
+          <button id="scene-move-right" type="button" disabled>Move right</button>
+          <button id="scene-move-up" type="button" disabled>Move up</button>
+          <button id="scene-move-down" type="button" disabled>Move down</button>
+        </div>
       </section>
 
       <p id="message" role="status" aria-live="polite" aria-atomic="true"></p>
