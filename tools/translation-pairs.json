@@ -71,8 +71,8 @@
     {
       "en": "docs/en/local-http.md",
       "tr": "docs/tr/local-http.md",
-      "en_sha256": "dd2e6e1405c37cb283f8c34e50c9a411a62741dc901032ccb45c245d3a6d535b",
-      "tr_sha256": "2523975bfc1a81e8ee12ca8cf27ec00d55386099d8346a71c5aab36102ce3d69"
+      "en_sha256": "7ed5aa41e3332602b757b4c592a25ec2bad066ba2a7d079a906f137daf64ec9e",
+      "tr_sha256": "928cf9f5047fb31ddaf9366abe0dafeb590a96590eda149acb479ad35a70af14"
     }
   ],
   "documents": []

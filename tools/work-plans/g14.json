@@ -1,6 +1,8 @@
 {
   "goal": "G14",
-  "task_revision": 1,
+  "task_revision": 2,
+  "revision_2_authorization": "Actual maintainer reply 2026-10-12 06:27 UTC: 'Onayl\u0131yorum; d\u00fczelt, kontroller ge\u00e7ince merge et ve G15\u2019e ge\u00e7'. Authorizes additional 60 active minutes and at most 2 targeted repairs to correct deadline regression; existing standing scoped merge authorization continues after passing controls and fresh separate review.",
+  "revision_2_started_at_utc": "2026-10-12T06:27:33Z",
   "issue": "https://github.com/eylema-dev/eylema/issues/16",
   "base": "b75a546a386e1695a5f423d15c88de7ca427c044",
   "guide_base": "34846219618caa4a7b50b354929c56bfe86dd144",
@@ -229,7 +231,7 @@
   "design": "Owned std loopback127.0.0.1 HTTP/1.1 fixed-length single-request profile. ExactHost/Origin, independent CSRF nonce plus OSentropy bearer session, bounded registration/expiry and actual opaque scoped DurableSession or independently host-verified DurableHuman. No request enrollment/human/grant/path/provider claim. Typed versioned EYL taskconsole requests/results using existing contracts; scoped reads/create/admit/cancellation and native worker processing only previously authorized admissions, no authority bypass. Strict header/body/path/method/framing/unknown-field checks and absolute read/write deadlines; no cross-origin CORS/preflight. Trusted embedding host supplies owner-controlled storage and verified enrollment. Native listener/proof restricted to ownedport0; no unrelated listener kill. Credential data never URL/log/journal/source. Host worker remains process-owned, no browser lifetime dependency; task/storage timing distinct from bounded request ingress. No general HTTP/proxy/TLS/remote/person-login/GPU acceptance claim.",
   "acceptance_checks": [
     "G14-A1: actual running native loopback service positive durable create/admit/read and denied Origin/Host/session/CSRF/resource/permission/human claims with unchanged journal/state",
-    "Actual malformed/duplicate/framing/oversize/incomplete and slow header/body deadline requests rejected; next authorized request succeeds; finite IO/body/header/response/session bounds and unsupported bind/method/CORS fail",
+    "Actual malformed/duplicate/framing/oversize/incomplete and slow header/body deadline requests rejected; next authorized request succeeds; deterministic clock/IO regression distinguishes one absolute header+body deadline from per-read reset and rejects a per-read-reset mutant without client pacing wall-clock assertions; finite IO/body/header/response/session bounds and unsupported bind/method/CORS fail",
     "Unchanged firstpartyRust/native/Wasm and exact6AGENTS, paired meaning/fingerprints, populatedPR/privacy/originalpreservation, integration9/live47, fresh separate finalhead review/latestbodyCI/standingmerge/exactmainCI-tree"
   ],
   "roles": {
@@ -239,10 +241,13 @@
     "reviewer": "Fresh separate exacthead context required; hidden model identity unverifiable; no human approval fabrication"
   },
   "budget": {
-    "active_minutes": 120,
-    "max_targeted_repairs": 3,
+    "active_minutes": 180,
+    "max_targeted_repairs": 5,
     "new_spending": false,
-    "targeted_repairs_used": 3
+    "targeted_repairs_used": 4,
+    "revision_2_additional_minutes": 60,
+    "revision_2_additional_repairs": 2,
+    "revision_2_repairs_used": 1
   },
   "risks": [
     "Closed loopback HTTP profile not general HTTP/TLS/server interoperability",
@@ -261,7 +266,9 @@
   "repair_record": [
     "Cycle1: initial native HTTP compile found AuthorityRequirement accessor principal() unavailable; use existing principal_ref(). No domain or guard change.",
     "Cycle2: actual native oversize-header rejection lost response body on close/reset. Emit a single bounded response frame, write-side FIN and bounded 8KiB/5ms discard grace; keep ingress/dispatch deadlines intact. Remove unused test import found by unchanged clippy.",
-    "Cycle3: delayed valid-body/expiry test exposed Darwin accepted socket inheriting nonblocking listener flag, producing premature WouldBlock/408. Explicitly select blocking connection IO with unchanged absolute read/write deadlines; add lower elapsed timeout bound so immediate failure cannot masquerade as timeout evidence. Temporary timing diagnostics removed."
+    "Cycle3: delayed valid-body/expiry test exposed Darwin accepted socket inheriting nonblocking listener flag, producing premature WouldBlock/408. Explicitly select blocking connection IO with unchanged absolute read/write deadlines; add lower elapsed timeout bound so immediate failure cannot masquerade as timeout evidence. Temporary timing diagnostics removed.",
+    "Revision2 authorization: maintainer granted additional60 active minutes and at most2 targeted repairs. Planned acceptance repair isolates absolute-deadline semantics with deterministic clock/IO coverage, proves rejection of per-read-reset mutant, and preserves native408/no-effect/next-valid-request evidence without caller-sleep elapsed measurement.",
+    "Cycle4 (revision2 repair1): Replace the client-sleep elapsed timeout assertion with an injected monotonic clock and timed reader over the real header parser and body read helper. A single RequestDeadline carries the same absolute 90ms budget across both phases. Deterministic regression proves remaining timeout decreases after header progress and times out during body progress; a private per-read-reset mutant makes the test fail. Removed the flaky caller-scheduling upper bound. Targeted web package tests pass; full gates/review/current CI pending."
   ],
-  "executed_evidence": "Unchanged full Rust checker passed seven owned packages/fmt/clippy/104native tests/build/selected contracts+platform Wasm. Actual owned-port/native locked journal HTTP proof passed positive task/identity/events/evidence/native disconnect continuation/idle-no-write, Origin/Host/bearer/CSRF/scope/permission/human denial, malformed/framing/size/header-body deadlines/expiry during ingress/cancellation/configuration/enrollment limits. Three targeted repairs remain recorded; no unresolved failure at this stage. Final sixAGENTS/privacy/preservation/integration/live tracking/separate review/CI delivery are pending until executed. Final author rerun of exact6AGENTS core43guide45Python/repository/template/whitespace and unchanged fullRust104/native HTTP proof passed. Original14 compare fresh G14snapshot HEAD/branch/status/nonignoredbytes passed; ignored caches excluded. Semantic EN/TR review precedes refreshed fingerprints; no fake separate review. Integration/live tracking/populatedPR/currentCI/exactmain gates still pending."
+  "executed_evidence": "Revision2 author verification passed: core exact6AGENTS commands, core43 Python tests, repository/template/populated-structure/whitespace and hash-locked dependencies; guide exact6AGENTS commands and45 Python tests; unchanged Rust checker across seven owned packages/fmt/clippy/105 native tests/build/selected contracts+platform Wasm; native HTTP proof; deterministic shared absolute-deadline regression with private per-read-reset mutant rejected. Integration/live tracking/fresh original14 preservation and final PR bodies/CI/review/main remain pending after the new source head."
 }

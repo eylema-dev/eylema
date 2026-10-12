@@ -495,18 +495,6 @@ fn timeouts() {
     stream.write_all(&body[..1]).unwrap();
     assert_eq!(response(&mut stream).0, 408);
     assert_eq!(f.bytes(), before);
-    let mut stream = f.connect();
-    let started = Instant::now();
-    for b in b"POST" {
-        let _ = stream.write_all(&[*b]);
-        thread::sleep(Duration::from_millis(30));
-    }
-    assert_eq!(response(&mut stream).0, 408);
-    assert!(
-        started.elapsed() < Duration::from_millis(240),
-        "absolute deadline did not reset per byte"
-    );
-    assert_eq!(f.bytes(), before);
     f.ok(&f.normal, &Request::Create(t));
 }
 fn expiry_and_disconnect() {
