@@ -1,4 +1,5 @@
 [package]
+license.workspace = true
 name = "eylema-platform"
 version.workspace = true
 edition.workspace = true

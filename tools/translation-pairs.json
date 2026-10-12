@@ -5,14 +5,14 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "93238307746a182aec538dbc73fbc17ff5c45d51bce3d7545c551abc61ee0fb7",
-      "tr_sha256": "5b09f2275933d87711a687b41dc7a43455c8a878b7702eeb46b389a199f75934"
+      "en_sha256": "7a323cbe4e92453e213516e3d7b0010662bcd2a4daac28b94443cfcb24926132",
+      "tr_sha256": "2b13937f8c8323a510b3b985218aa1670428fc44a3ce43a184e7fd12c7c276c0"
     },
     {
       "en": "CONTRIBUTING.md",
       "tr": "CONTRIBUTING.tr.md",
-      "en_sha256": "0f5d0e15050583a13ef54d31a14b604b439a6b2f7eb38920918e62fe6bd0bbfb",
-      "tr_sha256": "4f4c5281cd0e39d18bccbf14da2ee0f61d573e46fd66a9e1687f5232c624cf2a"
+      "en_sha256": "9ceda670626192b6f1b53d6fbd1295d7dac58992e73c4bf625ff86aea1037331",
+      "tr_sha256": "c0e97ed0149131f997d1a3537994e8ea832e84b08f1f63ca2b7706a9b26a91ad"
     },
     {
       "en": "assets/eylema-logo/README.md",
