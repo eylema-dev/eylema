@@ -197,6 +197,7 @@ fn browser_console_cookie_csrf_task_and_stop_flow() {
     };
     let created = f.raw_http(post("create", "{\"delta\":7}").as_bytes());
     assert!(created.starts_with("HTTP/1.1 200"), "{created}");
+    assert!(created.contains("\"state\":\"notStarted\""));
     let created_body = created.split("\r\n\r\n").nth(1).unwrap();
     let task = created_body
         .split("\"task\":\"")

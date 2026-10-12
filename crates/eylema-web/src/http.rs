@@ -229,7 +229,7 @@ fn console_response<T: Storage, H: Sha256, S: HostServices>(
             let Value::Text(task) = &fields[0] else {
                 return Err(WebError::Malformed);
             };
-            format!("{{\"task\":\"{task}\",\"value\":0,\"steps\":0}}")
+            format!("{{\"task\":\"{task}\",\"value\":0,\"steps\":0,\"state\":\"notStarted\"}}")
         }
         "/console/v1/run" => {
             let task = json_field(text, "task").ok_or(WebError::Malformed)?;
