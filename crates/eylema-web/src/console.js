@@ -38,10 +38,15 @@
   $('language').value = state.lang; language(state.lang);
   $('language').addEventListener('change', () => language($('language').value));
   $('create').addEventListener('click', async () => {
-    state.task = ''; state.execution = ''; save();
-    setText('task-id', '—'); setText('execution-id', '—'); setText('value', '—'); setText('progress', '—'); setText('execution-state', '—');
-    $('run').disabled = true; $('inspect').disabled = true; $('stop').disabled = true;
-    await act('create', { delta: Number($('delta').value) }, 'created');
+    $('error').textContent = '';
+    try {
+      const data = await call('create', { delta: Number($('delta').value) });
+      state.task = data.task; state.execution = ''; render(data);
+      $('message').textContent = copy[state.lang].created;
+    } catch (e) {
+      $('error').textContent = copy[state.lang].failed + (e.code || e.message);
+      if (e.code === 'FORBIDDEN') $('message').textContent = copy[state.lang].stopped;
+    }
   });
   $('run').addEventListener('click', () => act('run', { task: state.task, delta: Number($('delta').value) }, 'running'));
   $('inspect').addEventListener('click', () => act('inspect', { task: state.task, execution: state.execution }, 'ready'));

@@ -205,6 +205,15 @@ fn browser_console_cookie_csrf_task_and_stop_flow() {
         .split('"')
         .next()
         .unwrap();
+    let missing_execution = f.raw_http(
+        post(
+            "inspect",
+            &format!("{{\"task\":\"{task}\",\"execution\":\"execution:missing\"}}"),
+        )
+        .as_bytes(),
+    );
+    assert!(missing_execution.starts_with("HTTP/1.1 200"));
+    assert!(missing_execution.contains("\"state\":\"notStarted\""));
     let running =
         f.raw_http(post("run", &format!("{{\"task\":\"{task}\",\"delta\":7}}")).as_bytes());
     assert!(running.starts_with("HTTP/1.1 200"), "{running}");

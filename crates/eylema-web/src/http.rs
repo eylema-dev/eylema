@@ -255,27 +255,30 @@ fn console_response<T: Storage, H: Sha256, S: HostServices>(
                 .and_then(|v| ExecutionId::new(v.to_owned()).ok())
                 .or_else(|| server.actors[actor].last_console_execution.clone());
             let (execution, state) = if let Some(id) = &execution_id {
-                server
+                match server
                     .host
                     .execution_record(&server.actors[actor].session, id)
-                    .ok()
-                    .and_then(|r| match r {
-                        WireRecord::Execution { execution, .. } => (execution.fields().task_id
-                            == task)
-                            .then(|| match execution.fields().state {
-                                ExecutionState::Accepted => "accepted",
-                                ExecutionState::Queued => "queued",
-                                ExecutionState::Running => "running",
-                                ExecutionState::CancelRequested => "cancelRequested",
-                                ExecutionState::Succeeded => "succeeded",
-                                ExecutionState::Failed => "failed",
-                                ExecutionState::Cancelled => "cancelled",
-                                ExecutionState::OutcomeUnknown => "outcomeUnknown",
-                            }),
-                        _ => None,
-                    })
-                    .map(|state| (id.as_str(), state))
-                    .unwrap_or(("", "notStarted"))
+                {
+                    Ok(WireRecord::Execution { execution, .. })
+                        if execution.fields().task_id == task =>
+                    {
+                        let state = match execution.fields().state {
+                            ExecutionState::Accepted => "accepted",
+                            ExecutionState::Queued => "queued",
+                            ExecutionState::Running => "running",
+                            ExecutionState::CancelRequested => "cancelRequested",
+                            ExecutionState::Succeeded => "succeeded",
+                            ExecutionState::Failed => "failed",
+                            ExecutionState::Cancelled => "cancelled",
+                            ExecutionState::OutcomeUnknown => "outcomeUnknown",
+                        };
+                        (id.as_str(), state)
+                    }
+                    Err(HostError::Runtime(ErrorCode::InvalidRequest)) => ("", "notStarted"),
+                    Ok(WireRecord::Execution { .. }) => ("", "notStarted"),
+                    Ok(_) => return Err(WebError::Host(HostError::InvalidRecord)),
+                    Err(error) => return Err(error.into()),
+                }
             } else {
                 ("", "notStarted")
             };
