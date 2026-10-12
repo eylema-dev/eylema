@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "e7505d09d353e427b1de256d056bfd03b3d0651c3c1693cb529e4051075caa03",
-      "tr_sha256": "242920dfe0cce313f54c427254c73435891ea43aca0f3b45237e9be2c0f79daa"
+      "en_sha256": "5bdaa8a0d3eac404a94752bc3ad1001c4f783ae2769a53d122765badd46176e0",
+      "tr_sha256": "fd0258953748378be8c5ee8881950694c6c4cefbcdc4cb4895dd3afe4fb2eab1"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -79,6 +79,12 @@
       "tr": "docs/tr/local-cli.md",
       "en_sha256": "ef040f41d920858d795a96c97cc4e58c8d793cbc9fb657f1761e2e8d0a1b7465",
       "tr_sha256": "e499e1f87e5e8115411e6c3eabbab7b0b22d76aafe2c162a18417c0deb6d0eba"
+    },
+    {
+      "en": "docs/en/local-browser.md",
+      "tr": "docs/tr/local-browser.md",
+      "en_sha256": "6557ac041a087ac75c70fc54d7bd4035f989111418fd446eeed2164cd69388e3",
+      "tr_sha256": "58759056cc18004f0efa3195e10497c02ad4357bfc84df5fc9c50b769ecef812"
     }
   ],
   "documents": []

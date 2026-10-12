@@ -121,6 +121,8 @@ fn native_cli_and_http_service_share_ids_codes_and_private_session_custody() {
         "doctor should connect to the actual owned loopback service"
     );
     let session = root.join("session.txt");
+    let original_origin = fs::read_to_string(root.join("origin.txt")).unwrap();
+    assert!(original_origin.starts_with("http://127.0.0.1:"));
     let metadata = fs::metadata(&session).unwrap();
     assert_eq!(metadata.permissions().mode() & 0o777, 0o600);
 
@@ -281,6 +283,10 @@ fn native_cli_and_http_service_share_ids_codes_and_private_session_custody() {
         thread::sleep(Duration::from_millis(50));
     }
     assert!(ready_again, "reopened service should pass doctor");
+    assert_eq!(
+        fs::read_to_string(root.join("origin.txt")).unwrap(),
+        original_origin
+    );
     let recovered = cli(&root, &["inspect", "execution", &execution_id]);
     assert!(recovered.status.success());
     assert!(

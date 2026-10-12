@@ -142,6 +142,7 @@ struct Actor {
     human: Option<DurableHuman>,
     grant: Grant,
     expires: Instant,
+    last_console_execution: Option<ExecutionId>,
 }
 impl Actor {
     fn permission(&self, permission: Permission) -> Result<(), WebError> {
@@ -264,6 +265,7 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             human,
             grant,
             expires,
+            last_console_execution: None,
         });
         Ok(credentials)
     }
@@ -281,6 +283,14 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
         let supplied = headers
             .get("authorization")
             .and_then(|v| v.strip_prefix("Bearer "))
+            .or_else(|| {
+                headers.get("cookie").and_then(|cookies| {
+                    cookies
+                        .split(';')
+                        .map(str::trim)
+                        .find_map(|cookie| cookie.strip_prefix("eylema_session="))
+                })
+            })
             .ok_or(WebError::Unauthorized)?;
         let index = self
             .actors
@@ -393,6 +403,159 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
                 }
             }
         }
+    }
+
+    pub(crate) fn console_session(&self) -> Result<(String, String), WebError> {
+        let actor = self.actors.first().ok_or(WebError::Unauthorized)?;
+        if Instant::now() >= actor.expires {
+            return Err(WebError::Unauthorized);
+        }
+        Ok((
+            actor.credentials.bearer.clone(),
+            actor.credentials.csrf.clone(),
+        ))
+    }
+
+    pub(crate) fn console_create(&mut self, actor: usize, delta: u64) -> Result<Value, WebError> {
+        if !(1..=1_000_000).contains(&delta) {
+            return Err(WebError::Malformed);
+        }
+        let id = |kind| eylema_platform::random_id(kind).map_err(|_| WebError::Entropy);
+        let task_id =
+            TaskId::new(id(eylema_platform::IdKind::Task)?).map_err(|_| WebError::Malformed)?;
+        let context = RequestContext {
+            request_id: RequestId::new(id(eylema_platform::IdKind::Request)?)
+                .map_err(|_| WebError::Malformed)?,
+            correlation_id: CorrelationId::new(id(eylema_platform::IdKind::Correlation)?)
+                .map_err(|_| WebError::Malformed)?,
+            contract_version: ContractVersion::CURRENT,
+        };
+        let scope = self
+            .actors
+            .get(actor)
+            .ok_or(WebError::Unauthorized)?
+            .grant
+            .resource_scope
+            .clone();
+        let revision = Revision::new(1).map_err(|_| WebError::Malformed)?;
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|_| WebError::Configuration)?
+            .as_millis();
+        let deadline = u64::try_from(now)
+            .map_err(|_| WebError::Configuration)?
+            .checked_add(60_000)
+            .ok_or(WebError::Configuration)?;
+        let budget = Budget::new(
+            1,
+            12,
+            1024,
+            1,
+            Timestamp::new(deadline).map_err(|_| WebError::Malformed)?,
+        )
+        .map_err(|_| WebError::Malformed)?;
+        let target = ExecutionTarget::new(
+            ExecutionContext::NativeMacos,
+            Backend::NativeCpu,
+            GpuApi::None,
+        )
+        .map_err(|_| WebError::Malformed)?;
+        let task = TaskSpec::new(TaskDraft {
+            context,
+            task_id: task_id.clone(),
+            revision,
+            objective: "Advance a bounded local task value".into(),
+            resource_scope: scope,
+            budget,
+            target,
+        })
+        .map_err(|_| WebError::Malformed)?;
+        self.dispatch(actor, Request::Create(task))?;
+        self.actors[actor].last_console_execution = None;
+        Ok(list(vec![text(task_id.as_str()), Value::Unsigned(delta)]))
+    }
+
+    pub(crate) fn console_run(
+        &mut self,
+        actor: usize,
+        task_id: &str,
+        delta: u64,
+    ) -> Result<Value, WebError> {
+        if !(1..=1_000_000).contains(&delta) {
+            return Err(WebError::Malformed);
+        }
+        let task_id = TaskId::new(task_id.to_owned()).map_err(|_| WebError::Malformed)?;
+        let snapshot = self.host.task(&self.actors[actor].session, &task_id)?;
+        let task = snapshot.task;
+        let d = task.fields();
+        let id = |kind| eylema_platform::random_id(kind).map_err(|_| WebError::Entropy);
+        let context = RequestContext {
+            request_id: RequestId::new(id(eylema_platform::IdKind::Request)?)
+                .map_err(|_| WebError::Malformed)?,
+            correlation_id: CorrelationId::new(id(eylema_platform::IdKind::Correlation)?)
+                .map_err(|_| WebError::Malformed)?,
+            contract_version: ContractVersion::CURRENT,
+        };
+        let action = ActionSpec::new(ActionDraft {
+            context: context.clone(),
+            action_id: ActionId::new(id(eylema_platform::IdKind::Action)?)
+                .map_err(|_| WebError::Malformed)?,
+            task_id: task_id.clone(),
+            operation_id: OperationId::new("addTaskValue").map_err(|_| WebError::Malformed)?,
+            operation_version: ContractVersion::CURRENT,
+            side_effect_class: SideEffectClass::RecordMutation,
+            resource_scope: d.resource_scope.clone(),
+            expected_revision: Some(d.revision),
+            authority: AuthorityRequirement::new(
+                self.actors[actor].grant.principal.clone(),
+                self.actors[actor].grant.policy_revision,
+                d.resource_scope.clone(),
+                vec![Permission::ExecuteAction],
+                OversightRequirements::new(vec![], true, false, None)
+                    .map_err(|_| WebError::Malformed)?,
+            )
+            .map_err(|_| WebError::Malformed)?,
+            required_capabilities: vec![
+                CapabilityId::new("task:state").map_err(|_| WebError::Malformed)?,
+            ],
+            budget: d.budget,
+            target: d.target,
+            idempotency_key: IdempotencyKey::new(format!(
+                "{}:console:{}",
+                task_id.as_str(),
+                id(eylema_platform::IdKind::Request)?
+            ))
+            .map_err(|_| WebError::Malformed)?,
+            payload: codec::encode(&Value::Unsigned(delta)).map_err(|_| WebError::Malformed)?,
+        })
+        .map_err(|_| WebError::Malformed)?;
+        let proposal = ActionProposal::new(
+            ProposalDraft {
+                context,
+                proposal_id: ProposalId::new(id(eylema_platform::IdKind::Proposal)?)
+                    .map_err(|_| WebError::Malformed)?,
+                task_id: task_id.clone(),
+                plan_revision: d.revision,
+                state_revision: d.revision,
+                policy_revision: self.actors[actor].grant.policy_revision,
+                actions: vec![action],
+            },
+            &task,
+        )
+        .map_err(|_| WebError::Malformed)?;
+        let execution = self.dispatch(
+            actor,
+            Request::Admit {
+                task,
+                proposal,
+                approvals: vec![],
+            },
+        )?;
+        if let Value::Text(ref value) = execution {
+            self.actors[actor].last_console_execution =
+                Some(ExecutionId::new(value.clone()).map_err(|_| WebError::Malformed)?);
+        }
+        Ok(execution)
     }
     /// One bounded connection and one authorized queued runtime step. Idle
     /// polling performs no durable mutation. Closing a client is not shutdown.
