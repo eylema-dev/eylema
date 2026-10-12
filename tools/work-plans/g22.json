@@ -60,9 +60,9 @@
     "local": {
       "python_tests": "passed; 47 tests",
       "browser_fixture_tests": "passed; 8 dependency-free Node fixtures, not browser/GPU acceptance",
-      "native_worker_unit": "passed; finite argument regression is enabled in ordinary Cargo tests through test=true",
+      "native_worker_unit": "passed; finite arguments and fixed-size control reader, two tests enabled in ordinary Cargo tests",
       "rust_gate": "passed; native fmt/clippy/workspace tests/build and selected contracts/platform Wasm build; inherited RUST_LOG omitted and Cargo bin added to PATH",
-      "native_metal_smoke": "passed; one bounded 1-second M4 run, 80 actual 4096-element Metal calls, every readback matched CPU reference; observed wall duration range 2.943459\u201341.723541ms",
+      "native_metal_smoke": "passed after bounded-reader repair; one M4 1-second run, 81 actual 4096-element Metal calls/readback checks, wall range 2.986916..65.966583ms",
       "repository_and_translation": "passed; bilingual docs/hash review; 167 files,17 local language records",
       "pr_template_and_diff": "passed"
     },
@@ -77,5 +77,10 @@
     "Closing a tab cannot preempt the native worker; worker stdin stop and maximum duration/sample count bound its lifetime.",
     "Measurements are observations on one hardware/workload profile, without invented numerical success thresholds."
   ],
-  "targeted_repairs_used": 0
+  "targeted_repairs_used": 1,
+  "repair_record": {
+    "reviewed_head": "67ef10af2544cc297152589d7bfbfda6a22339e8",
+    "finding": "P2: unbounded stdin.lines() control allocation",
+    "repair": "Fixed six-byte control buffer; oversized, partial, unknown and empty input regressions; fresh exact-head review pending"
+  }
 }
