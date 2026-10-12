@@ -10,11 +10,7 @@ fn native_version_consumes_the_portable_package_identity() {
     assert!(output.status.success());
     assert_eq!(
         output.stdout,
-        format!(
-            "eylema {} (workspace bootstrap)\n",
-            env!("CARGO_PKG_VERSION")
-        )
-        .as_bytes()
+        format!("eylema {}\n", env!("CARGO_PKG_VERSION")).as_bytes()
     );
     assert!(output.stderr.is_empty());
 }
@@ -33,7 +29,7 @@ fn help_and_no_argument_expose_the_same_bounded_capability() {
     assert!(
         String::from_utf8(explicit.stdout)
             .unwrap()
-            .contains("Task and service operations are not implemented.")
+            .contains("start|create|run|inspect|stop|doctor")
     );
     assert!(implicit.stderr.is_empty() && explicit.stderr.is_empty());
 }
@@ -49,13 +45,13 @@ fn unknown_and_excess_arguments_never_report_success() {
             .args(arguments)
             .output()
             .expect("execute invalid bootstrap request");
-        assert_eq!(output.status.code(), Some(2));
-        assert!(output.stdout.is_empty());
-        assert!(
-            String::from_utf8(output.stderr)
-                .unwrap()
-                .starts_with("unsupported bootstrap argument")
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        assert_eq!(output.status.code(), Some(1));
+        assert_eq!(
+            stdout,
+            "{\"status\":\"error\",\"code\":\"INVALID_ARGUMENT\"}\n"
         );
+        assert!(output.stderr.is_empty());
     }
 }
 
@@ -68,11 +64,10 @@ fn non_unicode_argument_is_rejected_without_a_panic() {
         .arg(OsString::from_vec(vec![0xff]))
         .output()
         .expect("execute non-Unicode argument");
-    assert_eq!(output.status.code(), Some(2));
-    assert!(output.stdout.is_empty());
-    assert!(
-        !String::from_utf8(output.stderr)
-            .unwrap()
-            .contains("panicked")
+    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(
+        String::from_utf8(output.stdout).unwrap(),
+        "{\"status\":\"error\",\"code\":\"INVALID_ARGUMENT\"}\n"
     );
+    assert!(output.stderr.is_empty());
 }

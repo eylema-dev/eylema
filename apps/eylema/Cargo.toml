@@ -7,3 +7,8 @@ publish.workspace = true
 
 [dependencies]
 eylema-contracts.workspace = true
+eylema-runtime = { path = "../../crates/eylema-runtime" }
+eylema-journal = { path = "../../crates/eylema-journal" }
+eylema-host = { path = "../../crates/eylema-host" }
+eylema-web = { path = "../../crates/eylema-web" }
+eylema-platform = { path = "../../crates/eylema-platform" }

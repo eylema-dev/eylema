@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "e2139b40c7b71c60a75e27032c5c1b1c223ef39a9369fd5fc40f23cf1c44ded9",
-      "tr_sha256": "609e604f6024363c070c7b348d7a0b26d9c3473fb93730d0dcaaaa51e7d3ed35"
+      "en_sha256": "e7505d09d353e427b1de256d056bfd03b3d0651c3c1693cb529e4051075caa03",
+      "tr_sha256": "242920dfe0cce313f54c427254c73435891ea43aca0f3b45237e9be2c0f79daa"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -71,8 +71,14 @@
     {
       "en": "docs/en/local-http.md",
       "tr": "docs/tr/local-http.md",
-      "en_sha256": "19de293540db786a642e6ec396e5f9e423989d0dee48e99eca8e18a08a9a7987",
-      "tr_sha256": "5ca5f225d092fa8fccd11c104005032b7d3165e048a810e2c5f2a2e7eade75ce"
+      "en_sha256": "5750a5c97ced9ce2cb79f3e5e0ea53a8c4e0a464ad10d9730759546ad2310cf6",
+      "tr_sha256": "2aeb12ae7a9c4cbbfaa74153b3a92834a049a25fd19e49e3bc8dcfa0178e3bc1"
+    },
+    {
+      "en": "docs/en/local-cli.md",
+      "tr": "docs/tr/local-cli.md",
+      "en_sha256": "ef040f41d920858d795a96c97cc4e58c8d793cbc9fb657f1761e2e8d0a1b7465",
+      "tr_sha256": "e499e1f87e5e8115411e6c3eabbab7b0b22d76aafe2c162a18417c0deb6d0eba"
     }
   ],
   "documents": []

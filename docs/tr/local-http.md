@@ -2,7 +2,7 @@
 
 [English](../en/local-http.md). Görev revizyonu2; kabul edilmiş G09–G13 sonrasında [Goal issue16](https://github.com/eylema-dev/eylema/issues/16).
 
-Birinci taraf native `eylema-web` servisi, kalıcı görev işlemlerini IPv4 `127.0.0.1` üzerinde sunar. Gerçek macOS soket/dosya testleri görev oluşturup çalıştırır, özgün yürütmeyi ve olayları inceler, etkili iptal ister ve yetkisiz veya bozuk istekleri reddeder. Genel CLI ve tarayıcı konsolu G15/G16 kapsamındadır; buradan tarayıcı, gerçek kişi oturumu, uzak TLS, GPU veya model kabulü çıkarılmaz.
+Birinci taraf native `eylema-web` servisi, kalıcı görev işlemlerini IPv4 `127.0.0.1` üzerinde sunar. Gerçek macOS soket/dosya testleri görev oluşturup çalıştırır, özgün yürütmeyi ve olayları inceler, etkili iptal ister ve yetkisiz veya bozuk istekleri reddeder. Native CLI uygulanıp G15’te test edilmiştir; tarayıcı konsolu G16 kapsamındadır. Buradan tarayıcı, gerçek kişi oturumu, uzak TLS, GPU veya model kabulü çıkarılmaz.
 
 ## Bileşim ve yetki
 
@@ -58,6 +58,6 @@ cargo run --package eylema-web --example http-proof --locked --offline
 
 Native kanıt gerçekten sahipli geçici loopback portlarına bağlanır ve standart OS entropisi/SHA, dosya/üst dizin senkronizasyonu ve macOS tam senkronizasyonuyla sahip kontrollü geçici0700 dizinler/0600 kilitli günlükler oluşturur. İki sahipli adımdan sonra sonuç değeri5, aynı kabulde korunan yürütme kimliği, tipli olay/kanıt, her istemci bağlantısı koptuktan sonra native devam, boşta yazmama, kimlik bilgilerinin günlük/debug dışında kalması, reddedilen host/origin/bearer/CSRF/izin/kaynak/insan iddiaları, bozuk/çerçeveleme/aşırı büyük istekler, gerçek eksik başlık/gövde reddi ve deterministik ortak başlık/gövde mutlak süresi ile sıfırlama mutantının reddi, alım sırasında oturum bitimi, etkili iptal, desteklenmeyen bind ve sınırlı kayıt doğrulanır. Kanıtın sahip olduğu dinleyici/dosyalar temizlenir; ilgisiz checkout ve dinleyiciler korunur.
 
-Python/statik kontroller, seçilmiş Wasm derlemesi ve native soket davranışı ayrı kanıtlardır. Gerçek tarayıcı akışı ve varsayılan Application Support CLI bileşimi G15/G16 kapsamındadır; gerçek kişi doğrulaması, uzak erişim/TLS, fiziksel güç kaybı, dış etkiler, GPU/model/eğitim, performans, Linux ve ikinci fiziksel cihaz `not_run` durumundadır. PR/metin olayı CI’ı, yeni ayrı tam-baş incelemesi ve merge/main kanıtları gerçekten kaydedilene kadar teslim kapılarıdır.
+Python/statik kontroller, seçilmiş Wasm derlemesi ve native soket davranışı ayrı kanıtlardır. G15 CLI kanıtı artık varsayılan Application Support servisini, alt-süreç görev kimliğini, makine hatalarını, host tarafından doğrulanmış iptali, düzgün kapanışı ve günlük yeniden açmayı kapsar. Gerçek tarayıcı akışı G16’da kalır; gerçek kişi doğrulaması, uzak erişim/TLS, fiziksel güç kaybı, dış etkiler, GPU/model/eğitim, performans, Linux ve ikinci fiziksel cihaz G14 için `not_run` durumundadır. G14 PR/metin olayı CI’ı, ayrı tam-baş incelemesi ve merge/main kanıtları kabul tesliminde kayıtlıdır.
 
 İncelenen platform/protokol anlamları için referanslar: [RFC9112](https://www.rfc-editor.org/rfc/rfc9112.html), [Rust TcpStream](https://doc.rust-lang.org/std/net/struct.TcpStream.html), [Fetch Standard](https://fetch.spec.whatwg.org/). Kod yukarıdaki sınırlı profili uygular; bu belirtimlerin tümüne uygunluk iddiası değildir.
