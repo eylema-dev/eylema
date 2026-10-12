@@ -1,0 +1,116 @@
+{
+  "goal": "G39",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/32",
+  "base": "cf47ef609e633bac3d6533075dff5d1dd1f4221e",
+  "guide_base": "5b7643f395835c16a07ec146e97d891278574899",
+  "started_unix_ms": 1791830323769,
+  "authority": "Direct maintainer complete Goal program and standing merge instruction; accepted G38 delivery and current priority. This textual reference grants no authority.",
+  "accepted_dependencies": {
+    "G38": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/57",
+        "head": "2bbf0dac5b837d9a5fa128558722773d533b67ff",
+        "main": "cf47ef609e633bac3d6533075dff5d1dd1f4221e",
+        "tree": "02de392e0a0cddc8dad007242f0948dd233423f4",
+        "main_ci": {
+          "id": 38291411820,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38291411820",
+          "head": "cf47ef609e633bac3d6533075dff5d1dd1f4221e",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "2bbf0dac5b837d9a5fa128558722773d533b67ff",
+          "reviewer": "g16_review separate Codex context; no human GitHub approval claimed"
+        }
+      }
+    ]
+  },
+  "allowed_paths": [
+    "crates/eylema-development-host/",
+    "crates/eylema-development/src/run.rs",
+    "Cargo.toml",
+    "Cargo.lock",
+    "docs/en/development-workspace.md",
+    "docs/tr/development-workspace.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g39.json"
+  ],
+  "acceptance_mapping": {
+    "G39-A1": "Actual native detached-worktree and bounded subprocess tests prove accepted scope/path escape rejection, preserved dirty caller state, owned child cancellation/timeout, finite output and secret-canary isolation; trusted Git metadata and artifacts retained privately."
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false,
+    "live_provider_calls": 0
+  },
+  "roles": {
+    "architect_implementer_verifier": "Codex initial inherited GPT-6 family, exact initial SKU unavailable; resumed with user-configured gpt-6.1-sol/high",
+    "reviewer": "fresh gpt-6.1-sol/high separate exact-head context required"
+  },
+  "scope_limits": [
+    "Owned Rust native host only; no external production crate or schema/shared gate change.",
+    "Available macOS sandbox-exec is an explicit deprecated experimental platform input; fail closed if unavailable, no unsupported-platform fallback.",
+    "Only single-process worker, no fork/network/IPC/credential access; compiler/provider/GitHub integration remains later Goals.",
+    "Worker cannot access Git/control metadata; trusted host handles Git outside worker with hooks/global settings disabled.",
+    "No deployment, release, access/protection change or spending.",
+    "Coordinator exposes its already accepted base read-only for native binding; no authority/state-policy change.",
+    "No OS disk quota is provided; trusted host storage provisioning/monitoring remains explicit. Wall/output/export limits do not prove a disk bound."
+  ],
+  "risks": [
+    "OS sandbox may be unavailable on hosted/local macOS; required real tests must pass.",
+    "Path/symlink/hardlink escape and output artifact ambiguity must fail.",
+    "Caller dirty work and unrelated processes must remain intact.",
+    "Constructor/data references are not authentication; host binds actual accepted coordinator/base and rechecks current authority."
+  ],
+  "checks": [
+    "Exact AGENTS venv/hashed-install/unittest/repository/template/body/diff commands",
+    "Full unchanged Rust gate and meaningful actual native process/worktree tests",
+    "Native consumer with public sanitized summary and zero actual provider calls",
+    "Separate exact-head review/current CI, authorized merge/main CI, guide live Goal/pin acceptance"
+  ],
+  "targeted_repairs_used": 3,
+  "verification": {
+    "targeted_native": "passed; 20 actual native integration tests and one trusted-command unit test",
+    "native_consumer": "passed; actual detached worktree/process/scoped artifacts/dirty caller preserved; authority synthetic fixture, provider/GitHub not_run",
+    "pending": [
+      "separate exact-head review and CI",
+      "main CI and guide acceptance"
+    ],
+    "full_local_gates": "passed repaired full unchanged Rust fmt/Clippy/native tests/build/selected portable Wasm compilation; Python repository/body/diff rerun required before push"
+  },
+  "decisions": [
+    "Trusted Git calls have 20-second deadlines, stdout 4 MiB and stderr 64 KiB bounds.",
+    "Artifacts distinguish deletion from an empty replacement.",
+    "Mid-run authority revocation is tested after an actual worker-start barrier."
+  ],
+  "repair_records": [
+    {
+      "finding": "Full unchanged Rust gate rejected run_single for Clippy too_many_arguments",
+      "repair": "Group executable/args/limits/ownedcancel into WorkerSpec; no lint exemption or shared gate change",
+      "status": "passed unchanged full Rust gate rerun"
+    },
+    {
+      "reviewed_head": "ec5adf70dd259c220934b4b03442c88575f63b78",
+      "finding": "Independent reviewer identified false AuthorityDenied for coordinator budget/clock/state/cancellation failures",
+      "repair": "Keep Forbidden as AuthorityDenied; preserve other exact coordinator errors in CoordinatorStopped(Error)",
+      "regression": "Actual worker-start-barrier budget regression fails original mapping with enum-only compile addition (exit101); repaired budget and clock tests pending full rerun",
+      "status": "passed targeted native and full Rust gates; fresh review pending"
+    },
+    {
+      "finding": "Targeted rerun exposed cancellation test racing a slow worker startup",
+      "repair": "Wait for actual worker-start file within bounded 2 seconds before cancellation; timeout proof uses explicit 1-second deadline instead of a 100-ms startup assumption",
+      "status": "passed targeted native and full Rust gates; fresh review pending"
+    }
+  ],
+  "pause_record": {
+    "user_requested_pause": "2026-10-12T19:12:51Z",
+    "user_resumed_with_model_setting": "2026-10-12T19:28:37Z",
+    "note": "Pause is not active implementation time; original finite budget remains."
+  }
+}

@@ -26,6 +26,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "eylema-development-host"
+version = "0.1.0"
+dependencies = [
+ "eylema-contracts",
+ "eylema-development",
+ "eylema-platform",
+]
+
+[[package]]
 name = "eylema-host"
 version = "0.1.0"
 dependencies = [
