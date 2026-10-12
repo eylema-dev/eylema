@@ -1,5 +1,5 @@
 use eylema_runtime::resource::{
-    Cancellation, ResourceClass, ResourceError, ResourceLimits, ResourceManager,
+    Cancellation, ResourceClass, ResourceError, ResourceLimits, ResourceManager, ResourceSnapshot,
 };
 use std::hint::black_box;
 use std::sync::{Arc, Barrier, Mutex, mpsc};
@@ -264,16 +264,39 @@ fn combined_class_pressure_stays_bounded_and_stop_latency_is_measured() {
     assert_eq!(manager.snapshot().unwrap(), Default::default());
 }
 
+fn record_stress_peak(manager: &ResourceManager, high_water: &Mutex<ResourceSnapshot>) {
+    let snapshot = manager.snapshot().unwrap();
+    let config = limits();
+    assert!(snapshot.queued <= config.queued);
+    assert!(snapshot.active <= config.active);
+    assert!(snapshot.reserved_bytes <= config.reserved_bytes);
+    let mut peak = high_water.lock().unwrap();
+    peak.queued = peak.queued.max(snapshot.queued);
+    peak.active = peak.active.max(snapshot.active);
+    peak.reserved_bytes = peak.reserved_bytes.max(snapshot.reserved_bytes);
+    for (index, class) in snapshot.classes.iter().enumerate() {
+        assert!(class.queued <= config.queued_per_class);
+        assert!(class.active <= config.active_per_class[index]);
+        assert!(class.reserved_bytes <= config.reserved_bytes_per_class[index]);
+        peak.classes[index].queued = peak.classes[index].queued.max(class.queued);
+        peak.classes[index].active = peak.classes[index].active.max(class.active);
+        peak.classes[index].reserved_bytes =
+            peak.classes[index].reserved_bytes.max(class.reserved_bytes);
+    }
+}
+
 #[test]
-fn concurrent_admission_never_exceeds_global_bounds() {
+fn concurrent_admission_never_exceeds_global_or_class_bounds() {
     let manager = ResourceManager::new(limits()).unwrap();
-    let high_water = Arc::new(Mutex::new((0usize, 0usize, 0usize)));
+    let high_water = Arc::new(Mutex::new(ResourceSnapshot::default()));
     let barrier = Arc::new(Barrier::new(7));
+    let phases = Arc::new(Barrier::new(6));
     let mut threads = Vec::new();
     for worker in 0..6 {
         let manager = manager.clone();
         let high_water = high_water.clone();
         let barrier = barrier.clone();
+        let phases = phases.clone();
         threads.push(thread::spawn(move || {
             barrier.wait();
             let classes = [
@@ -281,10 +304,25 @@ fn concurrent_admission_never_exceeds_global_bounds() {
                 ResourceClass::View,
                 ResourceClass::Model,
             ];
+            // Each class is queued and active before free-running pressure.
+            // Phase barriers prevent a fast worker from releasing work before
+            // all workers have sampled the saturated queues and active leases.
+            manager.admit(classes[worker % classes.len()], 8).unwrap();
+            phases.wait();
+            record_stress_peak(&manager, &high_water);
+            phases.wait();
+            let warmup_lease = manager.dispatch_next().unwrap();
+            phases.wait();
+            record_stress_peak(&manager, &high_water);
+            phases.wait();
+            drop(warmup_lease);
+
             for turn in 0..300 {
                 let class = classes[(worker + turn) % classes.len()];
                 if let Ok(id) = manager.admit(class, 8) {
+                    record_stress_peak(&manager, &high_water);
                     if let Some(lease) = manager.dispatch_next().unwrap() {
+                        record_stress_peak(&manager, &high_water);
                         drop(lease);
                     } else {
                         assert!(matches!(
@@ -293,14 +331,7 @@ fn concurrent_admission_never_exceeds_global_bounds() {
                         ));
                     }
                 }
-                let snapshot = manager.snapshot().unwrap();
-                assert!(snapshot.queued <= limits().queued);
-                assert!(snapshot.active <= limits().active);
-                assert!(snapshot.reserved_bytes <= limits().reserved_bytes);
-                let mut peak = high_water.lock().unwrap();
-                peak.0 = peak.0.max(snapshot.queued);
-                peak.1 = peak.1.max(snapshot.active);
-                peak.2 = peak.2.max(snapshot.reserved_bytes);
+                record_stress_peak(&manager, &high_water);
             }
         }));
     }
@@ -313,9 +344,27 @@ fn concurrent_admission_never_exceeds_global_bounds() {
     }
     let peak = *high_water.lock().unwrap();
     eprintln!(
-        "resource stress high-water: queued={}, active={}, reserved_bytes={}",
-        peak.0, peak.1, peak.2
+        "resource stress observed high-water: queued={}, active={}, reserved_bytes={}",
+        peak.queued, peak.active, peak.reserved_bytes
     );
-    assert!(peak.0 > 0 && peak.1 > 0 && peak.2 > 0);
+    assert_eq!(peak.queued, limits().queued);
+    assert_eq!(peak.active, limits().active);
+    assert!(peak.reserved_bytes > 0 && peak.reserved_bytes <= limits().reserved_bytes);
+    for class in [
+        ResourceClass::Metal,
+        ResourceClass::View,
+        ResourceClass::Model,
+    ] {
+        let class_peak = peak.class(class);
+        let index = class as usize;
+        eprintln!(
+            "resource stress observed {class:?} high-water: queued={}, active={}, reserved_bytes={}",
+            class_peak.queued, class_peak.active, class_peak.reserved_bytes
+        );
+        assert_eq!(class_peak.queued, limits().queued_per_class);
+        assert_eq!(class_peak.active, limits().active_per_class[index]);
+        assert!(class_peak.reserved_bytes >= 16);
+        assert!(class_peak.reserved_bytes <= limits().reserved_bytes_per_class[index]);
+    }
     assert_eq!(manager.snapshot().unwrap(), Default::default());
 }

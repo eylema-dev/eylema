@@ -95,8 +95,8 @@
     {
       "en": "docs/en/resource-manager.md",
       "tr": "docs/tr/resource-manager.md",
-      "en_sha256": "f3e3a9747d9f1c596e7598b8f35864a18d5b779a6288fd467a166ccc330767bd",
-      "tr_sha256": "025f2939dd1def611a89731ec429a8fa9678d9e6a59c99f520234f0bb5e02bdc"
+      "en_sha256": "c1f64da09713090ba4d77d033de2d08c1c176a90a074e04f74cb267af2dbc068",
+      "tr_sha256": "5f685359001a2393fbdfcd14727c3c76586ac86ed4f72230e0d26ef201aa643d"
     }
   ],
   "documents": []

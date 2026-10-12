@@ -60,29 +60,29 @@
     }
   ],
   "budget": {
-    "active_minutes": 120,
-    "max_targeted_repairs": 3,
+    "active_minutes": 150,
+    "max_targeted_repairs": 4,
     "new_spending": false
   },
   "roles": {
     "architect": "Codex current context",
     "implementer": "Codex current context",
     "verifier": "Codex current context using Rust/Cargo, Python, GitHub CLI and M4 Metal when available",
-    "independent_reviewer": "g16_review separate Codex context; pending final core PR head review"
+    "independent_reviewer": "g16_review separate Codex context; previous exact head 5f08a22d3e33957a416e390460f161b927c64b95 FAIL (G21-A2 per-class stress evidence); fresh final-head review pending"
   },
   "model": {
     "planned": "GPT-6 family; inherited task model",
     "actual": "GPT-6 family; exact model SKU not exposed in task context"
   },
-  "targeted_repairs_used": 3,
+  "targeted_repairs_used": 4,
   "verification": {
     "environment": "Apple M4 Pro, 24 GiB, macOS 27.0.1 arm64; Python 3.14.8; Rust 1.99.0; Node 26.11.1",
     "local": {
-      "resource_manager_tests": "passed; 9 tests cover validation, total/class queue and byte bounds, checked overflow, per-class FIFO/round-robin, cancellation, lease release, combined class pressure and concurrent admission",
+      "resource_manager_tests": "passed; 9 tests include phase-barrier saturation and global/per-class concurrent observed high-water assertions",
       "rust_check": "passed; native fmt, clippy with warnings denied, full workspace tests/build, selected contracts/platform Wasm builds and dependency inventory; ran with only inherited RUST_LOG omitted because the gate rejects non-allowlisted RUST* variables",
       "metal_example": "passed; native M4 Metal addition under Metal lease while synthetic View and Model leases remained active",
-      "combined_stress": "passed; synthetic combined three-class test observed queue=3, active=3, reserved=96 bytes; concurrent admission stress high-water queue=6, active=3, reserved=64 bytes; all remained below configured limits",
-      "stop_latency": "passed; one M4 stress-test sample measured request-to-effective-stop p50=4.834us, p95=16.875us, max=16.875us; descriptive observation, not an SLA",
+      "combined_stress": "passed; concurrent observed peaks: global queue=6, active=3, reserved=72 bytes; each Metal/View/Model class queue=2, active=1, reserved=24 bytes; phase barriers exercise each class queue/active limit and every sample is checked against global/per-class limits",
+      "stop_latency": "passed; one M4 rerun measured request-to-effective-stop p50=21us, p95=29.625us, max=29.625us; descriptive observation, not an SLA",
       "repository": "passed; translation hashes refreshed after final bilingual edits",
       "pr_template": "passed",
       "git_diff_check": "passed"
@@ -104,5 +104,11 @@
     "VRAM or physical allocator measurement",
     "Performance SLA or rollback of external effects",
     "Third-party production crates, release, deployment, license/access changes or spending"
-  ]
+  ],
+  "budget_extension": {
+    "additional_minutes": 30,
+    "additional_targeted_repairs": 1,
+    "maintainer_response": "30 dk + 1 onar\u0131m (\u00d6nerilen)",
+    "scope": "G21-A2: per-class concurrent stress peaks and bounds; rerun checks and separate exact-head review"
+  }
 }
