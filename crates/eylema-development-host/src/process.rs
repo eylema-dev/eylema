@@ -45,6 +45,7 @@ pub enum StopReason {
     Cancelled,
     OutputLimit,
     AuthorityDenied,
+    CoordinatorStopped(eylema_development::Error),
 }
 #[derive(Debug)]
 pub struct WorkerResult {
@@ -201,10 +202,17 @@ impl Workspace {
                 Some(StopReason::OutputLimit)
             } else if started.elapsed() >= Duration::from_millis(limits.wall_ms) {
                 Some(StopReason::TimedOut)
-            } else if self.bind(run, now(), authority).is_err() {
-                Some(StopReason::AuthorityDenied)
             } else {
-                None
+                match self.bind(run, now(), authority) {
+                    Ok(()) => None,
+                    Err(Error::Coordinator(eylema_development::Error::Forbidden)) => {
+                        Some(StopReason::AuthorityDenied)
+                    }
+                    Err(Error::Coordinator(cause)) => Some(StopReason::CoordinatorStopped(cause)),
+                    Err(_) => Some(StopReason::CoordinatorStopped(
+                        eylema_development::Error::InvalidState,
+                    )),
+                }
             };
             if let Some(stopped) = stop {
                 child.0.kill()?;

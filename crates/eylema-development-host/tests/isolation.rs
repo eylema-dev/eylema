@@ -198,7 +198,7 @@ fn timeout_reaps_owned_child_and_preserves_unrelated_live_child_and_artifacts() 
         .unwrap();
     let mut f = Fixture::new();
     let mut w = f.workspace();
-    let r = probe(&mut f, &mut w, "wait", &[], 100);
+    let r = probe(&mut f, &mut w, "wait", &[], 1000);
     assert_eq!(r.reason, StopReason::TimedOut);
     assert!(sibling.try_wait().unwrap().is_none());
     assert_eq!(
@@ -221,8 +221,16 @@ fn explicit_cancel_reaps_exact_owned_child_without_arbitrary_pid_api() {
     let mut w = f.workspace();
     let cancel = CancelHandle::default();
     let c = cancel.clone();
+    let started_path = w.path().join("generated/started.txt");
     let timer = std::thread::spawn(move || {
-        std::thread::sleep(Duration::from_millis(100));
+        let deadline = std::time::Instant::now() + Duration::from_secs(2);
+        while !started_path.exists() && std::time::Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert!(
+            started_path.exists(),
+            "actual worker must start before cancellation"
+        );
         c.cancel();
     });
     let start = f.started;
@@ -492,4 +500,52 @@ fn authority_revocation_during_actual_worker_run_reaps_child() {
     timer.join().unwrap();
     assert_eq!(result.reason, StopReason::AuthorityDenied);
     assert!(w.path().join("generated/started.txt").exists());
+}
+
+fn actual_coordinator_stop_cause(cause: eylema_development::Error, stop_clock: u64) {
+    let mut f = Fixture::new();
+    let mut w = f.workspace();
+    let started_path = w.path().join("generated/started.txt");
+    let before = 1 + f.started.elapsed().as_millis() as u64;
+    let result = w
+        .run_single(
+            f.registry.get_mut(&f.key).unwrap(),
+            &f.auth,
+            || {
+                if started_path.exists() {
+                    stop_clock
+                } else {
+                    before
+                }
+            },
+            WorkerSpec {
+                executable: exe(),
+                args: &["--worker".into(), "wait".into()],
+                limits: ProcessLimits {
+                    wall_ms: 5000,
+                    output_bytes: 8192,
+                },
+                cancel: &CancelHandle::default(),
+            },
+        )
+        .unwrap();
+    assert!(
+        started_path.exists(),
+        "actual worker must start before coordinator stop"
+    );
+    assert_eq!(result.reason, StopReason::CoordinatorStopped(cause));
+    assert!(
+        result.exit_code.is_none(),
+        "owned worker was killed and reaped"
+    );
+}
+
+#[test]
+fn actual_task_budget_exhaustion_is_preserved_in_worker_result() {
+    actual_coordinator_stop_cause(eylema_development::Error::BudgetExhausted, 60_002);
+}
+
+#[test]
+fn actual_clock_regression_is_preserved_in_worker_result() {
+    actual_coordinator_stop_cause(eylema_development::Error::ClockRegressed, 0);
 }
