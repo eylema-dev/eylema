@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "b12f9d582d167015fd807260cf94a117f8b11bb5e3157630b069486a14524727",
-      "tr_sha256": "e7593d1bad8a9b12e0bb3bcd0e8381a7065d39b554cc713df4b4080ff6b44176"
+      "en_sha256": "d31e98b6248800f857c672805e66a3f60f010ef8fdc068fbefeabfbdc6b821d5",
+      "tr_sha256": "9c9817d8ae3e7428905c679c362adb76668c33cebc3e8e4a86232bd23cbbca1a"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -103,6 +103,12 @@
       "tr": "docs/tr/combined-gpu-measurement.md",
       "en_sha256": "524fd0d39873c48d7d892c6f1d2a8362b12ad91e064b62c97fb61c68d2c521ff",
       "tr_sha256": "481383c5a070ce7c5e0946c0e149ec7360d449f4967c758d1bdd73e81ed7c698"
+    },
+    {
+      "en": "docs/en/development-coordinator.md",
+      "tr": "docs/tr/development-coordinator.md",
+      "en_sha256": "0e8f0baada35f000abb70ab8ce49c6cc6ce58fbf94deda329f15f137bb2b5b4a",
+      "tr_sha256": "db5741ff8e644dfc63cc1d705a388c0abfab77019327c3a91ae243f834060abe"
     }
   ],
   "documents": []

@@ -9,6 +9,7 @@
   "gate_profile": "rust-v1",
   "wasm_packages": [
     "eylema-contracts",
-    "eylema-platform"
+    "eylema-platform",
+    "eylema-development"
   ]
 }
