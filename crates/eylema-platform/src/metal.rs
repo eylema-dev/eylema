@@ -405,9 +405,11 @@ fn objc_string(value: &'static str) -> Result<Id, PlatformError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     static RELEASES: AtomicUsize = AtomicUsize::new(0);
+    static RELEASE_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     unsafe extern "C" fn fake_release(pointer: Id) {
         // SAFETY: test constructs exactly one Box<u8> and transfers it to handle.
@@ -428,6 +430,9 @@ mod tests {
 
     #[test]
     fn retained_resource_is_released_once_when_scope_exits() {
+        let _lock = RELEASE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         RELEASES.store(0, Ordering::SeqCst);
         {
             let pointer = NonNull::new(Box::into_raw(Box::new(7_u8)).cast::<c_void>()).unwrap();
@@ -441,6 +446,9 @@ mod tests {
 
     #[test]
     fn injected_worker_completion_failure_releases_acquired_resources() {
+        let _lock = RELEASE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         RELEASES.store(0, Ordering::SeqCst);
         let left = NonNull::new(Box::into_raw(Box::new(1_u8)).cast::<c_void>()).unwrap();
         let right = NonNull::new(Box::into_raw(Box::new(2_u8)).cast::<c_void>()).unwrap();
@@ -455,7 +463,7 @@ mod tests {
             },
         ];
         assert!(matches!(
-            finish_worker(3, resources),
+            finish_worker(5, resources),
             Err(PlatformError::ServiceFailure)
         ));
         assert_eq!(RELEASES.load(Ordering::SeqCst), 2);

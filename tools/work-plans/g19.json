@@ -81,12 +81,12 @@
       "unittest": "passed; 46 tests",
       "repository_check": "passed",
       "pr_template": "passed",
-      "rust_check": "passed after worker-completion failure-path repair; native fmt, clippy -D warnings, workspace tests/build, selected contracts/platform Wasm build, dependency inventory",
+      "rust_check": "passed after worker cleanup repair; native fmt, clippy -D warnings, workspace tests/build, selected contracts/platform Wasm build, dependency inventory",
       "git_diff_check": "passed"
     },
     "hardware": {
       "command": "cargo test -p eylema-platform actual_metal_worker_adds_and_reads_back_on_hardware --all-features --locked --offline -- --ignored --nocapture",
-      "status": "passed on Apple M4 Pro after failure-path repair",
+      "status": "passed after worker cleanup repair on Apple M4 Pro",
       "coverage": "Metal dispatch and readback match checked CPU reference for representative values and the 4096-element upper bound"
     },
     "known_limits": [
@@ -94,7 +94,7 @@
       "WebGPU, models, training and energy remain outside G19 and were not run."
     ]
   },
-  "targeted_repairs_used": 2,
+  "targeted_repairs_used": 3,
   "budget": {
     "active_minutes": 120,
     "max_targeted_repairs": 3,
@@ -104,7 +104,7 @@
     "architect": "Codex current context",
     "implementer": "Codex current context",
     "verifier": "Codex current context using local Rust/macOS, Git, Python and GitHub CLI",
-    "independent_reviewer": "g16_review separate Codex context; initial actionable failure-path gap fixed, final head review pending"
+    "independent_reviewer": "g16_review separate Codex context; two actionable test gaps fixed, final head review pending"
   },
   "model": {
     "planned": "not applicable to inherited implementation session",
