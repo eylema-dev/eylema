@@ -1,0 +1,125 @@
+{
+  "goal": "G20",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/20",
+  "base": {
+    "repository": "eylema-dev/eylema",
+    "main": "125bc562466ed6fffd6b27856035e6735f96dbe6",
+    "tree": "a367dbd3e7d623db65b6d5881d1152aaea4d50b2"
+  },
+  "accepted_dependencies": {
+    "G17": {
+      "repository": "eylema-dev/eylema-examples",
+      "pr": "https://github.com/eylema-dev/eylema-examples/pull/5",
+      "head": "78afa3530ea377dfe51d3a7617edf7e230fb52ae",
+      "main": "67b23a27604f4b887cffd1b133e7dc5dcff7835f",
+      "main_ci": 38233991255
+    },
+    "G18": {
+      "repository": "eylema-dev/eylema-evals",
+      "pr": "https://github.com/eylema-dev/eylema-evals/pull/7",
+      "head": "7d6fd3e4761fab68f7340333b4da707ef4541f64",
+      "main": "9f2225cbfa150416f776165cf1c65624eca1f260",
+      "main_ci": 38265221384,
+      "boundary": "native CLI workload evidence only; not GPU evidence"
+    },
+    "G19": {
+      "repository": "eylema-dev/eylema",
+      "pr": "https://github.com/eylema-dev/eylema/pull/52",
+      "head": "2ff7ac8184bff6b932e728963dfdff89ffe6e5aa",
+      "main": "125bc562466ed6fffd6b27856035e6735f96dbe6",
+      "main_ci": 38267694058,
+      "review": "separate exact-head PASS"
+    }
+  },
+  "allowed_paths": [
+    "crates/eylema-web/src/http.rs",
+    "crates/eylema-web/src/console.html",
+    "crates/eylema-web/src/console.css",
+    "crates/eylema-web/src/console.js",
+    "crates/eylema-web/src/webgpu-view.mjs",
+    "crates/eylema-web/tests/http.rs",
+    "shaders/wgsl/",
+    "tools/tests/webgpu-view.test.mjs",
+    "tools/tests/test_webgpu_view.py",
+    "tools/work-plans/g20.json",
+    "README.md",
+    "README.tr.md",
+    "docs/en/local-webgpu.md",
+    "docs/tr/local-webgpu.md",
+    "tools/translation-pairs.json"
+  ],
+  "acceptance": [
+    {
+      "id": "G20-A1",
+      "check": "Actual Chrome on M4 requests a WebGPU adapter/device, compiles the owned WGSL shader, renders the bounded scene, and supports pointer object selection and keyboard/button movement; no benchmark claim."
+    },
+    {
+      "id": "G20-A2",
+      "check": "Missing WebGPU/adapter and a controlled GPUDevice.lost fixture produce stable accessible UNSUPPORTED/DEVICE_LOST states, disable controls, and never silently fall back to CPU/WebGL."
+    },
+    {
+      "id": "G20-A3",
+      "check": "Rust HTTP tests cover the canvas/module/WGSL routes and CSP/MIME; dependency-free Node fixtures cover adapter absence, pointer mapping, bounded movement and device loss; existing task-console behavior stays intact. Static asset GETs do not allocate extra console sessions."
+    },
+    {
+      "id": "G20-A4",
+      "check": "Exact core AGENTS commands, native Rust fmt/clippy/tests/build, selected portable Wasm, Node fixtures, translation fingerprint, diff checks, exact-head CI/review, post-merge main CI and pinned workspace check pass."
+    }
+  ],
+  "hardware": {
+    "device": "Apple M4 Pro, 24 GiB",
+    "os": "macOS 27.0.1",
+    "architecture": "arm64",
+    "browser": "Google Chrome 154.0.8037.98",
+    "webgpu_adapter": "requestAdapter and requestDevice succeeded in actual Chrome; adapter identity was not collected"
+  },
+  "verification": {
+    "node": "v26.11.1",
+    "local": {
+      "python": "3.14.8",
+      "unittest": "passed; 47 tests, includes Node state fixtures",
+      "repository_check": "passed; fingerprints refreshed and local records validated",
+      "pr_template": "passed",
+      "rust_check": "passed; native fmt, clippy -D warnings, full workspace tests/build, selected contracts/platform Wasm build and dependency inventory",
+      "node_fixtures": "passed; Node v26.11.1, 5 tests including projected cube-bound selection, off-bounds clicks, non-overlap at opposing movement limits and loss-during-initialization guard",
+      "git_diff_check": "passed",
+      "actual_chrome": "passed after final interaction fix; 2026-10-12, Google Chrome 154.0.8037.98 on Apple M4 Pro/macOS 27.0.1; local http://127.0.0.1 console, three WebGPU cubes visibly rendered, pointer selected cube 3 using its visible area, Right moved it within the scene; no external website navigation; temporary service stopped gracefully"
+    },
+    "known_limits": [
+      "GPU evidence is limited to one M4 Pro and one actual Chrome build.",
+      "Device loss uses a controlled fixture, not a forced physical adapter failure.",
+      "No WebGPU-to-Metal interop, performance, energy, model or training claim."
+    ]
+  },
+  "targeted_repairs_used": 3,
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "roles": {
+    "architect": "Codex current context",
+    "implementer": "Codex current context",
+    "verifier": "Codex current context using Rust/Cargo, Node, Python, GitHub CLI and actual Chrome when available",
+    "independent_reviewer": "g16_review separate Codex context; prior review findings repaired; final-head review pending"
+  },
+  "model": {
+    "planned": "not applicable to the existing session",
+    "actual": "GPT-6 family; exact model SKU is not exposed in task context"
+  },
+  "risks": [
+    "Browser WebGPU API availability and permissions depend on the browser/adapter.",
+    "GPUDevice loss can occur during initialization or after rendering; controls must remain disabled after loss.",
+    "WGSL shader and Canvas WebGPU context are explicit browser platform dependencies."
+  ],
+  "non_targets": [
+    "WebGPU to native Metal resource sharing",
+    "Cross-browser or cross-device acceptance",
+    "Performance or energy benchmarks",
+    "CPU/WebGL fallback rendering",
+    "Remote assets, user identity or task-authority changes",
+    "Models, training, release, spending, licensing or permission changes"
+  ],
+  "rollback": "Revert the scoped PR; no persisted state migration or external service change."
+}
