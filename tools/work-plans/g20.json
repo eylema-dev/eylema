@@ -71,8 +71,8 @@
     "device": "Apple M4 Pro, 24 GiB",
     "os": "macOS 27.0.1",
     "architecture": "arm64",
-    "browser": "verify exact Chrome build on this run",
-    "webgpu_adapter": "verify via actual Chrome; pending"
+    "browser": "Google Chrome 154.0.8037.98",
+    "webgpu_adapter": "requestAdapter and requestDevice succeeded in actual Chrome; adapter identity was not collected"
   },
   "verification": {
     "node": "v26.11.1",
@@ -82,9 +82,9 @@
       "repository_check": "passed; fingerprints refreshed and local records validated",
       "pr_template": "passed",
       "rust_check": "passed; native fmt, clippy -D warnings, full workspace tests/build, selected contracts/platform Wasm build and dependency inventory",
-      "node_fixtures": "passed; Node v26.11.1, 4 tests",
+      "node_fixtures": "passed; Node v26.11.1, 5 tests including moved-object hit mapping and loss-during-initialization guard",
       "git_diff_check": "passed",
-      "actual_chrome": "not_run; awaiting user confirmation for a bounded Chrome interaction window"
+      "actual_chrome": "passed; 2026-10-12, Google Chrome 154.0.8037.98 on Apple M4 Pro/macOS 27.0.1; served only from http://127.0.0.1; WebGPU ready, three cubes visibly rendered, pointer selected object 3, Right moved selected cube; no external site opened; temporary local service stopped gracefully"
     },
     "known_limits": [
       "GPU evidence is limited to one M4 Pro and one actual Chrome build.",
@@ -92,7 +92,7 @@
       "No WebGPU-to-Metal interop, performance, energy, model or training claim."
     ]
   },
-  "targeted_repairs_used": 0,
+  "targeted_repairs_used": 2,
   "budget": {
     "active_minutes": 120,
     "max_targeted_repairs": 3,
@@ -102,7 +102,7 @@
     "architect": "Codex current context",
     "implementer": "Codex current context",
     "verifier": "Codex current context using Rust/Cargo, Node, Python, GitHub CLI and actual Chrome when available",
-    "independent_reviewer": "g16_review separate Codex context; pending final-head review"
+    "independent_reviewer": "g16_review separate Codex context; initial review found two P2 issues, repaired on current branch; final-head review pending"
   },
   "model": {
     "planned": "not applicable to the existing session",

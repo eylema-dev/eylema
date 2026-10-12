@@ -20,10 +20,23 @@ export function requestWebGpuAdapter(gpu) {
   return gpu.requestAdapter();
 }
 
-export function selectObjectAt(x, width, count = 3) {
-  if (!Number.isFinite(x) || !Number.isFinite(width) || width <= 0 || !Number.isInteger(count) || count < 1) return null;
-  const clamped = Math.max(0, Math.min(width - Number.EPSILON, x));
-  return Math.min(count - 1, Math.floor((clamped / width) * count));
+export function selectObjectAt(x, width, positions = Array.from({ length: 3 }, () => ({ x: 0, y: 0 }))) {
+  if (!Number.isFinite(x) || !Number.isFinite(width) || width <= 0 || !Array.isArray(positions) || positions.length !== 3) return null;
+  const clipX = (x / width) * 2 - 1;
+  const projectedCenters = positions.map((position, index) => {
+    const worldX = (index - 1) * 1.35 + position.x;
+    const rotatedX = Math.cos(0.48) * worldX;
+    const depth = -Math.sin(0.48) * worldX + 4.2;
+    return rotatedX * 1.35 / depth;
+  });
+  return projectedCenters.reduce((closest, center, index) =>
+    Math.abs(center - clipX) < Math.abs(projectedCenters[closest] - clipX) ? index : closest, 0);
+}
+
+export function markReadyIfActive(currentState, activate) {
+  if (currentState !== 'starting') return false;
+  activate();
+  return true;
 }
 
 export function moveObject(position, direction, step = 0.16, limit = 0.64) {
@@ -136,12 +149,17 @@ export async function initializeWebGpuScene({
       state = 'lost';
       handleDeviceLoss(info, { status, controls, language, release });
     });
+    if (state === 'lost') return controller;
     const context = canvas.getContext('webgpu');
     if (!context) { setState('unsupported'); release(); return controller; }
     const response = await fetchImpl('/scene.wgsl', { credentials: 'same-origin' });
+    if (state === 'lost') return controller;
     if (!response.ok) throw new Error('shader fetch failed');
-    const shader = device.createShaderModule({ code: await response.text() });
+    const shaderCode = await response.text();
+    if (state === 'lost') return controller;
+    const shader = device.createShaderModule({ code: shaderCode });
     const info = await shader.getCompilationInfo();
+    if (state === 'lost') return controller;
     if (info.messages.some((message) => message.type === 'error')) throw new Error('WGSL compilation failed');
     const format = gpu.getPreferredCanvasFormat();
     context.configure({ device, format, alphaMode: 'opaque' });
@@ -158,6 +176,7 @@ export async function initializeWebGpuScene({
       primitive: { topology: 'triangle-list', cullMode: 'none' },
       depthStencil: { format: 'depth24plus', depthWriteEnabled: true, depthCompare: 'less' },
     });
+    if (state === 'lost') return controller;
     const geometry = cubeVertices();
     const vertexBuffer = device.createBuffer({ size: geometry.bytes.byteLength, usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST });
     const uniformBuffer = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
@@ -200,9 +219,11 @@ export async function initializeWebGpuScene({
     controls.next.addEventListener('click', () => select((selected + 1) % 3));
     for (const direction of ['left', 'right', 'up', 'down']) controls[direction].addEventListener('click', () => move(direction));
     globalThis.addEventListener?.('pagehide', release, { once: true });
-    setState('ready');
-    updateSelection();
-    render();
+    markReadyIfActive(state, () => {
+      setState('ready');
+      updateSelection();
+      render();
+    });
   } catch (_) {
     if (state !== 'lost') { setState('failed'); release(); }
   }

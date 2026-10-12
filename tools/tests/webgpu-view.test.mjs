@@ -4,6 +4,7 @@ import {
   initializeWebGpuScene,
   handleDeviceLoss,
   moveObject,
+  markReadyIfActive,
   requestWebGpuAdapter,
   selectObjectAt,
   watchDeviceLoss,
@@ -27,12 +28,17 @@ test('missing or unavailable adapter is explicit and disables every control', as
   for (const [id, control] of documentRef.elements) if (id.startsWith('scene-') && id !== 'scene-status' && id !== 'scene-selection' && id !== 'scene-canvas') assert.equal(control.disabled, true);
 });
 
-test('pointer selection maps the bounded canvas into three scene objects', () => {
-  assert.equal(selectObjectAt(0, 300), 0);
-  assert.equal(selectObjectAt(100, 300), 1);
-  assert.equal(selectObjectAt(299, 300), 2);
-  assert.equal(selectObjectAt(400, 300), 2);
-  assert.equal(selectObjectAt(0, 0), null);
+test('pointer selection follows projected cube positions after movement', () => {
+  const positions = Array.from({ length: 3 }, () => ({ x: 0, y: 0 }));
+  assert.equal(selectObjectAt(75, 300, positions), 0);
+  assert.equal(selectObjectAt(150, 300, positions), 1);
+  assert.equal(selectObjectAt(225, 300, positions), 2);
+  positions[0] = moveObject(positions[0], 'right');
+  positions[0] = moveObject(positions[0], 'right');
+  positions[0] = moveObject(positions[0], 'right');
+  const movedCenter = (Math.cos(0.48) * (-1.35 + positions[0].x) * 1.35 / (-Math.sin(0.48) * (-1.35 + positions[0].x) + 4.2) + 1) * 150;
+  assert.equal(selectObjectAt(movedCenter, 300, positions), 0);
+  assert.equal(selectObjectAt(0, 0, positions), null);
 });
 
 test('keyboard movement is bounded and rejects unknown directions', () => {
@@ -59,4 +65,17 @@ test('device-loss fixture reports the device reason through the production obser
   assert.equal(controls.one.disabled, true);
   assert.equal(controls.two.disabled, true);
   assert.equal(released, true);
+});
+
+test('device loss during asynchronous setup cannot restore ready controls', async () => {
+  let finishSetup;
+  const setup = new Promise((resolve) => { finishSetup = resolve; });
+  let state = 'starting';
+  let activated = false;
+  const initialization = setup.then(() => markReadyIfActive(state, () => { activated = true; state = 'ready'; }));
+  state = 'lost';
+  finishSetup();
+  assert.equal(await initialization, false);
+  assert.equal(state, 'lost');
+  assert.equal(activated, false);
 });
