@@ -7,6 +7,11 @@ name = "eylema"
 version = "0.1.0"
 dependencies = [
  "eylema-contracts",
+ "eylema-host",
+ "eylema-journal",
+ "eylema-platform",
+ "eylema-runtime",
+ "eylema-web",
 ]
 
 [[package]]
