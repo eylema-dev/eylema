@@ -1,6 +1,6 @@
 # Yerel HTTP servisi — G14
 
-[English](../en/local-http.md). Görev revizyonu1; kabul edilmiş G09–G13 sonrasında [Goal issue16](https://github.com/eylema-dev/eylema/issues/16).
+[English](../en/local-http.md). Görev revizyonu2; kabul edilmiş G09–G13 sonrasında [Goal issue16](https://github.com/eylema-dev/eylema/issues/16).
 
 Birinci taraf native `eylema-web` servisi, kalıcı görev işlemlerini IPv4 `127.0.0.1` üzerinde sunar. Gerçek macOS soket/dosya testleri görev oluşturup çalıştırır, özgün yürütmeyi ve olayları inceler, etkili iptal ister ve yetkisiz veya bozuk istekleri reddeder. Genel CLI ve tarayıcı konsolu G15/G16 kapsamındadır; buradan tarayıcı, gerçek kişi oturumu, uzak TLS, GPU veya model kabulü çıkarılmaz.
 

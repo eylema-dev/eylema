@@ -1,6 +1,6 @@
 # Local HTTP service — G14
 
-[Türkçe](../tr/local-http.md). Task revision1; [Goal issue16](https://github.com/eylema-dev/eylema/issues/16), following accepted G09–G13.
+[Türkçe](../tr/local-http.md). Task revision2; [Goal issue16](https://github.com/eylema-dev/eylema/issues/16), following accepted G09–G13.
 
 The owned native `eylema-web` service exposes durable task operations on IPv4 `127.0.0.1`. Its actual macOS socket/file tests create and run a task, inspect the original execution and events, request effective cancellation and reject unauthorized or malformed requests. The public CLI and browser console remain G15/G16; no browser, real person login, remote TLS, GPU or model acceptance is inferred here.
 
