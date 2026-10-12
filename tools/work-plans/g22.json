@@ -70,7 +70,12 @@
       "Three real combined Chrome/Metal trials and raw RSS/browser measurement results",
       "Exact-head independent review and GitHub CI",
       "Post-merge main CI and devguide live Goal/pin acceptance"
-    ]
+    ],
+    "source_review": {
+      "status": "passed",
+      "head": "3972e794b7d1e9c397a754fe904d673fd5b3279a",
+      "scope": "source only; fresh integrated head review pending"
+    }
   },
   "risks": [
     "Real Chrome acceptance requires maintainer-granted local browser time; authorization requested and pending.",
@@ -82,5 +87,9 @@
     "reviewed_head": "67ef10af2544cc297152589d7bfbfda6a22339e8",
     "finding": "P2: unbounded stdin.lines() control allocation",
     "repair": "Fixed six-byte control buffer; oversized, partial, unknown and empty input regressions; fresh exact-head review pending"
+  },
+  "integration_base": {
+    "main": "496351be437930b22a56253d8320a941980ac8d3",
+    "reason": "Refresh current main after independently merged PR55; preserve its accepted decisions, no new license or product decision made by G22"
   }
 }

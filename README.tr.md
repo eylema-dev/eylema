@@ -11,7 +11,7 @@
 
 Kod, kimlikler, dosya adları ve katkı şablonları İngilizcedir. Dokümantasyon [İngilizce](README.md) ve Türkçe sunulur; kaynak dil İngilizcedir. **Eylema** ürün adı **11 Ekim 2026** tarihinde kabul edildi; yukarıdaki tanım ürünün amacını anlatır.
 
-Herkese açık çekirdek proje deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Paket öneki ve native host CLI `eylema`; yerel servis başlatma, görev çalıştırma/inceleme, servis durdurma ve doctor komutları uygulanmıştır. Görev iptali bağımsız olarak host tarafından doğrulanmış insan oturumu gerektirir. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Lisans seçimi henüz tamamlanmadı.
+Herkese açık çekirdek proje deposu [eylema-dev/eylema](https://github.com/eylema-dev/eylema), [eylema-dev organizasyonundadır](https://github.com/eylema-dev). Paket öneki ve native host CLI `eylema`; yerel servis başlatma, görev çalıştırma/inceleme, servis durdurma ve doctor komutları uygulanmıştır. Görev iptali bağımsız olarak host tarafından doğrulanmış insan oturumu gerektirir. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Kendi kaynak kodumuz ve belgelerimiz [Apache-2.0](LICENSE) lisanslıdır. Ayrı belirtilen üçüncü taraf içerikleri, model ağırlıkları ve veri kümeleri kendi koşullarını korur.
 
 `eylema-dev` organizasyonu ve bu public depo 11 Ekim 2026 tarihinde oluşturuldu. [İsim ve uygunluk kaydı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/name-availability.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Ana alan adı `eylema.dev`; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez.
 
@@ -61,9 +61,9 @@ Hız veya maliyet iyileştirilmeden önce asgari kalite karşılanır. Kernel ya
 
 | Belge | İngilizce kaynak | Türkçe karşılık |
 |---|---|---|
-| Proje yapısı 0.2.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Mimari 0.4.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
-| API ve denetim 0.2.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
+| Proje yapısı 0.3.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Mimari 0.4.1 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| API ve denetim 0.3.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
 | Geliştirme ve işletim 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
 | Öğrenme ve eğitim 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
 
@@ -84,3 +84,5 @@ Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinl
 `eylema`; ilk Rust workspace/başlangıç host’unu, gelecek görev CLI/bileşenlerini, makine şemalarını ve mevcut marka varlıklarını sahiplenir. Ürün metinleri dil depolarına, ortak katkı politikası devguide'a taşınır. Örnekler, değerlendirmeler, model üstverileri ve eğitim tarifleri için açıkça iskelet aşamasında ayrı depolar vardır. Web sitesi [eylemadotdev](https://github.com/eylema-dev/eylemadotdev) içinde ayrı yönetilir. Bu bölünmeyle çalışma zamanı uygulanmış değildir.
 
 [Taşıma kaydı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/repository-migration.md) kaynakları, hedefleri, ilişkili PR'ları, entegrasyon kontrollerini ve geri dönüşü açıklar. Yeni belge bağlantıları eşgüdümlü birleştirme sonrası yerleşimi hedefler; öncesinde PR'lar ve sabitlenmiş depo kümesi inceleme kopyalarını sağlar.
+
+Bakımcı 12 Ekim 2026 tarihinde [ilk ürün kararları ve test envanterini](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) kabul etti: ilk kullanıcı yerel, tek kullanıcılı eylemci uygulaması geliştiren yazılımcıdır. Kullanılabilir görev konsolu önizlemesi ve erken ihtiyaçtan PR’a kanıt, isteğe bağlı model/eğitimden önce gelir. MacBook Pro M4 Pro/24 GB birincil kalır; Mac mini M4/24 GB ve Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM kendi yürütüm kanıtını bekleyen ek test cihazlarıdır. Mevcut Rust tipleri, EYL/EYLJ biçimleri ve sınırlı platform bağları uygulama temeli olarak korunur.
