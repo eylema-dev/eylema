@@ -5,6 +5,7 @@ import {
   handleDeviceLoss,
   moveObject,
   markReadyIfActive,
+  projectObjectBounds,
   requestWebGpuAdapter,
   selectObjectAt,
   watchDeviceLoss,
@@ -28,23 +29,30 @@ test('missing or unavailable adapter is explicit and disables every control', as
   for (const [id, control] of documentRef.elements) if (id.startsWith('scene-') && id !== 'scene-status' && id !== 'scene-selection' && id !== 'scene-canvas') assert.equal(control.disabled, true);
 });
 
-test('pointer selection follows projected cube positions after movement', () => {
+test('pointer selection follows projected cube bounds on both axes and stays unambiguous at movement limits', () => {
   const positions = Array.from({ length: 3 }, () => ({ x: 0, y: 0 }));
-  assert.equal(selectObjectAt(75, 300, positions), 0);
-  assert.equal(selectObjectAt(150, 300, positions), 1);
-  assert.equal(selectObjectAt(225, 300, positions), 2);
+  const center = (box) => ({ x: (box.minX + box.maxX + 2) * 75, y: 100 - (box.minY + box.maxY) * 50 });
+  let bounds = projectObjectBounds(positions);
+  for (const index of [0, 1, 2]) {
+    const point = center(bounds[index]);
+    assert.equal(selectObjectAt(point.x, point.y, 300, 200, positions), index);
+    assert.equal(selectObjectAt(point.x, 1, 300, 200, positions), null);
+  }
   positions[0] = moveObject(positions[0], 'right');
-  positions[0] = moveObject(positions[0], 'right');
-  positions[0] = moveObject(positions[0], 'right');
-  const movedCenter = (Math.cos(0.48) * (-1.35 + positions[0].x) * 1.35 / (-Math.sin(0.48) * (-1.35 + positions[0].x) + 4.2) + 1) * 150;
-  assert.equal(selectObjectAt(movedCenter, 300, positions), 0);
-  assert.equal(selectObjectAt(0, 0, positions), null);
+  positions[1] = moveObject(positions[1], 'left');
+  bounds = projectObjectBounds(positions);
+  assert.ok(bounds[0].maxX < bounds[1].minX, 'maximum opposing movement keeps adjacent projected cubes separate');
+  for (const index of [0, 1]) {
+    const point = center(bounds[index]);
+    assert.equal(selectObjectAt(point.x, point.y, 300, 200, positions), index);
+  }
+  assert.equal(selectObjectAt(0, 0, 300, 200, positions), null);
 });
 
 test('keyboard movement is bounded and rejects unknown directions', () => {
   assert.deepEqual(moveObject({ x: 0, y: 0 }, 'right'), { x: 0.16, y: 0 });
-  assert.deepEqual(moveObject({ x: 0.64, y: 0 }, 'right'), { x: 0.64, y: 0 });
-  assert.deepEqual(moveObject({ x: 0, y: -0.64 }, 'down'), { x: 0, y: -0.64 });
+  assert.deepEqual(moveObject({ x: 0.16, y: 0 }, 'right'), { x: 0.16, y: 0 });
+  assert.deepEqual(moveObject({ x: 0, y: -0.16 }, 'down'), { x: 0, y: -0.16 });
   assert.throws(() => moveObject({ x: 0, y: 0 }, 'forward'), RangeError);
 });
 

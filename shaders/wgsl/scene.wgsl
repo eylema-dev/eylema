@@ -20,7 +20,7 @@ struct VertexOutput {
 
 @vertex
 fn vertex_main(input: VertexInput) -> VertexOutput {
-    let object_x = (f32(input.object_id) - 1.0) * 1.35;
+    let object_x = (f32(input.object_id) - 1.0) * 1.7;
     let offset_x = select(0.0, view.offset_x, input.object_id == view.selected);
     let offset_y = select(0.0, view.offset_y, input.object_id == view.selected);
     let angle = 0.48;

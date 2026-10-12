@@ -14,23 +14,49 @@ const words = {
     selectNext: 'Sonraki nesneyi seç', moveLeft: 'Sola taşı', moveRight: 'Sağa taşı', moveUp: 'Yukarı taşı', moveDown: 'Aşağı taşı',
   },
 };
+const OBJECT_SPACING = 1.7;
+const CUBE_RADIUS = 0.38;
 
 export function requestWebGpuAdapter(gpu) {
   if (!gpu || typeof gpu.requestAdapter !== 'function') return Promise.resolve(null);
   return gpu.requestAdapter();
 }
 
-export function selectObjectAt(x, width, positions = Array.from({ length: 3 }, () => ({ x: 0, y: 0 }))) {
-  if (!Number.isFinite(x) || !Number.isFinite(width) || width <= 0 || !Array.isArray(positions) || positions.length !== 3) return null;
-  const clipX = (x / width) * 2 - 1;
-  const projectedCenters = positions.map((position, index) => {
-    const worldX = (index - 1) * 1.35 + position.x;
-    const rotatedX = Math.cos(0.48) * worldX;
-    const depth = -Math.sin(0.48) * worldX + 4.2;
-    return rotatedX * 1.35 / depth;
+export function projectObjectBounds(positions) {
+  if (!Array.isArray(positions) || positions.length !== 3) return null;
+  const corners = [-CUBE_RADIUS, CUBE_RADIUS];
+  return positions.map((position, index) => {
+    const projected = [];
+    for (const x of corners) for (const y of corners) for (const z of corners) {
+      const worldX = x + (index - 1) * OBJECT_SPACING + position.x;
+      const worldY = y + position.y;
+      const rotatedX = Math.cos(0.48) * worldX + Math.sin(0.48) * z;
+      const rotatedZ = -Math.sin(0.48) * worldX + Math.cos(0.48) * z;
+      const depth = rotatedZ + 4.2;
+      projected.push({ x: rotatedX * 1.35 / depth, y: worldY * 1.35 / depth });
+    }
+    return {
+      minX: Math.min(...projected.map((point) => point.x)), maxX: Math.max(...projected.map((point) => point.x)),
+      minY: Math.min(...projected.map((point) => point.y)), maxY: Math.max(...projected.map((point) => point.y)),
+    };
   });
-  return projectedCenters.reduce((closest, center, index) =>
-    Math.abs(center - clipX) < Math.abs(projectedCenters[closest] - clipX) ? index : closest, 0);
+}
+
+export function selectObjectAt(x, y, width, height, positions = Array.from({ length: 3 }, () => ({ x: 0, y: 0 }))) {
+  if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) return null;
+  const clipX = (x / width) * 2 - 1;
+  const clipY = 1 - (y / height) * 2;
+  const bounds = projectObjectBounds(positions);
+  if (!bounds) return null;
+  const candidates = bounds.map((box, index) => ({ box, index })).filter(({ box }) =>
+    clipX >= box.minX && clipX <= box.maxX && clipY >= box.minY && clipY <= box.maxY);
+  if (candidates.length === 0) return null;
+  const center = (box) => ({ x: (box.minX + box.maxX) / 2, y: (box.minY + box.maxY) / 2 });
+  return candidates.reduce((closest, candidate) => {
+    const a = center(candidate.box);
+    const b = center(closest.box);
+    return Math.hypot(a.x - clipX, a.y - clipY) < Math.hypot(b.x - clipX, b.y - clipY) ? candidate : closest;
+  }).index;
 }
 
 export function markReadyIfActive(currentState, activate) {
@@ -39,7 +65,7 @@ export function markReadyIfActive(currentState, activate) {
   return true;
 }
 
-export function moveObject(position, direction, step = 0.16, limit = 0.64) {
+export function moveObject(position, direction, step = 0.16, limit = 0.16) {
   const delta = { left: [-step, 0], right: [step, 0], up: [0, step], down: [0, -step] }[direction];
   if (!delta || !Number.isFinite(step) || step <= 0 || !Number.isFinite(limit) || limit < step) {
     throw new RangeError('invalid scene movement');
@@ -208,7 +234,7 @@ export async function initializeWebGpuScene({
     const move = (direction) => { positions[selected] = moveObject(positions[selected], direction); render(); };
     canvas.addEventListener('click', (event) => {
       const rect = canvas.getBoundingClientRect();
-      select(selectObjectAt(event.clientX - rect.left, rect.width) ?? selected);
+      select(selectObjectAt(event.clientX - rect.left, event.clientY - rect.top, rect.width, rect.height, positions) ?? selected);
       canvas.focus();
     });
     canvas.addEventListener('keydown', (event) => {
