@@ -10,6 +10,53 @@ pub enum PlatformError {
     ServiceFailure,
     InvalidInput,
 }
+
+/// Maximum number of elements accepted by the initial bounded Metal proof.
+pub const MAX_METAL_ELEMENTS: usize = 4096;
+
+fn validate_metal_inputs(lhs: &[i32], rhs: &[i32]) -> Result<(), PlatformError> {
+    if lhs.is_empty() || lhs.len() != rhs.len() {
+        return Err(PlatformError::InvalidInput);
+    }
+    if lhs.len() > MAX_METAL_ELEMENTS {
+        return Err(PlatformError::TooLarge);
+    }
+    if lhs
+        .iter()
+        .zip(rhs)
+        .any(|(left, right)| left.checked_add(*right).is_none())
+    {
+        return Err(PlatformError::InvalidInput);
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+fn cpu_reference_add(lhs: &[i32], rhs: &[i32]) -> Result<Vec<i32>, PlatformError> {
+    validate_metal_inputs(lhs, rhs)?;
+    lhs.iter()
+        .zip(rhs)
+        .map(|(left, right)| left.checked_add(*right).ok_or(PlatformError::InvalidInput))
+        .collect()
+}
+
+/// Adds equal-length signed integer vectors with the native Metal backend.
+/// Empty, mismatched, oversized and overflowing inputs are rejected before
+/// any device or buffer allocation. Unsupported targets fail explicitly.
+pub fn metal_add_i32(lhs: &[i32], rhs: &[i32]) -> Result<Vec<i32>, PlatformError> {
+    validate_metal_inputs(lhs, rhs)?;
+    metal::add_i32(lhs, rhs)
+}
+
+#[cfg(target_os = "macos")]
+mod metal;
+#[cfg(not(target_os = "macos"))]
+mod metal {
+    use super::PlatformError;
+    pub(super) fn add_i32(_: &[i32], _: &[i32]) -> Result<Vec<i32>, PlatformError> {
+        Err(PlatformError::Unavailable)
+    }
+}
 impl std::fmt::Display for PlatformError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}")
@@ -190,6 +237,44 @@ mod tests {
         assert_eq!(
             sha256(&vec![0; MAX_WIRE_BYTES + 1]),
             Err(PlatformError::TooLarge)
+        );
+    }
+    #[test]
+    fn metal_inputs_are_bounded_and_checked_before_dispatch() {
+        assert_eq!(metal_add_i32(&[], &[]), Err(PlatformError::InvalidInput));
+        assert_eq!(metal_add_i32(&[1], &[]), Err(PlatformError::InvalidInput));
+        assert_eq!(
+            metal_add_i32(&[i32::MAX], &[1]),
+            Err(PlatformError::InvalidInput)
+        );
+        let values = vec![1; MAX_METAL_ELEMENTS + 1];
+        assert_eq!(
+            metal_add_i32(&values, &values),
+            Err(PlatformError::TooLarge)
+        );
+    }
+    #[test]
+    fn cpu_reference_uses_the_same_checked_bounded_contract() {
+        assert_eq!(cpu_reference_add(&[-4, 7], &[9, -2]), Ok(vec![5, 5]));
+        assert_eq!(
+            cpu_reference_add(&[i32::MAX], &[1]),
+            Err(PlatformError::InvalidInput)
+        );
+    }
+    #[cfg(target_os = "macos")]
+    #[test]
+    #[ignore = "requires a Metal-capable device; run explicitly with --ignored"]
+    fn actual_metal_worker_adds_and_reads_back_on_hardware() {
+        let lhs = [-10, 0, 42, 2_000_000];
+        let rhs = [3, 5, -12, 7];
+        assert_eq!(
+            metal_add_i32(&lhs, &rhs).unwrap(),
+            cpu_reference_add(&lhs, &rhs).unwrap()
+        );
+        let boundary = vec![1_i32; MAX_METAL_ELEMENTS];
+        assert_eq!(
+            metal_add_i32(&boundary, &boundary).unwrap(),
+            cpu_reference_add(&boundary, &boundary).unwrap()
         );
     }
     #[cfg(target_os = "macos")]

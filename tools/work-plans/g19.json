@@ -1,0 +1,126 @@
+{
+  "goal": "G19",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/19",
+  "base": {
+    "repository": "eylema-dev/eylema",
+    "main": "590ff647dd8a3fbee272e2fc2e517f22e2a1a754",
+    "tree": "593ef15cb62ccab401d4fa6936cd9568b2460fcd"
+  },
+  "accepted_dependencies": {
+    "G18": [
+      {
+        "repository": "eylema-dev/eylema-evals",
+        "pr": "https://github.com/eylema-dev/eylema-evals/pull/7",
+        "head": "7d6fd3e4761fab68f7340333b4da707ef4541f64",
+        "main": "9f2225cbfa150416f776165cf1c65624eca1f260",
+        "tree": "d2affe168b5edc9479524e290598772afb1966ea",
+        "main_ci": {
+          "id": 38265221384,
+          "head": "9f2225cbfa150416f776165cf1c65624eca1f260",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "7d6fd3e4761fab68f7340333b4da707ef4541f64",
+          "reviewer": "g16_review separate Codex context; no actionable findings"
+        }
+      },
+      {
+        "repository": "eylema-dev/devguide",
+        "pr": "https://github.com/eylema-dev/devguide/pull/26",
+        "head": "8d267b67835a73e4837f60dc8d8b82a795ab9df0",
+        "main": "66e5fd8d117c3ef522bd0b8f53eb806974b01a03",
+        "tree": "e1d17c11426da3228e4281e48434f29ba02535e9",
+        "main_ci": {
+          "id": 38265680308,
+          "head": "66e5fd8d117c3ef522bd0b8f53eb806974b01a03",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "8d267b67835a73e4837f60dc8d8b82a795ab9df0",
+          "reviewer": "g16_review separate Codex context; no actionable findings"
+        }
+      }
+    ]
+  },
+  "allowed_paths": [
+    "crates/eylema-platform/",
+    "shaders/metal/",
+    "tools/work-plans/g19.json"
+  ],
+  "acceptance": [
+    {
+      "id": "G19-A1",
+      "check": "A deterministic bounded integer-vector operation executes on native Metal and actual M4 Pro readback matches the CPU reference. Record exact source, toolchain, OS/SDK, device, command, and outcome; no performance claim."
+    },
+    {
+      "id": "G19-A2",
+      "check": "Empty, mismatched, over-limit inputs fail before allocation/dispatch; arithmetic overflow returns an explicit error; exact bounds and each rejection are tested."
+    },
+    {
+      "id": "G19-A3",
+      "check": "Device/command-buffer worker failure maps to a stable error; injected worker-loss and object ownership/drop tests cover success and failure; actual M4 integration test proves command submission/readback."
+    },
+    {
+      "id": "G19-A4",
+      "check": "Six exact AGENTS commands, unchanged Rust fmt/clippy/native tests/build/selected Wasm gates, and git diff --check pass; no third-party production dependency; Metal code stays excluded from Wasm."
+    }
+  ],
+  "hardware": {
+    "device": "Apple M4 Pro, 24 GiB",
+    "os": "macOS 27.0.1",
+    "sdk": "Xcode SDK 27.0",
+    "architecture": "arm64",
+    "rust": "1.99.0"
+  },
+  "verification": {
+    "python": "3.14.8",
+    "local": {
+      "unittest": "passed; 46 tests",
+      "repository_check": "passed",
+      "pr_template": "passed",
+      "rust_check": "passed; native fmt, clippy -D warnings, all workspace tests/build, selected contracts/platform Wasm build",
+      "git_diff_check": "passed"
+    },
+    "hardware": {
+      "command": "cargo test -p eylema-platform actual_metal_worker_adds_and_reads_back_on_hardware --all-features --locked --offline -- --ignored --nocapture",
+      "status": "passed on Apple M4 Pro",
+      "coverage": "Metal dispatch and readback match checked CPU reference for representative values and the 4096-element upper bound"
+    },
+    "known_limits": [
+      "Metal is exercised on one M4 Pro only; no performance threshold or cross-device claim.",
+      "WebGPU, models, training and energy remain outside G19 and were not run."
+    ]
+  },
+  "targeted_repairs_used": 1,
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "roles": {
+    "architect": "Codex current context",
+    "implementer": "Codex current context",
+    "verifier": "Codex current context using local Rust/macOS, Git, Python and GitHub CLI",
+    "independent_reviewer": "g16_review separate context; final head pending"
+  },
+  "model": {
+    "planned": "not applicable to inherited implementation session",
+    "actual": "GPT-6 family; exact model SKU not exposed in task context"
+  },
+  "risks": [
+    "Raw Metal Objective-C ABI and buffer lifetime boundaries require narrow audited unsafe blocks and deterministic release on every path.",
+    "Only one Apple M4 Pro is in scope; no cross-device or performance-threshold claim.",
+    "A command-buffer or worker-loss test double proves error handling only; actual M4 dispatch/readback remains a separate mandatory hardware test."
+  ],
+  "non_targets": [
+    "Browser WebGPU or 3D rendering",
+    "General GPU scheduler or multi-device support",
+    "Model inference or training",
+    "Performance benchmark claims",
+    "License, publication, permissions, protection settings or spending changes"
+  ],
+  "rollback": "Revert the scoped PR; no data migration or external service change."
+}
