@@ -61,6 +61,14 @@ pub struct Fixture {
 }
 impl Fixture {
     pub fn new() -> Self {
+        Self::with_limits(Limits {
+            model_calls: 1,
+            repairs: 1,
+            wall_ms: 60_000,
+            usage_units: 1,
+        })
+    }
+    pub fn with_limits(limits: Limits) -> Self {
         let root = temp();
         let source = root.join("source");
         let control = root.join("control");
@@ -109,12 +117,7 @@ impl Fixture {
             out_of_scope: vec!["Publication and provider access".into()],
             targets: vec!["native_macos".into()],
             authorization_ref: "synthetic-fixture".into(),
-            limits: Limits {
-                model_calls: 1,
-                repairs: 1,
-                wall_ms: 60_000,
-                usage_units: 1,
-            },
+            limits,
         })
         .unwrap();
         let auth = FixtureAuthority(

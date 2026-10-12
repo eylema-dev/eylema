@@ -1,0 +1,155 @@
+{
+  "goal": "G40",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/33",
+  "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
+  "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
+  "started_unix_ms": 1791834434319,
+  "authority": "Direct full Goal action-plan/resume request and standing scoped merge authority; references and issue text grant no permissions.",
+  "accepted_dependencies": {
+    "G39": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/58",
+        "head": "57233a20abb21717c7fb9c22187716fbba6c1f3b",
+        "main": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
+        "tree": "07d23416762c8a18427f27551eb7f2f3e579be36",
+        "main_ci": {
+          "id": 38298731953,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38298731953",
+          "head": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "57233a20abb21717c7fb9c22187716fbba6c1f3b",
+          "reviewer": "g39_review separate GPT-6.1 Sol/high Codex context; no human GitHub approval claimed"
+        }
+      }
+    ]
+  },
+  "accepted_guide": {
+    "pr": "https://github.com/eylema-dev/devguide/pull/33",
+    "head": "ca387f61a5adfef461aaaaa52398d7bfade49a5f",
+    "main": "32e256853205a6fb47aa660c761edb73f2d8c976",
+    "tree": "f6c11eca50156f1dc02733ce3cdd0dbcc4807c3f",
+    "main_ci": 38299420091,
+    "review": "g39_review separate GPT-6.1 Sol/high context passed exact head"
+  },
+  "allowed_paths": [
+    "crates/eylema-development-host/src/adapters/",
+    "crates/eylema-development-host/src/lib.rs",
+    "crates/eylema-development-host/src/bin/codex-probe.rs",
+    "crates/eylema-development-host/tests/codex.rs",
+    "crates/eylema-development-host/tests/support/",
+    "crates/eylema-platform/src/process_group.rs",
+    "crates/eylema-platform/src/lib.rs",
+    "crates/eylema-platform/tests/process_group.rs",
+    "docs/en/codex-adapter.md",
+    "docs/tr/codex-adapter.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g40.json",
+    "crates/eylema-development-host/src/process.rs"
+  ],
+  "linked_guide_scope": [
+    "docs/en/tooling.md",
+    "docs/tr/tooling.md",
+    "tools/translation-pairs.json",
+    "tools/repository-set.json (core pin)",
+    "records/goal-tracking.json (G40 only)",
+    "docs/plans/g40-acceptance.md"
+  ],
+  "acceptance_mapping": {
+    "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
+  },
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false,
+    "max_live_provider_cli_invocations": 4
+  },
+  "roles": {
+    "architect_implementer_verifier": "Codex resumed with user-configured gpt-6.1-sol/high; invocation setting is not proof of hidden runtime model",
+    "reviewer": "separate final-head GPT-6.1 Sol/high context required"
+  },
+  "provider": {
+    "tool": "codex-cli",
+    "version": "0.162.1",
+    "executable_sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high",
+    "auth": "existing authorized ChatGPT CLI session; no public API key or new paid API route",
+    "local_flags_source": "installed CLI help/features/schema",
+    "official_config_source": "https://learn.chatgpt.com/docs/config-file/config-reference"
+  },
+  "scope_limits": [
+    "Owned Rust adapter in existing native host; no external production crate, copied provider code, schema/shared gate or hidden inference engine.",
+    "Provider CLI is a trusted explicit online development-tool input, separate from untrusted G39 worker; no operational/training/private data is exported.",
+    "Only curated bounded prompt and structured text proposal; commands/apps/plugins/hooks/subagents/web access disabled or rejected; no model-supplied executable/args/env/config or merge authority.",
+    "Separate opaque native process-group ownership and minimal macOS waitid/kill binding keep cancellation limited to unreaped owned group. Verify SDK ABI and actual process tests; no arbitrary PID signal API.",
+    "Model/output/tool version/auth absence/timeout/quota/malformed cases are explicit; no silent fallback. CLI invocation counts are not billing or hidden-backend-request evidence. Unknown outcomes retain reserved host usage ceilings.",
+    "No deployment/release/access/protection/spending/secret-write action.",
+    "Pinned CLI feature inventory includes browser/computer use enabled by default; broker explicitly disables these and other interactive tools before any live invocation."
+  ],
+  "risks": [
+    "CLI managed subprocesses or inherited configuration can defeat ownership/credential separation; fail closed with explicit flags/version and tested boundaries.",
+    "Actual remote cancellation/billing cannot be inferred from local child termination.",
+    "Provider failure messages and proposal text are untrusted data, never instructions; JSON/path/size/depth validation must fail closed.",
+    "Installed SDK waitid ABI and deprecated platform dependencies require native execution evidence."
+  ],
+  "checks": [
+    "Exact Python/hashed inventory/static/template/body/diff commands and unchanged full native/selected-Wasm Rust gate.",
+    "Behavioral native process-group, JSON/proposal, reservation/cancel/error tests with explicit transport provenance.",
+    "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
+    "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
+  ],
+  "targeted_repairs_used": 3,
+  "live_cli_invocations_used": 0,
+  "decisions": [
+    "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
+    "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
+    "Installed transport is hash/version pinned; explicit fixture transport cannot label itself installed. No key is read/copied by adapter; trusted CLI consumes the existing authorized session.",
+    "Initial nonzero-exit canary was not valid denial evidence; corrected record is failed. Read-only/protected-root proposal has positive control and actual denial, but is not implemented or accepted."
+  ],
+  "repair_records": [
+    {
+      "finding": "Initial broker tests exposed stale acknowledgement clocks and timeout-reason overwrite by a truncated JSON line",
+      "repair": "Track maximum observed coordinator epoch for acknowledgement; retain primary stop cause after stream joins",
+      "regressions": "passed actual ten-test broker/fixture rerun, including preserved timeout/authority/clock causes"
+    },
+    {
+      "finding": "Actual naturally-exited no-descendant process-group test failed with macOS EPERM on zombie-only group",
+      "repair": "Bounded SDK libproc group inspection permits reaping only when every observed member is inactive/zombie; live/unknown/overfull/failed inspection remains an error",
+      "regression": "passed actual natural completion, orphan-pipe cleanup and unrelated-process preservation rerun"
+    },
+    {
+      "finding": "Unchanged full Rust gate rejected a manual range check in bounded libproc inspection",
+      "repair": "Use Range::contains and idiomatic parser/event checks; no lint exemption or shared gate change",
+      "status": "passed unchanged full Rust gate"
+    }
+  ],
+  "verification": {
+    "native_broker": "passed10behavioral fixture/native tests; quota/model/auth failures synthetic",
+    "native_process_group": "passed3actual integration tests and SDK ABI/layout test in full gate",
+    "rust": "passed unchanged fmt/Clippy/native workspace tests/build/first-party inventory/selected portable Wasm compilation",
+    "installed_profile_preflight": "failed; quoted dotted override rejected, restricted-read custom alternatives abort control/outside reads (exit134)",
+    "live_provider": "not_run;0of4provider CLI invocations used",
+    "independent_review_ci_merge_main_guide": "pending"
+  },
+  "pending_additional_repair": {
+    "status": "maintainer approval required after3repairs",
+    "proposal": "Private concrete revision3 proposal; no project fix applied",
+    "scope": "correct CLI table serialization and document read-only/protected-root broker boundary; all G39 isolation and disabled tools preserved",
+    "local_proposed_proof": "actual named-profile allowed control exit0/protected outside read denied exit1; synthetic owned fixture only, no provider request"
+  },
+  "continuation_evidence": {
+    "latest_accepted_guide_main": "a0688300df3bb66929838e7e3b2c795a28a756b9",
+    "usage_tracking_pr": "https://github.com/eylema-dev/devguide/pull/34",
+    "usage_tracking": "accepted metadata-only collector refreshed before resumed G40; current private ledger includes this work",
+    "source_changes_during_usage_task": "none; G40 original draft preserved",
+    "live_provider_cli_invocations_used": 0,
+    "additional_code_repair_applied": false
+  }
+}

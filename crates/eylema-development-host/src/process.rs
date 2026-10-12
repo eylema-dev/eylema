@@ -33,6 +33,9 @@ impl ProcessLimits {
 #[derive(Clone, Default)]
 pub struct CancelHandle(Arc<AtomicBool>);
 impl CancelHandle {
+    pub(crate) fn is_cancelled(&self) -> bool {
+        self.0.load(Ordering::Acquire)
+    }
     pub fn cancel(&self) {
         self.0.store(true, Ordering::Release);
     }

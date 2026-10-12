@@ -2,6 +2,7 @@
 //! Native trusted host. Public inputs are not identity or publication authority.
 //! Task code executes only in a default-deny macOS single-process sandbox.
 
+pub mod adapters;
 mod files;
 mod process;
 mod workspace;

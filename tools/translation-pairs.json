@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "3cb3b9ab0b2233ae6b06d424dd2e623cd162d511fc7d0ae79015481922975825",
-      "tr_sha256": "a030929e4af1573f5b65e05d6be642dd6ad5d543629b0bd9f8cdad1ea58228b2"
+      "en_sha256": "0206c0c1ea2f4e3373ce74223e4b71b635b2cab7fcf2c639dc8fc3f0e9203302",
+      "tr_sha256": "bbdd892eb617adc1047a68077e5f07e34c63c4a8ac93476c89cbad4705491727"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -115,6 +115,12 @@
       "tr": "docs/tr/development-workspace.md",
       "en_sha256": "4192ff0d85302b4ff988d3c7309b0d22ca5b5d78157edd15fbd74c4cb8a628c4",
       "tr_sha256": "77dadbe467acf30480435ecc5e857b81d852613bc07e11f0486a787fa5c371a6"
+    },
+    {
+      "en": "docs/en/codex-adapter.md",
+      "tr": "docs/tr/codex-adapter.md",
+      "en_sha256": "1d4b4667c40f01815d0bc1564e37349ea4557e8dee31c26e7bcc6272d595c50b",
+      "tr_sha256": "44fdb9df079164598a6faf27a5a5f5d1cfa66323db8d98509fc84fdb040f1cc2"
     }
   ],
   "documents": []

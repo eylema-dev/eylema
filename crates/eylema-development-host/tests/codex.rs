@@ -1,0 +1,319 @@
+#![cfg(target_os = "macos")]
+mod support;
+use eylema_development::{AcceptedTask, AuthorityResolver, Limits, NeedSpec};
+use eylema_development_host::{CancelHandle, adapters::*};
+use std::{
+    fs,
+    path::Path,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+    },
+    time::{Duration, Instant},
+};
+use support::*;
+
+fn fixture() -> Fixture {
+    Fixture::with_limits(Limits {
+        model_calls: 4,
+        repairs: 3,
+        wall_ms: 60_000,
+        usage_units: 300_000,
+    })
+}
+fn tool(f: &Fixture) -> CodexTool {
+    CodexTool::fixture(Path::new(env!("CARGO_BIN_EXE_codex-probe")), &f.root).unwrap()
+}
+fn invoke(mode: &str, wall_ms: u64, bytes: usize) -> CallOutcome {
+    let mut f = fixture();
+    let mut w = f.workspace();
+    let tool = tool(&f);
+    let start = f.started;
+    tool.invoke(
+        &mut w,
+        f.registry.get_mut(&f.key).unwrap(),
+        &f.auth,
+        || 1 + start.elapsed().as_millis() as u64,
+        CodexRequest {
+            prompt: mode,
+            limits: CallLimits {
+                wall_ms,
+                output_bytes: bytes,
+            },
+            cancel: &CancelHandle::default(),
+            unavailable_probe: false,
+        },
+    )
+    .unwrap()
+}
+#[test]
+fn explicit_fixture_returns_valid_proposal_usage_and_no_workspace_edit() {
+    let mut f = fixture();
+    let mut w = f.workspace();
+    let tool = tool(&f);
+    let start = f.started;
+    let result = tool
+        .invoke(
+            &mut w,
+            f.registry.get_mut(&f.key).unwrap(),
+            &f.auth,
+            || 1 + start.elapsed().as_millis() as u64,
+            CodexRequest {
+                prompt: "good",
+                limits: CallLimits {
+                    wall_ms: 5000,
+                    output_bytes: 8192,
+                },
+                cancel: &CancelHandle::default(),
+                unavailable_probe: false,
+            },
+        )
+        .unwrap();
+    assert_eq!(result.status, CallStatus::Completed);
+    assert_eq!(result.transport, Transport::ExplicitFixture);
+    assert_eq!(result.reported_total_tokens, Some(16));
+    assert_eq!(result.proposal.unwrap().changes[0].text, "Türkçe result\n");
+    assert_eq!(
+        fs::read_to_string(w.path().join("allowed.txt")).unwrap(),
+        "base\n"
+    );
+    let run = f.registry.get_mut(&f.key).unwrap();
+    assert!(run.active_call().is_none());
+    assert_eq!(run.usage().model_calls, 1);
+    assert_eq!(run.usage().reserved_units, 7000);
+}
+#[test]
+fn synthetic_quota_unavailable_authentication_and_bad_output_are_explicit() {
+    for (mode, expected) in [
+        ("quota", CallStatus::Quota),
+        ("unavailable", CallStatus::ModelUnavailable),
+        ("auth", CallStatus::AuthenticationUnavailable),
+        ("malformed", CallStatus::MalformedOutput),
+        ("unknown-event", CallStatus::MalformedOutput),
+        ("outside", CallStatus::MalformedOutput),
+        ("tool", CallStatus::UnexpectedTool),
+    ] {
+        assert_eq!(invoke(mode, 5000, 8192).status, expected, "{mode}");
+    }
+}
+#[test]
+fn actual_timeout_partial_line_does_not_replace_stop_reason_with_parse_failure() {
+    assert_eq!(
+        invoke("partial-wait", 100, 8192).status,
+        CallStatus::TimedOut
+    );
+}
+#[test]
+fn output_flood_is_bounded_and_reaped() {
+    assert_eq!(invoke("flood", 5000, 123).status, CallStatus::OutputLimit);
+}
+#[test]
+fn denied_or_exhausted_call_does_not_start_provider() {
+    let mut f = Fixture::new();
+    let mut w = f.workspace();
+    let tool = tool(&f);
+    let result = tool.invoke(
+        &mut w,
+        f.registry.get_mut(&f.key).unwrap(),
+        &f.auth,
+        || 1 + f.started.elapsed().as_millis() as u64,
+        CodexRequest {
+            prompt: "good",
+            limits: CallLimits {
+                wall_ms: 1000,
+                output_bytes: 8192,
+            },
+            cancel: &CancelHandle::default(),
+            unavailable_probe: false,
+        },
+    );
+    assert!(result.is_err());
+    assert!(
+        !w.path()
+            .parent()
+            .unwrap()
+            .join("provider/started.txt")
+            .exists()
+    );
+}
+#[test]
+fn changed_tool_cannot_claim_installed_transport() {
+    let f = fixture();
+    assert!(
+        CodexTool::installed(
+            Path::new(env!("CARGO_BIN_EXE_codex-probe")),
+            &f.root,
+            &f.root
+        )
+        .is_err()
+    );
+}
+#[test]
+fn authority_revocation_stops_group_preserves_reason_and_acknowledges_charged_ticket() {
+    struct Revocable {
+        accepted: AcceptedTask,
+        revoked: Arc<AtomicBool>,
+    }
+    impl AuthorityResolver for Revocable {
+        fn resolve(&self, _: &NeedSpec) -> Option<AcceptedTask> {
+            if self.revoked.load(Ordering::Acquire) {
+                None
+            } else {
+                Some(self.accepted.clone())
+            }
+        }
+    }
+    let mut f = fixture();
+    let mut w = f.workspace();
+    let tool = tool(&f);
+    let revoked = Arc::new(AtomicBool::new(false));
+    let auth = Revocable {
+        accepted: f.auth.0.clone(),
+        revoked: revoked.clone(),
+    };
+    let path = w.path().parent().unwrap().join("provider/started.txt");
+    let revoke = std::thread::spawn(move || {
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while !path.exists() && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert!(path.exists());
+        revoked.store(true, Ordering::Release);
+    });
+    let start = f.started;
+    let result = tool.invoke(
+        &mut w,
+        f.registry.get_mut(&f.key).unwrap(),
+        &auth,
+        || 1 + start.elapsed().as_millis() as u64,
+        CodexRequest {
+            prompt: "wait",
+            limits: CallLimits {
+                wall_ms: 5000,
+                output_bytes: 8192,
+            },
+            cancel: &CancelHandle::default(),
+            unavailable_probe: false,
+        },
+    );
+    revoke.join().unwrap();
+    assert_eq!(result.unwrap().status, CallStatus::AuthorityDenied);
+    let run = f.registry.get_mut(&f.key).unwrap();
+    assert!(run.active_call().is_none());
+    assert_eq!(run.usage().reserved_units, 7000);
+}
+
+#[test]
+fn explicit_cancel_after_provider_start_reaps_and_acknowledges_without_refund() {
+    let mut f = fixture();
+    let mut w = f.workspace();
+    let tool = tool(&f);
+    let cancel = CancelHandle::default();
+    let signal = cancel.clone();
+    let path = w.path().parent().unwrap().join("provider/started.txt");
+    let requester = std::thread::spawn(move || {
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while !path.exists() && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        assert!(path.exists());
+        signal.cancel();
+    });
+    let start = f.started;
+    let result = tool
+        .invoke(
+            &mut w,
+            f.registry.get_mut(&f.key).unwrap(),
+            &f.auth,
+            || 1 + start.elapsed().as_millis() as u64,
+            CodexRequest {
+                prompt: "wait",
+                limits: CallLimits {
+                    wall_ms: 5000,
+                    output_bytes: 8192,
+                },
+                cancel: &cancel,
+                unavailable_probe: false,
+            },
+        )
+        .unwrap();
+    requester.join().unwrap();
+    assert_eq!(result.status, CallStatus::Cancelled);
+    let run = f.registry.get_mut(&f.key).unwrap();
+    assert_eq!(run.state(), eylema_development::State::Cancelled);
+    assert!(run.active_call().is_none());
+    assert_eq!(run.usage().reserved_units, 7000);
+}
+
+#[test]
+fn actual_clock_and_task_budget_stops_keep_cause_and_charged_acknowledgement() {
+    for (clock, cause) in [
+        (0, eylema_development::Error::ClockRegressed),
+        (60_002, eylema_development::Error::BudgetExhausted),
+    ] {
+        let mut f = fixture();
+        let mut w = f.workspace();
+        let tool = tool(&f);
+        let path = w.path().parent().unwrap().join("provider/started.txt");
+        let before = 1 + f.started.elapsed().as_millis() as u64;
+        let result = tool
+            .invoke(
+                &mut w,
+                f.registry.get_mut(&f.key).unwrap(),
+                &f.auth,
+                || if path.exists() { clock } else { before },
+                CodexRequest {
+                    prompt: "wait",
+                    limits: CallLimits {
+                        wall_ms: 5000,
+                        output_bytes: 8192,
+                    },
+                    cancel: &CancelHandle::default(),
+                    unavailable_probe: false,
+                },
+            )
+            .unwrap();
+        assert!(
+            path.exists(),
+            "provider must really start before clock/budget failure"
+        );
+        assert_eq!(result.status, CallStatus::CoordinatorStopped(cause));
+        let run = f.registry.get_mut(&f.key).unwrap();
+        assert!(run.active_call().is_none());
+        assert_eq!(run.usage().reserved_units, 7000);
+        if clock > 0 {
+            assert_eq!(run.state(), eylema_development::State::BudgetExhausted);
+        }
+    }
+}
+
+#[test]
+fn dangling_provider_schema_cannot_overwrite_outside_private_storage() {
+    use std::os::unix::fs::symlink;
+    let mut f = fixture();
+    let mut w = f.workspace();
+    let tool = tool(&f);
+    let private = w.path().parent().unwrap().join("provider");
+    fs::create_dir(&private).unwrap();
+    let outside = f.root.join("must-not-be-created.txt");
+    symlink(&outside, private.join("proposal-schema.json")).unwrap();
+    let start = f.started;
+    let result = tool.invoke(
+        &mut w,
+        f.registry.get_mut(&f.key).unwrap(),
+        &f.auth,
+        || 1 + start.elapsed().as_millis() as u64,
+        CodexRequest {
+            prompt: "good",
+            limits: CallLimits {
+                wall_ms: 5000,
+                output_bytes: 8192,
+            },
+            cancel: &CancelHandle::default(),
+            unavailable_probe: false,
+        },
+    );
+    assert!(result.is_err());
+    assert!(!outside.exists());
+    assert_eq!(f.registry.get_mut(&f.key).unwrap().usage().model_calls, 0);
+}

@@ -3,6 +3,9 @@
 
 use eylema_contracts::codec::MAX_WIRE_BYTES;
 
+/// Opaque ownership of a native subprocess group; unavailable outside macOS.
+pub mod process_group;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PlatformError {
     TooLarge,
