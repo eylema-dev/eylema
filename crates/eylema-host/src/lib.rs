@@ -10,6 +10,7 @@ use eylema_runtime::*;
 use std::sync::Arc;
 mod command;
 mod encoding;
+pub mod native;
 mod services;
 use command::{Command, State};
 use encoding::*;
@@ -407,6 +408,25 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
         } else {
             Ok(Some(typed(ExecutionId::new(string(&v)?))?))
         }
+    }
+
+    /// Read-only trusted scheduler check, avoiding durable idle polling.
+    pub fn has_pending_work(&self) -> Result<bool> {
+        self.healthy()?;
+        self.state
+            .runtime
+            .has_pending_work(&self.state.owner)
+            .map_err(HostError::Runtime)
+    }
+
+    /// Original retained wire context with the same scoped execution read.
+    pub fn execution_record(
+        &self,
+        s: &DurableSession,
+        id: &ExecutionId,
+    ) -> Result<codec::WireRecord> {
+        let execution = self.execution(s, id)?;
+        self.state.execution_record(id, execution)
     }
     pub fn preview_approval(
         &mut self,

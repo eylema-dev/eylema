@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "0c0ff4a3cac6b06352b610232a587b6f13ba67c33dfe74ff9569f711026fd722",
-      "tr_sha256": "fa6e58f4cd97b1f942a787bddd44d797626dddc569da5e048beb808234376d01"
+      "en_sha256": "e2139b40c7b71c60a75e27032c5c1b1c223ef39a9369fd5fc40f23cf1c44ded9",
+      "tr_sha256": "609e604f6024363c070c7b348d7a0b26d9c3473fb93730d0dcaaaa51e7d3ed35"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -67,6 +67,12 @@
       "tr": "docs/tr/runtime-recovery.md",
       "en_sha256": "285b3a594487d1143a120c308eac6e8356f41eaf24924370d6a9e843f4ad771a",
       "tr_sha256": "bf4204aa6625830ecb3cee07eae74363df8790afb461cc62c66c29220292b461"
+    },
+    {
+      "en": "docs/en/local-http.md",
+      "tr": "docs/tr/local-http.md",
+      "en_sha256": "dd2e6e1405c37cb283f8c34e50c9a411a62741dc901032ccb45c245d3a6d535b",
+      "tr_sha256": "2523975bfc1a81e8ee12ca8cf27ec00d55386099d8346a71c5aab36102ce3d69"
     }
   ],
   "documents": []

@@ -8,6 +8,7 @@
 pub mod codec;
 mod primitives;
 mod records;
+pub mod transport;
 
 pub use primitives::*;
 pub use records::*;

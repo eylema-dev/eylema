@@ -211,6 +211,14 @@ impl<S: HostServices> Runtime<S> {
             slot,
         })
     }
+
+    /// Trusted scheduler inspection; conveys no task data or new authority.
+    pub fn has_pending_work(&self, host: &HostKey) -> Result<bool> {
+        if !Arc::ptr_eq(&self.identity, &host.identity) {
+            return Err(ErrorCode::Forbidden);
+        }
+        Ok(!self.queue.is_empty())
+    }
     fn grant(&self, session: &Session) -> Result<&Grant> {
         if !Arc::ptr_eq(&self.identity, &session.identity)
             || self.revoked_slots.contains_key(&session.slot)
