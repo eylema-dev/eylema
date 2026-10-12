@@ -87,6 +87,50 @@ export function handleDeviceLoss(info, { status, controls, language = 'en', rele
   release();
 }
 
+// Evaluation host clocks measure animation cadence and queue-observed wall
+// latency. They are not GPU timestamp queries or presented-frame timestamps.
+export async function measureSceneFrames({
+  frameCount, ready, render, completed,
+  nextFrame = () => new Promise((resolve) => globalThis.requestAnimationFrame(resolve)),
+  now = () => globalThis.performance.now(),
+  wallNow = () => Date.now(),
+  memory = () => globalThis.performance?.memory?.usedJSHeapSize ?? null,
+}) {
+  if (!Number.isInteger(frameCount) || frameCount < 2 || frameCount > 240) {
+    throw new RangeError('frame count must be between 2 and 240');
+  }
+  const samples = [];
+  let previous = null;
+  try {
+    for (let index = 0; index < frameCount; index += 1) {
+      if (!ready()) throw new Error('GPU_UNAVAILABLE');
+      const timestamp = await nextFrame();
+      if (!ready()) throw new Error('GPU_UNAVAILABLE');
+      const interval = previous === null ? null : timestamp - previous;
+      if (!Number.isFinite(timestamp) || (interval !== null && (!Number.isFinite(interval) || interval < 0))) {
+        throw new Error('INVALID_FRAME_CLOCK');
+      }
+      previous = timestamp;
+      const start = now();
+      const startUnix = wallNow();
+      render(index);
+      await completed();
+      if (!ready()) throw new Error('GPU_UNAVAILABLE');
+      const elapsed = now() - start;
+      if (!Number.isFinite(elapsed) || elapsed < 0) throw new Error('INVALID_COMPLETION_CLOCK');
+      const heap = memory();
+      if (heap !== null && (!Number.isFinite(heap) || heap < 0)) throw new Error('INVALID_MEMORY_SAMPLE');
+      samples.push({ index, start_unix_ms: startUnix, end_unix_ms: wallNow(), raf_interval_ms: interval,
+        queue_completion_ms: elapsed, js_heap_bytes: heap });
+    }
+  } catch (error) {
+    error.samples = samples;
+    error.failed_frame_index = samples.length;
+    throw error;
+  }
+  return samples;
+}
+
 function cubeVertices() {
   const faces = [
     { points: [[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]], color: [0.25,0.78,0.68] },
@@ -139,12 +183,24 @@ export async function initializeWebGpuScene({
   let selected = 1;
   const positions = Array.from({ length: 3 }, () => ({ x: 0, y: 0 }));
   let state = 'starting';
+  let released = false;
   let lossReason = 'unknown';
+  const measurementOutput = documentRef.getElementById('scene-measurement');
+  const parameters = new URLSearchParams(globalThis.location?.hash?.slice(1) || '');
+  const measurementRequested = parameters.has('g22');
+  const writeMeasurement = (value) => {
+    if (measurementRequested && measurementOutput) {
+      measurementOutput.hidden = false;
+      measurementOutput.textContent = JSON.stringify(value);
+    }
+  };
+  writeMeasurement({ status: 'pending', format_version: 1 });
   const updateSelection = () => { selection.textContent = words[language].selected(selected); };
   const setState = (next) => {
     state = next;
     status.textContent = next === 'ready' ? words[language].ready : next === 'lost' ? words[language].lost(lossReason) : next === 'unsupported' ? words[language].unsupported : next === 'failed' ? words[language].failed : words[language].starting;
     setControlsDisabled(controls, next !== 'ready');
+    if (['unsupported', 'failed', 'lost'].includes(next)) writeMeasurement({ status: 'failed', reason: next });
   };
   const setLanguage = (next) => {
     language = next === 'tr' ? 'tr' : 'en';
@@ -157,6 +213,7 @@ export async function initializeWebGpuScene({
     controls.down.textContent = words[language].moveDown;
   };
   const release = () => {
+    released = true;
     buffers.forEach((buffer) => { try { buffer.destroy(); } catch (_) {} });
     buffers = [];
     if (device) { try { device.destroy(); } catch (_) {} }
@@ -250,8 +307,28 @@ export async function initializeWebGpuScene({
       updateSelection();
       render();
     });
-  } catch (_) {
+    if (measurementRequested && measurementOutput) {
+      const frameCount = Number(parameters.get('g22'));
+      const trial = Number(parameters.get('trial'));
+      if (!Number.isInteger(trial) || trial < 1 || trial > 3) throw new RangeError('invalid measurement trial');
+      const samples = await measureSceneFrames({
+        frameCount, ready: () => state === 'ready' && !released,
+        render: (index) => { positions[selected].x = 0.16 * Math.sin(index / 10); render(); },
+        completed: () => device.queue.onSubmittedWorkDone(),
+      });
+      writeMeasurement({ format_version: 1, status: 'passed', trial, frame_count: frameCount,
+        browser_user_agent: String(globalThis.navigator?.userAgent || 'unknown').slice(0, 512),
+        adapter_info: Object.fromEntries(['vendor', 'architecture', 'device', 'description'].map((key) =>
+          [key, String(adapter.info?.[key] || '').slice(0, 256)])),
+        fallback_adapter: typeof adapter.isFallbackAdapter === 'boolean' ? adapter.isFallbackAdapter : null,
+        canvas_extent: [canvas.width, canvas.height], declared_buffer_bytes: geometry.bytes.byteLength + 16,
+        memory_scope: 'browser-reported JS heap estimate; excludes GPU/driver memory',
+        latency_scope: 'animation-frame cadence and submit-to-queue-completion wall time; not GPU/presentation timestamps', samples });
+    }
+  } catch (error) {
     if (state !== 'lost') { setState('failed'); release(); }
+    writeMeasurement({ format_version: 1, status: 'failed', reason: 'MEASUREMENT_OR_GPU_FAILURE',
+      samples: Array.isArray(error?.samples) ? error.samples : [], failed_frame_index: error?.failed_frame_index ?? null });
   }
   return controller;
 }
