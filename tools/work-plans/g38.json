@@ -136,12 +136,19 @@
     "python_tests": "passed47",
     "repository": "passed178files,3schemas,18localtranslations; EN/TR reviewed and fingerprints refreshed",
     "rust": "passed unchanged fmt/clippy/native tests/build/dependency inventory and selectedWasmlibrary compilation including eylema-development",
-    "coordinator_tests": "passed20 behavioral tests; fixture inputs, actual native Rust execution",
+    "coordinator_tests": "passed22 behavioral tests; fixture inputs, actual native Rust execution",
     "native_consumer": "passed actual executable coordinator-proof; host authority/check/review observations explicitly synthetic, no provider/reviewer/PR call",
     "external_process_provider_github": "not_run; G39-G43 separate gates",
     "gpu_model_training": "not_applicable for G38",
     "pr_template_diff": "passed",
     "independent_review_current_ci_merge_main_ci_devguide": "pending"
   },
-  "targeted_repairs_used": 0
+  "targeted_repairs_used": 1,
+  "repair_record": {
+    "reviewed_head": "1392d840b653755ef9412407284f5b9b2fc63c95",
+    "status": "failed; P2 exhausted in-flight call cancellation was rejected",
+    "repair": "Allow pending-call cancellation even after budget exhaustion, retain charged counters/ticket, acknowledge to terminal cancelled; already exhausted run without pending call remains exhausted on idempotent cancel",
+    "regressions": "New cancellation regression fails original reviewed implementation (cargo exit101) and passes fixed source; no-pending exhausted cancellation remains terminal",
+    "fresh_review": "pending exact repaired head"
+  }
 }

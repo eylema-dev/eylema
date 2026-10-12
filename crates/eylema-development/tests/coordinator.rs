@@ -547,6 +547,47 @@ fn in_flight_timeout_retains_reservation_and_completion_cannot_revive_run() {
 }
 
 #[test]
+fn exhausted_in_flight_call_still_accepts_cancellation_and_matching_ack() {
+    let need = NeedSpec::new(draft()).unwrap();
+    let host = host(&need);
+    let mut registry = Registry::new(1).unwrap();
+    let run = registry.receive(need, 10).unwrap();
+    implementing(run, &host);
+    let t = run.reserve_call(2, 14, &host).unwrap();
+    assert_eq!(run.poll(1010, &host), Err(Error::BudgetExhausted));
+    run.cancel(1011).unwrap();
+    assert_eq!(run.state(), State::CancelRequested);
+    assert_eq!(run.active_call(), Some(&t));
+    assert_eq!(run.poll(1012, &host), Err(Error::Cancelled));
+    run.finish_call(&t, 1013).unwrap();
+    assert_eq!(run.state(), State::Cancelled);
+    assert_eq!(
+        run.usage(),
+        Usage {
+            model_calls: 1,
+            repairs: 0,
+            reserved_units: 2
+        }
+    );
+    assert_eq!(run.reserve_call(1, 1014, &host), Err(Error::Cancelled));
+    assert_eq!(run.finish_call(&t, 1015), Err(Error::UnknownCall));
+    run.cancel(1016).unwrap();
+    assert_eq!(run.state(), State::Cancelled);
+}
+
+#[test]
+fn completed_exhausted_run_cancel_is_idempotent_without_reset() {
+    let need = NeedSpec::new(draft()).unwrap();
+    let host = host(&need);
+    let mut registry = Registry::new(1).unwrap();
+    let run = registry.receive(need, 10).unwrap();
+    implementing(run, &host);
+    assert_eq!(run.poll(1010, &host), Err(Error::BudgetExhausted));
+    run.cancel(1011).unwrap();
+    assert_eq!(run.state(), State::BudgetExhausted);
+}
+
+#[test]
 fn registry_is_bounded_and_terminal_same_key_retries_remain_terminal() {
     assert!(Registry::new(0).is_err());
     assert!(Registry::new(129).is_err());

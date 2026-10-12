@@ -541,14 +541,11 @@ impl Coordinator {
     /// this state alone cannot prove a process stopped or undo earlier effects.
     pub fn cancel(&mut self, now: u64) -> Result<()> {
         self.clock(now)?;
-        if self.state == State::BudgetExhausted {
-            return Err(Error::BudgetExhausted);
+        if self.active_call.is_some() {
+            self.state = State::CancelRequested;
+        } else if self.state != State::BudgetExhausted {
+            self.state = State::Cancelled;
         }
-        self.state = if self.active_call.is_some() {
-            State::CancelRequested
-        } else {
-            State::Cancelled
-        };
         Ok(())
     }
 }
