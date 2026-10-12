@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "7a323cbe4e92453e213516e3d7b0010662bcd2a4daac28b94443cfcb24926132",
-      "tr_sha256": "2b13937f8c8323a510b3b985218aa1670428fc44a3ce43a184e7fd12c7c276c0"
+      "en_sha256": "4c7a007cab317f910108da87ec33ffd16f00912b98eebb62491e11f7cf4f5f58",
+      "tr_sha256": "c5fdd0208e9fc061bfe823e63cd0c8d353535e1e355a171057d611881e849720"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -91,6 +91,12 @@
       "tr": "docs/tr/local-webgpu.md",
       "en_sha256": "e3e5a29e7b2580f61a3068c62e2e0466431c14f9364975e5d8afef5a7f44b303",
       "tr_sha256": "5f0af779693833a2e81deae43df716ae4d6981034098b1bdd9c01002b35f64c9"
+    },
+    {
+      "en": "docs/en/resource-manager.md",
+      "tr": "docs/tr/resource-manager.md",
+      "en_sha256": "c1f64da09713090ba4d77d033de2d08c1c176a90a074e04f74cb267af2dbc068",
+      "tr_sha256": "5f685359001a2393fbdfcd14727c3c76586ac86ed4f72230e0d26ef201aa643d"
     }
   ],
   "documents": []

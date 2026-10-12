@@ -10,6 +10,7 @@ use std::sync::Arc;
 
 mod oversight;
 mod recovery;
+pub mod resource;
 pub use oversight::*;
 
 pub type Result<T> = std::result::Result<T, ErrorCode>;
