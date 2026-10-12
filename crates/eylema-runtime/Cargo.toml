@@ -10,3 +10,7 @@ eylema-contracts.workspace = true
 
 [dev-dependencies]
 eylema-platform = { path = "../eylema-platform" }
+
+[[example]]
+name = "combined-gpu-proof"
+test = true

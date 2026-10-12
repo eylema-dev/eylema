@@ -23,6 +23,8 @@ G20 WebGPU scene notes: [local WebGPU view](docs/en/local-webgpu.md) describe th
 
 G21 adds bounded, cooperative host-resource admission for declared Metal, view and model work classes: [resource manager](docs/en/resource-manager.md). Its byte limits account for caller-declared transient reservations, not physical GPU memory, model weights or actual browser/model execution.
 
+G22 adds bounded [combined GPU measurement hosts](docs/en/combined-gpu-measurement.md); repeated real hardware acceptance and raw distributions are tracked in eylema-evals.
+
 ## Contribute
 
 Start with [contribution rules](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.md) and the shared [AI agent contract](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md). Follow the [first-release roadmap](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/roadmap.md), [quality gates](https://github.com/eylema-dev/devguide/blob/main/docs/en/quality-gates.md) and [CI tooling inventory](https://github.com/eylema-dev/devguide/blob/main/docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.

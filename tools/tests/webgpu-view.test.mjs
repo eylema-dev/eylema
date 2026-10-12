@@ -9,6 +9,7 @@ import {
   requestWebGpuAdapter,
   selectObjectAt,
   watchDeviceLoss,
+  measureSceneFrames,
 } from '../../crates/eylema-web/src/webgpu-view.mjs';
 
 function fakeDocument() {
@@ -27,6 +28,45 @@ test('missing or unavailable adapter is explicit and disables every control', as
   assert.equal(scene.state, 'unsupported');
   assert.match(documentRef.elements.get('scene-status').textContent, /UNSUPPORTED/);
   for (const [id, control] of documentRef.elements) if (id.startsWith('scene-') && id !== 'scene-status' && id !== 'scene-selection' && id !== 'scene-canvas') assert.equal(control.disabled, true);
+});
+
+test('measurement bounds prevent arbitrary allocation and preserve unavailable memory as null', async () => {
+  const base = { ready: () => true, render() {}, completed: async () => {}, nextFrame: async () => 10,
+    now: () => 1, wallNow: () => 100, memory: () => null };
+  for (const frameCount of [0, 1, 241, 1.5, NaN]) {
+    await assert.rejects(measureSceneFrames({ ...base, frameCount }), RangeError);
+  }
+  const times = [10, 27, 48];
+  const samples = await measureSceneFrames({ ...base, frameCount: 3, nextFrame: async () => times.shift() });
+  assert.deepEqual(samples.map((sample) => sample.raf_interval_ms), [null, 17, 21]);
+  assert.deepEqual(samples.map((sample) => sample.js_heap_bytes), [null, null, null]);
+});
+
+test('measurement rejects device loss, decreasing clocks and invalid memory rather than returning success', async () => {
+  const base = { frameCount: 2, ready: () => true, render() {}, completed: async () => {},
+    nextFrame: async () => 10, now: () => 1, wallNow: () => 100, memory: () => null };
+  await assert.rejects(measureSceneFrames({ ...base, ready: () => false }), /GPU_UNAVAILABLE/);
+  let active = true;
+  await assert.rejects(measureSceneFrames({ ...base, ready: () => active,
+    completed: async () => { active = false; } }), /GPU_UNAVAILABLE/);
+  const times = [10, 9];
+  await assert.rejects(measureSceneFrames({ ...base, nextFrame: async () => times.shift() }), /INVALID_FRAME_CLOCK/);
+  const completion = [10, 9];
+  await assert.rejects(measureSceneFrames({ ...base, now: () => completion.shift() }), /INVALID_COMPLETION_CLOCK/);
+  await assert.rejects(measureSceneFrames({ ...base, memory: () => NaN }), /INVALID_MEMORY_SAMPLE/);
+});
+
+test('failed frame retains preceding raw samples for the evaluation report', async () => {
+  let completions = 0;
+  await assert.rejects(measureSceneFrames({ frameCount: 3, ready: () => true, render() {},
+    nextFrame: async () => 10, now: () => 1, wallNow: () => 100, memory: () => null,
+    completed: async () => { if (++completions === 2) throw new Error('device fixture'); },
+  }), (error) => {
+    assert.equal(error.samples.length, 1);
+    assert.equal(error.failed_frame_index, 1);
+    assert.equal(error.samples[0].index, 0);
+    return true;
+  });
 });
 
 test('pointer selection follows projected cube bounds on both axes and stays unambiguous at movement limits', () => {

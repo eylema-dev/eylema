@@ -1,0 +1,81 @@
+{
+  "format_version": 1,
+  "goal": "G22",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema-evals/issues/4",
+  "base": {
+    "repository": "eylema-dev/eylema",
+    "main": "d3e9fa69b45983fcb63442612a49f430fb13c174",
+    "tree": "44690c9c22b0bfe5a6b3eb76cf6f81ac217b607b"
+  },
+  "accepted_dependency": {
+    "goal": "G21",
+    "core_pr": "https://github.com/eylema-dev/eylema/pull/54",
+    "core_main": "d3e9fa69b45983fcb63442612a49f430fb13c174",
+    "core_main_ci": 38278420548,
+    "reviewed_head": "bdf553c7512350d78c04c28e58acbd2b95237aad",
+    "devguide_pr": "https://github.com/eylema-dev/devguide/pull/30",
+    "devguide_main": "afa9947479518d6678bdb83de3eeb7a8675ac257",
+    "devguide_main_ci": 38279112539
+  },
+  "allowed_paths": [
+    "crates/eylema-runtime/examples/combined-gpu-proof.rs",
+    "crates/eylema-runtime/Cargo.toml",
+    "crates/eylema-web/src/webgpu-view.mjs",
+    "crates/eylema-web/src/console.html",
+    "tools/tests/webgpu-view.test.mjs",
+    "docs/en/combined-gpu-measurement.md",
+    "docs/tr/combined-gpu-measurement.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g22.json"
+  ],
+  "acceptance_mapping": [
+    {
+      "id": "G22-A1",
+      "check": "Three real M4 combined Metal/WebGPU trials preserve raw native wall latency, browser animation-frame intervals/queue-observed completion latency, actual native process RSS and browser-reported JS heap estimates where available; verify tab-close/native-worker liveness using same process and further completed Metal samples."
+    },
+    {
+      "id": "G22-A2",
+      "check": "Bounded inputs/samples, unavailable/device-loss/failure paths preserve failures; local Python and full native Rust/Wasm gates, exact-head CI, separate review, main CI and devguide live Goal/pin acceptance."
+    }
+  ],
+  "boundaries": [
+    "Rust first-party Metal worker remains core; Python eval tools orchestrate and analyse measurement only, without an application-runtime or source-profile transition.",
+    "Browser animation-frame intervals and queue completion wall times are not presented-frame or hardware GPU timestamp measurements.",
+    "Native RSS and browser-reported JS heap estimates are memory observations; physical VRAM/driver allocations, energy, model inference and performance SLA remain explicitly unmeasured.",
+    "Browser and native process resources are independent; this task does not claim WebGPU-to-Metal shared memory or unified cross-process admission."
+  ],
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "roles": {
+    "architect_implementer_verifier": "Codex current context, inherited GPT-6 family; exact model SKU not exposed",
+    "independent_reviewer": "separate exact final head review required"
+  },
+  "verification": {
+    "local": {
+      "python_tests": "passed; 47 tests",
+      "browser_fixture_tests": "passed; 8 dependency-free Node fixtures, not browser/GPU acceptance",
+      "native_worker_unit": "passed; finite argument regression is enabled in ordinary Cargo tests through test=true",
+      "rust_gate": "passed; native fmt/clippy/workspace tests/build and selected contracts/platform Wasm build; inherited RUST_LOG omitted and Cargo bin added to PATH",
+      "native_metal_smoke": "passed; one bounded 1-second M4 run, 80 actual 4096-element Metal calls, every readback matched CPU reference; observed wall duration range 2.943459\u201341.723541ms",
+      "repository_and_translation": "passed; bilingual docs/hash review; 167 files,17 local language records",
+      "pr_template_and_diff": "passed"
+    },
+    "pending": [
+      "Three real combined Chrome/Metal trials and raw RSS/browser measurement results",
+      "Exact-head independent review and GitHub CI",
+      "Post-merge main CI and devguide live Goal/pin acceptance"
+    ]
+  },
+  "risks": [
+    "Real Chrome acceptance requires maintainer-granted local browser time; authorization requested and pending.",
+    "Closing a tab cannot preempt the native worker; worker stdin stop and maximum duration/sample count bound its lifetime.",
+    "Measurements are observations on one hardware/workload profile, without invented numerical success thresholds."
+  ],
+  "targeted_repairs_used": 0
+}
