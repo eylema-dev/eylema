@@ -21,6 +21,8 @@ Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/
 
 G20 WebGPU sahnesi notları: [yerel WebGPU görünümü](docs/tr/local-webgpu.md) sınırlı sahneyi, kontrolleri ve açık desteklenmiyor/aygıt kaybı durumlarını anlatır. Tarayıcı/GPU kabulü depo kontrollerinden ayrı kaydedilir.
 
+G21, bildirilen Metal, görünüm ve model iş sınıfları için sınırlı, eşgüdümlü ana makine kaynak kabulü ekler: [kaynak yöneticisi](docs/tr/resource-manager.md). Bayt sınırları çağıranın bildirdiği geçici rezervasyonları kapsar; fiziksel GPU belleğini, model ağırlıklarını veya gerçek tarayıcı/model yürütümünü ölçmez.
+
 ## Katkıda bulunma
 
 [Katkı kuralları](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/roadmap.md), [kalite kontrollerini](https://github.com/eylema-dev/devguide/blob/main/docs/tr/quality-gates.md) ve [CI araç envanterini](https://github.com/eylema-dev/devguide/blob/main/docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.

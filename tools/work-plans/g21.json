@@ -1,0 +1,108 @@
+{
+  "goal": "G21",
+  "task_revision": 2,
+  "issue": "https://github.com/eylema-dev/eylema/issues/21",
+  "base": {
+    "repository": "eylema-dev/eylema",
+    "main": "99e791aaba9cccc2a8bdf4b0ce3a5eb572983e2b",
+    "tree": "117842c5acec933924415a8e2946f9cdd3968146"
+  },
+  "accepted_dependencies": {
+    "G19": {
+      "repository": "eylema-dev/eylema",
+      "pr": "https://github.com/eylema-dev/eylema/pull/52",
+      "head": "2ff7ac8184bff6b932e728963dfdff89ffe6e5aa",
+      "main": "125bc562466ed6fffd6b27856035e6735f96dbe6",
+      "main_ci": 38267694058,
+      "devguide_pr": "https://github.com/eylema-dev/devguide/pull/27",
+      "devguide_main": "be676ad94e2e4b7b0f69a6acd7ac233600747ab0"
+    },
+    "G20": {
+      "repository": "eylema-dev/eylema",
+      "pr": "https://github.com/eylema-dev/eylema/pull/53",
+      "head": "ea7ecd30bedc9a0c319e0222f22cebc2fe1b368a",
+      "main": "99e791aaba9cccc2a8bdf4b0ce3a5eb572983e2b",
+      "main_ci": 38271468209,
+      "review": "separate exact-head PASS",
+      "devguide_pr": "https://github.com/eylema-dev/devguide/pull/28",
+      "devguide_main": "b86f4c6327ee40c7d090fd8b4b961b63bea4fea3",
+      "devguide_main_ci": 38272902303
+    }
+  },
+  "allowed_paths": [
+    "crates/eylema-runtime/src/resource.rs",
+    "crates/eylema-runtime/src/lib.rs",
+    "crates/eylema-runtime/tests/resource_manager.rs",
+    "crates/eylema-runtime/examples/resource-proof.rs",
+    "docs/en/resource-manager.md",
+    "docs/tr/resource-manager.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g21.json"
+  ],
+  "acceptance": [
+    {
+      "id": "G21-A1",
+      "check": "Concurrent admission across Metal/view/model classes stays within configured per-class and global concurrency, queue and transient-byte bounds; overflow/full/oversized requests fail atomically; fairness, saturation, cancellation and lease-release regressions pass."
+    },
+    {
+      "id": "G21-A2",
+      "check": "Bounded multi-thread combined class-pressure test reports maximum queue and reserved transient bytes and proves limits; execute one real M4 Metal operation under a Metal reservation when available. View/model pressure is synthetic; no actual view/model or physical VRAM claim."
+    },
+    {
+      "id": "G21-A3",
+      "check": "Cooperative cancellation is observed at bounded work-chunk boundaries and releases the lease; measure request-to-effective-stop p50/p95/max on M4 under combined class pressure, without asserting an unapproved SLA or rollback."
+    },
+    {
+      "id": "G21-A4",
+      "check": "Run exact local AGENTS commands, native Rust fmt/clippy/tests/build, selected Wasm, translation fingerprint and diff checks; exact-head CI/review; post-merge main CI and devguide live Goal/workspace checks."
+    }
+  ],
+  "budget": {
+    "active_minutes": 120,
+    "max_targeted_repairs": 3,
+    "new_spending": false
+  },
+  "roles": {
+    "architect": "Codex current context",
+    "implementer": "Codex current context",
+    "verifier": "Codex current context using Rust/Cargo, Python, GitHub CLI and M4 Metal when available",
+    "independent_reviewer": "g16_review separate Codex context; pending final core PR head review"
+  },
+  "model": {
+    "planned": "GPT-6 family; inherited task model",
+    "actual": "GPT-6 family; exact model SKU not exposed in task context"
+  },
+  "targeted_repairs_used": 3,
+  "verification": {
+    "environment": "Apple M4 Pro, 24 GiB, macOS 27.0.1 arm64; Python 3.14.8; Rust 1.99.0; Node 26.11.1",
+    "local": {
+      "resource_manager_tests": "passed; 9 tests cover validation, total/class queue and byte bounds, checked overflow, per-class FIFO/round-robin, cancellation, lease release, combined class pressure and concurrent admission",
+      "rust_check": "passed; native fmt, clippy with warnings denied, full workspace tests/build, selected contracts/platform Wasm builds and dependency inventory; ran with only inherited RUST_LOG omitted because the gate rejects non-allowlisted RUST* variables",
+      "metal_example": "passed; native M4 Metal addition under Metal lease while synthetic View and Model leases remained active",
+      "combined_stress": "passed; synthetic combined three-class test observed queue=3, active=3, reserved=96 bytes; concurrent admission stress high-water queue=6, active=3, reserved=64 bytes; all remained below configured limits",
+      "stop_latency": "passed; one M4 stress-test sample measured request-to-effective-stop p50=4.834us, p95=16.875us, max=16.875us; descriptive observation, not an SLA",
+      "repository": "passed; translation hashes refreshed after final bilingual edits",
+      "pr_template": "passed",
+      "git_diff_check": "passed"
+    },
+    "not_run": [
+      "Actual browser-view execution or WebGPU-to-Metal interop",
+      "Model inference or model-weight memory",
+      "Physical VRAM measurement or performance SLA"
+    ]
+  },
+  "risks": [
+    "Only cooperative work can be stopped; an in-progress non-cooperative platform call cannot be preempted.",
+    "Resource manager byte reservations account for declared transient buffers only, not driver/VRAM/model-weight memory.",
+    "Browser view and model adapters remain separate integrations and are represented by synthetic class pressure in this task."
+  ],
+  "non_targets": [
+    "Real model inference/training or model weights",
+    "Browser WebGPU-to-Metal interop",
+    "VRAM or physical allocator measurement",
+    "Performance SLA or rollback of external effects",
+    "Third-party production crates, release, deployment, license/access changes or spending"
+  ]
+}
