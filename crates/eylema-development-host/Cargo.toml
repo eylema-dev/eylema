@@ -1,0 +1,12 @@
+[package]
+license.workspace = true
+name = "eylema-development-host"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+eylema-development = { path = "../eylema-development" }
+eylema-platform = { path = "../eylema-platform" }
+eylema-contracts.workspace = true

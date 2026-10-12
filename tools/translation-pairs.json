@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "d31e98b6248800f857c672805e66a3f60f010ef8fdc068fbefeabfbdc6b821d5",
-      "tr_sha256": "9c9817d8ae3e7428905c679c362adb76668c33cebc3e8e4a86232bd23cbbca1a"
+      "en_sha256": "3cb3b9ab0b2233ae6b06d424dd2e623cd162d511fc7d0ae79015481922975825",
+      "tr_sha256": "a030929e4af1573f5b65e05d6be642dd6ad5d543629b0bd9f8cdad1ea58228b2"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -109,6 +109,12 @@
       "tr": "docs/tr/development-coordinator.md",
       "en_sha256": "0e8f0baada35f000abb70ab8ce49c6cc6ce58fbf94deda329f15f137bb2b5b4a",
       "tr_sha256": "db5741ff8e644dfc63cc1d705a388c0abfab77019327c3a91ae243f834060abe"
+    },
+    {
+      "en": "docs/en/development-workspace.md",
+      "tr": "docs/tr/development-workspace.md",
+      "en_sha256": "0a2e9b3f03b1bca664a8e3c87466359e90854edcad92e1172762f0e5aac1e05b",
+      "tr_sha256": "e6753dd0208e3052db09c892496dcc3fd62e85d96e87ea75305b4a21ce9d43ac"
     }
   ],
   "documents": []

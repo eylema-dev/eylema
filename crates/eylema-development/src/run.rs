@@ -198,6 +198,10 @@ impl Coordinator {
     pub fn head(&self) -> Option<&Commit> {
         self.head.as_ref()
     }
+    /// The immutable base resolved by the trusted host, if admission succeeded.
+    pub fn accepted_base(&self) -> Option<&Commit> {
+        self.accepted.as_ref().map(|a| &a.base)
+    }
     pub fn active_call(&self) -> Option<&CallTicket> {
         self.active_call.as_ref()
     }
