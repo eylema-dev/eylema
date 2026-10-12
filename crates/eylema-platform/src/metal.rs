@@ -241,6 +241,11 @@ fn command_buffer_result(status: usize) -> Result<(), PlatformError> {
     }
 }
 
+fn finish_worker<T>(status: usize, resources: T) -> Result<T, PlatformError> {
+    command_buffer_result(status)?;
+    Ok(resources)
+}
+
 pub(super) fn add_i32(lhs: &[i32], rhs: &[i32]) -> Result<Vec<i32>, PlatformError> {
     let _pool = AutoreleasePool::new();
     let device = OwnedObject::from_owned(
@@ -353,7 +358,19 @@ pub(super) fn add_i32(lhs: &[i32], rhs: &[i32]) -> Result<Vec<i32>, PlatformErro
     let status =
         // SAFETY: live command buffer; status is NSUInteger per SDK enum.
         unsafe { send_usize0(command_buffer, c"status") };
-    command_buffer_result(status)?;
+    let (_, _, _, _, _, _, _, result_buffer) = finish_worker(
+        status,
+        (
+            device,
+            queue,
+            library,
+            function,
+            pipeline,
+            lhs_buffer,
+            rhs_buffer,
+            result_buffer,
+        ),
+    )?;
     let output =
         // SAFETY: MTLBuffer owns this pointer through completed command buffer.
         unsafe { send_pointer0(result_buffer.as_id(), c"contents") };
@@ -422,27 +439,25 @@ mod tests {
         assert_eq!(RELEASES.load(Ordering::SeqCst), 1);
     }
 
-    fn simulated_worker_failure() -> Result<(), PlatformError> {
+    #[test]
+    fn injected_worker_completion_failure_releases_acquired_resources() {
+        RELEASES.store(0, Ordering::SeqCst);
         let left = NonNull::new(Box::into_raw(Box::new(1_u8)).cast::<c_void>()).unwrap();
         let right = NonNull::new(Box::into_raw(Box::new(2_u8)).cast::<c_void>()).unwrap();
-        let _left = OwnedObject {
-            pointer: left,
-            release: fake_release,
-        };
-        let _right = OwnedObject {
-            pointer: right,
-            release: fake_release,
-        };
-        Err(PlatformError::ServiceFailure)
-    }
-
-    #[test]
-    fn every_retained_resource_is_released_after_worker_failure() {
-        RELEASES.store(0, Ordering::SeqCst);
-        assert_eq!(
-            simulated_worker_failure(),
+        let resources = [
+            OwnedObject {
+                pointer: left,
+                release: fake_release,
+            },
+            OwnedObject {
+                pointer: right,
+                release: fake_release,
+            },
+        ];
+        assert!(matches!(
+            finish_worker(3, resources),
             Err(PlatformError::ServiceFailure)
-        );
+        ));
         assert_eq!(RELEASES.load(Ordering::SeqCst), 2);
     }
 }
