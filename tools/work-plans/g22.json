@@ -89,7 +89,7 @@
     "repair": "Fixed six-byte control buffer; oversized, partial, unknown and empty input regressions; fresh exact-head review pending"
   },
   "integration_base": {
-    "main": "496351be437930b22a56253d8320a941980ac8d3",
+    "main": "496351b6b1d508a4988fb753bc0a65db5945a33e",
     "reason": "Refresh current main after independently merged PR55; preserve its accepted decisions, no new license or product decision made by G22"
   }
 }
