@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="eylema-csrf" content="__EYLEMA_CSRF__">
+    <meta name="color-scheme" content="light dark">
+    <title>Eylema local task console</title>
+    <link rel="stylesheet" href="/console.css">
+    <script src="/console.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <p class="eyebrow" id="eyebrow">Local task console</p>
+          <h1 id="title">Eylema</h1>
+        </div>
+        <label for="language" id="language-label">Language</label>
+        <select id="language" name="language">
+          <option value="en">English</option>
+          <option value="tr">Türkçe</option>
+        </select>
+      </header>
+
+      <p id="intro">Create and run a bounded task on this Mac. Your task and execution IDs are saved in this browser so you can inspect them after a reload.</p>
+      <p class="notice" id="authority-note">This local session is not verified as a person. A stop request may be denied; the console will keep showing the observed execution state.</p>
+
+      <section aria-labelledby="actions-title">
+        <h2 id="actions-title">Task actions</h2>
+        <div class="field">
+          <label for="delta" id="delta-label">Value to add</label>
+          <input id="delta" name="delta" type="number" min="1" max="1000000" value="7" inputmode="numeric">
+        </div>
+        <div class="buttons">
+          <button id="create" type="button">Create task</button>
+          <button id="run" type="button" disabled>Run task</button>
+          <button id="inspect" type="button" disabled>Refresh status</button>
+          <button id="stop" type="button" disabled>Request stop</button>
+        </div>
+      </section>
+
+      <section aria-labelledby="state-title">
+        <h2 id="state-title">Observed state</h2>
+        <dl>
+          <div><dt id="task-label">Task ID</dt><dd id="task-id">—</dd></div>
+          <div><dt id="execution-label">Execution ID</dt><dd id="execution-id">—</dd></div>
+          <div><dt id="value-label">Current value</dt><dd id="value">—</dd></div>
+          <div><dt id="progress-label">Steps completed</dt><dd id="progress">—</dd></div>
+          <div><dt id="execution-state-label">Execution state</dt><dd id="execution-state">—</dd></div>
+        </dl>
+      </section>
+
+      <p id="message" role="status" aria-live="polite" aria-atomic="true"></p>
+      <p id="error" class="error" role="alert" aria-live="assertive" aria-atomic="true"></p>
+    </main>
+  </body>
+</html>

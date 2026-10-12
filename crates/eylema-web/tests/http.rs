@@ -116,6 +116,14 @@ impl Fixture {
         stream.write_all(bytes).unwrap();
         response(&mut stream)
     }
+    #[allow(dead_code)]
+    fn raw_http(&self, bytes: &[u8]) -> String {
+        let mut stream = self.connect();
+        stream.write_all(bytes).unwrap();
+        let mut response = Vec::new();
+        stream.read_to_end(&mut response).unwrap();
+        String::from_utf8(response).unwrap()
+    }
     fn request(
         &self,
         credentials: &Credentials,
@@ -134,6 +142,110 @@ impl Fixture {
     fn bytes(&self) -> Vec<u8> {
         std::fs::read(&self.path).unwrap()
     }
+}
+
+#[test]
+fn browser_console_cookie_csrf_task_and_stop_flow() {
+    let f = Fixture::new(Config::default());
+    let get = format!(
+        "GET /console HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n",
+        f.address
+    );
+    let page = f.raw_http(get.as_bytes());
+    assert!(page.starts_with("HTTP/1.1 200"), "{page}");
+    assert!(page.contains("Set-Cookie: eylema_session="));
+    assert!(page.contains("HttpOnly; SameSite=Strict"));
+    assert!(page.contains("name=\"eylema-csrf\""));
+    assert!(page.contains("Create task"));
+    assert!(page.contains("aria-live=\"assertive\""));
+    for (path, marker) in [
+        ("/console.css", "focus-visible"),
+        ("/console.js", "localStorage"),
+    ] {
+        let asset = f.raw_http(
+            format!(
+                "GET {path} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n",
+                f.address
+            )
+            .as_bytes(),
+        );
+        assert!(asset.starts_with("HTTP/1.1 200"), "{asset}");
+        assert!(asset.contains(marker));
+        assert!(asset.contains("Content-Security-Policy: default-src 'self'"));
+    }
+    let cookie = page
+        .split("Set-Cookie: eylema_session=")
+        .nth(1)
+        .unwrap()
+        .split(';')
+        .next()
+        .unwrap();
+    let csrf = page
+        .split("name=\"eylema-csrf\" content=\"")
+        .nth(1)
+        .unwrap()
+        .split('"')
+        .next()
+        .unwrap();
+    let post = |path: &str, body: &str| {
+        format!(
+            "POST /console/v1/{path} HTTP/1.1\r\nHost: {}\r\nOrigin: {}\r\nSec-Fetch-Site: same-origin\r\nCookie: eylema_session={cookie}\r\nX-Eylema-CSRF: {csrf}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+            f.address,
+            f.origin,
+            body.len()
+        )
+    };
+    let created = f.raw_http(post("create", "{\"delta\":7}").as_bytes());
+    assert!(created.starts_with("HTTP/1.1 200"), "{created}");
+    let created_body = created.split("\r\n\r\n").nth(1).unwrap();
+    let task = created_body
+        .split("\"task\":\"")
+        .nth(1)
+        .unwrap()
+        .split('"')
+        .next()
+        .unwrap();
+    let running =
+        f.raw_http(post("run", &format!("{{\"task\":\"{task}\",\"delta\":7}}")).as_bytes());
+    assert!(running.starts_with("HTTP/1.1 200"), "{running}");
+    let run_body = running.split("\r\n\r\n").nth(1).unwrap();
+    let execution = run_body
+        .split("\"execution\":\"")
+        .nth(1)
+        .unwrap()
+        .split('"')
+        .next()
+        .unwrap();
+    let inspect = f.raw_http(
+        post(
+            "inspect",
+            &format!("{{\"task\":\"{task}\",\"execution\":\"{execution}\"}}"),
+        )
+        .as_bytes(),
+    );
+    assert!(inspect.starts_with("HTTP/1.1 200"), "{inspect}");
+    assert!(inspect.contains(task));
+    assert!(inspect.contains(execution));
+    let stop = f.raw_http(post("stop", &format!("{{\"execution\":\"{execution}\"}}")).as_bytes());
+    assert!(stop.starts_with("HTTP/1.1 403"), "{stop}");
+    assert!(stop.contains("FORBIDDEN"));
+    let no_csrf = format!(
+        "POST /console/v1/inspect HTTP/1.1\r\nHost: {}\r\nOrigin: {}\r\nCookie: eylema_session={cookie}\r\nContent-Type: application/json\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{{}}",
+        f.address, f.origin
+    );
+    let rejected = f.raw_http(no_csrf.as_bytes());
+    assert!(rejected.starts_with("HTTP/1.1 403"));
+    assert!(rejected.contains("FORBIDDEN"));
+    let wrong_origin = post("inspect", &format!("{{\"task\":\"{task}\"}}"))
+        .replace(&f.origin, "http://attacker.invalid");
+    let rejected_origin = f.raw_http(wrong_origin.as_bytes());
+    assert!(rejected_origin.starts_with("HTTP/1.1 403"));
+    let oversized = format!(
+        "POST /console/v1/inspect HTTP/1.1\r\nHost: {}\r\nOrigin: {}\r\nSec-Fetch-Site: same-origin\r\nCookie: eylema_session={cookie}\r\nX-Eylema-CSRF: {csrf}\r\nContent-Type: application/json\r\nContent-Length: 999999\r\nConnection: close\r\n\r\n",
+        f.address, f.origin
+    );
+    let rejected_size = f.raw_http(oversized.as_bytes());
+    assert!(rejected_size.starts_with("HTTP/1.1 413"));
 }
 impl Drop for Fixture {
     fn drop(&mut self) {

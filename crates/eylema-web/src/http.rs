@@ -41,10 +41,16 @@ impl RequestDeadline {
     }
 }
 
-pub(crate) struct Headers(BTreeMap<String, String>);
+pub(crate) struct Headers(BTreeMap<String, String>, String, String);
 impl Headers {
     pub(crate) fn get(&self, key: &str) -> Option<&str> {
         self.0.get(key).map(String::as_str)
+    }
+    fn method(&self) -> &str {
+        &self.1
+    }
+    fn path(&self) -> &str {
+        &self.2
     }
 }
 fn remaining(deadline: Instant) -> Result<Duration, WebError> {
@@ -106,9 +112,11 @@ fn headers(
     if parts.len() != 3 || parts[2] != "HTTP/1.1" {
         return Err(WebError::Malformed);
     }
-    if parts[0] != "POST" || parts[1] != "/v1/request" {
+    if !matches!(parts[0], "GET" | "POST") || !parts[1].starts_with('/') {
         return Err(WebError::Unsupported);
     }
+    let method = parts[0].to_owned();
+    let path = parts[1].to_owned();
     let mut values = BTreeMap::new();
     for line in lines {
         if values.len() == 32 {
@@ -138,15 +146,219 @@ fn headers(
     {
         return Err(WebError::Malformed);
     }
-    Ok(Headers(values))
+    Ok(Headers(values, method, path))
+}
+struct HttpResponse {
+    status: u16,
+    content_type: &'static str,
+    body: Vec<u8>,
+    cookie: Option<String>,
+}
+fn json_error(code: &str) -> Vec<u8> {
+    format!("{{\"error\":\"{code}\"}}").into_bytes()
+}
+fn json_field<'a>(body: &'a str, name: &str) -> Option<&'a str> {
+    let needle = format!("\"{name}\"");
+    let rest = body
+        .split_once(&needle)?
+        .1
+        .trim_start()
+        .strip_prefix(':')?
+        .trim_start();
+    if let Some(rest) = rest.strip_prefix('"') {
+        Some(rest.split('"').next()?)
+    } else {
+        Some(rest.split([',', '}']).next()?.trim())
+    }
+}
+fn console_response<T: Storage, H: Sha256, S: HostServices>(
+    server: &mut Server<T, H, S>,
+    headers: &Headers,
+    body: &[u8],
+) -> Result<HttpResponse, WebError> {
+    let path = headers.path();
+    if headers.method() == "GET" {
+        if headers.get("host") != Some(server.authority.as_str()) {
+            return Err(WebError::Forbidden);
+        }
+        let (bearer, csrf) = server.console_session()?;
+        let (content_type, source) = match path {
+            "/console" => (
+                "text/html; charset=utf-8",
+                include_str!("console.html").replace("__EYLEMA_CSRF__", &csrf),
+            ),
+            "/console.css" => (
+                "text/css; charset=utf-8",
+                include_str!("console.css").to_owned(),
+            ),
+            "/console.js" => (
+                "text/javascript; charset=utf-8",
+                include_str!("console.js").to_owned(),
+            ),
+            _ => return Err(WebError::Unsupported),
+        };
+        let cookie = (path == "/console").then(|| {
+            format!(
+                "eylema_session={bearer}; HttpOnly; SameSite=Strict; Path=/console/v1; Max-Age=3600"
+            )
+        });
+        return Ok(HttpResponse {
+            status: 200,
+            content_type,
+            body: source.into_bytes(),
+            cookie,
+        });
+    }
+    if headers.method() != "POST" || !path.starts_with("/console/v1/") {
+        return Err(WebError::Unsupported);
+    }
+    if headers.get("content-type") != Some("application/json") {
+        return Err(WebError::Malformed);
+    }
+    let actor = server.authenticate(headers)?;
+    let text = std::str::from_utf8(body).map_err(|_| WebError::Malformed)?;
+    let value = match path {
+        "/console/v1/create" => {
+            let delta = json_field(text, "delta")
+                .and_then(|v| v.parse::<u64>().ok())
+                .ok_or(WebError::Malformed)?;
+            let result = server.console_create(actor, delta)?;
+            let Value::List(fields) = result else {
+                return Err(WebError::Malformed);
+            };
+            let Value::Text(task) = &fields[0] else {
+                return Err(WebError::Malformed);
+            };
+            format!("{{\"task\":\"{task}\",\"value\":0,\"steps\":0}}")
+        }
+        "/console/v1/run" => {
+            let task = json_field(text, "task").ok_or(WebError::Malformed)?;
+            let delta = json_field(text, "delta")
+                .and_then(|v| v.parse::<u64>().ok())
+                .unwrap_or(7);
+            let result = server.console_run(actor, task, delta)?;
+            let Value::Text(execution) = result else {
+                return Err(WebError::Malformed);
+            };
+            format!("{{\"task\":\"{task}\",\"execution\":\"{execution}\",\"state\":\"accepted\"}}")
+        }
+        "/console/v1/inspect" => {
+            let task = TaskId::new(
+                json_field(text, "task")
+                    .ok_or(WebError::Malformed)?
+                    .to_owned(),
+            )
+            .map_err(|_| WebError::Malformed)?;
+            let snapshot = server.host.task(&server.actors[actor].session, &task)?;
+            let execution_id = json_field(text, "execution")
+                .filter(|v| !v.is_empty())
+                .and_then(|v| ExecutionId::new(v.to_owned()).ok())
+                .or_else(|| server.actors[actor].last_console_execution.clone());
+            let (execution, state) = if let Some(id) = &execution_id {
+                server
+                    .host
+                    .execution_record(&server.actors[actor].session, id)
+                    .ok()
+                    .and_then(|r| match r {
+                        WireRecord::Execution { execution, .. } => (execution.fields().task_id
+                            == task)
+                            .then(|| match execution.fields().state {
+                                ExecutionState::Accepted => "accepted",
+                                ExecutionState::Queued => "queued",
+                                ExecutionState::Running => "running",
+                                ExecutionState::CancelRequested => "cancelRequested",
+                                ExecutionState::Succeeded => "succeeded",
+                                ExecutionState::Failed => "failed",
+                                ExecutionState::Cancelled => "cancelled",
+                                ExecutionState::OutcomeUnknown => "outcomeUnknown",
+                            }),
+                        _ => None,
+                    })
+                    .map(|state| (id.as_str(), state))
+                    .unwrap_or(("", "notStarted"))
+            } else {
+                ("", "notStarted")
+            };
+            format!(
+                "{{\"task\":\"{}\",\"execution\":\"{execution}\",\"value\":{},\"steps\":{},\"state\":\"{state}\"}}",
+                snapshot.task.fields().task_id.as_str(),
+                snapshot.value,
+                snapshot.performed_steps
+            )
+        }
+        "/console/v1/stop" => {
+            let id = ExecutionId::new(
+                json_field(text, "execution")
+                    .ok_or(WebError::Malformed)?
+                    .to_owned(),
+            )
+            .map_err(|_| WebError::Malformed)?;
+            let result = server.dispatch(actor, Request::Cancel(id))?;
+            let Value::List(fields) = result else {
+                return Err(WebError::Malformed);
+            };
+            let Value::Text(outcome) = &fields[0] else {
+                return Err(WebError::Malformed);
+            };
+            let state = if outcome == "requested" {
+                "cancelRequested"
+            } else if let Value::Text(state) = &fields[2] {
+                state.as_str()
+            } else {
+                return Err(WebError::Malformed);
+            };
+            format!("{{\"state\":\"{state}\"}}")
+        }
+        _ => return Err(WebError::Unsupported),
+    };
+    Ok(HttpResponse {
+        status: 200,
+        content_type: "application/json; charset=utf-8",
+        body: value.into_bytes(),
+        cookie: None,
+    })
 }
 fn process<T: Storage, H: Sha256, S: HostServices>(
     server: &mut Server<T, H, S>,
     reader: &mut BufReader<impl TimedRead>,
     clock: &impl DeadlineClock,
-) -> Result<Value, WebError> {
+) -> Result<HttpResponse, WebError> {
     let deadline = RequestDeadline::start(clock, server.config.request_timeout)?;
     let headers = headers(reader, server.config.header_bytes, &deadline, clock)?;
+    if headers.method() == "GET" || headers.path().starts_with("/console/v1/") {
+        let mut body = Vec::new();
+        if headers.method() == "POST" {
+            let length = headers
+                .get("content-length")
+                .ok_or(WebError::Malformed)?
+                .parse::<usize>()
+                .map_err(|_| WebError::TooLarge)?;
+            if length > server.config.body_bytes {
+                return Err(WebError::TooLarge);
+            }
+            body.resize(length, 0);
+            let mut offset = 0;
+            while offset < body.len() {
+                offset += read(reader, &mut body[offset..], &deadline, clock)?;
+            }
+            if !reader.buffer().is_empty() {
+                return Err(WebError::Malformed);
+            }
+            deadline.remaining(clock)?;
+        }
+        return match console_response(server, &headers, &body) {
+            Ok(response) => Ok(response),
+            Err(error) => Ok(HttpResponse {
+                status: error.status(),
+                content_type: "application/json; charset=utf-8",
+                body: json_error(error.code()),
+                cookie: None,
+            }),
+        };
+    }
+    if headers.method() != "POST" || headers.path() != "/v1/request" {
+        return Err(WebError::Unsupported);
+    }
     let content_length = headers.get("content-length").ok_or(WebError::Malformed)?;
     if content_length.is_empty() || !content_length.bytes().all(|b| b.is_ascii_digit()) {
         return Err(WebError::Malformed);
@@ -174,7 +386,13 @@ fn process<T: Storage, H: Sha256, S: HostServices>(
     if Instant::now() >= server.actors[actor].expires {
         return Err(WebError::Unauthorized);
     }
-    server.dispatch(actor, request)
+    let value = server.dispatch(actor, request)?;
+    Ok(HttpResponse {
+        status: 200,
+        content_type: "application/eylema",
+        body: protocol::encode_response(value).map_err(|_| WebError::TooLarge)?,
+        cookie: None,
+    })
 }
 fn write(stream: &mut TcpStream, mut bytes: &[u8], deadline: Instant) -> Result<(), WebError> {
     let mut interrupted = 0;
@@ -210,26 +428,30 @@ pub(crate) fn serve<T: Storage, H: Sha256, S: HostServices>(
 ) {
     let mut reader = BufReader::with_capacity(512, stream);
     let result = process(server, &mut reader, &SystemClock);
-    let (mut status, mut body) = match result {
-        Ok(value) => match protocol::encode_response(value) {
-            Ok(body) => (200, body),
-            Err(_) => (
-                413,
-                protocol::encode_error(WebError::TooLarge.code()).expect("static error"),
-            ),
+    let mut response = match result {
+        Ok(response) => response,
+        Err(error) => HttpResponse {
+            status: error.status(),
+            content_type: "application/eylema",
+            body: protocol::encode_error(error.code()).expect("bounded error code"),
+            cookie: None,
         },
-        Err(error) => (
-            error.status(),
-            protocol::encode_error(error.code()).expect("bounded error code"),
-        ),
     };
+    let mut status = response.status;
+    let mut body = response.body;
     if body.len() > server.config.response_bytes {
         status = 413;
         body = protocol::encode_error(WebError::TooLarge.code()).expect("static error");
     }
     let response = format!(
-        "HTTP/1.1 {status} Response\r\nContent-Type: application/eylema\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src 'none'; frame-ancestors 'none'\r\n\r\n",
-        body.len()
+        "HTTP/1.1 {status} Response\r\nContent-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\nContent-Security-Policy: default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'\r\n{}\r\n",
+        response.content_type,
+        body.len(),
+        response
+            .cookie
+            .take()
+            .map(|c| format!("Set-Cookie: {c}\r\n"))
+            .unwrap_or_default()
     );
     let mut response = response.into_bytes();
     response.extend_from_slice(&body);

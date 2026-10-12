@@ -278,13 +278,21 @@ fn start_service() -> Result<()> {
     let journal_path = directory.join(JOURNAL_FILE);
     let session_path = directory.join(SESSION_FILE);
     let stop_path = directory.join(STOP_FILE);
+    let preferred = saved_service_address(&directory)?;
     let (host, owner) = open_host(&directory)?;
     // A successful exclusive journal open proves the previous service no longer owns this store.
     let _ = fs::remove_file(&session_path);
     let _ = fs::remove_file(directory.join("session.session.tmp"));
     let _ = fs::remove_file(&stop_path);
-    let mut server = Server::bind(host, owner, Config::default())
-        .map_err(|_| CliError("SERVICE_UNAVAILABLE"))?;
+    let config = Config {
+        address: preferred
+            .filter(|address| std::net::TcpListener::bind(address).is_ok())
+            .unwrap_or_else(|| SocketAddr::from((Ipv4Addr::LOCALHOST, 0))),
+        ..Config::default()
+    };
+    let mut server =
+        Server::bind(host, owner, config).map_err(|_| CliError("SERVICE_UNAVAILABLE"))?;
+    save_service_origin(&directory, server.origin())?;
     let credentials = server
         .register_session(cli_grant()?)
         .map_err(|_| CliError("SESSION_UNAVAILABLE"))?;
@@ -325,6 +333,44 @@ fn start_service() -> Result<()> {
     let _ = journal_path;
     println!("{{\"status\":\"stopped\"}}");
     Ok(())
+}
+
+fn saved_service_address(directory: &Path) -> Result<Option<SocketAddr>> {
+    let path = directory.join("origin.txt");
+    let metadata = match fs::symlink_metadata(&path) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => return Err(CliError("STORAGE_UNAVAILABLE")),
+    };
+    if metadata.file_type().is_symlink() || !metadata.is_file() || metadata.len() > 128 {
+        return Err(CliError("UNSAFE_SESSION"));
+    }
+    let origin = fs::read_to_string(path).map_err(|_| CliError("STORAGE_UNAVAILABLE"))?;
+    let origin = origin.trim_end_matches(['\r', '\n']);
+    if origin.contains('\n') || origin.contains('\r') {
+        return Err(CliError("UNSAFE_SESSION"));
+    }
+    parse_origin(origin).map(|(address, _)| Some(address))
+}
+
+fn save_service_origin(directory: &Path, origin: &str) -> Result<()> {
+    let path = directory.join("origin.txt");
+    let tmp = directory.join("origin.tmp");
+    let _ = fs::remove_file(&tmp);
+    let mut options = OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut file = options
+        .open(&tmp)
+        .map_err(|_| CliError("STORAGE_UNAVAILABLE"))?;
+    writeln!(file, "{origin}").map_err(|_| CliError("STORAGE_UNAVAILABLE"))?;
+    file.sync_all()
+        .map_err(|_| CliError("STORAGE_UNAVAILABLE"))?;
+    fs::rename(tmp, path).map_err(|_| CliError("STORAGE_UNAVAILABLE"))
 }
 
 fn stop_service() -> Result<()> {
