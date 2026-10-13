@@ -1,11 +1,11 @@
 {
   "goal": "G40",
-  "task_revision": 4,
+  "task_revision": 5,
   "issue": "https://github.com/eylema-dev/eylema/issues/33",
   "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
   "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
   "started_unix_ms": 1791834434319,
-  "authority": "Actual maintainer answer approved30additional active minutes; existing5totalrepairs/4totalproviderinvocations caps unchanged; authorized merge only after real acceptance,current checks,new separate review.",
+  "authority": "Actual maintainer reply approves revision5 within concrete diagnostic plan:30additionalactive minutes,one diagnostic repair,total5liveCLIcap;stop on first failednormalprobe.",
   "accepted_dependencies": {
     "G39": [
       {
@@ -65,10 +65,10 @@
     "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
   },
   "budget": {
-    "active_minutes": 210,
-    "max_targeted_repairs": 5,
+    "active_minutes": 240,
+    "max_targeted_repairs": 6,
     "new_spending": false,
-    "max_live_provider_cli_invocations": 4
+    "max_live_provider_cli_invocations": 5
   },
   "roles": {
     "architect_implementer_verifier": "Codex resumed with user-configured gpt-6.1-sol/high; invocation setting is not proof of hidden runtime model",
@@ -105,7 +105,7 @@
     "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
-  "targeted_repairs_used": 5,
+  "targeted_repairs_used": 6,
   "live_cli_invocations_used": 2,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
@@ -138,19 +138,26 @@
       "finding": "unchanged Clippy rejected2needlessborrows;actualsuccess probe stoppedonunexpecteditem",
       "repair": "cycle5diagnosespassiveerror/unknown-event metadata andcorrectsborrowlintwithoutweakeningtoolrejection",
       "status": "passedfullRustgate/passiveerrorregression;realnormalrequestTransportFailedremainsunresolved"
+    },
+    {
+      "finding": "real TransportFailed is ambiguous with current sanitized observation;CLIusageaggregate lacks observed buckets",
+      "repair": "singleapproved diagnostic cycle adds bounded enum/exit/write/turn/message/observedusage metadata only",
+      "status": "diagnosticimplementationpassedmeaningfulred-greenandunchangedfullRustgate;freshreviewbeforeprovider"
     }
   ],
   "verification": {
-    "python": "passed47tests/hashinstall/venv",
-    "rust": "passedunchangedfmt/Clippy/nativeworkspace tests/build/inventory/selectedWasmcompilation atfinalruntime source",
+    "python": "passed47tests/hashinstall/venv atrevision5",
+    "rust": "passedunchangedfullfmt/Clippy/nativeworkspace/allfeatures/selectedWasm atrevision5",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
     "live_provider": "failednormalconfiguredcalls1UnexpectedTool/2TransportFailed;2of4invocationsused;0acceptedproposals",
-    "independent_review_ci_merge_main_guide": "pendingdraftreview/currentCI;mergeblockedbyliveacceptancefailure"
+    "independent_review_ci_merge_main_guide": "revision5freshreview/currentCI pending;realacceptanceincomplete;noauthorizedmergeyet",
+    "diagnostics": "passednativeenum/exit/stream/unknownusage/invalidcacheaggregate regressions;nochangeinproposalorstopdecision"
   },
   "pending_additional_repair": {
-    "status": "actuallivefailure unresolved after5of5repairs;noadditionalruntimefixauthorized",
-    "provider_calls_remaining": 2,
-    "additional_repair_requires_actual_maintainer_answer": true
+    "status": "revision5approved;diagnosticphase",
+    "current_runtime_repairs_remaining": 0,
+    "live_calls_remaining": 3,
+    "normal_failure_stop_required": true
   },
   "continuation_evidence": {
     "latest_accepted_guide_main": "a0688300df3bb66929838e7e3b2c795a28a756b9",
@@ -183,7 +190,7 @@
     "repair_cycles_remaining_at_extension_start": 1,
     "provider_invocations_remaining_at_extension_start": 4,
     "repair_cycles_remaining": 0,
-    "provider_invocations_remaining": 2
+    "provider_invocations_remaining": 3
   },
   "live_invocations": [
     {
@@ -205,5 +212,12 @@
       },
       "probe_binary_sha256": "f35e019f966eb174737afbabeaa4416f088e3ff3dc5aba7421968a884005856e"
     }
-  ]
+  ],
+  "diagnostic_extension": {
+    "started_unix_ms": 1791877652839,
+    "active_minutes": 30,
+    "repair_cycle": 6,
+    "status": "localgatespassed;separateexactheadreviewpending;zeroadditionalprovidercalls",
+    "review_budget_separate_minutes": 30
+  }
 }

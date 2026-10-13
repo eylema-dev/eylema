@@ -431,3 +431,63 @@ fn passive_provider_error_item_is_a_failure_and_never_a_tool_or_proposal() {
     assert_eq!(result.status, CallStatus::ModelUnavailable);
     assert!(result.proposal.is_none());
 }
+
+#[test]
+fn bounded_diagnostics_distinguish_provider_exit_and_incomplete_failures() {
+    for (mode, path, code) in [
+        ("diag-schema", "ProviderError", 1),
+        ("diag-exit", "ProcessOrInput", 7),
+        ("diag-incomplete", "IncompleteTurn", 0),
+    ] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+            .args(["--fixture-observation", mode])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+        let text = String::from_utf8(output.stdout).unwrap();
+        assert!(
+            text.contains(&format!("\"failure_path\":\"{path}\"")),
+            "{mode}"
+        );
+        assert!(text.contains(&format!("\"child_exit_code\":{code}")));
+        assert!(!text.contains("G40_DIAGNOSTIC_SECRET_MARKER"));
+        if mode == "diag-schema" {
+            assert!(text.contains("\"message_category\":\"SchemaMention\""));
+            assert!(text.contains("\"input_tokens\":123"));
+            assert!(text.contains("\"cached_input_tokens\":70"));
+            assert!(text.contains("\"output_tokens\":7"));
+            assert!(text.contains("\"reasoning_output_tokens\":3"));
+        }
+        if mode == "diag-exit" {
+            assert!(text.contains("\"completed_turn_seen\":true"));
+        }
+        if mode == "diag-incomplete" {
+            assert!(text.contains("\"completed_turn_seen\":false"));
+        }
+    }
+}
+
+#[test]
+fn diagnostics_keep_missing_usage_unknown_and_transport_synthetic() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+        .args(["--fixture-observation", "diag-missing-usage"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(text.contains("\"reported_usage\":null"));
+    assert!(text.contains("\"failure_path\":\"Completed\""));
+    assert!(text.contains("\"transport\":\"ExplicitFixture\""));
+}
+
+#[test]
+fn diagnostics_do_not_export_overlapping_input_cache_buckets_as_valid_usage() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+        .args(["--fixture-observation", "diag-invalid-usage"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).unwrap();
+    assert!(text.contains("\"invalid_usage_seen\":true"));
+    assert!(text.contains("\"reported_usage\":null"));
+}

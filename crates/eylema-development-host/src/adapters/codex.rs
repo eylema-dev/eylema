@@ -45,6 +45,54 @@ pub enum CallStatus {
     AuthorityDenied,
     CoordinatorStopped(eylema_development::Error),
 }
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum FailurePath {
+    Completed,
+    Stopped,
+    ProviderError,
+    ProcessOrInput,
+    IncompleteTurn,
+    ProposalRejected,
+    StreamRejected,
+    OutputRejected,
+    ToolRejected,
+}
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum MessageCategory {
+    #[default]
+    NoError,
+    QuotaMention,
+    ModelMention,
+    AuthenticationMention,
+    SchemaMention,
+    PermissionsMention,
+    ConnectivityMention,
+    StreamMention,
+    ConfigurationMention,
+    Unclassified,
+}
+/// Observed CLI turn aggregates, not individual backend response/billing records.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct ReportedUsage {
+    pub input_tokens: Option<u64>,
+    pub cached_input_tokens: Option<u64>,
+    pub cache_write_input_tokens: Option<u64>,
+    pub output_tokens: Option<u64>,
+    pub reasoning_output_tokens: Option<u64>,
+}
+#[derive(Clone, Copy, Debug)]
+pub struct CallDiagnostics {
+    pub failure_path: FailurePath,
+    pub child_exit_code: Option<i32>,
+    pub child_exit_success: bool,
+    pub stdin_write_success: bool,
+    pub completed_turn_seen: bool,
+    pub final_message_seen: bool,
+    pub provider_error_seen: bool,
+    pub message_category: MessageCategory,
+    pub reported_usage: Option<ReportedUsage>,
+    pub invalid_usage_seen: bool,
+}
 #[derive(Debug)]
 pub struct CallOutcome {
     pub status: CallStatus,
@@ -53,6 +101,7 @@ pub struct CallOutcome {
     pub elapsed_ms: u64,
     pub transport: Transport,
     pub rejected_item_kind: Option<String>,
+    pub diagnostics: Option<CallDiagnostics>,
 }
 #[derive(Clone, Copy)]
 pub struct CallLimits {
@@ -296,6 +345,7 @@ impl CodexTool {
                 elapsed_ms: 0,
                 transport: self.transport,
                 rejected_item_kind: None,
+                diagnostics: None,
             });
         }
         for path in [&self.program, &self.auth_home, &self.user_home] {
@@ -312,6 +362,7 @@ impl CodexTool {
                 elapsed_ms: 0,
                 transport: self.transport,
                 rejected_item_kind: None,
+                diagnostics: None,
             });
         }
         files::tree(&workspace.work, 100_000)?;
@@ -623,6 +674,14 @@ fn execute(
         status = CallStatus::MalformedOutput;
         proposed = None;
     }
+    let diagnostics = diagnose(
+        &stdout,
+        status,
+        stopped.is_some(),
+        exit.code(),
+        exit.success(),
+        wrote.is_ok(),
+    );
     Ok((
         CallOutcome {
             status,
@@ -630,6 +689,7 @@ fn execute(
             reported_total_tokens: usage,
             elapsed_ms,
             transport: Transport::ExplicitFixture,
+            diagnostics: Some(diagnostics),
             rejected_item_kind: flags
                 .rejected_kind
                 .lock()
@@ -638,6 +698,174 @@ fn execute(
         },
         valid_epoch,
     ))
+}
+fn message_category(text: &str) -> MessageCategory {
+    match failure_status(text) {
+        CallStatus::Quota => return MessageCategory::QuotaMention,
+        CallStatus::ModelUnavailable => return MessageCategory::ModelMention,
+        CallStatus::AuthenticationUnavailable => return MessageCategory::AuthenticationMention,
+        _ => {}
+    }
+    let text = text.to_ascii_lowercase();
+    if text.contains("schema") || text.contains("response_format") {
+        MessageCategory::SchemaMention
+    } else if text.contains("permission")
+        || text.contains("sandbox")
+        || text.contains("not permitted")
+    {
+        MessageCategory::PermissionsMention
+    } else if text.contains("stream") {
+        MessageCategory::StreamMention
+    } else if text.contains("connect")
+        || text.contains("network")
+        || text.contains("dns")
+        || text.contains("timed out")
+    {
+        MessageCategory::ConnectivityMention
+    } else if text.contains("config") || text.contains("feature") || text.contains("setting") {
+        MessageCategory::ConfigurationMention
+    } else {
+        MessageCategory::Unclassified
+    }
+}
+fn diagnose(
+    data: &[u8],
+    status: CallStatus,
+    stopped: bool,
+    exit_code: Option<i32>,
+    exit_success: bool,
+    wrote: bool,
+) -> CallDiagnostics {
+    let mut d = CallDiagnostics {
+        failure_path: FailurePath::StreamRejected,
+        child_exit_code: exit_code,
+        child_exit_success: exit_success,
+        stdin_write_success: wrote,
+        completed_turn_seen: false,
+        final_message_seen: false,
+        provider_error_seen: false,
+        message_category: MessageCategory::NoError,
+        reported_usage: None,
+        invalid_usage_seen: false,
+    };
+    for line in data.split(|b| *b == b'\n').filter(|line| !line.is_empty()) {
+        let Ok(value) = json::parse(line) else {
+            continue;
+        };
+        let mut error_text = None;
+        match value.field("type").and_then(Json::text) {
+            Some("item.completed") => {
+                if let Some(item) = value.field("item") {
+                    match item.field("type").and_then(Json::text) {
+                        Some("agent_message") => {
+                            d.final_message_seen |=
+                                item.field("text").and_then(Json::text).is_some()
+                        }
+                        Some("error") => {
+                            d.provider_error_seen = true;
+                            error_text =
+                                Some(item.field("message").and_then(Json::text).unwrap_or(""));
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            Some("turn.completed") => {
+                d.completed_turn_seen = true;
+                if let Some(tokens) = value.field("usage") {
+                    let observed = ReportedUsage {
+                        input_tokens: tokens.field("input_tokens").and_then(Json::unsigned),
+                        cached_input_tokens: tokens
+                            .field("cached_input_tokens")
+                            .and_then(Json::unsigned),
+                        cache_write_input_tokens: tokens
+                            .field("cache_write_input_tokens")
+                            .and_then(Json::unsigned),
+                        output_tokens: tokens.field("output_tokens").and_then(Json::unsigned),
+                        reasoning_output_tokens: tokens
+                            .field("reasoning_output_tokens")
+                            .and_then(Json::unsigned),
+                    };
+                    let bad_input = observed
+                        .input_tokens
+                        .zip(observed.cached_input_tokens)
+                        .is_some_and(|(a, b)| b > a)
+                        || observed
+                            .input_tokens
+                            .zip(observed.cache_write_input_tokens)
+                            .is_some_and(|(a, b)| b > a);
+                    let bad_cache_sum = observed
+                        .input_tokens
+                        .zip(
+                            observed
+                                .cached_input_tokens
+                                .zip(observed.cache_write_input_tokens),
+                        )
+                        .is_some_and(|(input, (read, write))| {
+                            read.checked_add(write).is_none_or(|sum| sum > input)
+                        });
+                    let bad_type = [
+                        "input_tokens",
+                        "cached_input_tokens",
+                        "cache_write_input_tokens",
+                        "output_tokens",
+                        "reasoning_output_tokens",
+                    ]
+                    .into_iter()
+                    .any(|name| tokens.field(name).is_some_and(|v| v.unsigned().is_none()));
+                    let bad_output = observed
+                        .output_tokens
+                        .zip(observed.reasoning_output_tokens)
+                        .is_some_and(|(a, b)| b > a);
+                    let bad_sum = observed
+                        .input_tokens
+                        .zip(observed.output_tokens)
+                        .is_some_and(|(a, b)| a.checked_add(b).is_none());
+                    if bad_input || bad_output || bad_sum || bad_cache_sum || bad_type {
+                        d.invalid_usage_seen = true;
+                        d.reported_usage = None;
+                    } else {
+                        d.reported_usage = Some(observed);
+                    }
+                }
+            }
+            Some("turn.failed" | "error") => {
+                d.provider_error_seen = true;
+                error_text = Some(
+                    value
+                        .field("error")
+                        .and_then(|v| v.field("message"))
+                        .or_else(|| value.field("message"))
+                        .and_then(Json::text)
+                        .unwrap_or(""),
+                );
+            }
+            _ => {}
+        }
+        if let Some(text) = error_text {
+            d.message_category = message_category(text);
+        }
+    }
+    d.failure_path = if stopped {
+        FailurePath::Stopped
+    } else if status == CallStatus::UnexpectedTool {
+        FailurePath::ToolRejected
+    } else if status == CallStatus::OutputLimit {
+        FailurePath::OutputRejected
+    } else if d.provider_error_seen {
+        FailurePath::ProviderError
+    } else if !exit_success || !wrote {
+        FailurePath::ProcessOrInput
+    } else if !d.completed_turn_seen {
+        FailurePath::IncompleteTurn
+    } else if status == CallStatus::MalformedOutput {
+        FailurePath::ProposalRejected
+    } else if status == CallStatus::Completed {
+        FailurePath::Completed
+    } else {
+        FailurePath::StreamRejected
+    };
+    d
 }
 fn failure_status(text: &str) -> CallStatus {
     let lower = text.to_ascii_lowercase();

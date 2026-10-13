@@ -26,6 +26,30 @@ fn quote(text: &str) -> String {
     output.push('"');
     output
 }
+fn number<T: std::fmt::Display>(value: Option<T>) -> String {
+    value.map_or("null".into(), |v| v.to_string())
+}
+fn diagnostics_json(value: Option<CallDiagnostics>) -> String {
+    let Some(d) = value else {
+        return "null".into();
+    };
+    let usage = d.reported_usage.map_or("null".into(), |u| format!(
+        r#"{{"kind":"cli_turn_aggregate","input_tokens":{},"cached_input_tokens":{},"cache_write_input_tokens":{},"output_tokens":{},"reasoning_output_tokens":{}}}"#,
+        number(u.input_tokens), number(u.cached_input_tokens), number(u.cache_write_input_tokens), number(u.output_tokens), number(u.reasoning_output_tokens)));
+    format!(
+        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"provider_error_seen":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
+        d.failure_path,
+        number(d.child_exit_code),
+        d.child_exit_success,
+        d.stdin_write_success,
+        d.completed_turn_seen,
+        d.final_message_seen,
+        d.provider_error_seen,
+        d.message_category,
+        usage,
+        d.invalid_usage_seen
+    )
+}
 fn fixture(args: &[String]) {
     for flag in [
         "--ignore-user-config",
@@ -73,6 +97,20 @@ fn fixture(args: &[String]) {
             );
             std::process::exit(1);
         }
+        "diag-invalid-usage" => {
+            println!(
+                r#"{{"type":"turn.completed","usage":{{"input_tokens":10,"cached_input_tokens":8,"cache_write_input_tokens":8,"output_tokens":5}}}}"#
+            );
+        }
+        "diag-schema" => {
+            println!(
+                r#"{{"type":"item.completed","item":{{"type":"error","message":"schema rejection G40_DIAGNOSTIC_SECRET_MARKER"}}}}"#
+            );
+            println!(
+                r#"{{"type":"turn.completed","usage":{{"input_tokens":123,"cached_input_tokens":70,"output_tokens":7,"reasoning_output_tokens":3}}}}"#
+            );
+            std::process::exit(1);
+        }
         "item-error" => {
             println!(
                 r#"{{"type":"item.completed","item":{{"type":"error","message":"Requested model unavailable"}}}}"#
@@ -114,9 +152,18 @@ fn fixture(args: &[String]) {
                 r#"{{"type":"item.completed","item":{{"type":"agent_message","text":{}}}}}"#,
                 quote(&proposed)
             );
-            println!(
-                r#"{{"type":"turn.completed","usage":{{"input_tokens":11,"output_tokens":5}}}}"#
-            );
+            if mode != "diag-incomplete" {
+                if mode == "diag-missing-usage" {
+                    println!(r#"{{"type":"turn.completed"}}"#);
+                } else {
+                    println!(
+                        r#"{{"type":"turn.completed","usage":{{"input_tokens":11,"output_tokens":5}}}}"#
+                    );
+                }
+            }
+            if mode == "diag-exit" {
+                std::process::exit(7);
+            }
         }
     }
 }
@@ -157,6 +204,9 @@ fn main() {
     let mode = args.get(1).map(String::as_str).unwrap_or("success");
     let expected = match mode {
         "success" | "permissions" => CallStatus::Completed,
+        "diag-schema" | "diag-exit" | "diag-incomplete" if synthetic => CallStatus::TransportFailed,
+        "diag-missing-usage" if synthetic => CallStatus::Completed,
+        "diag-invalid-usage" if synthetic => CallStatus::MalformedOutput,
         "timeout" => CallStatus::TimedOut,
         "unavailable" => CallStatus::ModelUnavailable,
         _ => panic!("unknown mode"),
@@ -194,8 +244,13 @@ fn main() {
         output_bytes: 1024 * 1024,
     };
     let start = fixture.started;
+    let fixture_prompt = if synthetic && mode.starts_with("diag-") {
+        mode
+    } else {
+        prompt
+    };
     let request = CodexRequest {
-        prompt,
+        prompt: fixture_prompt,
         limits,
         cancel: &CancelHandle::default(),
         unavailable_probe: mode == "unavailable",
@@ -212,7 +267,7 @@ fn main() {
         .expect("controlled provider observation");
     let count = result.proposal.as_ref().map_or(0, |p| p.changes.len());
     println!(
-        r#"{{"kind":"{}","status":"{:?}","transport":"{:?}","cli_version":"{}","cli_sha256":"{}","requested_model":"{}","requested_effort":"{}","elapsed_ms":{},"proposal_changes":{},"reported_total_tokens":{},"authority":"synthetic_host_fixture","filesystem_process":"actual_native","remote_cancellation":"unknown_after_local_stop","hidden_model_identity":"not_established","rejected_item_kind":{}}}"#,
+        r#"{{"kind":"{}","status":"{:?}","transport":"{:?}","cli_version":"{}","cli_sha256":"{}","requested_model":"{}","requested_effort":"{}","elapsed_ms":{},"proposal_changes":{},"reported_total_tokens":{},"authority":"synthetic_host_fixture","filesystem_process":"actual_native","remote_cancellation":"unknown_after_local_stop","hidden_model_identity":"not_established","rejected_item_kind":{},"diagnostics":{}}}"#,
         if synthetic {
             "codex_adapter_fixture_observation"
         } else {
@@ -240,7 +295,8 @@ fn main() {
         result
             .rejected_item_kind
             .as_deref()
-            .map_or("null".into(), quote)
+            .map_or("null".into(), quote),
+        diagnostics_json(result.diagnostics)
     );
     assert_eq!(result.status, expected);
 }
