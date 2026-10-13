@@ -6,6 +6,7 @@
 #![forbid(unsafe_code)]
 
 pub mod codec;
+pub mod platform;
 mod primitives;
 mod records;
 pub mod transport;

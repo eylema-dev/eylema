@@ -31,16 +31,18 @@ G39 adds a [controlled native development workspace](docs/en/development-workspa
 
 Start with [contribution rules](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.md) and the shared [AI agent contract](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md). Follow the [first-release roadmap](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/roadmap.md), [quality gates](https://github.com/eylema-dev/devguide/blob/main/docs/en/quality-gates.md) and [CI tooling inventory](https://github.com/eylema-dev/devguide/blob/main/docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.
 
+G46 adds portable [loop, role and model-binding contracts](docs/en/platform-contracts.md): immutable declared profiles and bounded loop definitions. Native constructor checks are separate from model, training and harness-job acceptance.
+
 ## Product direction
 
-Build an end-to-end web platform that AI teams can develop and operate through explicit, inspectable contracts. Applications declare state, goals, actions, authority, budgets and acceptance conditions. Human participation, oversight and command remain practical capabilities of the same system.
+Build a Rust harness platform where human imagination and expert judgment, supported by large language models, compose bounded agentic systems. Users combine interchangeable local open-weight model roles, RAG and reusable skills; optionally they explicitly connect an external frontier model. Performance, privacy and measured outcomes govern selection. AI teams develop and operate the platform through explicit, inspectable contracts. Applications declare state, goals, actions, authority, budgets and acceptance conditions. Human participation, oversight and command remain practical capabilities of the same system.
 
 - Own Rust production components for web, data, agents, compute and tooling; optional 3D, local language, decision and world-model capabilities.
 - Browser Rust/Wasm/WebGPU and native macOS CPU/Metal on one M4 Pro/24 GB device for the first experimental release; Linux and second physical-device acceptance are future scope.
 - Frontier-model development teams using a standard requirement-to-PR protocol.
 - Hardware-selected local model teams, versioned and evaluated under combined application load.
 - Permitted experience, human corrections and verified outcomes feeding curated training data.
-- Unsloth as an explicit external training/packaging tool; exported candidates verified in our own runtime before acceptance.
+- Per-model native Rust gradients, LoRA/QLoRA and controlled improvement/promotion are planned. Unsloth-like tools remain explicit reviewed development/reference or recipe aids; the original external reference-run and owned-runtime reacceptance gates remain separate.
 - Public contribution contracts for code, data, evaluation, training recipes, models and hardware profiles.
 
 ## What “world-leading” must mean
@@ -63,8 +65,8 @@ Quality floors are mandatory before optimizing speed or cost. Compare complete a
 
 | Document | English source | Turkish companion |
 |---|---|---|
-| Project structure 0.3.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Architecture 0.4.1 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| Project structure 0.5.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Architecture 0.6.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
 | API and oversight 0.3.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
 | Development and operations 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
 | Learning and training 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
@@ -83,7 +85,7 @@ The later 3D environment, learned policy/dynamics model, local language model, p
 
 [English product docs](https://github.com/eylema-dev/eylema-docs-en) · [Turkish product docs](https://github.com/eylema-dev/eylema-docs-tr) · [Developer guide](https://github.com/eylema-dev/devguide) · [Repository map](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-map.md)
 
-`eylema` owns the initial Rust workspace/bootstrap host, future task CLI/components, machine-readable schemas and existing brand assets. Product prose moves to the language repositories; shared contribution policy moves to devguide. Examples, evaluations, model metadata and training recipes have separate repositories with explicit scaffold-only status. The website is managed separately in [eylemadotdev](https://github.com/eylema-dev/eylemadotdev). No runtime has been implemented by this split.
+`eylema` owns the current Rust task core, service/CLI/browser components, platform contracts, machine-readable schemas and brand assets. Product prose lives in the language repositories; shared contribution policy lives in devguide. Example/evaluation repositories contain accepted consumer and scoped measurement evidence; model/training repositories await their execution gates. The website is managed separately in [eylemadotdev](https://github.com/eylema-dev/eylemadotdev). Repository separation alone is not execution evidence; component notes bind actual acceptance scope.
 
 Read [the migration record](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-migration.md) for exact sources, destinations, linked PRs, integration checks and rollback. New document links target the coordinated post-merge layout; the PRs and pinned repository set provide review copies before then.
 

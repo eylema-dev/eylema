@@ -32,16 +32,18 @@ G39, [kontrollü yerel geliştirme çalışma alanı](docs/tr/development-worksp
 
 [Katkı kuralları](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/roadmap.md), [kalite kontrollerini](https://github.com/eylema-dev/devguide/blob/main/docs/tr/quality-gates.md) ve [CI araç envanterini](https://github.com/eylema-dev/devguide/blob/main/docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.
 
+G46 taşınabilir [döngü, rol ve model bağlama sözleşmeleri](docs/tr/platform-contracts.md) ekler: değişmez tanımlı profiller ve sınırlı döngü tanımları. Native constructor kontrolleri model, eğitim ve harness iş kabulünden ayrıdır.
+
 ## Ürün yönü
 
-AI ekiplerinin açık ve incelenebilir sözleşmelerle geliştirebildiği ve işletebildiği uçtan uca bir web platformu. Uygulamalar durumunu, hedeflerini, eylemlerini, yetkilerini, bütçelerini ve kabul koşullarını tanımlar. İnsan katılımı, gözetimi ve komutası aynı sistemin kullanılabilir yetenekleridir.
+İnsan hayal gücü ve uzman değerlendirmesinin büyük dil modellerinin desteğiyle sınırlı agentic sistemler kurduğu bir Rust harness platformu geliştiriyoruz. Kullanıcı değiştirilebilir yerel açık ağırlık model rollerini, RAG ve yeniden kullanılabilir skill'leri birleştirir; isteğe bağlı olarak harici büyük modeli açıkça bağlar. Seçimi performans, gizlilik ve ölçülmüş sonuçlar belirler. AI takımları platformu açık, incelenebilir sözleşmelerle geliştirir ve işletir. Uygulamalar durum, amaç, eylem, yetki, bütçe ve kabul koşullarını tanımlar; insan katılımı, gözetimi ve komutası sistemin pratik yetenekleri olarak korunur.
 
 - Web, veri, eylemci, hesaplama ve araçlar için kendi Rust üretim bileşenlerimiz; seçilebilir 3B, yerel dil, karar ve dünya modeli yetenekleri.
 - İlk deneysel sürümde tek M4 Pro/24 GB cihazda tarayıcı Rust/Wasm/WebGPU ve native macOS CPU/Metal; Linux ve ikinci fiziksel cihaz kabulü sonraki kapsamdır.
 - İhtiyaçtan PR’a standart protokol kullanan büyük model geliştirme ekipleri.
 - Donanıma göre seçilen, sürümlenen ve ortak uygulama yükünde değerlendirilen yerel model takımları.
 - İzinli deneyim, insan düzeltmesi ve gerçek sonuçlardan kürasyonla oluşturulan eğitim verileri.
-- Eğitim/paketleme hattında açık dış araç olarak Unsloth; model kabulünden önce kendi motorumuzda doğrulama.
+- Modele özel native Rust gradyan, LoRA/QLoRA ve kontrollü iyileştirme/terfi planlanır. Unsloth benzeri araçlar açıkça incelenmiş geliştirme/referans veya reçete yardımcılarıdır; özgün harici referans koşusu ve kendi runtime yeniden kabul kapıları ayrı kalır.
 - Kod, veri, değerlendirme, eğitim tarifi, model ve donanım profili için açık katkı sözleşmeleri.
 
 ## “Dünyanın en iyisi” hedefinin kanıtı
@@ -64,8 +66,8 @@ Hız veya maliyet iyileştirilmeden önce asgari kalite karşılanır. Kernel ya
 
 | Belge | İngilizce kaynak | Türkçe karşılık |
 |---|---|---|
-| Proje yapısı 0.3.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Mimari 0.4.1 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| Proje yapısı 0.5.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Mimari 0.6.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
 | API ve denetim 0.3.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
 | Geliştirme ve işletim 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
 | Öğrenme ve eğitim 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
@@ -84,7 +86,7 @@ Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinl
 
 [İngilizce ürün belgeleri](https://github.com/eylema-dev/eylema-docs-en) · [Türkçe ürün belgeleri](https://github.com/eylema-dev/eylema-docs-tr) · [Geliştirici rehberi](https://github.com/eylema-dev/devguide) · [Depo haritası](https://github.com/eylema-dev/devguide/blob/main/docs/tr/repository-map.md)
 
-`eylema`; ilk Rust workspace/başlangıç host’unu, gelecek görev CLI/bileşenlerini, makine şemalarını ve mevcut marka varlıklarını sahiplenir. Ürün metinleri dil depolarına, ortak katkı politikası devguide'a taşınır. Örnekler, değerlendirmeler, model üstverileri ve eğitim tarifleri için açıkça iskelet aşamasında ayrı depolar vardır. Web sitesi [eylemadotdev](https://github.com/eylema-dev/eylemadotdev) içinde ayrı yönetilir. Bu bölünmeyle çalışma zamanı uygulanmış değildir.
+`eylema`, mevcut Rust görev çekirdeği, servis/CLI/tarayıcı bileşenleri, platform sözleşmeleri, makine şemaları ve marka varlıklarını sahiplenir. Ürün metinleri dil depolarında, ortak katkı politikası devguide'dadır. Örnek/değerlendirme depoları kabul edilmiş consumer ve sınırlı ölçüm kanıtı içerir; model/eğitim depoları kendi yürütüm kapılarını bekler. Web sitesi [eylemadotdev](https://github.com/eylema-dev/eylemadotdev) içinde ayrı yönetilir. Depo bölünmesi tek başına yürütüm kanıtı değildir; bileşen notları gerçek kabul kapsamını bağlar.
 
 [Taşıma kaydı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/repository-migration.md) kaynakları, hedefleri, ilişkili PR'ları, entegrasyon kontrollerini ve geri dönüşü açıklar. Yeni belge bağlantıları eşgüdümlü birleştirme sonrası yerleşimi hedefler; öncesinde PR'lar ve sabitlenmiş depo kümesi inceleme kopyalarını sağlar.
 
