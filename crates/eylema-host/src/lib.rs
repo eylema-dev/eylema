@@ -9,6 +9,7 @@ use eylema_journal::{Journal, JournalError, Sha256, Storage};
 use eylema_runtime::*;
 use std::sync::Arc;
 mod command;
+pub mod decision;
 mod encoding;
 pub mod memory;
 pub mod native;

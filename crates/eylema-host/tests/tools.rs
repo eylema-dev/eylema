@@ -211,6 +211,219 @@ fn input(d: &mut Data, o: &Owner, s: &DataSession, n: u64, expiry: u64) {
     )
     .unwrap();
 }
+fn decision(p: &ToolPlan) -> eylema_contracts::decision::DecisionDeclaration {
+    use eylema_contracts::decision::*;
+    let b = &p.bindings()[0];
+    DecisionDeclaration::new(
+        vec![Candidate {
+            route: sid("route:owned"),
+            action: b.action_id.clone(),
+            profile: b.profile.clone(),
+            revision: b.revision,
+            score: Score::new(ScoreMeaning::UtilityUnits, 10).unwrap(),
+            constraints: ConstraintStatus::DeclaredSatisfied,
+        }],
+        0,
+        Calibration::Uncalibrated,
+        None,
+    )
+    .unwrap()
+}
+#[test]
+fn decision_attachment_precedes_effects_and_correlates_actual_scoped_observations() {
+    let (mut h, _, s, mut d, _, ds, _, _) = fixture();
+    let t = support::task("task:decision", 20, 50);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = plan(&t, &[2, 3], false);
+    let declaration = decision(&p);
+    let id = h.admit(&mut d, &ds, &s, p.clone(), &[]).unwrap();
+    h.attach_decision(&mut d, &s, &id, declaration.clone())
+        .unwrap();
+    assert_eq!(
+        h.decision_evidence(&mut d, &s, &id)
+            .unwrap()
+            .outcome()
+            .status,
+        ToolStatus::Pending
+    );
+    h.step(&mut d).unwrap();
+    h.step(&mut d).unwrap();
+    let e = h.decision_evidence(&mut d, &s, &id).unwrap();
+    assert_eq!(e.outcome().status, ToolStatus::Completed);
+    assert_eq!(e.declaration(), &declaration);
+    assert_eq!(e.timing().steps.len(), 2);
+    assert!(e.timing().total.is_some());
+    assert_eq!(e.physical_rss_bytes(), None);
+    assert_eq!(e.accounted_reservation_bytes(), None);
+    h.admit(&mut d, &ds, &s, p, &[]).unwrap();
+    let replay = h.decision_evidence(&mut d, &s, &id).unwrap();
+    assert_eq!(replay.timing(), e.timing());
+}
+#[test]
+fn source_withdrawal_blocks_decision_egress_and_late_attachment_is_rejected() {
+    let (mut h, _, s, mut d, o, ds, _, _) = fixture();
+    input(&mut d, &o, &ds, 2, 2000);
+    let t = support::task("task:decision-private", 20, 50);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = plan(&t, &[2], true);
+    let id = h.admit(&mut d, &ds, &s, p.clone(), &[]).unwrap();
+    h.step(&mut d).unwrap();
+    assert!(h.attach_decision(&mut d, &s, &id, decision(&p)).is_err());
+    d.set_policy(
+        &o,
+        &reference(),
+        support::rev(2),
+        DataPermissions::new(vec![]).unwrap(),
+        true,
+    )
+    .unwrap();
+    assert!(h.decision_evidence(&mut d, &s, &id).is_err());
+}
+#[test]
+fn decision_wrong_binding_rebinding_and_foreign_reader_cannot_author_evidence() {
+    use eylema_contracts::decision::*;
+    let (mut h, o, s, mut d, data_owner, ds, _, _) = fixture();
+    input(&mut d, &data_owner, &ds, 2, 2000);
+    let t = support::task("task:decision-binding", 20, 50);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = plan(&t, &[2], true);
+    let id = h.admit(&mut d, &ds, &s, p.clone(), &[]).unwrap();
+    let good = decision(&p);
+    let mut candidates = good.alternatives().to_vec();
+    candidates[0].revision = support::rev(2);
+    let wrong = DecisionDeclaration::new(candidates, 0, Calibration::Uncalibrated, None).unwrap();
+    assert_eq!(
+        h.attach_decision(&mut d, &s, &id, wrong),
+        Err(ToolError::InvalidEvidence)
+    );
+    let mut read_grant = support::grant();
+    read_grant
+        .permissions
+        .retain(|p| *p != Permission::ExecuteAction);
+    let read_only = h.enroll(&o, read_grant).unwrap();
+    assert!(
+        h.attach_decision(&mut d, &read_only, &id, good.clone())
+            .is_err()
+    );
+    h.attach_decision(&mut d, &s, &id, good.clone()).unwrap();
+    let changed = DecisionDeclaration::new(
+        good.alternatives().to_vec(),
+        0,
+        Calibration::DeclaredReference(sid("eval:other")),
+        None,
+    )
+    .unwrap();
+    assert_eq!(
+        h.attach_decision(&mut d, &s, &id, changed),
+        Err(ToolError::InvalidEvidence)
+    );
+    let mut grant = support::grant();
+    grant.principal = PrincipalRef::new("principal:foreign").unwrap();
+    grant.permissions = vec![Permission::ExecuteAction];
+    let denied = h.enroll(&o, grant).unwrap();
+    assert!(h.decision_evidence(&mut d, &denied, &id).is_err());
+    h.step(&mut d).unwrap();
+    assert_eq!(
+        h.decision_evidence(&mut d, &s, &id)
+            .unwrap()
+            .outcome()
+            .status,
+        ToolStatus::Completed
+    );
+    d.set_policy(
+        &data_owner,
+        &reference(),
+        support::rev(2),
+        DataPermissions::new(vec![]).unwrap(),
+        true,
+    )
+    .unwrap();
+    assert!(matches!(
+        h.decision_evidence(&mut d, &s, &id),
+        Err(ToolError::Data(DataError::Forbidden))
+    ));
+}
+#[test]
+fn actual_serial_cycles_measure_cold_warm_percentiles_and_reject_duplicate_samples() {
+    use eylema_host::decision::CycleDistribution;
+    let (mut h, _, s, mut d, _, ds, _, _) = fixture();
+    let mut rows = vec![];
+    for i in 0..64 {
+        let t = support::task(&format!("task:measured:{i}"), 20, 50);
+        h.create_task(&s, t.clone()).unwrap();
+        let p = plan(&t, &[2], false);
+        let id = h.admit(&mut d, &ds, &s, p.clone(), &[]).unwrap();
+        h.attach_decision(&mut d, &s, &id, decision(&p)).unwrap();
+        h.step(&mut d).unwrap();
+        let e = h.decision_evidence(&mut d, &s, &id).unwrap();
+        assert_eq!(
+            codec::decode(&e.outcome().outputs[0].bytes).unwrap(),
+            codec::Value::Unsigned(2)
+        );
+        rows.push(e);
+    }
+    let refs: Vec<_> = rows.iter().collect();
+    let distribution = CycleDistribution::from_evidence(&refs).unwrap();
+    assert_eq!(distribution.samples.len(), 63);
+    let mut ranked = distribution.samples.clone();
+    ranked.sort();
+    assert_eq!(distribution.p50, ranked[31]);
+    assert_eq!(distribution.p95, ranked[59]);
+    assert_eq!(distribution.p99, ranked[62]);
+    assert!(distribution.p50 <= distribution.p95 && distribution.p95 <= distribution.p99);
+    assert!(
+        distribution.successful_cycles_per_second.is_finite()
+            && distribution.successful_cycles_per_second > 0.0
+    );
+    assert!(CycleDistribution::from_evidence(&[&rows[0], &rows[0]]).is_err());
+    assert!(CycleDistribution::from_evidence(&refs[1..]).is_err());
+    let (mut other, _, os, mut od, _, ods, _, _) = fixture();
+    let ot = support::task("task:other-measurement", 20, 50);
+    other.create_task(&os, ot.clone()).unwrap();
+    let op = plan(&ot, &[3], false);
+    let oid = other.admit(&mut od, &ods, &os, op.clone(), &[]).unwrap();
+    other
+        .attach_decision(&mut od, &os, &oid, decision(&op))
+        .unwrap();
+    other.step(&mut od).unwrap();
+    let foreign = other.decision_evidence(&mut od, &os, &oid).unwrap();
+    assert!(CycleDistribution::from_evidence(&[&rows[0], &foreign]).is_err());
+    println!(
+        "G50 actual64 serial owned counter cycles: cold_ns={} warm_p50_ns={} warm_p95_ns={} warm_p99_ns={} span_ns={} cycles_per_second={:.3}; physicalRSS/VRAM/reservations unknown; no model run",
+        distribution.first_host_call.as_nanos(),
+        distribution.p50.as_nanos(),
+        distribution.p95.as_nanos(),
+        distribution.p99.as_nanos(),
+        distribution.wall_span.as_nanos(),
+        distribution.successful_cycles_per_second
+    );
+}
+#[test]
+fn actual_cancellation_is_timed_separately_from_completed_work() {
+    use eylema_host::decision::CycleDistribution;
+    let (mut h, o, s, mut d, _, ds, _, _) = fixture();
+    let mut g = support::grant();
+    g.principal = PrincipalRef::new("principal:timed-stop").unwrap();
+    g.permissions.push(Permission::RequestCancellation);
+    let human = h.enroll_verified_human(&o, g).unwrap();
+    let t = support::task("task:timed-stop", 20, 50);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = intervention(plan(&t, &[2, 3], false), true);
+    let id = h.admit(&mut d, &ds, &s, p.clone(), &[]).unwrap();
+    h.attach_decision(&mut d, &s, &id, decision(&p)).unwrap();
+    h.step(&mut d).unwrap();
+    h.request_cancellation(&human, &id).unwrap();
+    h.step(&mut d).unwrap();
+    let e = h.decision_evidence(&mut d, &s, &id).unwrap();
+    assert_eq!(e.outcome().status, ToolStatus::Partial);
+    assert!(e.timing().cancellation.is_some());
+    assert_eq!(e.timing().steps.len(), 2);
+    assert!(CycleDistribution::from_evidence(&[&e, &e]).is_err());
+    println!(
+        "G50 actual scoped stop latency_ns={}; one confirmed effect, remaining action stopped",
+        e.timing().cancellation.unwrap().as_nanos()
+    );
+}
 #[test]
 fn real_owned_tools_and_replays_report_confirmed_outputs_without_new_effects() {
     let (mut h, _, s, mut d, _, ds, _, _) = fixture();
