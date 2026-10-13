@@ -51,7 +51,7 @@ fn diagnostics_json(value: Option<CallDiagnostics>) -> String {
         .collect::<Vec<_>>()
         .join(",");
     format!(
-        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"final_proposal_valid":{},"provider_error_seen":{},"item_error_seen":{},"turn_failed_seen":{},"top_level_error_seen":{},"error_prefixes":[{}],"public_error_identifiers":[{}],"error_identifier_limit_reached":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
+        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"final_proposal_valid":{},"provider_error_seen":{},"error_event_count":{},"unclassified_error_events":{},"item_error_seen":{},"turn_failed_seen":{},"top_level_error_seen":{},"error_prefixes":[{}],"public_error_identifiers":[{}],"error_identifier_limit_reached":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
         d.failure_path,
         number(d.child_exit_code),
         d.child_exit_success,
@@ -60,6 +60,8 @@ fn diagnostics_json(value: Option<CallDiagnostics>) -> String {
         d.final_message_seen,
         number(d.final_proposal_valid),
         d.provider_error_seen,
+        d.error_event_count,
+        d.unclassified_error_events,
         d.item_error_seen,
         d.turn_failed_seen,
         d.top_level_error_seen,

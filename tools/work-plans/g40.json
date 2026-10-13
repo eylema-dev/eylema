@@ -161,7 +161,7 @@
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
     "live_provider": "failednormalprobe3:TransportFailed/ProviderError/ConfigurationMention;3of5invocationsused;0acceptedproposals;unavailable/timeout not_run due mandatory firstnormalfailurestop",
     "independent_review_ci_merge_main_guide": "diagnosticruntime04dfcd8 separatelyreviewedpassed and CI38368524971passed;liveacceptancefailed;notmerged;guide/G41notstarted",
-    "diagnostics": "passedred-green privacy/tokenboundary/16identifierlimit/scopedproposalvalidity;nochangeinacceptance/stops"
+    "diagnostics": "red-green publicerror origins/prefixes/identifierprivacy/limits/scopedproposalvalidity/error-eventcounts;unchangedacceptance"
   },
   "pending_additional_repair": {
     "status": "revision7approvedsafeoffline diagnosticphase",
@@ -277,7 +277,7 @@
     "repair_cycles_max": 2,
     "repair_cycle_first": 8,
     "diagnostic_call_failure_exception": "one instrumented call only;unknowncause stops;noeffect after failure without proven cause/offline repair/newgates/review",
-    "status": "localgatespassed;zeroadditionalprovidercalls;freshreview/currentCIpending",
+    "status": "finaldiagnosticfullgatespassed;zeroadditionalprovidercalls;newexactheadreview/currentCIpending",
     "public_metadata_provenance": {
       "tool_sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
       "sources": [

@@ -279,6 +279,8 @@ pub struct CallDiagnostics {
     pub final_message_seen: bool,
     pub final_proposal_valid: Option<bool>,
     pub provider_error_seen: bool,
+    pub error_event_count: u32,
+    pub unclassified_error_events: u32,
     pub item_error_seen: bool,
     pub turn_failed_seen: bool,
     pub top_level_error_seen: bool,
@@ -958,7 +960,8 @@ fn public_identifier_present(text: &str, name: &str) -> bool {
                 .is_some_and(identifier_char)
     })
 }
-fn record_public_error(text: &str, d: &mut CallDiagnostics) {
+fn record_public_error(text: &str, d: &mut CallDiagnostics) -> bool {
+    let mut recognized = false;
     for (prefix, observed) in [
         (
             PublicErrorPrefix::UnderDevelopmentFeatures,
@@ -987,6 +990,7 @@ fn record_public_error(text: &str, d: &mut CallDiagnostics) {
             text.contains("Failed to read output schema file"),
         ),
     ] {
+        recognized |= observed;
         if observed
             && !d.error_prefixes.contains(&Some(prefix))
             && let Some(slot) = d.error_prefixes.iter_mut().find(|v| v.is_none())
@@ -1005,6 +1009,7 @@ fn record_public_error(text: &str, d: &mut CallDiagnostics) {
             }
         }
     }
+    recognized
 }
 fn diagnose(
     data: &[u8],
@@ -1024,6 +1029,8 @@ fn diagnose(
         final_message_seen: false,
         final_proposal_valid: None,
         provider_error_seen: false,
+        error_event_count: 0,
+        unclassified_error_events: 0,
         item_error_seen: false,
         turn_failed_seen: false,
         top_level_error_seen: false,
@@ -1133,7 +1140,10 @@ fn diagnose(
         }
         if let Some(text) = error_text {
             d.message_category = message_category(text);
-            record_public_error(text, &mut d);
+            d.error_event_count = d.error_event_count.saturating_add(1);
+            if !record_public_error(text, &mut d) {
+                d.unclassified_error_events = d.unclassified_error_events.saturating_add(1);
+            }
         }
     }
     d.failure_path = if stopped {

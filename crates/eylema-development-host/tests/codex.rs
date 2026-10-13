@@ -561,6 +561,8 @@ fn public_error_evidence_is_whitelisted_and_does_not_downgrade_failure() {
             assert!(!text.contains(secret), "{mode}");
         }
         if mode == "diag-feature-notice" {
+            assert!(text.contains("\"error_event_count\":1"));
+            assert!(text.contains("\"unclassified_error_events\":0"));
             assert!(text.contains("\"final_proposal_valid\":true"));
             assert!(text.contains("\"item_error_seen\":true"));
             assert!(text.contains("\"UnderDevelopmentFeatures\""));
@@ -568,6 +570,8 @@ fn public_error_evidence_is_whitelisted_and_does_not_downgrade_failure() {
             assert!(text.contains("\"code_mode\""));
             assert!(text.contains("\"suppress_unstable_features_warning\""));
         } else {
+            assert!(text.contains("\"error_event_count\":2"));
+            assert!(text.contains("\"unclassified_error_events\":1"));
             assert!(text.contains("\"top_level_error_seen\":true"));
             assert!(text.contains("\"turn_failed_seen\":true"));
             assert!(text.contains("\"UnsupportedReasoningEffort\""));
