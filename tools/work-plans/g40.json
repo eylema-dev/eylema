@@ -416,7 +416,7 @@
       "private_projection_status": "Available",
       "private_projection_contents_public": false,
       "original_free_form_persisted": false,
-      "actual_cause": "disabledhost/failclosedroute observed;whycode_modeactive despite local false flags/notproved;no allowedrestrictivefixproved"
+      "actual_cause": "safe host-disabled/fail-closed phrases observed;actual activation/runtime route/cause notproved;no allowedrestrictivefixproved"
     }
   ],
   "diagnostic_extension": {
@@ -485,7 +485,7 @@
     "live_calls_used": 6,
     "public_literal_provenance": "pinnedCLI74c6a6d binary contains host is disabled / Code mode will fail closed;static evidence does not prove actual cause",
     "observed_predicate_source": "only safe available eligible opt-in projected words;punctuation normalized,token-boundary phrase observations,not original error/configuration state",
-    "status": "diagnostic6failed;fixedsafephrasesconfirmed;offline companions alreadyfalse;no proved restrictive cause correction;no repair12/furthercalls/merge/G41",
+    "status": "diagnostic6failed;fixed safe phrase presence observed;offline companions alreadyfalse;no proved restrictive cause correction;no repair12/furthercalls/merge/G41",
     "root_elapsed_seconds_at_cutoff": 1499.7002999782562
   },
   "revision10_time_extension": {
