@@ -106,7 +106,7 @@
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
   "targeted_repairs_used": 10,
-  "live_cli_invocations_used": 4,
+  "live_cli_invocations_used": 5,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
     "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
@@ -162,21 +162,21 @@
     {
       "finding": "Independent exact8bdd146 native adversarial regressions prove quoted value leak and unmatched attached quote not withheld",
       "repair": "approvedcycle10:recognize quotes at every token position;withhold escaped/ambiguous quote forms;preserve exact backtick public identifiers only",
-      "status": "red-green/fullunchangedlocalgatespassed;fresh currentCI/separate exactheadreview pending"
+      "status": "passedfullunchangedgates/CI38386058945/separateexact87c9cd0review;actualdiagnostic5failed;causeinsufficientlyproved;no cycle11 repair"
     }
   ],
   "verification": {
     "python": "passed47tests/venv/hashedinstall/repository/template/body/diff atrevision9",
     "rust": "passedunchangedfullfmt/Clippy/nativeallfeatures/build/inventory/selectedWasm atrevision9;25Codexintegrationtests",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
-    "live_provider": "diagnostic4failed:oneunclassifieditemerror/code_mode_host;finalproposalvalid but rejected;4of8used;causeunknown;zero revision8/9 actual calls",
-    "independent_review_ci_merge_main_guide": "8bdd146 CI38384074409passed;g40_r8_review changes_requested;new revision9 full gates/review pending;notmerged/G41notactivated",
-    "diagnostics": "revision9quoteprivacy regressionred-green/nativeintegrationpassed;fresh currentCI/separate review pending"
+    "live_provider": "diagnostic5TransportFailed11563ms/0acceptedproposal;scopedfinalvalid and oneconfigurationitemerror;privateprojectionAvailablebutcompleteallowedcausenotproved;5of8used;mandatoryunknown/insufficientevidencestop",
+    "independent_review_ci_merge_main_guide": "87c9cd0 narrowdiagnosticrepairreviewpassed/CI38386058945passed;actualdiagnostic5failed;notmerged/G41notactivated",
+    "diagnostics": "privacyrepairpassedred-green/fullgates/18independentnativeharness/4integrationcases/currentCI;actual boundedprojectionAvailable;no originalpersisted/publicprojectionexport"
   },
   "pending_additional_repair": {
-    "status": "revision9approvedprivacyfixphase",
+    "status": "stopped_after_diagnostic5_insufficient_cause_evidence",
     "current_runtime_repairs_remaining": 1,
-    "live_calls_remaining": 4,
+    "live_calls_remaining": 3,
     "normal_failure_stop_required": true,
     "remaining_repair_condition": "cycle11 only actual proved CLI cause plus failing offline regression;no policy relaxation"
   },
@@ -310,6 +310,56 @@
         },
         "invalid_usage_seen": false
       }
+    },
+    {
+      "ordinal": 5,
+      "purpose": "approvedsingleboundedprivateprojectiondiagnostic",
+      "head": "87c9cd01da9d21a2e33d94ca857f653f58ff0c67",
+      "status": "TransportFailed",
+      "elapsed_ms": 11563,
+      "proposal_changes": 0,
+      "reported_total_tokens": 11822,
+      "source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "e5963a820be2f2297d8e1d9fbcc7282f6b942218ffb7f06d5f2630943c053eae",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "41f80199aa20edf6d23b65981e574d1d9620b51bf3d5f939e8dce309065e37de",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "44d3f8fc5f7dd0684fb28e9490a64cd313b177b298f61ed0ff540691bdce6173",
+      "settings_sha256": "8699c6b17f7021fe75e496baabc7b94c43760db7a323881f7989a47e3856d6f2",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "final_proposal_valid": true,
+        "provider_error_seen": true,
+        "error_event_count": 1,
+        "unclassified_error_events": 1,
+        "item_error_seen": true,
+        "turn_failed_seen": false,
+        "top_level_error_seen": false,
+        "error_prefixes": [],
+        "public_error_identifiers": [
+          "code_mode_host"
+        ],
+        "error_identifier_limit_reached": false,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11750,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 72,
+          "reasoning_output_tokens": 28
+        },
+        "invalid_usage_seen": false
+      },
+      "private_projection_status": "Available",
+      "private_projection_contents_public": false,
+      "original_free_form_persisted": false,
+      "actual_cause": "not_proved;safeprojectioninsufficient;policychangeifrequiredneedsnewauthority"
     }
   ],
   "diagnostic_extension": {
@@ -362,7 +412,9 @@
     "repair_cycle": 10,
     "repair_cap": 11,
     "live_call_cap": 8,
-    "live_calls_used": 4,
-    "status": "fullunchangedlocalgatespassed;freshcurrentCI/separate review before any provider effect"
+    "live_calls_used": 5,
+    "status": "diagnostic5failed;mandatoryunknown/insufficientevidencestop;nocausespecificrepair/nofurthercalls/nomerge/G41",
+    "review_status": "g40_r8_review passed narrow exact87c9cd0 phase;3.50of9.55minutes used;6.05remaining",
+    "root_elapsed_seconds_at_effect_cutoff": 696.7806708812714
   }
 }
