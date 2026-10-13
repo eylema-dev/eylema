@@ -758,3 +758,58 @@ fn quoted_configuration_values_are_masked_at_every_token_position() {
         }
     }
 }
+
+#[test]
+fn fixed_code_mode_phrases_require_opt_in_eligible_safe_projection() {
+    for (mode, expected) in [
+        ("diag-projection-fixed", Some(true)),
+        ("diag-projection-near", Some(false)),
+        ("diag-projection-quoted-phrases", Some(false)),
+        ("diag-projection-sensitive", None),
+        ("diag-projection-origin", None),
+        ("diag-projection-multiple", None),
+        ("diag-projection-words", None),
+        ("diag-projection-bytes", None),
+        ("diag-projection-unmatched", None),
+    ] {
+        let f = fixture();
+        let path = f.root.join("private-fixed-phrases.json");
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+            .args(["--fixture-observation", mode, "--private-diagnostic-output"])
+            .arg(&path)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{mode}");
+        let public = String::from_utf8(output.stdout).unwrap();
+        assert!(public.contains("\"status\":\"TransportFailed\""));
+        assert!(public.contains("\"proposal_changes\":0"));
+        for field in [
+            "host_disabled_phrase_observed",
+            "code_mode_fail_closed_phrase_observed",
+        ] {
+            let value = expected.map_or("null".to_owned(), |v| v.to_string());
+            assert!(
+                public.contains(&format!("\"{field}\":{value}")),
+                "{mode}: {public}"
+            );
+        }
+        assert!(
+            !public.contains("host is disabled") && !public.contains("code mode will fail closed")
+        );
+        if mode == "diag-projection-quoted-phrases" {
+            let private = fs::read_to_string(&path).unwrap();
+            assert!(
+                !private.contains("host is disabled")
+                    && !private.contains("code mode will fail closed")
+            );
+        }
+    }
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+        .args(["--fixture-observation", "diag-projection-fixed"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let public = String::from_utf8(output.stdout).unwrap();
+    assert!(public.contains("\"host_disabled_phrase_observed\":null"));
+    assert!(public.contains("\"code_mode_fail_closed_phrase_observed\":null"));
+}

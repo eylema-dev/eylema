@@ -51,7 +51,7 @@ fn diagnostics_json(value: Option<CallDiagnostics>) -> String {
         .collect::<Vec<_>>()
         .join(",");
     format!(
-        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"final_proposal_valid":{},"provider_error_seen":{},"error_event_count":{},"unclassified_error_events":{},"item_error_seen":{},"turn_failed_seen":{},"top_level_error_seen":{},"error_prefixes":[{}],"public_error_identifiers":[{}],"error_identifier_limit_reached":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
+        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"final_proposal_valid":{},"host_disabled_phrase_observed":{},"code_mode_fail_closed_phrase_observed":{},"provider_error_seen":{},"error_event_count":{},"unclassified_error_events":{},"item_error_seen":{},"turn_failed_seen":{},"top_level_error_seen":{},"error_prefixes":[{}],"public_error_identifiers":[{}],"error_identifier_limit_reached":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
         d.failure_path,
         number(d.child_exit_code),
         d.child_exit_success,
@@ -59,6 +59,8 @@ fn diagnostics_json(value: Option<CallDiagnostics>) -> String {
         d.completed_turn_seen,
         d.final_message_seen,
         number(d.final_proposal_valid),
+        number(d.host_disabled_phrase_observed),
+        number(d.code_mode_fail_closed_phrase_observed),
         d.provider_error_seen,
         d.error_event_count,
         d.unclassified_error_events,
@@ -141,6 +143,9 @@ fn fixture(args: &[String]) {
                 "diag-projection-single" => "code_mode_host configuration value='old new'".to_owned(),
                 "diag-projection-backtick" => "code_mode_host configuration value=`old new`".to_owned(),
                 "diag-projection-plain" => "code_mode_host configuration old new".to_owned(),
+                "diag-projection-fixed" => "code_mode_host configuration: host is disabled. Code mode will fail closed.".to_owned(),
+                "diag-projection-near" => "code_mode_host configuration ghost is disabled; code mode will fail closedx.".to_owned(),
+                "diag-projection-quoted-phrases" => "code_mode_host configuration value=\"host is disabled\" other=\"code mode will fail closed\"".to_owned(),
                 "diag-projection-sensitive" => "code_mode_host configuration credential sk-fixture-private-value".to_owned(),
                 "diag-projection-words" => format!("code_mode_host configuration {}", "required ".repeat(64)),
                 "diag-projection-bytes" => format!("code_mode_host configuration {}", "guardian_enhanced_node_repl_transcripts ".repeat(20)),
@@ -316,6 +321,9 @@ fn main() {
         | "diag-projection-single"
         | "diag-projection-backtick"
         | "diag-projection-plain"
+        | "diag-projection-fixed"
+        | "diag-projection-near"
+        | "diag-projection-quoted-phrases"
         | "diag-projection-sensitive"
         | "diag-projection-words"
         | "diag-projection-bytes"

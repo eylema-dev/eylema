@@ -278,6 +278,10 @@ pub struct CallDiagnostics {
     pub completed_turn_seen: bool,
     pub final_message_seen: bool,
     pub final_proposal_valid: Option<bool>,
+    /// Fixed public phrase observations on the eligible, safe opt-in projection.
+    /// Null outside that boundary; not a cause, acceptance or configuration value.
+    pub host_disabled_phrase_observed: Option<bool>,
+    pub code_mode_fail_closed_phrase_observed: Option<bool>,
     pub provider_error_seen: bool,
     pub error_event_count: u32,
     pub unclassified_error_events: u32,
@@ -920,6 +924,18 @@ fn execute(
     } else {
         (PrivateProjectionStatus::NotEligible, None)
     };
+    if let Some(projection) = private_projection.as_ref() {
+        // Derive only from safe emitted words. Quoted/opaque/sensitive values and
+        // noneligible or overflowed candidates cannot populate these fields.
+        diagnostics.host_disabled_phrase_observed = Some(public_identifier_present(
+            projection.as_str(),
+            "host is disabled",
+        ));
+        diagnostics.code_mode_fail_closed_phrase_observed = Some(public_identifier_present(
+            projection.as_str(),
+            "code mode will fail closed",
+        ));
+    }
     Ok((
         CallOutcome {
             status,
@@ -968,7 +984,7 @@ fn message_category(text: &str) -> MessageCategory {
         MessageCategory::Unclassified
     }
 }
-const PROJECTION_WORDS: &str = "a an and are as at be been boolean by can cannot cli code codex config config.toml configuration configured default deprecated disable disabled disabling does enable enabled error execution false feature features field fields file flag flags for format has host ignored ignoring in input instead invalid is it mode must need needs network new no not of off old on only or output override overrides permissions read remove removed require required requires response responses runtime sandbox schema set setting settings should support supported that the this to tool tools true unset unsupported use used using value values version via warning was will with write you your";
+const PROJECTION_WORDS: &str = "a an and are as at be been boolean by can cannot cli code codex config config.toml configuration configured default deprecated disable disabled disabling does enable enabled error execution false feature features field fields file flag flags fail closed for format has host ignored ignoring in input instead invalid is it mode must need needs network new no not of off old on only or output override overrides permissions read remove removed require required requires response responses runtime sandbox schema set setting settings should support supported that the this to tool tools true unset unsupported use used using value values version via warning was will with write you your";
 fn sanitized_projection(text: &str) -> (PrivateProjectionStatus, Option<PrivateErrorProjection>) {
     let lower = text.to_ascii_lowercase();
     if [
@@ -1196,6 +1212,8 @@ fn diagnose(
         completed_turn_seen: false,
         final_message_seen: false,
         final_proposal_valid: None,
+        host_disabled_phrase_observed: None,
+        code_mode_fail_closed_phrase_observed: None,
         provider_error_seen: false,
         error_event_count: 0,
         unclassified_error_events: 0,
