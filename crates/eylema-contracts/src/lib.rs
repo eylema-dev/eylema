@@ -18,3 +18,5 @@ pub use records::*;
 
 /// Package build identity; independent of protocol or schema versions.
 pub const PACKAGE_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+pub mod tool;

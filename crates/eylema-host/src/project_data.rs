@@ -539,6 +539,19 @@ impl<T: Storage, H: Sha256, C: DataClock> ProjectStore<T, H, C> {
             .metadata
             .clone())
     }
+    /// Bound a composed action's deadline to actual data and sealed grant TTL.
+    /// Derived data expiry is already constrained by every source ancestor.
+    pub(crate) fn authorized_deadline_at_observed_time(
+        &self,
+        s: &DataSession,
+        r: &DataRef,
+        purpose: DataUse,
+    ) -> DataResult<u64> {
+        let metadata = self.authorized_metadata_at_observed_time(s, r, purpose)?;
+        Ok(metadata
+            .expires_at
+            .min(self.sessions[s.slot].grant.expires_at))
+    }
     pub fn read(&mut self, s: &DataSession, r: &DataRef, purpose: DataUse) -> DataResult<Vec<u8>> {
         if purpose.is_egress() {
             return Err(DataError::Forbidden);

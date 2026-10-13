@@ -1,0 +1,42 @@
+# G54 tipli araçlar ve kaynak kontrollü yürütme
+
+[English](../en/typed-tools.md). G54, sınırlı eylem önerisini değişmez araç profillerine ve kabul edilmiş [kendi yürütücümüze](deterministic-runtime.md), [gözetime](human-oversight.md), [kurtarmaya](runtime-recovery.md) ve [proje veri kapısına](project-data.md) bağlar. Taşınabilir sözleşmeler, runtime registry ve native cephe `eylema_contracts::tool`, `eylema_runtime::tool` içindedir; cephe `eylema_host::tool` içindedir.
+
+Bu dilim mevcut iki birinci taraf Rust işlemini yürütür. Inference motoru kurmaz, dil modeli çağırmaz, keyfî eklenti yüklemez, süreç çalıştırmaz veya veritabanı seçmez. G39 kontrollü geliştirme host’u ayrı sınırdır; araç kimliği oraya yönlendiremez. Model argüman ve bağ önerebilir; profil, rol ve kaynak kimliği oturum veya onay oluşturmaz.
+
+## Tipli seçim
+
+| Kendi işlemimiz | Giriş şeması | Çıkış şeması | Etki |
+|---|---|---|---|
+| `readTaskValue` | `eyl:empty:v1`: yük veya kaynak argümanı yok | `eyl:task-value:v1`: gözlenen canonical işaretsiz değer | Okuma; sayaç değişmez |
+| `addTaskValue` | `eyl:u64:v1`: canonical işaretsiz zarf | `eyl:task-value:v1`: gözlenen canonical işaretsiz değer | Kontrollü kendi kayıt değişikliğimiz |
+
+`ToolProfile` doğrulanmış semantik kimlik, pozitif sürüm ve kapalı iki `OwnedTool` işleyicisinden birini bağlar. Giriş/çıkış şeması ve etki anlamı işleyiciden türetilir; callback kaydı yoktur. Değişmez `ToolRegistry` 1–64 ayrı profil kabul eder. `ToolPlan` gerçek görev/öneriyi 1–8 sıralı eylem bağına bağlar. Her `ToolBinding` eylem/profil/sürüm/giriş şeması/çıkış şeması ve isteğe bağlı proje veri referansı taşır. Ayrı canonical sekiz alanlı kodlaması bilinmeyen sürüm, yanlış tür, ek yetki alanı ve bozuk referansı reddeder. Mevcut görev/öneri/wire/journal kodlamaları değişmez.
+
+Registry kabul öncesinde gerçek işlem/sürüm/etkiyi, profil sürümünü, şemayı, GPU olmayan native macOS CPU hedefini ve tam task-state yeteneğini denetler. Okuma boş argüman ister; güncelleme EYL’nin yedi baytlık başlığı dahil en çok 16 bayt olan tam canonical işaretsiz gösterimi ister. İşaretli/metin/büyük giriş, eski profil ve GPU/browser seçimi reddedilir. Normal yürütücü gerçek kapsamlı izin, görev/politika sürümü, bütçe, süre sonu, checkpoint ve idempotency kurallarını ayrıca uygular. Yönlendirme bildirimi bu denetimleri gevşetemez.
+
+## Projeye özel giriş ve türetilmiş çıkış
+
+`ToolHost` yeni ve kendisine ayrılmış bir `DurableHost` ile değişmez registry’ye tek başına sahip olur. Ham değiştirilebilir host veya denetimsiz scheduler yerine tipli kabul ve sınırlı adım sunar. Tek aktif yürütme kabul eder, en çok 128 değişmez yürütme/kaynak bağı kaydı tutar; yeni eylem almak için kayıt atmaz. Ayrı özel journal ve güvenilen embedding host kullanın; kaynak kısıtlarını aşmak için aynı journal’ı eski konsol veya ham host API üzerinden açmayın.
+
+Literal argüman önceden uygun host girdisi olmalıdır. API bildirilmeyen kaynak soyunu keşfetmez veya sır sınıflandırmaz. Bildirilmiş kaynaktan gelen argümanda gerçek G63 `DataSession`, kaynak ve bütün üst kaynaklar için Execute izni taşımalıdır. Gerçek kaynak baytı önerilen canonical argümanla eşit olmalıdır. Cephe canlı veri deposu kimliğine bağlanır; aynı görünen başka depo veya yabancı oturum onun yerine geçemez.
+
+Kabul, her etki adımı, sonuç okuma ve görev sözleşmesi keşfi **biriken görev değerinin tutulan bütün girdilerini**, eski planlar dahil yeniden denetler. Bu, eylem sonradan başarısız olsa bile önerilen girdilerin kısıtlarını ihtiyatlı biçimde korur. Önceki kaynağın geri çekilmesi sonraki kaynaksız okuma veya literal eylemle aşılamaz. Kaynak izni, oturum, soy ve saklama denetimi tek ortak kalıcı G63 zaman gözleminde yapılır. Yeni eylemin süre sonu, tutulan her kaynak ve mühürlü veri oturumunun süre sonunu da aşamaz. Asıl yürütücü gerçek etki öncesinde kendi güvenilen Unix milisaniye zamanını denetler; kaynak hazırlığı ile bu gözlem arasında süre dolarsa değişiklik yapılmaz. Doğru ve uyumlu saat birimleri ile cooperative depolama/hash/host hizmeti ön koşuldur; kesin gerçek zamanlı kesme değildir.
+
+Veri reddi aktif planı yeni etki olmadan bloklar. Başka ham scheduler’a kaçamaz. Gerçek kapsamlı iptal makbuzu, geri çekilmiş kaynak gövdesi okunmadan durdurma adımını çalıştırabilir; bayrak yalnız G11’in gerçek host sonucundan gelir. Yetkin insan denetleyici ve iptal olay kapasitesi kabul anında mevcut olmalıdır. Geç kayıt ayrılmış kapasite oluşturmaz. Onay önizleme/oluşturma ve yetki verilen oturumun geri çekilmesi gerçek kapsamlı G11 API’lerine iletilir. Onay somut etki baytını kapsar; proje veri hakkını vermez. Burada kayıt güvenilen host fixture’ıdır, gerçek insan kimliği doğrulaması değildir.
+
+## Sonuç, kısmi etki ve yeniden başlatma sınırı
+
+`ToolReport` tutulan gerçek etki kanıtını kendi gözlemlerimize çözer, görev/yürütme/eylem bağını doğrular ve canonical sayaç çıktısı verir. Bekleyen, tamamlanan, başarısız, durdurulmuş, kısmi ve bilinmeyen durum ayrı kalır. Doğrulanmış uygulanmış etkisi olan başarısız/iptal plan kısmi olur; bilinen ön bölüm belirsizliği başarıya çeviremez. Debug çıkış baytı yerine durum/sayı gösterir. Sonuç dönmeden tutulan bütün veri kaynaklarında Execute ve kapsamlı Read/ObserveEvents gerekir. Eğitim, dış açıklama ve ekosistem dışa aktarımı hakkı buradan türemez; cephe böyle bir export API sunmaz.
+
+Başarılı adım aktif alanı güvenilen scheduler’ın gerçek boşta bayrağıyla serbest bırakır. Yürütücü planı terminal yapmışken aktörün yetkisi sonuç okumayı engelleyebilir; bu cepheyi kalıcı kilitli bırakamaz. Yeni yetkilendirilmiş kapsamlı okuyucu doğrulanmış çıktı için yine asıl veri kapısından geçer. Aynı tekrar aynı yürütmeyi döndürür, ek etki yapmaz. Değişmiş plan/bağ kaynak soyunu sessizce tekrar bağlayamaz; idempotency çatışması açıktır.
+
+Mevcut G13 journal gerçek eylem, etki ve kurtarma sonucunu tutar; yeni tipli kaynak bağlarını kalıcı saklamaz. Bu yüzden `ToolHost::new`, önceki komut geçmişi olan her host’u reddeder. Kurtarılan görev bu cephede literal giriş diye yeniden etiketlenemez veya sürdürülemez. `inspect_recovery`, özel sayısal çıktı veya yeniden başlatma yetkisi vermeden kapsamlı bilinmeyen durumu ve doğrulanmış/bilinmeyen etki kaydı sayılarını döndürür. Sayılar bitmemiş sonucu çözmez. Kalıcı tipli kaynak soyu ve skill yeniden bağlama daha sonra ayrı kabul edilmiş uygulama gerektirir; bu dilim yeniden başlatılabilen tam harness değildir. G13’ün doğrulanmış ön bölümü ve bilinmeyen sonucu otomatik tekrarsız korunur. Önceden verilmiş bayt geri alınamaz; kaynak geri çekilince journal fiziksel silinmez.
+
+## Sınırlar ve yürütülmüş kanıt
+
+Profil 64; eylem bağı 8; aktif yürütme 1; tutulan kaynak bağı kaydı 128. Geçerli güncelleme argümanı ve her işaretsiz çıktı 16 bayttır. Uyuşmayan kaynak okuması reddedilmeden önce G63’ün sınırlı 64 KiB gövdesini geçici ayırabilir. Geçmiş kaynak denetimi 128×8 referansla sınırlıdır; güvenilen saat/journal kapasitesi tüketir ve maliyetli olabilir. Asıl görev/olay/wire/journal sınırları uygulanır. Bunlar yapısal sınırlardır; ölçülmüş allocator tepesi, gecikme veya throughput değildir.
+
+ARM64 macOS/Rust 1.99.0’da üç yeni taşınabilir sözleşme, üç registry ve on yedi cephe testi; kapalı bağ, eksik/tekrarlı/sınır durumları, 64/65 profil sınırı, eski şema/sürüm/işlem/etki/giriş/hedef, gerçek okuma/güncelleme çıktısı, reddedilen/eski/büyük istek, idempotency çatışması/tekrarı, kaynak politika/geri çekme/TTL/biriken kısıtlar, canlı depo/oturum kimliği, kaynak/oturum süre bağı, hazırlık-yürütme arasında gerçek zaman ilerlemesi, kapsamlı onay/süre, etkili durdurma, aktör yetkisinin geri çekilmesi, kısmi taşma, 128 kayıt ve devam edilmeyen bilinmeyen kurtarmayı sınar. Eksik modül RED, işaretsiz zarf hesabı RED, süre bağı RED ve iptal edilmiş aktör kilidi RED gözlendi; ardından düzeltmeler geçti.
+
+Yeni fixture’lar kendi bellek journal’ımız ve kontrollü saattir; yeni fiziksel IO veya gerçek insan/model kabulü değildir. Tam suite daha önce kabul edilmiş native dosya/süreç testlerini kendi kapsamlarında korur. Tam native/Python denetimi, seçili taşınabilir Wasm derlemesi, çift dil incelemesi, sabitlenmiş entegrasyon, gerçek ayrı son-commit incelemesi ve güncel CI/main kanıtı teslim kapılarıdır. Yeni Wasm yürütmesi, genel dış araç, gerçek model inference/eğitimi, tam harness görevi, gerçek insan kimliği ve performans kabulü not_run’dır. Üçüncü taraf crate, provider çağrısı, yeni süreç/G40 denemesi, model ağırlığı veya harcama yoktur. İncelenmiş geri dönüş özel journal ve çözülmemiş sonuçları koruyarak cephe/sözleşmeyi kaldırır.
