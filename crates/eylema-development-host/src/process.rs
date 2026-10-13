@@ -33,6 +33,9 @@ impl ProcessLimits {
 #[derive(Clone, Default)]
 pub struct CancelHandle(Arc<AtomicBool>);
 impl CancelHandle {
+    pub(crate) fn is_cancelled(&self) -> bool {
+        self.0.load(Ordering::Acquire)
+    }
     pub fn cancel(&self) {
         self.0.store(true, Ordering::Release);
     }
@@ -259,16 +262,16 @@ pub(crate) fn host_output(
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    let mut child = OwnedChild(command.spawn()?);
+    let mut child = eylema_platform::process_group::OwnedGroup::spawn(command)?;
     let overflow = Arc::new(AtomicBool::new(false));
     let out = reader(
-        child.0.stdout.take().ok_or(Error::InvalidState)?,
+        child.take_stdout().ok_or(Error::InvalidState)?,
         Arc::new(AtomicUsize::new(0)),
         overflow.clone(),
         stdout_limit,
     );
     let err = reader(
-        child.0.stderr.take().ok_or(Error::InvalidState)?,
+        child.take_stderr().ok_or(Error::InvalidState)?,
         Arc::new(AtomicUsize::new(0)),
         overflow.clone(),
         stderr_limit,
@@ -278,10 +281,9 @@ pub(crate) fn host_output(
     let status = loop {
         if overflow.load(Ordering::Acquire) || started.elapsed() >= Duration::from_millis(wall_ms) {
             limited = true;
-            child.0.kill()?;
-            break child.0.wait()?;
+            break child.stop()?.ok_or(Error::InvalidState)?;
         }
-        if let Some(status) = child.0.try_wait()? {
+        if let Some(status) = child.poll()? {
             break status;
         }
         thread::sleep(Duration::from_millis(2));
@@ -322,5 +324,38 @@ mod tests {
         let output = host_output(&mut finite, 1000, 128, 128).unwrap();
         assert!(output.status.success());
         assert_eq!(output.stdout, b"observed");
+    }
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod preflight_regressions {
+    use super::*;
+    #[test]
+    fn exited_preflight_leader_cleans_pipe_retaining_descendant() {
+        let mut command = Command::new("/bin/sh");
+        command
+            .env_clear()
+            .args(["-c", "/bin/sleep 3 & /usr/bin/printf done; exit 0"]);
+        let started = Instant::now();
+        let result = host_output(&mut command, 100, 128, 128).unwrap();
+        assert!(result.status.success());
+        assert_eq!(result.stdout, b"done");
+        assert!(
+            started.elapsed() < Duration::from_secs(2),
+            "descendant retained capture beyond deadline"
+        );
+    }
+    #[test]
+    fn timed_out_preflight_cleans_descendant_and_pipe_before_return() {
+        let mut command = Command::new("/bin/sh");
+        command
+            .env_clear()
+            .args(["-c", "/bin/sleep 3 & /bin/sleep 3"]);
+        let started = Instant::now();
+        assert!(host_output(&mut command, 100, 128, 128).is_err());
+        assert!(
+            started.elapsed() < Duration::from_secs(2),
+            "timeout left an owned descendant holding capture"
+        );
     }
 }

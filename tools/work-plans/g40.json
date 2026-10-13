@@ -1,0 +1,534 @@
+{
+  "goal": "G40",
+  "task_revision": 10,
+  "issue": "https://github.com/eylema-dev/eylema/issues/33",
+  "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
+  "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
+  "started_unix_ms": 1791834434319,
+  "authority": "Actual maintainer approved revision10:20additional active root minutes,5additional independent review minutes;reassign cycle11 to fixed public failure predicates and add conditional restrictive cause-specific cycle12;CLIcap9total.",
+  "accepted_dependencies": {
+    "G39": [
+      {
+        "repository": "eylema-dev/eylema",
+        "pr": "https://github.com/eylema-dev/eylema/pull/58",
+        "head": "57233a20abb21717c7fb9c22187716fbba6c1f3b",
+        "main": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
+        "tree": "07d23416762c8a18427f27551eb7f2f3e579be36",
+        "main_ci": {
+          "id": 38298731953,
+          "url": "https://github.com/eylema-dev/eylema/actions/runs/38298731953",
+          "head": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
+          "status": "passed"
+        },
+        "review": {
+          "status": "passed",
+          "reviewed_head": "57233a20abb21717c7fb9c22187716fbba6c1f3b",
+          "reviewer": "g39_review separate GPT-6.1 Sol/high Codex context; no human GitHub approval claimed"
+        }
+      }
+    ]
+  },
+  "accepted_guide": {
+    "pr": "https://github.com/eylema-dev/devguide/pull/33",
+    "head": "ca387f61a5adfef461aaaaa52398d7bfade49a5f",
+    "main": "32e256853205a6fb47aa660c761edb73f2d8c976",
+    "tree": "f6c11eca50156f1dc02733ce3cdd0dbcc4807c3f",
+    "main_ci": 38299420091,
+    "review": "g39_review separate GPT-6.1 Sol/high context passed exact head"
+  },
+  "allowed_paths": [
+    "crates/eylema-development-host/src/adapters/",
+    "crates/eylema-development-host/src/lib.rs",
+    "crates/eylema-development-host/src/bin/codex-probe.rs",
+    "crates/eylema-development-host/tests/codex.rs",
+    "crates/eylema-development-host/tests/support/",
+    "crates/eylema-platform/src/process_group.rs",
+    "crates/eylema-platform/src/lib.rs",
+    "crates/eylema-platform/tests/process_group.rs",
+    "docs/en/codex-adapter.md",
+    "docs/tr/codex-adapter.md",
+    "README.md",
+    "README.tr.md",
+    "tools/translation-pairs.json",
+    "tools/work-plans/g40.json",
+    "crates/eylema-development-host/src/process.rs"
+  ],
+  "linked_guide_scope": [
+    "docs/en/tooling.md",
+    "docs/tr/tooling.md",
+    "tools/translation-pairs.json",
+    "tools/repository-set.json (core pin)",
+    "records/goal-tracking.json (G40 only)",
+    "docs/plans/g40-acceptance.md"
+  ],
+  "acceptance_mapping": {
+    "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
+  },
+  "budget": {
+    "active_minutes": 335,
+    "max_targeted_repairs": 12,
+    "new_spending": false,
+    "max_live_provider_cli_invocations": 9
+  },
+  "roles": {
+    "architect_implementer_verifier": "Codex resumed with user-configured gpt-6.1-sol/high; invocation setting is not proof of hidden runtime model",
+    "reviewer": "separate final-head GPT-6.1 Sol/high context required"
+  },
+  "provider": {
+    "tool": "codex-cli",
+    "version": "0.162.1",
+    "executable_sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "high",
+    "auth": "existing authorized ChatGPT CLI session; no public API key or new paid API route",
+    "local_flags_source": "installed CLI help/features/schema",
+    "official_config_source": "https://learn.chatgpt.com/docs/config-file/config-reference"
+  },
+  "scope_limits": [
+    "Owned Rust adapter in existing native host; no external production crate, copied provider code, schema/shared gate or hidden inference engine.",
+    "Provider CLI is a trusted explicit online development-tool input, separate from untrusted G39 worker; no operational/training/private data is exported.",
+    "Only curated bounded prompt and structured text proposal; commands/apps/plugins/hooks/subagents/web access disabled or rejected; no model-supplied executable/args/env/config or merge authority.",
+    "Separate opaque native process-group ownership and minimal macOS waitid/kill binding keep cancellation limited to unreaped owned group. Verify SDK ABI and actual process tests; no arbitrary PID signal API.",
+    "Model/output/tool version/auth absence/timeout/quota/malformed cases are explicit; no silent fallback. CLI invocation counts are not billing or hidden-backend-request evidence. Unknown outcomes retain reserved host usage ceilings.",
+    "No deployment/release/access/protection/spending/secret-write action.",
+    "Pinned CLI feature inventory includes browser/computer use enabled by default; broker explicitly disables these and other interactive tools before any live invocation."
+  ],
+  "risks": [
+    "CLI managed subprocesses or inherited configuration can defeat ownership/credential separation; fail closed with explicit flags/version and tested boundaries.",
+    "Actual remote cancellation/billing cannot be inferred from local child termination.",
+    "Provider failure messages and proposal text are untrusted data, never instructions; JSON/path/size/depth validation must fail closed.",
+    "Installed SDK waitid ABI and deprecated platform dependencies require native execution evidence."
+  ],
+  "checks": [
+    "Exact Python/hashed inventory/static/template/body/diff commands and unchanged full native/selected-Wasm Rust gate.",
+    "Behavioral native process-group, JSON/proposal, reservation/cancel/error tests with explicit transport provenance.",
+    "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
+    "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
+  ],
+  "targeted_repairs_used": 11,
+  "live_cli_invocations_used": 6,
+  "decisions": [
+    "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
+    "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
+    "Installed transport is hash/version pinned; explicit fixture transport cannot label itself installed. No key is read/copied by adapter; trusted CLI consumes the existing authorized session.",
+    "Initial nonzero-exit canary was not valid denial evidence; corrected record is failed. Read-only/protected-root proposal has positive control and actual denial, but is not implemented or accepted."
+  ],
+  "repair_records": [
+    {
+      "finding": "Initial broker tests exposed stale acknowledgement clocks and timeout-reason overwrite by a truncated JSON line",
+      "repair": "Track maximum observed coordinator epoch for acknowledgement; retain primary stop cause after stream joins",
+      "regressions": "passed actual ten-test broker/fixture rerun, including preserved timeout/authority/clock causes"
+    },
+    {
+      "finding": "Actual naturally-exited no-descendant process-group test failed with macOS EPERM on zombie-only group",
+      "repair": "Bounded SDK libproc group inspection permits reaping only when every observed member is inactive/zombie; live/unknown/overfull/failed inspection remains an error",
+      "regression": "passed actual natural completion, orphan-pipe cleanup and unrelated-process preservation rerun"
+    },
+    {
+      "finding": "Unchanged full Rust gate rejected a manual range check in bounded libproc inspection",
+      "repair": "Use Range::contains and idiomatic parser/event checks; no lint exemption or shared gate change",
+      "status": "passed unchanged full Rust gate"
+    },
+    {
+      "finding": "separate exact-head review atffe8d5b requested ChatGPT-only auth/executable drift/preflight cleanup/model evidence fixes; installed filesystem serialization known failed",
+      "repair": "approved cohesive cycle4; pending tests and actual acceptance",
+      "status": "passednativeauth/tool/preflight/modeandactualpermissioncontrols;supersededbyfinalverification"
+    },
+    {
+      "finding": "unchanged Clippy rejected2needlessborrows;actualsuccess probe stoppedonunexpecteditem",
+      "repair": "cycle5diagnosespassiveerror/unknown-event metadata andcorrectsborrowlintwithoutweakeningtoolrejection",
+      "status": "passedfullRustgate/passiveerrorregression;realnormalrequestTransportFailedremainsunresolved"
+    },
+    {
+      "finding": "real TransportFailed is ambiguous with current sanitized observation;CLIusageaggregate lacks observed buckets",
+      "repair": "singleapproved diagnostic cycle adds bounded enum/exit/write/turn/message/observedusage metadata only",
+      "status": "diagnosticimplementationpassedmeaningfulred-greenandunchangedfullRustgate;freshreviewbeforeprovider"
+    },
+    {
+      "finding": "revision5independentreview:P2lateEOFmalformedstream falsely labels ProposalRejected",
+      "repair": "approvedsinglecycle7:pass existing capture flag to diagnostic route;native lateEOF regression and invalidproposal comparison",
+      "status": "red-green/fullgates/separateexactheadreview/currentCIpassed;realacceptancefailed"
+    },
+    {
+      "finding": "realprovidererror only ConfigurationMention;actualcauseunknown",
+      "repair": "approvedcycle8:publicschema/fixedidentifierdiagnostics;noacceptancedowngrade",
+      "status": "safe diagnosticphase full unchangedlocalgatespassed;freshreview/currentCIpending"
+    },
+    {
+      "finding": "singlecode_mode_host configurationerror still hasunknownprefix;no causeproven",
+      "repair": "approvedcycle9:bounded private publicvocabulary projection withfailclosed privacy/origin/size eligibility",
+      "status": "localgates/CI38384074409passed;separate8bdd146reviewchangesrequested:attached/parenthesized/unmatched quote privacy defect;zero new provider calls"
+    },
+    {
+      "finding": "Independent exact8bdd146 native adversarial regressions prove quoted value leak and unmatched attached quote not withheld",
+      "repair": "approvedcycle10:recognize quotes at every token position;withhold escaped/ambiguous quote forms;preserve exact backtick public identifiers only",
+      "status": "passedfullunchangedgates/CI38386058945/separateexact87c9cd0review;actualdiagnostic5failed;causeinsufficientlyproved;no cycle11 repair"
+    },
+    {
+      "finding": "diagnostic5 privateprojectionAvailablebutcompleteallowedcausenotproved;fixed pinned public literals can improve safe classification",
+      "repair": "approvedcycle11:nullable fixed phrase observations from safe eligible opt-in projection only;add public words fail/closed;no rawtext/configvalue export",
+      "status": "meaningfulred-green/fullunchangedlocalgatespassed;rootstopped atconservativetimebound;freshapprovedreview/currentCIpending;zero new provider calls"
+    }
+  ],
+  "verification": {
+    "python": "passedfreshvenv/hashedinstall/47tests/repository/template/body/diff atrevision10",
+    "rust": "passedunchangedfullfmt/Clippy/nativeallfeatures/build/inventory/selectedWasm atrevision10;26Codexintegrationtests",
+    "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
+    "live_provider": "diagnostic6TransportFailed14001ms/0accepted;host_disabled_phrase_observed=true/code_mode_fail_closed_phrase_observed=true;scopedvalidfinalrejected;6of9used;offline allcompanionsalreadyfalse so allowedcorrectionnotproved;mandatory stop",
+    "independent_review_ci_merge_main_guide": "db289f0cutoffreview/CI38386880668passed;revision10freshgates/currentCI/separate review before invocation6pending;notmerged/G41notactivated",
+    "diagnostics": "revision10fixed safeprojected publicphrase nullablefieldsred-green;no raw/quoted/sensitive/configvalue export"
+  },
+  "pending_additional_repair": {
+    "status": "stopped_after_diagnostic6_no_proved_restrictive_correction",
+    "current_runtime_repairs_remaining": 1,
+    "live_calls_remaining": 3,
+    "normal_failure_stop_required": true,
+    "remaining_repair_condition": "cycle12 only actualprovedCLIcause/offlinefailingregression and restriction-only correction;no host/tool enablement or policy relaxation"
+  },
+  "continuation_evidence": {
+    "latest_accepted_guide_main": "a0688300df3bb66929838e7e3b2c795a28a756b9",
+    "usage_tracking_pr": "https://github.com/eylema-dev/devguide/pull/34",
+    "usage_tracking": "accepted metadata-only collector refreshed before resumed G40; current private ledger includes this work",
+    "source_changes_during_usage_task": "none; G40 original draft preserved",
+    "snapshot_scope": "historical before revision3 source follow-up",
+    "live_provider_cli_invocations_used_at_snapshot": 0,
+    "additional_code_repair_applied_at_snapshot": false
+  },
+  "extension": {
+    "approved_additional_active_minutes": 60,
+    "approved_additional_targeted_repairs": 2,
+    "started_unix_ms": 1791866823924,
+    "live_cli_cap_total": 4,
+    "review_active_minutes": 30,
+    "original_budget_preserved": {
+      "active_minutes": 120,
+      "max_targeted_repairs": 3
+    },
+    "status": "time_limit_exhausted;source repair stopped",
+    "stopped_unix_ms": 1791870927414,
+    "repair_cycle_at_extension_start": 4
+  },
+  "verification_extension": {
+    "approved_minutes": 30,
+    "started_unix_ms": 1791871302378,
+    "status": "draftlocalgatespassed;realacceptancefailed;awaitingseparatedraftreview",
+    "review_budget_separate_minutes": 30,
+    "repair_cycles_remaining_at_extension_start": 1,
+    "provider_invocations_remaining_at_extension_start": 4,
+    "repair_cycles_remaining": 0,
+    "provider_invocations_remaining": 3
+  },
+  "live_invocations": [
+    {
+      "mode": "success",
+      "status": "failedUnexpectedTool;actualnativeCLI2912ms;no acceptedproposal",
+      "ordinal": 1,
+      "started_unix_ms": 1791871663753,
+      "binary_identity": "notcapturedbeforecycle5;notclaimedexactfinalbinary"
+    },
+    {
+      "mode": "success",
+      "ordinal": 2,
+      "status": "failedTransportFailed;actual12466ms;reported11816tokens;noacceptedproposal",
+      "started_unix_ms": 1791872311152,
+      "runtime_source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "2ae658b2960ef6c908bb9fd0ff2d788e094b3a857b1400c3bacc763a2d354ac6",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "5c7a2bdb25dd5af66984f6a15a9855ca59c920b10d503063f1e19a4a80293caa",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "f35e019f966eb174737afbabeaa4416f088e3ff3dc5aba7421968a884005856e"
+    },
+    {
+      "ordinal": 3,
+      "mode": "success",
+      "status": "failedTransportFailed;actual14289ms;reported11809tokens;0acceptedproposals",
+      "started_unix_ms": 1791879877481,
+      "reviewed_runtime_head": "04dfcd80129bcff4c32904bdbaa670003a28126e",
+      "runtime_source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "5469367f47d8cb3389a3e5d0c175e34b731710ffbdefbf297e6b12a31ec8913c",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "1bba36e827d3d230b2afc267da8aa3b4ab88f611edf39d738dc192ab7fc27c76",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "5934835ff0b576f64b0e664d8b8b88b04ab12abfba6e8b689e864046baae54bc",
+      "settings_sha256": "4db704627ff440f99ed11d8f8aae917fe0308e6aaeda3ae9555269eefb21e0f8",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "provider_error_seen": true,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11743,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 66,
+          "reasoning_output_tokens": 22
+        },
+        "invalid_usage_seen": false
+      }
+    },
+    {
+      "ordinal": 4,
+      "mode": "success",
+      "purpose": "singleapproveddiagnosticobservation",
+      "status": "failedTransportFailed;actual7575ms;reported11827tokens;0acceptedproposals;causeunknown",
+      "started_unix_ms": 1791882710113,
+      "reviewed_runtime_head": "a0cbb5f9d8e5af0fa2ae6e6c03de5d2f1302eb48",
+      "runtime_source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "5523c8395481a8058f65ebefbbbc1a083b99e6fed1fb2856c4e2809558ca412f",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "7f6e73cb8a4cd80136db5b9d27257f0a39746334cdce7529532b2b2ee7d530e7",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "fa96c587c066ba2369294cf5847f1bef978772fd6a88096bf792763ec2e3dbea",
+      "settings_sha256": "884c408a1833cf1e2942edf7b069314afe2a233ddaf344314878f0af116279d8",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "final_proposal_valid": true,
+        "provider_error_seen": true,
+        "error_event_count": 1,
+        "unclassified_error_events": 1,
+        "item_error_seen": true,
+        "turn_failed_seen": false,
+        "top_level_error_seen": false,
+        "error_prefixes": [],
+        "public_error_identifiers": [
+          "code_mode_host"
+        ],
+        "error_identifier_limit_reached": false,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11759,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 68,
+          "reasoning_output_tokens": 24
+        },
+        "invalid_usage_seen": false
+      }
+    },
+    {
+      "ordinal": 5,
+      "purpose": "approvedsingleboundedprivateprojectiondiagnostic",
+      "head": "87c9cd01da9d21a2e33d94ca857f653f58ff0c67",
+      "status": "TransportFailed",
+      "elapsed_ms": 11563,
+      "proposal_changes": 0,
+      "reported_total_tokens": 11822,
+      "source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "e5963a820be2f2297d8e1d9fbcc7282f6b942218ffb7f06d5f2630943c053eae",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "41f80199aa20edf6d23b65981e574d1d9620b51bf3d5f939e8dce309065e37de",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "44d3f8fc5f7dd0684fb28e9490a64cd313b177b298f61ed0ff540691bdce6173",
+      "settings_sha256": "8699c6b17f7021fe75e496baabc7b94c43760db7a323881f7989a47e3856d6f2",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "final_proposal_valid": true,
+        "provider_error_seen": true,
+        "error_event_count": 1,
+        "unclassified_error_events": 1,
+        "item_error_seen": true,
+        "turn_failed_seen": false,
+        "top_level_error_seen": false,
+        "error_prefixes": [],
+        "public_error_identifiers": [
+          "code_mode_host"
+        ],
+        "error_identifier_limit_reached": false,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11750,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 72,
+          "reasoning_output_tokens": 28
+        },
+        "invalid_usage_seen": false
+      },
+      "private_projection_status": "Available",
+      "private_projection_contents_public": false,
+      "original_free_form_persisted": false,
+      "actual_cause": "not_proved;safeprojectioninsufficient;policychangeifrequiredneedsnewauthority"
+    },
+    {
+      "ordinal": 6,
+      "purpose": "approvedsinglefixedpublicphrasediagnostic",
+      "head": "5c63c54f24433fb1439673eaed7f19ef2424e8cf",
+      "status": "TransportFailed",
+      "elapsed_ms": 14001,
+      "proposal_changes": 0,
+      "reported_total_tokens": 11828,
+      "source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "679e98b211fcb48c2ba4bb41a92f217aa09ecd27300be933537fd6976f410723",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "99603e69ce4fd31491e75592e131dedde525cbd0806f1ca3dd783d08ac155c12",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "c2afae0d1ac1763a7584314cd29931dc338542020f22ac9e2679418e3fa17978",
+      "settings_sha256": "8699c6b17f7021fe75e496baabc7b94c43760db7a323881f7989a47e3856d6f2",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "final_proposal_valid": true,
+        "host_disabled_phrase_observed": true,
+        "code_mode_fail_closed_phrase_observed": true,
+        "provider_error_seen": true,
+        "error_event_count": 1,
+        "unclassified_error_events": 1,
+        "item_error_seen": true,
+        "turn_failed_seen": false,
+        "top_level_error_seen": false,
+        "error_prefixes": [],
+        "public_error_identifiers": [
+          "code_mode_host"
+        ],
+        "error_identifier_limit_reached": false,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11762,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 66,
+          "reasoning_output_tokens": 22
+        },
+        "invalid_usage_seen": false
+      },
+      "private_projection_status": "Available",
+      "private_projection_contents_public": false,
+      "original_free_form_persisted": false,
+      "actual_cause": "safe host-disabled/fail-closed phrases observed;actual activation/runtime route/cause notproved;no allowedrestrictivefixproved"
+    }
+  ],
+  "diagnostic_extension": {
+    "started_unix_ms": 1791877652839,
+    "active_minutes": 30,
+    "repair_cycle": 6,
+    "status": "separateexactheadreviewchangesrequested:P2streamroute;sourcepausedawaitingadditionalrepairauthority;zeroadditionalprovidercalls",
+    "review_budget_separate_minutes": 30
+  },
+  "diagnostic_fidelity_extension": {
+    "started_unix_ms": 1791879420856,
+    "active_minutes": 15,
+    "review_active_minutes": 15,
+    "repair_cycle": 7,
+    "status": "diagnosticpassed;realnormalprobe3failed;mandatoryfirstnormalfailurestop"
+  },
+  "provider_failure_extension": {
+    "started_unix_ms": 1791881164000,
+    "active_minutes": 30,
+    "review_active_minutes": 15,
+    "repair_cycles_max": 2,
+    "repair_cycle_first": 8,
+    "diagnostic_call_failure_exception": "one instrumented call only;unknowncause stops;noeffect after failure without proven cause/offline repair/newgates/review",
+    "status": "diagnostic4failed;unknowncausegateforcesstop;nosecondrepairorfurthercalls",
+    "public_metadata_provenance": {
+      "tool_sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
+      "sources": [
+        "installedCLIhelp",
+        "generatedappserverschema(notexecguarantee)",
+        "publicfeatureinventory withemptytemporaryconfig",
+        "fixedpublicmessageprefixes ininstalledbinary"
+      ],
+      "public_identifier_catalog_sha256": "03c2c22bd687bf468a04943b75fc691c586f5058538d4bb4fedafefa2627d07f",
+      "user_config_values_read": false,
+      "raw_error_exports": false
+    }
+  },
+  "private_error_extension": {
+    "started_unix_ms": 1791886462000,
+    "active_minutes": 15,
+    "review_active_minutes": 10,
+    "status": "separatechangesrequested and CIpassed at8bdd146;root stopped atconservative16.55elapsedminute bound;no real call",
+    "additional_repair_right": 1
+  },
+  "private_projection_repair_extension": {
+    "started_unix_ms": 1791888294000,
+    "active_minutes": 15,
+    "review_additional_active_minutes": 5,
+    "review_prior_remaining_minutes": 4.55,
+    "repair_cycle": 10,
+    "repair_cap": 11,
+    "live_call_cap": 8,
+    "live_calls_used": 5,
+    "status": "diagnostic5failed;mandatoryunknown/insufficientevidencestop;nocausespecificrepair/nofurthercalls/nomerge/G41",
+    "review_status": "g40_r8_review passed narrow exact87c9cd0 phase;3.50of9.55minutes used;6.05remaining",
+    "root_elapsed_seconds_at_effect_cutoff": 696.7806708812714
+  },
+  "fixed_public_failure_extension": {
+    "started_unix_ms": 1791889550000,
+    "active_minutes": 20,
+    "review_additional_active_minutes": 5,
+    "review_prior_remaining_minutes": 3.91,
+    "repair_cycle": 11,
+    "repair_cap": 12,
+    "live_call_cap": 9,
+    "live_calls_used": 6,
+    "public_literal_provenance": "pinnedCLI74c6a6d binary contains host is disabled / Code mode will fail closed;static evidence does not prove actual cause",
+    "observed_predicate_source": "only safe available eligible opt-in projected words;punctuation normalized,token-boundary phrase observations,not original error/configuration state",
+    "status": "diagnostic6failed;fixed safe phrase presence observed;offline companions alreadyfalse;no proved restrictive cause correction;no repair12/furthercalls/merge/G41",
+    "root_elapsed_seconds_at_cutoff": 1499.7002999782562
+  },
+  "revision10_time_extension": {
+    "authority": "actualhuman approves30root/5review;repair12/CLI9capsunchanged",
+    "started_unix_ms": 1791892110000,
+    "root_active_minutes": 30,
+    "review_available_minutes": 9.62,
+    "status": "stopped no proved restrictive correction;remainingconditionalrepair12unused",
+    "offline_feature_controls": [
+      {
+        "purpose": "current_disabled_host",
+        "exit_code": 0,
+        "features": [
+          "code_mode                                under development  false",
+          "code_mode_buffered_exec                  removed            false",
+          "code_mode_host                           stable             false",
+          "code_mode_interrupt                      under development  false",
+          "code_mode_only                           under development  false",
+          "code_mode_only_strict_3p_tools           under development  false",
+          "code_mode_prewarm                        under development  false",
+          "code_mode_tool_search                    under development  false"
+        ],
+        "stderr_nonempty": false,
+        "provider_calls": 0,
+        "profile": "empty temporary HOME/CODEX_HOME,requested public model"
+      },
+      {
+        "purpose": "restrict_all_code_mode_companions",
+        "exit_code": 0,
+        "features": [
+          "code_mode                                under development  false",
+          "code_mode_buffered_exec                  removed            false",
+          "code_mode_host                           stable             false",
+          "code_mode_interrupt                      under development  false",
+          "code_mode_only                           under development  false",
+          "code_mode_only_strict_3p_tools           under development  false",
+          "code_mode_prewarm                        under development  false",
+          "code_mode_tool_search                    under development  false"
+        ],
+        "stderr_nonempty": false,
+        "provider_calls": 0,
+        "profile": "empty temporary HOME/CODEX_HOME,requested public model"
+      }
+    ]
+  }
+}

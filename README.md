@@ -27,6 +27,8 @@ G22 adds bounded [combined GPU measurement hosts](docs/en/combined-gpu-measureme
 
 G39 adds a [controlled native development workspace](docs/en/development-workspace.md): detached accepted-base worktrees, bounded single-process macOS isolation, scoped artifacts and preservation of dirty caller work. Its native proof uses synthetic host authority; provider/compiler/GitHub execution remains separate.
 
+G40 is a [bounded Codex adapter draft](docs/en/codex-adapter.md). Native broker/parser/process tests pass; actual local CLI permission controls pass, but real configured provider calls have not produced an accepted proposal.
+
 ## Contribute
 
 Start with [contribution rules](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.md) and the shared [AI agent contract](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md). Follow the [first-release roadmap](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/roadmap.md), [quality gates](https://github.com/eylema-dev/devguide/blob/main/docs/en/quality-gates.md) and [CI tooling inventory](https://github.com/eylema-dev/devguide/blob/main/docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.
