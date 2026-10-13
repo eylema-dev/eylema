@@ -637,3 +637,128 @@ fn all_sources_and_parent_boundary_are_checked_before_derivation() {
     d.expires_at = 10001;
     assert!(matches!(s.collect(&a, d), Err(DataError::InvalidRecord)));
 }
+#[test]
+fn malformed_known_replay_events_and_configurations_fail_closed() {
+    use eylema_contracts::codec::Value;
+    let t = |s: &str| Value::Text(s.into());
+    let u = Value::Unsigned;
+    let l = Value::List;
+    let put = |id: &str, kind: &str, parents: Vec<Value>, bytes: Vec<u8>, expires: u64| {
+        l(vec![
+            t("put"),
+            t(id),
+            t(kind),
+            l(parents),
+            Value::Bytes(bytes),
+            u(expires),
+        ])
+    };
+    let cases = vec![
+        l(vec![t("clock"), u(1000)]),
+        l(vec![t("clock"), u(999)]),
+        l(vec![t("clock"), Value::Null]),
+        l(vec![t("clock"), u(1001), Value::Null]),
+        put("child", "raw_reasoning", vec![], vec![1], 10000),
+        put("child", "credentials", vec![], vec![1], 10000),
+        put("child", "derived", vec![], vec![1], 10000),
+        put(
+            "child",
+            "training_candidate",
+            vec![t("missing")],
+            vec![1],
+            10000,
+        ),
+        put(
+            "child",
+            "derived",
+            vec![t("root"), t("root")],
+            vec![1],
+            10000,
+        ),
+        put("child", "derived", vec![t("root"); 17], vec![1], 10000),
+        put("root", "artifact", vec![], vec![1], 10000),
+        put("child", "artifact", vec![], vec![], 10000),
+        put(
+            "child",
+            "artifact",
+            vec![],
+            vec![1; MAX_DATA_PAYLOAD_BYTES + 1],
+            10000,
+        ),
+        put("child", "derived", vec![t("root")], vec![1], 10001),
+        put("child", "artifact", vec![], vec![1], 1000),
+        put("child", "artifact", vec![], vec![1], 1001 + MAX_DATA_TTL_MS),
+        l(vec![t("put"), t("child")]),
+        l(vec![
+            t("policy"),
+            t("missing"),
+            u(1),
+            u(0),
+            Value::Bool(false),
+        ]),
+        l(vec![t("policy"), t("root"), u(2), u(1), Value::Bool(false)]),
+        l(vec![t("policy"), t("root"), u(4), u(1), Value::Bool(false)]),
+        l(vec![
+            t("policy"),
+            t("root"),
+            u(3),
+            u(32),
+            Value::Bool(false),
+        ]),
+        l(vec![t("policy"), t("root"), u(3), u(1), u(0)]),
+        l(vec![
+            t("policy"),
+            t("root"),
+            u(3),
+            u(1),
+            Value::Bool(false),
+            Value::Null,
+        ]),
+        l(vec![t("withdraw"), t("missing"), u(1)]),
+        l(vec![t("withdraw"), t("root"), u(2)]),
+        l(vec![t("withdraw"), t("root"), u(3), Value::Null]),
+    ];
+    let reopen_event = |event: Value| {
+        let (mut s, o, m, c) = fixture();
+        let a = session(&mut s, &o, &["root"], &DataUse::ALL);
+        s.collect(&a, draft("root", vec![])).unwrap();
+        allow(&mut s, &o, "root", &DataUse::ALL, true);
+        s.close();
+        let mut j = Journal::open(m, Hash, project_journal_limits()).unwrap();
+        j.append(&event).unwrap();
+        c.value.set(2000);
+        Store::open(j, project("project:a"), c)
+    };
+    for (n, event) in cases.into_iter().enumerate() {
+        assert!(reopen_event(event).is_err(), "malformed replay fixture {n}");
+    }
+    for event in [
+        put("child", "derived", vec![t("root")], vec![1], 10000),
+        l(vec![t("policy"), t("root"), u(3), u(1), Value::Bool(false)]),
+        l(vec![t("withdraw"), t("root"), u(3)]),
+        l(vec![t("clock"), u(1001)]),
+    ] {
+        assert!(reopen_event(event).is_ok(), "valid semantic control");
+    }
+    for config in [
+        l(vec![t("project-data"), u(2), t("project:a"), u(1000)]),
+        l(vec![t("project-data"), u(1), t("project:a"), u(0)]),
+        l(vec![t("project-data"), u(1), t("bad/path"), u(1000)]),
+        l(vec![
+            t("project-data"),
+            u(1),
+            t("project:a"),
+            u(1000),
+            Value::Null,
+        ]),
+    ] {
+        let m = Memory::new();
+        let c = Clock {
+            value: Rc::new(Cell::new(1000)),
+            fail: Rc::new(Cell::new(false)),
+        };
+        let mut j = Journal::create_new(m, Hash, project_journal_limits()).unwrap();
+        j.append(&config).unwrap();
+        assert!(Store::open(j, project("project:a"), c).is_err());
+    }
+}
