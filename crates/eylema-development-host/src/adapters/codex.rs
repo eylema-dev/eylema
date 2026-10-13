@@ -71,6 +71,195 @@ pub enum MessageCategory {
     ConfigurationMention,
     Unclassified,
 }
+/// Fixed public CLI message prefixes, not a root-cause assertion.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PublicErrorPrefix {
+    UnderDevelopmentFeatures,
+    UnknownFeature,
+    InvalidConfiguration,
+    RemoteHostRequiresCodeMode,
+    UnsupportedReasoningEffort,
+    OutputSchemaReadFailure,
+}
+// Names observed from the pinned CLI's feature inventory using an empty temporary
+// configuration directory. No user configuration values or provider text copied.
+const PUBLIC_ERROR_IDENTIFIERS: &[&str] = &[
+    "agent_message_board",
+    "analytics_plan_history",
+    "api_key_cyber_access_programs",
+    "api_key_model_discovery",
+    "apply_patch_freeform",
+    "apply_patch_preserve_line_endings",
+    "apply_patch_streaming_events",
+    "apps",
+    "apps_mcp_path_override",
+    "artifact",
+    "auth_elicitation",
+    "background_paginated_rollout_migration",
+    "bedrock_setup_wizard",
+    "browser_annotation_api",
+    "browser_use",
+    "browser_use_external",
+    "browser_use_full_cdp_access",
+    "chronicle",
+    "cli_daybreak",
+    "code_mode",
+    "code_mode_buffered_exec",
+    "code_mode_host",
+    "code_mode_interrupt",
+    "code_mode_only",
+    "code_mode_only_strict_3p_tools",
+    "code_mode_prewarm",
+    "code_mode_tool_search",
+    "codex_apps_mcp_2026_07_28",
+    "codex_git_commit",
+    "collaboration_modes",
+    "compaction_image_budget",
+    "computer_use",
+    "concurrent_reasoning_summaries",
+    "content_item_kinds",
+    "context_management",
+    "current_time_reminder",
+    "cwd_relative_turn_diffs",
+    "daemon_auto_start",
+    "default_mode_request_user_input",
+    "default_permissions",
+    "defer_mailbox_preemption",
+    "deferred_executor",
+    "deferred_tool_world_state",
+    "elevated_windows_sandbox",
+    "enable_fanout",
+    "enable_mcp_apps",
+    "enable_request_compression",
+    "exec_permission_approvals",
+    "executed_tool_call_metadata",
+    "executor_capability_discovery",
+    "experimental_windows_sandbox",
+    "external_agent_memory_import",
+    "external_migration",
+    "fast_mode",
+    "forced_login_method",
+    "goals",
+    "guardian_approval",
+    "guardian_conversation_history_tools",
+    "guardian_enhanced_node_repl_transcripts",
+    "guardian_ext",
+    "guardian_node_repl_transcript_images",
+    "guardian_reuse_parent_compaction",
+    "guardian_root_handoff_context",
+    "guardianv2",
+    "guardianv2_decisions_comparison",
+    "hooks",
+    "image_detail_original",
+    "image_generation",
+    "image_resize_notice",
+    "in_app_browser",
+    "in_app_chat",
+    "in_app_dictation",
+    "in_app_local_automation",
+    "in_app_updates",
+    "in_app_voice",
+    "incremental_tools",
+    "instant_interrupt",
+    "item_ids",
+    "js_repl",
+    "js_repl_tools_only",
+    "local_thread_store_compression",
+    "local_thread_store_shared_compression",
+    "login_shell_package_path",
+    "mcp_2026_07_28",
+    "mcp_oauth_refresh_coordination",
+    "memories",
+    "mentions_v2",
+    "model_catalog_in_context",
+    "model_provider",
+    "model_reasoning_effort",
+    "multi_agent",
+    "multi_agent_mode",
+    "multi_agent_v2",
+    "multi_agent_v2_dynamic_tools",
+    "network_proxy",
+    "non_prefixed_mcp_tool_names",
+    "nonfatal_clock_read_errors",
+    "omit_app_server_notification_media",
+    "output-schema",
+    "personality",
+    "plugin_hooks",
+    "plugin_sharing",
+    "plugins",
+    "powershell_shell_version",
+    "prefer_mxc",
+    "prevent_idle_sleep",
+    "project_doc_max_bytes",
+    "psp",
+    "realtime_conversation",
+    "reasoning_effort_override",
+    "recommended_plugins",
+    "remote_compaction_v2",
+    "remote_control",
+    "remote_models",
+    "remote_plugin",
+    "request_permissions_tool",
+    "request_rule",
+    "resize_all_images",
+    "respect_system_proxy",
+    "response_format",
+    "responses_websockets",
+    "responses_websockets_v2",
+    "retain_client_developer_messages",
+    "rollout_budget",
+    "runtime_metrics",
+    "search_tool",
+    "secret_auth_storage",
+    "send_async_message",
+    "send_message_to_user_async",
+    "shell_snapshot",
+    "shell_snapshot_v2",
+    "shell_tool",
+    "shell_zsh_fork",
+    "skill_env_var_dependency_prompt",
+    "skill_mcp_dependency_install",
+    "skill_search",
+    "skip_host_skill_discovery",
+    "sleep_tool",
+    "sqlite",
+    "stable_environment_tools",
+    "standalone_web_search",
+    "steer",
+    "step_model_switching",
+    "suppress_unstable_features_warning",
+    "system_proxy_fallback",
+    "terminal_resize_reflow",
+    "terminal_visualization_instructions",
+    "token_budget",
+    "tool_call_mcp_elicitation",
+    "tool_search",
+    "tool_search_always_defer_mcp_tools",
+    "tool_suggest",
+    "transcript_v2",
+    "tui_app_server",
+    "ultrafast_mode",
+    "unavailable_dummy_tools",
+    "unbounded_connection_retries",
+    "undo",
+    "unified_exec",
+    "unified_exec_tty",
+    "unified_exec_zsh_fork",
+    "unified_image_budget",
+    "use_agent_identity",
+    "use_legacy_landlock",
+    "use_linux_sandbox_bwrap",
+    "use_xaa",
+    "view_image",
+    "web_search",
+    "web_search_cached",
+    "web_search_request",
+    "windows_sandbox_service",
+    "workspace_dependencies",
+    "workspace_owner_usage_nudge",
+    "worktrees",
+    "write_stdin_approval",
+];
 /// Observed CLI turn aggregates, not individual backend response/billing records.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ReportedUsage {
@@ -88,7 +277,14 @@ pub struct CallDiagnostics {
     pub stdin_write_success: bool,
     pub completed_turn_seen: bool,
     pub final_message_seen: bool,
+    pub final_proposal_valid: Option<bool>,
     pub provider_error_seen: bool,
+    pub item_error_seen: bool,
+    pub turn_failed_seen: bool,
+    pub top_level_error_seen: bool,
+    pub error_prefixes: [Option<PublicErrorPrefix>; 6],
+    pub public_error_identifiers: [Option<&'static str>; 16],
+    pub error_identifier_limit_reached: bool,
     pub message_category: MessageCategory,
     pub reported_usage: Option<ReportedUsage>,
     pub invalid_usage_seen: bool,
@@ -674,7 +870,7 @@ fn execute(
         status = CallStatus::MalformedOutput;
         proposed = None;
     }
-    let diagnostics = diagnose(
+    let mut diagnostics = diagnose(
         &stdout,
         status,
         stopped.is_some(),
@@ -683,6 +879,8 @@ fn execute(
         exit.success(),
         wrote.is_ok(),
     );
+    diagnostics.final_proposal_valid =
+        observed_proposal_validity(&stdout, &workspace.need.draft().allowed_paths);
     Ok((
         CallOutcome {
             status,
@@ -729,6 +927,85 @@ fn message_category(text: &str) -> MessageCategory {
         MessageCategory::Unclassified
     }
 }
+fn observed_proposal_validity(data: &[u8], scope: &[String]) -> Option<bool> {
+    let mut observed = None;
+    for line in data.split(|b| *b == b'\n').filter(|line| !line.is_empty()) {
+        let Ok(value) = json::parse(line) else {
+            continue;
+        };
+        if value.field("type").and_then(Json::text) == Some("item.completed")
+            && let Some(item) = value.field("item")
+            && item.field("type").and_then(Json::text) == Some("agent_message")
+        {
+            observed = item
+                .field("text")
+                .and_then(Json::text)
+                .map(|text| proposal(text.as_bytes(), scope).is_ok());
+        }
+    }
+    observed
+}
+fn public_identifier_present(text: &str, name: &str) -> bool {
+    let identifier_char = |c: char| c.is_alphanumeric() || c == '_' || c == '-';
+    text.match_indices(name).any(|(offset, _)| {
+        !text[..offset]
+            .chars()
+            .next_back()
+            .is_some_and(identifier_char)
+            && !text[offset + name.len()..]
+                .chars()
+                .next()
+                .is_some_and(identifier_char)
+    })
+}
+fn record_public_error(text: &str, d: &mut CallDiagnostics) {
+    for (prefix, observed) in [
+        (
+            PublicErrorPrefix::UnderDevelopmentFeatures,
+            text.contains("Under-development features enabled:"),
+        ),
+        (
+            PublicErrorPrefix::UnknownFeature,
+            text.contains("Unknown feature flag:"),
+        ),
+        (
+            PublicErrorPrefix::InvalidConfiguration,
+            text.contains("Invalid configuration:"),
+        ),
+        (
+            PublicErrorPrefix::RemoteHostRequiresCodeMode,
+            text.contains(
+                "remote code-mode host requires the code_mode_host feature to be enabled",
+            ),
+        ),
+        (
+            PublicErrorPrefix::UnsupportedReasoningEffort,
+            text.contains("Reasoning effort `") && text.contains("` is not supported for model `"),
+        ),
+        (
+            PublicErrorPrefix::OutputSchemaReadFailure,
+            text.contains("Failed to read output schema file"),
+        ),
+    ] {
+        if observed
+            && !d.error_prefixes.contains(&Some(prefix))
+            && let Some(slot) = d.error_prefixes.iter_mut().find(|v| v.is_none())
+        {
+            *slot = Some(prefix);
+        }
+    }
+    for &name in PUBLIC_ERROR_IDENTIFIERS {
+        if public_identifier_present(text, name)
+            && !d.public_error_identifiers.contains(&Some(name))
+        {
+            if let Some(slot) = d.public_error_identifiers.iter_mut().find(|v| v.is_none()) {
+                *slot = Some(name);
+            } else {
+                d.error_identifier_limit_reached = true;
+            }
+        }
+    }
+}
 fn diagnose(
     data: &[u8],
     status: CallStatus,
@@ -745,7 +1022,14 @@ fn diagnose(
         stdin_write_success: wrote,
         completed_turn_seen: false,
         final_message_seen: false,
+        final_proposal_valid: None,
         provider_error_seen: false,
+        item_error_seen: false,
+        turn_failed_seen: false,
+        top_level_error_seen: false,
+        error_prefixes: [None; 6],
+        public_error_identifiers: [None; 16],
+        error_identifier_limit_reached: false,
         message_category: MessageCategory::NoError,
         reported_usage: None,
         invalid_usage_seen: false,
@@ -765,6 +1049,7 @@ fn diagnose(
                         }
                         Some("error") => {
                             d.provider_error_seen = true;
+                            d.item_error_seen = true;
                             error_text =
                                 Some(item.field("message").and_then(Json::text).unwrap_or(""));
                         }
@@ -831,8 +1116,10 @@ fn diagnose(
                     }
                 }
             }
-            Some("turn.failed" | "error") => {
+            Some(kind @ ("turn.failed" | "error")) => {
                 d.provider_error_seen = true;
+                d.turn_failed_seen |= kind == "turn.failed";
+                d.top_level_error_seen |= kind == "error";
                 error_text = Some(
                     value
                         .field("error")
@@ -846,6 +1133,7 @@ fn diagnose(
         }
         if let Some(text) = error_text {
             d.message_category = message_category(text);
+            record_public_error(text, &mut d);
         }
     }
     d.failure_path = if stopped {

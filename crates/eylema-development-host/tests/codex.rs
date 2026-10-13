@@ -534,3 +534,79 @@ fn late_capture_stream_rejection_is_distinct_from_proposal_rejection() {
         );
     }
 }
+
+#[test]
+fn public_error_evidence_is_whitelisted_and_does_not_downgrade_failure() {
+    for mode in ["diag-feature-notice", "diag-private-identifiers"] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+            .args(["--fixture-observation", mode])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+        let text = String::from_utf8(output.stdout).unwrap();
+        let expected = if mode == "diag-feature-notice" {
+            "TransportFailed"
+        } else {
+            "ModelUnavailable"
+        };
+        assert!(text.contains(&format!("\"status\":\"{expected}\"")));
+        assert!(text.contains("\"proposal_changes\":0"));
+        for secret in [
+            "G40_DIAGNOSTIC_SECRET_MARKER",
+            "unknown_private_feature",
+            "private_value",
+            "private_model",
+            "private_other",
+        ] {
+            assert!(!text.contains(secret), "{mode}");
+        }
+        if mode == "diag-feature-notice" {
+            assert!(text.contains("\"final_proposal_valid\":true"));
+            assert!(text.contains("\"item_error_seen\":true"));
+            assert!(text.contains("\"UnderDevelopmentFeatures\""));
+            assert!(text.contains("\"memories\""));
+            assert!(text.contains("\"code_mode\""));
+            assert!(text.contains("\"suppress_unstable_features_warning\""));
+        } else {
+            assert!(text.contains("\"top_level_error_seen\":true"));
+            assert!(text.contains("\"turn_failed_seen\":true"));
+            assert!(text.contains("\"UnsupportedReasoningEffort\""));
+            assert!(text.contains("\"public_error_identifiers\":[]"));
+        }
+    }
+}
+
+#[test]
+fn public_error_identifier_union_is_bounded_and_deduplicated() {
+    let result = invoke("diag-many-identifiers", 5000, 8192);
+    assert_eq!(result.status, CallStatus::TransportFailed);
+    assert!(result.proposal.is_none());
+    let diagnostics = result.diagnostics.unwrap();
+    let identifiers = diagnostics
+        .public_error_identifiers
+        .iter()
+        .flatten()
+        .copied()
+        .collect::<Vec<_>>();
+    assert_eq!(identifiers.len(), 16);
+    assert_eq!(
+        identifiers
+            .iter()
+            .collect::<std::collections::BTreeSet<_>>()
+            .len(),
+        16
+    );
+    assert!(diagnostics.error_identifier_limit_reached);
+    assert!(diagnostics.top_level_error_seen);
+    assert!(!diagnostics.item_error_seen && !diagnostics.turn_failed_seen);
+    assert!(!format!("{diagnostics:?}").contains("G40_DIAGNOSTIC_SECRET_MARKER"));
+}
+
+#[test]
+fn diagnostic_proposal_validation_keeps_missing_and_outside_scope_distinct() {
+    for (mode, expected) in [("outside", Some(false)), ("diag-private-identifiers", None)] {
+        let result = invoke(mode, 5000, 8192);
+        assert!(result.proposal.is_none());
+        assert_eq!(result.diagnostics.unwrap().final_proposal_valid, expected);
+    }
+}

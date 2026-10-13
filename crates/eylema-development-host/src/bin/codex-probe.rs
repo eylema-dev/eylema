@@ -36,15 +36,36 @@ fn diagnostics_json(value: Option<CallDiagnostics>) -> String {
     let usage = d.reported_usage.map_or("null".into(), |u| format!(
         r#"{{"kind":"cli_turn_aggregate","input_tokens":{},"cached_input_tokens":{},"cache_write_input_tokens":{},"output_tokens":{},"reasoning_output_tokens":{}}}"#,
         number(u.input_tokens), number(u.cached_input_tokens), number(u.cache_write_input_tokens), number(u.output_tokens), number(u.reasoning_output_tokens)));
+    let prefixes = d
+        .error_prefixes
+        .iter()
+        .flatten()
+        .map(|v| quote(&format!("{v:?}")))
+        .collect::<Vec<_>>()
+        .join(",");
+    let identifiers = d
+        .public_error_identifiers
+        .iter()
+        .flatten()
+        .map(|v| quote(v))
+        .collect::<Vec<_>>()
+        .join(",");
     format!(
-        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"provider_error_seen":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
+        r#"{{"failure_path":"{:?}","child_exit_code":{},"child_exit_success":{},"stdin_write_success":{},"completed_turn_seen":{},"final_message_seen":{},"final_proposal_valid":{},"provider_error_seen":{},"item_error_seen":{},"turn_failed_seen":{},"top_level_error_seen":{},"error_prefixes":[{}],"public_error_identifiers":[{}],"error_identifier_limit_reached":{},"message_category":"{:?}","reported_usage":{},"invalid_usage_seen":{}}}"#,
         d.failure_path,
         number(d.child_exit_code),
         d.child_exit_success,
         d.stdin_write_success,
         d.completed_turn_seen,
         d.final_message_seen,
+        number(d.final_proposal_valid),
         d.provider_error_seen,
+        d.item_error_seen,
+        d.turn_failed_seen,
+        d.top_level_error_seen,
+        prefixes,
+        identifiers,
+        d.error_identifier_limit_reached,
         d.message_category,
         usage,
         d.invalid_usage_seen
@@ -100,6 +121,34 @@ fn fixture(args: &[String]) {
         "diag-invalid-usage" => {
             println!(
                 r#"{{"type":"turn.completed","usage":{{"input_tokens":10,"cached_input_tokens":8,"cache_write_input_tokens":8,"output_tokens":5}}}}"#
+            );
+        }
+        "diag-many-identifiers" => {
+            for _ in 0..2 {
+                println!(
+                    r#"{{"type":"error","message":"apps artifact browser_use code_mode code_mode_host computer_use goals hooks image_generation in_app_browser js_repl memories multi_agent plugins shell_snapshot shell_tool skill_search sleep_tool sqlite tool_suggest unified_exec G40_DIAGNOSTIC_SECRET_MARKER"}}"#
+                );
+            }
+        }
+        "diag-feature-notice" => {
+            let proposed = r#"{"summary":"bounded fixture","changes":[{"path":"allowed.txt","text":"fixture","deleted":false}]}"#;
+            println!(
+                r#"{{"type":"item.completed","item":{{"type":"agent_message","text":{}}}}}"#,
+                quote(proposed)
+            );
+            println!(
+                r#"{{"type":"item.completed","item":{{"type":"error","message":"Under-development features enabled: memories, code_mode. Set suppress_unstable_features_warning in config.toml. G40_DIAGNOSTIC_SECRET_MARKER"}}}}"#
+            );
+            println!(
+                r#"{{"type":"turn.completed","usage":{{"input_tokens":11,"output_tokens":5}}}}"#
+            );
+        }
+        "diag-private-identifiers" => {
+            println!(
+                r#"{{"type":"error","message":"private-memories-secret unknown_private_feature G40_DIAGNOSTIC_SECRET_MARKER"}}"#
+            );
+            println!(
+                r#"{{"type":"turn.failed","error":{{"message":"Reasoning effort `private_value` is not supported for model `private_model`. Supported reasoning efforts: private_other"}}}}"#
             );
         }
         "diag-schema" => {
@@ -214,7 +263,11 @@ fn main() {
     let mode = args.get(1).map(String::as_str).unwrap_or("success");
     let expected = match mode {
         "success" | "permissions" => CallStatus::Completed,
-        "diag-schema" | "diag-exit" | "diag-incomplete" if synthetic => CallStatus::TransportFailed,
+        "diag-schema" | "diag-exit" | "diag-incomplete" | "diag-feature-notice" if synthetic => {
+            CallStatus::TransportFailed
+        }
+        "diag-many-identifiers" if synthetic => CallStatus::TransportFailed,
+        "diag-private-identifiers" if synthetic => CallStatus::ModelUnavailable,
         "diag-missing-usage" if synthetic => CallStatus::Completed,
         "diag-invalid-usage" if synthetic => CallStatus::MalformedOutput,
         "timeout" => CallStatus::TimedOut,

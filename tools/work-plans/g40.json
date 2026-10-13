@@ -1,11 +1,11 @@
 {
   "goal": "G40",
-  "task_revision": 6,
+  "task_revision": 7,
   "issue": "https://github.com/eylema-dev/eylema/issues/33",
   "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
   "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
   "started_unix_ms": 1791834434319,
-  "authority": "Actual maintainer reply approves revision6:15additionalactive minutes,one narrow diagnostic repair;total5liveCLIcap unchanged;stop on first failednormalprobe.",
+  "authority": "Actual maintainer reply approves revision7:30additionalactive minutes,atmost2repairs,total7CLIcap;onefailed diagnostic invocation may precede only a proven offline repair;failednormalacceptancestops.",
   "accepted_dependencies": {
     "G39": [
       {
@@ -65,10 +65,10 @@
     "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
   },
   "budget": {
-    "active_minutes": 255,
-    "max_targeted_repairs": 7,
+    "active_minutes": 285,
+    "max_targeted_repairs": 9,
     "new_spending": false,
-    "max_live_provider_cli_invocations": 5
+    "max_live_provider_cli_invocations": 7
   },
   "roles": {
     "architect_implementer_verifier": "Codex resumed with user-configured gpt-6.1-sol/high; invocation setting is not proof of hidden runtime model",
@@ -105,7 +105,7 @@
     "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
-  "targeted_repairs_used": 7,
+  "targeted_repairs_used": 8,
   "live_cli_invocations_used": 3,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
@@ -148,20 +148,25 @@
       "finding": "revision5independentreview:P2lateEOFmalformedstream falsely labels ProposalRejected",
       "repair": "approvedsinglecycle7:pass existing capture flag to diagnostic route;native lateEOF regression and invalidproposal comparison",
       "status": "red-green/fullgates/separateexactheadreview/currentCIpassed;realacceptancefailed"
+    },
+    {
+      "finding": "realprovidererror only ConfigurationMention;actualcauseunknown",
+      "repair": "approvedcycle8:publicschema/fixedidentifierdiagnostics;noacceptancedowngrade",
+      "status": "safe diagnosticphase full unchangedlocalgatespassed;freshreview/currentCIpending"
     }
   ],
   "verification": {
-    "python": "passed47tests/hashinstall/venv atrevision6",
-    "rust": "passedunchangedfullfmt/Clippy/nativeworkspace/allfeatures/selectedWasm atrevision6;ambientRUST_LOGremovedwithoutgatechange",
+    "python": "passed47tests/venv/hashedinstall atrevision7",
+    "rust": "passedrevision7unchangedfmt/Clippy/nativeallfeatures/workspaceinventory/selectedWasm",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
     "live_provider": "failednormalprobe3:TransportFailed/ProviderError/ConfigurationMention;3of5invocationsused;0acceptedproposals;unavailable/timeout not_run due mandatory firstnormalfailurestop",
     "independent_review_ci_merge_main_guide": "diagnosticruntime04dfcd8 separatelyreviewedpassed and CI38368524971passed;liveacceptancefailed;notmerged;guide/G41notstarted",
-    "diagnostics": "passednativeenum/exit/stream/unknownusage/invalidcacheaggregate regressions;nochangeinproposalorstopdecision"
+    "diagnostics": "passedred-green privacy/tokenboundary/16identifierlimit/scopedproposalvalidity;nochangeinacceptance/stops"
   },
   "pending_additional_repair": {
-    "status": "stoppedafterfailednormalprobe3;noadditionalrepairauthority",
-    "current_runtime_repairs_remaining": 0,
-    "live_calls_remaining": 2,
+    "status": "revision7approvedsafeoffline diagnosticphase",
+    "current_runtime_repairs_remaining": 1,
+    "live_calls_remaining": 4,
     "normal_failure_stop_required": true
   },
   "continuation_evidence": {
@@ -264,5 +269,26 @@
     "review_active_minutes": 15,
     "repair_cycle": 7,
     "status": "diagnosticpassed;realnormalprobe3failed;mandatoryfirstnormalfailurestop"
+  },
+  "provider_failure_extension": {
+    "started_unix_ms": 1791881164000,
+    "active_minutes": 30,
+    "review_active_minutes": 15,
+    "repair_cycles_max": 2,
+    "repair_cycle_first": 8,
+    "diagnostic_call_failure_exception": "one instrumented call only;unknowncause stops;noeffect after failure without proven cause/offline repair/newgates/review",
+    "status": "localgatespassed;zeroadditionalprovidercalls;freshreview/currentCIpending",
+    "public_metadata_provenance": {
+      "tool_sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
+      "sources": [
+        "installedCLIhelp",
+        "generatedappserverschema(notexecguarantee)",
+        "publicfeatureinventory withemptytemporaryconfig",
+        "fixedpublicmessageprefixes ininstalledbinary"
+      ],
+      "public_identifier_catalog_sha256": "03c2c22bd687bf468a04943b75fc691c586f5058538d4bb4fedafefa2627d07f",
+      "user_config_values_read": false,
+      "raw_error_exports": false
+    }
   }
 }
