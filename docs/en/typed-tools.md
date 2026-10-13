@@ -42,3 +42,5 @@ On ARM64 macOS/Rust 1.99.0, three new portable contract tests, three registry te
 These new fixtures use owned memory journals and controlled clocks, not new physical IO or real human/model acceptance. The complete suite also retains previously accepted native file/process tests in their own scopes. Full native/Python checks, selected portable Wasm compilation, paired review, pinned integration, genuine separate final-head review and current CI/main proof remain delivery gates. New Wasm execution, generic external tools, actual model inference/training, full harness jobs, real human authentication and performance acceptance are not_run. No third-party crate, provider call, new process/G40 trial, model weight or spending is included. Reviewed rollback removes the facade/contracts while preserving private journals and unresolved outcomes.
 
 G50 [decision evidence](decision-evidence.md) binds submitted choices to actual scoped outputs and bounded monotonic measurements.
+
+G75 [versioned skills](versioned-skills.md) adds closed leaf reuse and retained control-source privacy alongside argument provenance.

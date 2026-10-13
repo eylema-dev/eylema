@@ -15,6 +15,7 @@ pub mod memory;
 pub mod native;
 pub mod project_data;
 mod services;
+pub mod skill;
 use command::{Command, State};
 use encoding::*;
 const VERSION: u64 = 1;

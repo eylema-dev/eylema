@@ -229,6 +229,519 @@ fn decision(p: &ToolPlan) -> eylema_contracts::decision::DecisionDeclaration {
     )
     .unwrap()
 }
+fn package_ref(name: &str) -> DataRef {
+    DataRef {
+        project: reference().project,
+        id: DataId::new(format!("package:{name}")).unwrap(),
+    }
+}
+fn skill_definition(op: OwnedTool) -> eylema_contracts::skill::SkillDefinition {
+    use eylema_contracts::skill::*;
+    let name = if op == OwnedTool::AddTaskValue {
+        "add"
+    } else {
+        "read"
+    };
+    SkillDefinition::new(
+        SkillId::new(format!("skill:{name}")).unwrap(),
+        support::rev(1),
+        ToolProfile::new(sid(&format!("tool:{name}")), support::rev(1), op),
+        sid(OWNED_SKILL_ADAPTER),
+        None,
+        sid("acceptance:declared-counter"),
+    )
+    .unwrap()
+}
+fn skill_sources(d: &mut Data, o: &Owner) -> DataSession {
+    let ds = d
+        .enroll(
+            o,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Collect, DataUse::Execute])
+                    .unwrap(),
+                scope: vec![
+                    reference().id,
+                    package_ref("add").id,
+                    package_ref("read").id,
+                ],
+                expires_at: 10000,
+            },
+        )
+        .unwrap();
+    for (name, op) in [
+        ("add", OwnedTool::AddTaskValue),
+        ("read", OwnedTool::ReadTaskValue),
+    ] {
+        let r = package_ref(name);
+        d.collect(
+            &ds,
+            DataDraft {
+                reference: r.clone(),
+                kind: DataKind::Artifact,
+                parents: vec![],
+                payload: codec::encode(&skill_definition(op).to_value()).unwrap(),
+                expires_at: 2000,
+            },
+        )
+        .unwrap();
+        d.set_policy(
+            o,
+            &r,
+            support::rev(1),
+            DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+            false,
+        )
+        .unwrap();
+    }
+    ds
+}
+fn skill_loop(
+    name: &str,
+    ops: &[OwnedTool],
+    iterations: u32,
+) -> eylema_contracts::skill::SkillLoop {
+    use eylema_contracts::{platform::LoopId, skill::*};
+    let calls = ops
+        .iter()
+        .map(|op| {
+            let name = if *op == OwnedTool::AddTaskValue {
+                "add"
+            } else {
+                "read"
+            };
+            SkillCall {
+                reference: package_ref(name),
+                skill: SkillId::new(format!("skill:{name}")).unwrap(),
+                revision: support::rev(1),
+            }
+        })
+        .collect();
+    SkillLoop::new(
+        LoopId::new(name).unwrap(),
+        support::rev(1),
+        calls,
+        iterations,
+    )
+    .unwrap()
+}
+fn skill_plan(t: &TaskSpec, ops: &[OwnedTool]) -> ToolPlan {
+    let mut pd = support::proposal(t, &vec![2; ops.len()]).fields().clone();
+    let mut bindings = vec![];
+    for (a, op) in pd.actions.iter_mut().zip(ops) {
+        let mut f = a.fields().clone();
+        f.operation_id = OperationId::new(op.operation_id()).unwrap();
+        f.side_effect_class = op.effect();
+        if *op == OwnedTool::ReadTaskValue {
+            f.payload = vec![];
+        }
+        *a = ActionSpec::new(f).unwrap();
+        let profile = skill_definition(*op);
+        bindings.push(ToolBinding {
+            action_id: a.fields().action_id.clone(),
+            profile: profile.profile().id().clone(),
+            revision: profile.profile().revision(),
+            input_schema: profile.profile().input_schema(),
+            output_schema: profile.profile().output_schema(),
+            source: None,
+        });
+    }
+    intervention(
+        ToolPlan::new(t.clone(), ActionProposal::new(pd, t).unwrap(), bindings).unwrap(),
+        true,
+    )
+}
+#[test]
+fn actual_two_skill_packages_are_reused_in_two_distinct_bounded_loops() {
+    let (mut h, _, s, mut d, o, _, _, _) = fixture();
+    let ds = skill_sources(&mut d, &o);
+    for (name, ops, it) in [
+        (
+            "loop:skill-one",
+            vec![OwnedTool::AddTaskValue, OwnedTool::ReadTaskValue],
+            2,
+        ),
+        (
+            "loop:skill-two",
+            vec![OwnedTool::ReadTaskValue, OwnedTool::AddTaskValue],
+            1,
+        ),
+    ] {
+        let t = support::task(name, 30, 100);
+        h.create_task(&s, t.clone()).unwrap();
+        let loop_def = skill_loop(name, &ops, it);
+        let expanded: Vec<_> = (0..it).flat_map(|_| ops.iter().copied()).collect();
+        let p = skill_plan(&t, &expanded);
+        let id = h
+            .admit_skill(&mut d, &ds, &s, (p.clone(), loop_def.clone()), &[])
+            .unwrap();
+        for _ in &expanded {
+            h.step(&mut d).unwrap();
+        }
+        let e = h.skill_evidence(&mut d, &s, &id).unwrap();
+        assert_eq!(e.outcome().status, ToolStatus::Completed);
+        assert_eq!(e.witness().definition(), &loop_def);
+        assert_eq!(e.outcome().outputs.len(), expanded.len());
+        assert_eq!(
+            codec::decode(&e.outcome().outputs.last().unwrap().bytes).unwrap(),
+            codec::Value::Unsigned(if it == 2 { 4 } else { 2 })
+        );
+        assert_eq!(
+            h.admit_skill(&mut d, &ds, &s, (p, loop_def), &[]).unwrap(),
+            id
+        );
+    }
+}
+#[test]
+fn control_source_withdrawal_blocks_later_literal_results_but_reserved_stop_is_effective() {
+    let (mut h, owner, s, mut d, o, _, _, _) = fixture();
+    let ds = skill_sources(&mut d, &o);
+    let mut g = support::grant();
+    g.permissions.push(Permission::RequestCancellation);
+    let human = h.enroll_verified_human(&owner, g).unwrap();
+    let ops = [OwnedTool::AddTaskValue, OwnedTool::ReadTaskValue];
+    let t = support::task("task:private-control", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let id = h
+        .admit_skill(
+            &mut d,
+            &ds,
+            &s,
+            (skill_plan(&t, &ops), skill_loop("loop:private", &ops, 1)),
+            &[],
+        )
+        .unwrap();
+    h.step(&mut d).unwrap();
+    d.withdraw(&o, &package_ref("add"), support::rev(2))
+        .unwrap();
+    assert!(matches!(
+        h.step(&mut d),
+        Err(ToolError::Data(DataError::Forbidden))
+    ));
+    assert!(h.report(&mut d, &s, &id).is_err());
+    assert!(h.skill_evidence(&mut d, &s, &id).is_err());
+    h.request_cancellation(&human, &id).unwrap();
+    assert_eq!(h.step(&mut d).unwrap(), Some(id));
+    assert!(h.task_spec(&mut d, &s, &t.fields().task_id).is_err());
+}
+#[test]
+fn incompatible_skill_model_adapter_schema_and_extra_authority_never_produce_effects() {
+    use eylema_contracts::codec::Value;
+    let Value::List(base) = skill_definition(OwnedTool::AddTaskValue).to_value() else {
+        unreachable!()
+    };
+    let mut invalid = vec![];
+    let mut adapter = base.clone();
+    adapter[9] = Value::Text("adapter:foreign".into());
+    invalid.push(adapter);
+    let mut model = base.clone();
+    model[10] = Value::List(vec![
+        Value::Text("model:unavailable".into()),
+        Value::Unsigned(1),
+        Value::Bytes(vec![7; 32]),
+        Value::Text("adapter:model".into()),
+    ]);
+    invalid.push(model);
+    let mut schema = base.clone();
+    schema[7] = Value::Text("eyl:text:v1".into());
+    invalid.push(schema);
+    let mut extra = base;
+    extra.push(Value::Text("permission:execute".into()));
+    invalid.push(extra);
+    for (i, fields) in invalid.into_iter().enumerate() {
+        let (mut h, _, s, mut d, o, _, _, _) = fixture();
+        let ds = d
+            .enroll(
+                &o,
+                DataGrant {
+                    permissions: DataPermissions::new(vec![DataUse::Collect, DataUse::Execute])
+                        .unwrap(),
+                    scope: vec![package_ref("add").id],
+                    expires_at: 10000,
+                },
+            )
+            .unwrap();
+        d.collect(
+            &ds,
+            DataDraft {
+                reference: package_ref("add"),
+                kind: DataKind::Artifact,
+                parents: vec![],
+                payload: codec::encode(&Value::List(fields)).unwrap(),
+                expires_at: 2000,
+            },
+        )
+        .unwrap();
+        d.set_policy(
+            &o,
+            &package_ref("add"),
+            support::rev(1),
+            DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+            false,
+        )
+        .unwrap();
+        let t = support::task(&format!("task:bad-skill:{i}"), 20, 50);
+        h.create_task(&s, t.clone()).unwrap();
+        assert!(
+            h.admit_skill(
+                &mut d,
+                &ds,
+                &s,
+                (
+                    skill_plan(&t, &[OwnedTool::AddTaskValue]),
+                    skill_loop("loop:bad", &[OwnedTool::AddTaskValue], 1)
+                ),
+                &[]
+            )
+            .is_err()
+        );
+        assert_eq!(h.step(&mut d).unwrap(), None);
+        let id = h.admit(&mut d, &ds, &s, read_plan(&t), &[]).unwrap();
+        h.step(&mut d).unwrap();
+        assert_eq!(
+            codec::decode(&h.report(&mut d, &s, &id).unwrap().outputs[0].bytes).unwrap(),
+            Value::Unsigned(0)
+        );
+    }
+}
+#[test]
+fn skill_witness_cannot_be_rebound_or_removed_and_retained_controls_constrain_new_reads() {
+    let (mut h, _, s, mut d, o, _, _, _) = fixture();
+    let ds = skill_sources(&mut d, &o);
+    let ops = [OwnedTool::AddTaskValue];
+    let t = support::task("task:skill-witness", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = skill_plan(&t, &ops);
+    let id = h
+        .admit_skill(
+            &mut d,
+            &ds,
+            &s,
+            (p.clone(), skill_loop("loop:original", &ops, 1)),
+            &[],
+        )
+        .unwrap();
+    h.step(&mut d).unwrap();
+    assert!(matches!(
+        h.admit_skill(
+            &mut d,
+            &ds,
+            &s,
+            (p.clone(), skill_loop("loop:rebound", &ops, 1)),
+            &[]
+        ),
+        Err(ToolError::ProvenanceUnavailable)
+    ));
+    assert!(matches!(
+        h.admit(&mut d, &ds, &s, p, &[]),
+        Err(ToolError::ProvenanceUnavailable)
+    ));
+    let current = h.task_spec(&mut d, &s, &t.fields().task_id).unwrap();
+    assert!(matches!(
+        h.admit(&mut d, &ds, &s, read_plan(&current), &[]),
+        Err(ToolError::Runtime(ErrorCode::CapabilityUnavailable))
+    ));
+    let read = h
+        .admit(
+            &mut d,
+            &ds,
+            &s,
+            intervention(read_plan(&current), true),
+            &[],
+        )
+        .unwrap();
+    h.step(&mut d).unwrap();
+    assert_eq!(
+        h.report(&mut d, &s, &read).unwrap().status,
+        ToolStatus::Completed
+    );
+    d.withdraw(&o, &package_ref("add"), support::rev(2))
+        .unwrap();
+    assert!(h.report(&mut d, &s, &id).is_err());
+    assert!(h.report(&mut d, &s, &read).is_err());
+}
+#[test]
+fn derived_skill_parent_withdrawal_and_collect_only_grants_fail_closed() {
+    let (mut h, owner, s, mut d, o, original, _, _) = fixture();
+    input(&mut d, &o, &original, 2, 2000);
+    d.set_policy(
+        &o,
+        &reference(),
+        support::rev(2),
+        DataPermissions::new(vec![DataUse::Collect, DataUse::Execute]).unwrap(),
+        false,
+    )
+    .unwrap();
+    let ds = d
+        .enroll(
+            &o,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Collect, DataUse::Execute])
+                    .unwrap(),
+                scope: vec![reference().id, package_ref("add").id],
+                expires_at: 10000,
+            },
+        )
+        .unwrap();
+    d.collect(
+        &ds,
+        DataDraft {
+            reference: package_ref("add"),
+            kind: DataKind::Derived,
+            parents: vec![reference()],
+            payload: codec::encode(&skill_definition(OwnedTool::AddTaskValue).to_value()).unwrap(),
+            expires_at: 2000,
+        },
+    )
+    .unwrap();
+    d.set_policy(
+        &o,
+        &package_ref("add"),
+        support::rev(1),
+        DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+        false,
+    )
+    .unwrap();
+    let collect_only = d
+        .enroll(
+            &o,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Collect]).unwrap(),
+                scope: vec![package_ref("add").id],
+                expires_at: 10000,
+            },
+        )
+        .unwrap();
+    let mut g = support::grant();
+    g.permissions.push(Permission::RequestCancellation);
+    let human = h.enroll_verified_human(&owner, g).unwrap();
+    let ops = [OwnedTool::AddTaskValue, OwnedTool::AddTaskValue];
+    let t = support::task("task:derived-skill", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let def = skill_loop("loop:derived", &[OwnedTool::AddTaskValue], 2);
+    let p = skill_plan(&t, &ops);
+    assert!(matches!(
+        h.admit_skill(&mut d, &collect_only, &s, (p.clone(), def.clone()), &[]),
+        Err(ToolError::Data(DataError::Forbidden))
+    ));
+    let id = h.admit_skill(&mut d, &ds, &s, (p, def), &[]).unwrap();
+    h.step(&mut d).unwrap();
+    assert_eq!(
+        codec::decode(&h.skill_evidence(&mut d, &s, &id).unwrap().outcome().outputs[0].bytes)
+            .unwrap(),
+        codec::Value::Unsigned(2)
+    );
+    d.withdraw(&o, &reference(), support::rev(3)).unwrap();
+    assert!(h.step(&mut d).is_err());
+    assert!(h.skill_evidence(&mut d, &s, &id).is_err());
+    h.request_cancellation(&human, &id).unwrap();
+    h.step(&mut d).unwrap();
+}
+#[test]
+fn skill_data_session_deadline_and_actual_missing_controller_are_enforced() {
+    let (mut h, owner, s, mut d, o, _, _, clock) = fixture_with_controller(false);
+    let ds = skill_sources(&mut d, &o);
+    let ops = [OwnedTool::AddTaskValue];
+    let t = support::task("task:skill-controller", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = skill_plan(&t, &ops);
+    let def = skill_loop("loop:controller", &ops, 1);
+    assert!(matches!(
+        h.admit_skill(&mut d, &ds, &s, (p.clone(), def.clone()), &[]),
+        Err(ToolError::Host(HostError::Runtime(
+            ErrorCode::CapabilityUnavailable
+        )))
+    ));
+    let mut g = support::grant();
+    g.permissions.push(Permission::RequestCancellation);
+    let human = h.enroll_verified_human(&owner, g).unwrap();
+    let short = d
+        .enroll(
+            &o,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+                scope: vec![package_ref("add").id],
+                expires_at: 1100,
+            },
+        )
+        .unwrap();
+    assert!(matches!(
+        h.admit_skill(&mut d, &short, &s, (p, def.clone()), &[]),
+        Err(ToolError::DeadlineNotBound)
+    ));
+    let mut draft = support::task("task:skill-short", 20, 50).fields().clone();
+    draft.budget = Budget::new(20, 50, 1024, 1, Timestamp::new(1100).unwrap()).unwrap();
+    let t = TaskSpec::new(draft).unwrap();
+    h.create_task(&s, t.clone()).unwrap();
+    let id = h
+        .admit_skill(&mut d, &short, &s, (skill_plan(&t, &ops), def), &[])
+        .unwrap();
+    assert_eq!(h.report(&mut d, &s, &id).unwrap().outputs.len(), 0);
+    clock.0.set(1100);
+    assert!(h.step(&mut d).is_err());
+    h.request_cancellation(&human, &id).unwrap();
+    assert_eq!(h.step(&mut d).unwrap(), Some(id));
+    assert_eq!(h.step(&mut d).unwrap(), None);
+}
+#[test]
+fn skill_order_scope_foreign_session_and_equal_looking_backing_store_are_denied() {
+    let (mut h, _, s, mut d, o, _, _, _) = fixture();
+    let ds = skill_sources(&mut d, &o);
+    let ops = [OwnedTool::AddTaskValue, OwnedTool::ReadTaskValue];
+    let t = support::task("task:skill-boundary", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let p = skill_plan(&t, &ops);
+    let def = skill_loop("loop:scope", &ops, 1);
+    let missing = d
+        .enroll(
+            &o,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+                scope: vec![package_ref("add").id],
+                expires_at: 10000,
+            },
+        )
+        .unwrap();
+    assert!(matches!(
+        h.admit_skill(&mut d, &missing, &s, (p.clone(), def.clone()), &[]),
+        Err(ToolError::Data(DataError::Forbidden))
+    ));
+    assert!(matches!(
+        h.admit_skill(
+            &mut d,
+            &ds,
+            &s,
+            (
+                p.clone(),
+                skill_loop(
+                    "loop:wrong-order",
+                    &[OwnedTool::ReadTaskValue, OwnedTool::AddTaskValue],
+                    1
+                )
+            ),
+            &[]
+        ),
+        Err(ToolError::InvalidEvidence)
+    ));
+    let (_, _, _, mut other, oo, _, _, _) = fixture();
+    let foreign = skill_sources(&mut other, &oo);
+    assert!(matches!(
+        h.admit_skill(&mut d, &foreign, &s, (p.clone(), def.clone()), &[]),
+        Err(ToolError::Data(DataError::Forbidden))
+    ));
+    let id = h
+        .admit_skill(&mut d, &ds, &s, (p.clone(), def.clone()), &[])
+        .unwrap();
+    h.step(&mut d).unwrap();
+    h.step(&mut d).unwrap();
+    assert_eq!(
+        h.skill_evidence(&mut d, &s, &id).unwrap().outcome().status,
+        ToolStatus::Completed
+    );
+    assert!(matches!(
+        h.admit_skill(&mut other, &foreign, &s, (p, def), &[]),
+        Err(ToolError::WrongBackingStore)
+    ));
+}
 #[test]
 fn decision_attachment_precedes_effects_and_correlates_actual_scoped_observations() {
     let (mut h, _, s, mut d, _, ds, _, _) = fixture();

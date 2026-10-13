@@ -42,3 +42,5 @@ ARM64 macOS/Rust 1.99.0’da üç yeni taşınabilir sözleşme, üç registry v
 Yeni fixture’lar kendi bellek journal’ımız ve kontrollü saattir; yeni fiziksel IO veya gerçek insan/model kabulü değildir. Tam suite daha önce kabul edilmiş native dosya/süreç testlerini kendi kapsamlarında korur. Tam native/Python denetimi, seçili taşınabilir Wasm derlemesi, çift dil incelemesi, sabitlenmiş entegrasyon, gerçek ayrı son-commit incelemesi ve güncel CI/main kanıtı teslim kapılarıdır. Yeni Wasm yürütmesi, genel dış araç, gerçek model inference/eğitimi, tam harness görevi, gerçek insan kimliği ve performans kabulü not_run’dır. Üçüncü taraf crate, provider çağrısı, yeni süreç/G40 denemesi, model ağırlığı veya harcama yoktur. İncelenmiş geri dönüş özel journal ve çözülmemiş sonuçları koruyarak cephe/sözleşmeyi kaldırır.
 
 G50 [karar kanıtı](decision-evidence.md), bildirilen seçimleri gerçek kapsamlı sonuç ve sınırlı monoton ölçümlere bağlar.
+
+G75 [sürümlü skill](versioned-skills.md), argüman soyunun yanında kapalı yaprak yeniden kullanımı ve tutulan kontrol-kaynağı gizliliği ekler.
