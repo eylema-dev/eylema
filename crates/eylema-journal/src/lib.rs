@@ -469,6 +469,10 @@ impl<T: Storage, H: Sha256> Journal<T, H> {
         }
         Ok(())
     }
+    /// Immutable configuration for stricter composed host profile admission.
+    pub fn limits(&self) -> Limits {
+        self.limits
+    }
     pub fn is_poisoned(&self) -> bool {
         self.poisoned
     }

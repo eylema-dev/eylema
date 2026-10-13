@@ -11,6 +11,7 @@ use std::sync::Arc;
 mod command;
 mod encoding;
 pub mod native;
+pub mod project_data;
 mod services;
 use command::{Command, State};
 use encoding::*;
