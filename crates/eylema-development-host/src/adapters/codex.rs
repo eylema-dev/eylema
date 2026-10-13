@@ -1010,16 +1010,31 @@ fn sanitized_projection(text: &str) -> (PrivateProjectionStatus, Option<PrivateE
     let mut last_redacted = false;
     for raw in lower.split_whitespace() {
         let mut redact = raw.contains(['/', '\\', '@']) || raw.contains("://") || raw.len() > 64;
-        if let Some(quote) = opaque_quote {
-            redact = true;
-            if raw.contains(quote) {
-                opaque_quote = None;
+        // Recognize quoted values even after assignments or punctuation. Escaped
+        // quote forms are deliberately withheld instead of interpreting config syntax.
+        if raw.contains('\\') && (opaque_quote.is_some() || raw.contains(['\'', '"', '`'])) {
+            return (PrivateProjectionStatus::WithheldSensitive, None);
+        }
+        let quoted_identifier = opaque_quote.is_none()
+            && raw
+                .strip_prefix('`')
+                .and_then(|v| v.strip_suffix('`'))
+                .is_some_and(|v| PUBLIC_ERROR_IDENTIFIERS.contains(&v));
+        for ch in raw.chars() {
+            if let Some(quote) = opaque_quote {
+                redact = true;
+                if ch == quote {
+                    opaque_quote = None;
+                }
+            } else if matches!(ch, '\'' | '"' | '`') {
+                redact = true;
+                opaque_quote = Some(ch);
             }
-        } else if let Some(quote @ ('\'' | '"' | '`')) = raw.chars().next()
-            && raw.chars().filter(|c| *c == quote).count() == 1
-        {
-            redact = true;
-            opaque_quote = Some(quote);
+        }
+        // Only an entire, backtick-wrapped catalog identifier is public syntax;
+        // quoted vocabulary words/configuration values remain opaque.
+        if quoted_identifier {
+            redact = false;
         }
         let word = raw.trim_matches(|c: char| !c.is_ascii_alphanumeric() && c != '_' && c != '-');
         let public = PUBLIC_ERROR_IDENTIFIERS.contains(&word)

@@ -1,11 +1,11 @@
 {
   "goal": "G40",
-  "task_revision": 8,
+  "task_revision": 9,
   "issue": "https://github.com/eylema-dev/eylema/issues/33",
   "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
   "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
   "started_unix_ms": 1791834434319,
-  "authority": "Actual maintainer approves revision8 narrow private sanitizederror plan:15active minutes,1additionalrepairright(max10total),max8CLIcalls;knowncause/offlineregression required before repair;unknown or policychange stops.",
+  "authority": "Actual maintainer approved revision9:15additional active root minutes,5additional independent review minutes;reassign cycle10 to proven projection privacy defect and add conditional cause-specific cycle11;CLIcap8unchanged.",
   "accepted_dependencies": {
     "G39": [
       {
@@ -65,8 +65,8 @@
     "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
   },
   "budget": {
-    "active_minutes": 300,
-    "max_targeted_repairs": 10,
+    "active_minutes": 315,
+    "max_targeted_repairs": 11,
     "new_spending": false,
     "max_live_provider_cli_invocations": 8
   },
@@ -105,7 +105,7 @@
     "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
-  "targeted_repairs_used": 9,
+  "targeted_repairs_used": 10,
   "live_cli_invocations_used": 4,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
@@ -157,22 +157,28 @@
     {
       "finding": "singlecode_mode_host configurationerror still hasunknownprefix;no causeproven",
       "repair": "approvedcycle9:bounded private publicvocabulary projection withfailclosed privacy/origin/size eligibility",
-      "status": "localgatespassed;freshreviewpending;timelimitstopbeforerealprobe"
+      "status": "localgates/CI38384074409passed;separate8bdd146reviewchangesrequested:attached/parenthesized/unmatched quote privacy defect;zero new provider calls"
+    },
+    {
+      "finding": "Independent exact8bdd146 native adversarial regressions prove quoted value leak and unmatched attached quote not withheld",
+      "repair": "approvedcycle10:recognize quotes at every token position;withhold escaped/ambiguous quote forms;preserve exact backtick public identifiers only",
+      "status": "red-green/fullunchangedlocalgatespassed;fresh currentCI/separate exactheadreview pending"
     }
   ],
   "verification": {
-    "python": "passed47tests/venv/hashedinstall atrevision8",
-    "rust": "passedunchangedfullfmt/Clippy/nativeallfeatures/inventory/selectedWasm atrevision8",
+    "python": "passed47tests/venv/hashedinstall/repository/template/body/diff atrevision9",
+    "rust": "passedunchangedfullfmt/Clippy/nativeallfeatures/build/inventory/selectedWasm atrevision9;25Codexintegrationtests",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
-    "live_provider": "diagnostic4failed:oneunclassifieditemerror/code_mode_host;finalproposalvalid but rejected;4of7used;causeunknown;furthercallsstopped",
-    "independent_review_ci_merge_main_guide": "a0cbb5fdiagnosticreviewpassed and CI38374122342passed;actualG40failed;notmerged;G41notactivated",
-    "diagnostics": "revision8nativeprivacy/origin/word/byte/quotedvalue/overwrite regressions red-green;publicstdoutcontentunchanged"
+    "live_provider": "diagnostic4failed:oneunclassifieditemerror/code_mode_host;finalproposalvalid but rejected;4of8used;causeunknown;zero revision8/9 actual calls",
+    "independent_review_ci_merge_main_guide": "8bdd146 CI38384074409passed;g40_r8_review changes_requested;new revision9 full gates/review pending;notmerged/G41notactivated",
+    "diagnostics": "revision9quoteprivacy regressionred-green/nativeintegrationpassed;fresh currentCI/separate review pending"
   },
   "pending_additional_repair": {
-    "status": "revision8approvedprivateprojectionphase",
+    "status": "revision9approvedprivacyfixphase",
     "current_runtime_repairs_remaining": 1,
     "live_calls_remaining": 4,
-    "normal_failure_stop_required": true
+    "normal_failure_stop_required": true,
+    "remaining_repair_condition": "cycle11 only actual proved CLI cause plus failing offline regression;no policy relaxation"
   },
   "continuation_evidence": {
     "latest_accepted_guide_main": "a0688300df3bb66929838e7e3b2c795a28a756b9",
@@ -345,7 +351,18 @@
     "started_unix_ms": 1791886462000,
     "active_minutes": 15,
     "review_active_minutes": 10,
-    "status": "sourceworkstoppedatconservativetimebound;localgatespassed;separateapprovedreview/currentCIpending;zeroadditionalprovidercalls",
+    "status": "separatechangesrequested and CIpassed at8bdd146;root stopped atconservative16.55elapsedminute bound;no real call",
     "additional_repair_right": 1
+  },
+  "private_projection_repair_extension": {
+    "started_unix_ms": 1791888294000,
+    "active_minutes": 15,
+    "review_additional_active_minutes": 5,
+    "review_prior_remaining_minutes": 4.55,
+    "repair_cycle": 10,
+    "repair_cap": 11,
+    "live_call_cap": 8,
+    "live_calls_used": 4,
+    "status": "fullunchangedlocalgatespassed;freshcurrentCI/separate review before any provider effect"
   }
 }

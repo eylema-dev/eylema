@@ -699,3 +699,62 @@ fn private_output_existing_file_is_refused_before_tool_or_home_access() {
     );
     assert_eq!(fs::read_to_string(path).unwrap(), "preserve");
 }
+
+#[test]
+fn quoted_configuration_values_are_masked_at_every_token_position() {
+    for (mode, expected) in [
+        (
+            "diag-projection-assigned",
+            Some("code_mode_host configuration <redacted>"),
+        ),
+        (
+            "diag-projection-parenthesized",
+            Some("code_mode_host configuration <redacted>"),
+        ),
+        ("diag-projection-unmatched", None),
+        ("diag-projection-escaped", None),
+        (
+            "diag-projection-embedded",
+            Some("code_mode_host configuration <redacted>"),
+        ),
+        (
+            "diag-projection-single",
+            Some("code_mode_host configuration <redacted>"),
+        ),
+        (
+            "diag-projection-backtick",
+            Some("code_mode_host configuration <redacted>"),
+        ),
+        (
+            "diag-projection-plain",
+            Some("code_mode_host configuration old new"),
+        ),
+    ] {
+        let f = fixture();
+        let path = f.root.join("private-quotes.json");
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+            .args(["--fixture-observation", mode, "--private-diagnostic-output"])
+            .arg(&path)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{mode}");
+        let public = String::from_utf8(output.stdout).unwrap();
+        assert!(public.contains("\"status\":\"TransportFailed\""));
+        assert!(public.contains("\"proposal_changes\":0"));
+        assert!(!public.contains("code_mode_host configuration"), "{mode}");
+        let private = fs::read_to_string(&path).unwrap();
+        if let Some(expected) = expected {
+            assert!(private.contains("\"status\":\"Available\""), "{mode}");
+            assert!(
+                private.contains(&format!("\"projection\":\"{expected}\"")),
+                "{mode}: {private}"
+            );
+        } else {
+            assert!(
+                private.contains("\"status\":\"WithheldSensitive\""),
+                "{mode}: {private}"
+            );
+            assert!(private.contains("\"projection\":null"), "{mode}");
+        }
+    }
+}

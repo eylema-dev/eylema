@@ -133,6 +133,14 @@ fn fixture(args: &[String]) {
             );
             let message = match mode {
                 "diag-projection-safe" => "`code_mode_host` is disabled via configuration. Remove OPAQUE_CANARY_9X /fixture/local/value https://fixture.invalid/value person@fixture.invalid. \"/fixture/code mode host\"".to_owned(),
+                "diag-projection-assigned" => "code_mode_host configuration value=\"old new\"".to_owned(),
+                "diag-projection-parenthesized" => "code_mode_host configuration (\"old new\")".to_owned(),
+                "diag-projection-unmatched" => "code_mode_host configuration value=\"old".to_owned(),
+                "diag-projection-escaped" => "code_mode_host configuration value=\"old \\\"new\"".to_owned(),
+                "diag-projection-embedded" => "code_mode_host configuration old\"new old\"new".to_owned(),
+                "diag-projection-single" => "code_mode_host configuration value='old new'".to_owned(),
+                "diag-projection-backtick" => "code_mode_host configuration value=`old new`".to_owned(),
+                "diag-projection-plain" => "code_mode_host configuration old new".to_owned(),
                 "diag-projection-sensitive" => "code_mode_host configuration credential sk-fixture-private-value".to_owned(),
                 "diag-projection-words" => format!("code_mode_host configuration {}", "required ".repeat(64)),
                 "diag-projection-bytes" => format!("code_mode_host configuration {}", "guardian_enhanced_node_repl_transcripts ".repeat(20)),
@@ -300,6 +308,14 @@ fn main() {
             CallStatus::TransportFailed
         }
         "diag-projection-safe"
+        | "diag-projection-assigned"
+        | "diag-projection-parenthesized"
+        | "diag-projection-unmatched"
+        | "diag-projection-escaped"
+        | "diag-projection-embedded"
+        | "diag-projection-single"
+        | "diag-projection-backtick"
+        | "diag-projection-plain"
         | "diag-projection-sensitive"
         | "diag-projection-words"
         | "diag-projection-bytes"
