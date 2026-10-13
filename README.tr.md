@@ -95,3 +95,5 @@ Bakımcı 12 Ekim 2026 tarihinde [ilk ürün kararları ve test envanterini](htt
 - [G38 geliştirme koordinatörü](docs/tr/development-coordinator.md): Projeye ait Rust ihtiyaçtan incelemeye durum akışı, host tarafından çözümlenen yetki, sonlu bütçe/iptal ve eski kanıt reddi; süreç/sağlayıcı/GitHub izolasyonu ve gerçek teslim G39–G43 adımlarıdır.
 
 - [G63 proje veri kapısı](docs/tr/project-data.md): ayrı proje journal’ları, beş bağımsız amaç, kaynak mirası ve terminal geri çekme. Kapalı metaveri egress’i kayıt içeriği paylaşımı, gerçek insan kimliği ve tam bellek/model kabulünden ayrıdır.
+
+- [G87 bellek sözleşmeleri](docs/tr/memory-contracts.md): altı isteğe bağlı tür ve güncel kaynak yetkisi, canlı-depo bağı,TTL/serileştirilmiş bayt sınırı taşıyan kendi açık-referans bağlam adaptörümüz. Graph/vector/analitik motor ve token sayımı ayrı kapılardadır.

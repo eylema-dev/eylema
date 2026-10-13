@@ -491,6 +491,32 @@ impl<T: Storage, H: Sha256, C: DataClock> ProjectStore<T, H, C> {
         self.session_expiry(s, now)?;
         self.permitted(&r.id, purpose, now)
     }
+    /// Host-only live binding for composed registries; no request serialization.
+    pub(crate) fn memory_binding(&self) -> (&ProjectId, &Arc<()>) {
+        (&self.project, &self.identity)
+    }
+    /// Trusted persisted time observation for composed host lifecycle checks.
+    pub fn trusted_time(&mut self) -> DataResult<u64> {
+        self.observe_time()
+    }
+    /// Declared metadata after current source/purpose/session authorization.
+    pub fn authorized_metadata(
+        &mut self,
+        s: &DataSession,
+        r: &DataRef,
+        purpose: DataUse,
+    ) -> DataResult<DataMetadata> {
+        if purpose.is_egress() {
+            return Err(DataError::Forbidden);
+        }
+        self.authorize(s, r, purpose)?;
+        Ok(self
+            .items
+            .get(&r.id)
+            .expect("authorized item")
+            .metadata
+            .clone())
+    }
     pub fn read(&mut self, s: &DataSession, r: &DataRef, purpose: DataUse) -> DataResult<Vec<u8>> {
         if purpose.is_egress() {
             return Err(DataError::Forbidden);

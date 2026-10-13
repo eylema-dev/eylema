@@ -10,6 +10,7 @@ use eylema_runtime::*;
 use std::sync::Arc;
 mod command;
 mod encoding;
+pub mod memory;
 pub mod native;
 pub mod project_data;
 mod services;

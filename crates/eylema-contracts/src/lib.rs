@@ -6,6 +6,7 @@
 #![forbid(unsafe_code)]
 
 pub mod codec;
+pub mod memory;
 pub mod platform;
 mod primitives;
 pub mod project_data;

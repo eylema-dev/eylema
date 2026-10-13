@@ -94,3 +94,5 @@ The maintainer accepted the [first-product decisions and test inventory](https:/
 - [G38 development coordinator](docs/en/development-coordinator.md): Owned Rust need-to-review state, host-resolved authority, finite budgets/cancellation and stale-evidence rejection; process/provider/GitHub isolation and real delivery remain G39–G43.
 
 - [G63 project-data gate](docs/en/project-data.md): separate project journals, five independent purposes, source inheritance and terminal withdrawal. Closed metadata egress is distinct from record-content sharing, actual human authentication and complete memory/model acceptance.
+
+- [G87 memory contracts](docs/en/memory-contracts.md): six optional kinds and an owned exact-reference context adapter with current source authorization, live-store binding, TTL and serialized byte limits. Graph/vector/analytical engines and token counting retain separate gates.
