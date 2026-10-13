@@ -42,6 +42,7 @@ fn invoke(mode: &str, wall_ms: u64, bytes: usize) -> CallOutcome {
             },
             cancel: &CancelHandle::default(),
             unavailable_probe: false,
+            private_diagnostic: false,
         },
     )
     .unwrap()
@@ -66,6 +67,7 @@ fn explicit_fixture_returns_valid_proposal_usage_and_no_workspace_edit() {
                 },
                 cancel: &CancelHandle::default(),
                 unavailable_probe: false,
+                private_diagnostic: false,
             },
         )
         .unwrap();
@@ -125,6 +127,7 @@ fn denied_or_exhausted_call_does_not_start_provider() {
             },
             cancel: &CancelHandle::default(),
             unavailable_probe: false,
+            private_diagnostic: false,
         },
     );
     assert!(result.is_err());
@@ -194,6 +197,7 @@ fn authority_revocation_stops_group_preserves_reason_and_acknowledges_charged_ti
             },
             cancel: &CancelHandle::default(),
             unavailable_probe: false,
+            private_diagnostic: false,
         },
     );
     revoke.join().unwrap();
@@ -234,6 +238,7 @@ fn explicit_cancel_after_provider_start_reaps_and_acknowledges_without_refund() 
                 },
                 cancel: &cancel,
                 unavailable_probe: false,
+                private_diagnostic: false,
             },
         )
         .unwrap();
@@ -270,6 +275,7 @@ fn actual_clock_and_task_budget_stops_keep_cause_and_charged_acknowledgement() {
                     },
                     cancel: &CancelHandle::default(),
                     unavailable_probe: false,
+                    private_diagnostic: false,
                 },
             )
             .unwrap();
@@ -311,6 +317,7 @@ fn dangling_provider_schema_cannot_overwrite_outside_private_storage() {
             },
             cancel: &CancelHandle::default(),
             unavailable_probe: false,
+            private_diagnostic: false,
         },
     );
     assert!(result.is_err());
@@ -347,6 +354,7 @@ fn executable_replacement_after_construction_is_rejected_before_model_reservatio
                 },
                 cancel: &CancelHandle::default(),
                 unavailable_probe: false,
+                private_diagnostic: false,
             },
         );
         assert!(result.is_err(), "changed executable must not launch");
@@ -376,6 +384,7 @@ fn non_chatgpt_or_missing_session_is_refused_before_model_request() {
                     },
                     cancel: &CancelHandle::default(),
                     unavailable_probe: false,
+                    private_diagnostic: false,
                 },
             )
             .unwrap();
@@ -516,6 +525,7 @@ fn late_capture_stream_rejection_is_distinct_from_proposal_rejection() {
                     },
                     cancel: &CancelHandle::default(),
                     unavailable_probe: false,
+                    private_diagnostic: false,
                 },
             )
             .unwrap();
@@ -613,4 +623,79 @@ fn diagnostic_proposal_validation_keeps_missing_and_outside_scope_distinct() {
         assert!(result.proposal.is_none());
         assert_eq!(result.diagnostics.unwrap().final_proposal_valid, expected);
     }
+}
+
+#[test]
+fn private_projection_is_opt_in_bounded_and_never_in_public_stdout() {
+    for (mode, status) in [
+        ("diag-projection-safe", "Available"),
+        ("diag-projection-sensitive", "WithheldSensitive"),
+        ("diag-projection-words", "LimitExceeded"),
+        ("diag-projection-bytes", "LimitExceeded"),
+        ("diag-projection-origin", "NotEligible"),
+        ("diag-projection-multiple", "NotEligible"),
+    ] {
+        let f = fixture();
+        let path = f.root.join("private-projection.json");
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+            .args(["--fixture-observation", mode, "--private-diagnostic-output"])
+            .arg(&path)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{mode}");
+        let public = String::from_utf8(output.stdout).unwrap();
+        assert!(public.contains("\"status\":\"TransportFailed\""));
+        assert!(public.contains("\"proposal_changes\":0"));
+        assert!(!public.contains("is disabled via configuration"));
+        let private = fs::read_to_string(&path).unwrap();
+        assert!(
+            private.contains(&format!("\"status\":\"{status}\"")),
+            "{mode}"
+        );
+        for content in [
+            "OPAQUE_CANARY_9X",
+            "/fixture/local/value",
+            "fixture.invalid",
+            "person@",
+            "sk-fixture",
+        ] {
+            assert!(
+                !public.contains(content) && !private.contains(content),
+                "{mode}"
+            );
+        }
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            fs::metadata(&path).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+        if mode == "diag-projection-safe" {
+            assert!(
+                private.contains("code_mode_host is disabled via configuration remove <redacted>")
+            );
+        } else {
+            assert!(private.contains("\"projection\":null"));
+        }
+    }
+}
+
+#[test]
+fn private_output_existing_file_is_refused_before_tool_or_home_access() {
+    let f = fixture();
+    let path = f.root.join("preserved.txt");
+    fs::write(&path, "preserve").unwrap();
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+        .args(["--live", "success", "--private-diagnostic-output"])
+        .arg(&path)
+        .env("HOME", f.root.join("absent-home"))
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(output.stdout.is_empty());
+    assert!(
+        String::from_utf8(output.stderr)
+            .unwrap()
+            .contains("private output must be new")
+    );
+    assert_eq!(fs::read_to_string(path).unwrap(), "preserve");
 }

@@ -291,6 +291,30 @@ pub struct CallDiagnostics {
     pub reported_usage: Option<ReportedUsage>,
     pub invalid_usage_seen: bool,
 }
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PrivateProjectionStatus {
+    NotEligible,
+    WithheldSensitive,
+    LimitExceeded,
+    Available,
+}
+#[derive(Clone, Copy)]
+pub struct PrivateErrorProjection {
+    bytes: [u8; 512],
+    len: u16,
+}
+impl PrivateErrorProjection {
+    pub fn as_str(&self) -> &str {
+        std::str::from_utf8(&self.bytes[..usize::from(self.len)]).expect("fixed ASCII projection")
+    }
+}
+impl std::fmt::Debug for PrivateErrorProjection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PrivateErrorProjection")
+            .field("bytes", &self.len)
+            .finish_non_exhaustive()
+    }
+}
 #[derive(Debug)]
 pub struct CallOutcome {
     pub status: CallStatus,
@@ -300,6 +324,8 @@ pub struct CallOutcome {
     pub transport: Transport,
     pub rejected_item_kind: Option<String>,
     pub diagnostics: Option<CallDiagnostics>,
+    pub private_projection: Option<PrivateErrorProjection>,
+    pub private_projection_status: PrivateProjectionStatus,
 }
 #[derive(Clone, Copy)]
 pub struct CallLimits {
@@ -312,6 +338,8 @@ pub struct CodexRequest<'a> {
     pub cancel: &'a CancelHandle,
     /// Deliberate negative acceptance probe; never a fallback model selection.
     pub unavailable_probe: bool,
+    /// Trusted operator opt-in for bounded private synthetic acceptance diagnostics.
+    pub private_diagnostic: bool,
 }
 impl CodexRequest<'_> {
     pub fn requested_model(&self) -> &'static str {
@@ -544,6 +572,8 @@ impl CodexTool {
                 transport: self.transport,
                 rejected_item_kind: None,
                 diagnostics: None,
+                private_projection: None,
+                private_projection_status: PrivateProjectionStatus::NotEligible,
             });
         }
         for path in [&self.program, &self.auth_home, &self.user_home] {
@@ -561,6 +591,8 @@ impl CodexTool {
                 transport: self.transport,
                 rejected_item_kind: None,
                 diagnostics: None,
+                private_projection: None,
+                private_projection_status: PrivateProjectionStatus::NotEligible,
             });
         }
         files::tree(&workspace.work, 100_000)?;
@@ -883,6 +915,11 @@ fn execute(
     );
     diagnostics.final_proposal_valid =
         observed_proposal_validity(&stdout, &workspace.need.draft().allowed_paths);
+    let (private_projection_status, private_projection) = if request.private_diagnostic {
+        private_configuration_projection(&stdout, &diagnostics)
+    } else {
+        (PrivateProjectionStatus::NotEligible, None)
+    };
     Ok((
         CallOutcome {
             status,
@@ -891,6 +928,8 @@ fn execute(
             elapsed_ms,
             transport: Transport::ExplicitFixture,
             diagnostics: Some(diagnostics),
+            private_projection,
+            private_projection_status,
             rejected_item_kind: flags
                 .rejected_kind
                 .lock()
@@ -928,6 +967,120 @@ fn message_category(text: &str) -> MessageCategory {
     } else {
         MessageCategory::Unclassified
     }
+}
+const PROJECTION_WORDS: &str = "a an and are as at be been boolean by can cannot cli code codex config config.toml configuration configured default deprecated disable disabled disabling does enable enabled error execution false feature features field fields file flag flags for format has host ignored ignoring in input instead invalid is it mode must need needs network new no not of off old on only or output override overrides permissions read remove removed require required requires response responses runtime sandbox schema set setting settings should support supported that the this to tool tools true unset unsupported use used using value values version via warning was will with write you your";
+fn sanitized_projection(text: &str) -> (PrivateProjectionStatus, Option<PrivateErrorProjection>) {
+    let lower = text.to_ascii_lowercase();
+    if [
+        "authorization",
+        "bearer",
+        "password",
+        "passwd",
+        "credential",
+        "api_key",
+        "api-key",
+        "access_token",
+        "refresh_token",
+        "session_token",
+        "token",
+        "key=",
+        "key:",
+        "authentication",
+        "oauth",
+        "cookie",
+        "secret",
+        "account",
+        "invoice",
+        "billing",
+        "sk-",
+    ]
+    .iter()
+    .any(|v| lower.contains(v))
+    {
+        return (PrivateProjectionStatus::WithheldSensitive, None);
+    }
+    if text.len() > 4096 || text.split_whitespace().count() > 64 {
+        return (PrivateProjectionStatus::LimitExceeded, None);
+    }
+    let mut projection = PrivateErrorProjection {
+        bytes: [0; 512],
+        len: 0,
+    };
+    let mut opaque_quote = None;
+    let mut last_redacted = false;
+    for raw in lower.split_whitespace() {
+        let mut redact = raw.contains(['/', '\\', '@']) || raw.contains("://") || raw.len() > 64;
+        if let Some(quote) = opaque_quote {
+            redact = true;
+            if raw.contains(quote) {
+                opaque_quote = None;
+            }
+        } else if let Some(quote @ ('\'' | '"' | '`')) = raw.chars().next()
+            && raw.chars().filter(|c| *c == quote).count() == 1
+        {
+            redact = true;
+            opaque_quote = Some(quote);
+        }
+        let word = raw.trim_matches(|c: char| !c.is_ascii_alphanumeric() && c != '_' && c != '-');
+        let public = PUBLIC_ERROR_IDENTIFIERS.contains(&word)
+            || word
+                .strip_prefix("features.")
+                .is_some_and(|name| PUBLIC_ERROR_IDENTIFIERS.contains(&name))
+            || PROJECTION_WORDS.split_whitespace().any(|v| v == word);
+        let token = if !redact && public {
+            word
+        } else {
+            "<redacted>"
+        };
+        if token == "<redacted>" && last_redacted {
+            continue;
+        }
+        last_redacted = token == "<redacted>";
+        let start = usize::from(projection.len);
+        let separator = usize::from(start > 0);
+        if start + separator + token.len() > projection.bytes.len() {
+            return (PrivateProjectionStatus::LimitExceeded, None);
+        }
+        if separator > 0 {
+            projection.bytes[start] = b' ';
+        }
+        projection.bytes[start + separator..start + separator + token.len()]
+            .copy_from_slice(token.as_bytes());
+        projection.len = (start + separator + token.len()) as u16;
+    }
+    if opaque_quote.is_some() {
+        return (PrivateProjectionStatus::WithheldSensitive, None);
+    }
+    (PrivateProjectionStatus::Available, Some(projection))
+}
+fn private_configuration_projection(
+    data: &[u8],
+    d: &CallDiagnostics,
+) -> (PrivateProjectionStatus, Option<PrivateErrorProjection>) {
+    if d.error_event_count != 1
+        || !d.item_error_seen
+        || d.turn_failed_seen
+        || d.top_level_error_seen
+        || d.failure_path != FailurePath::ProviderError
+        || d.message_category != MessageCategory::ConfigurationMention
+        || d.final_proposal_valid != Some(true)
+    {
+        return (PrivateProjectionStatus::NotEligible, None);
+    }
+    for line in data.split(|b| *b == b'\n').filter(|line| !line.is_empty()) {
+        let Ok(value) = json::parse(line) else {
+            continue;
+        };
+        if value.field("type").and_then(Json::text) == Some("item.completed")
+            && let Some(item) = value.field("item")
+            && item.field("type").and_then(Json::text) == Some("error")
+            && let Some(text) = item.field("message").and_then(Json::text)
+            && public_identifier_present(text, "code_mode_host")
+        {
+            return sanitized_projection(text);
+        }
+    }
+    (PrivateProjectionStatus::NotEligible, None)
 }
 fn observed_proposal_validity(data: &[u8], scope: &[String]) -> Option<bool> {
     let mut observed = None;

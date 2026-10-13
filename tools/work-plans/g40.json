@@ -1,11 +1,11 @@
 {
   "goal": "G40",
-  "task_revision": 7,
+  "task_revision": 8,
   "issue": "https://github.com/eylema-dev/eylema/issues/33",
   "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
   "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
   "started_unix_ms": 1791834434319,
-  "authority": "Actual maintainer reply approves revision7:30additionalactive minutes,atmost2repairs,total7CLIcap;onefailed diagnostic invocation may precede only a proven offline repair;failednormalacceptancestops.",
+  "authority": "Actual maintainer approves revision8 narrow private sanitizederror plan:15active minutes,1additionalrepairright(max10total),max8CLIcalls;knowncause/offlineregression required before repair;unknown or policychange stops.",
   "accepted_dependencies": {
     "G39": [
       {
@@ -65,10 +65,10 @@
     "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
   },
   "budget": {
-    "active_minutes": 285,
-    "max_targeted_repairs": 9,
+    "active_minutes": 300,
+    "max_targeted_repairs": 10,
     "new_spending": false,
-    "max_live_provider_cli_invocations": 7
+    "max_live_provider_cli_invocations": 8
   },
   "roles": {
     "architect_implementer_verifier": "Codex resumed with user-configured gpt-6.1-sol/high; invocation setting is not proof of hidden runtime model",
@@ -105,7 +105,7 @@
     "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
-  "targeted_repairs_used": 8,
+  "targeted_repairs_used": 9,
   "live_cli_invocations_used": 4,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
@@ -153,20 +153,25 @@
       "finding": "realprovidererror only ConfigurationMention;actualcauseunknown",
       "repair": "approvedcycle8:publicschema/fixedidentifierdiagnostics;noacceptancedowngrade",
       "status": "safe diagnosticphase full unchangedlocalgatespassed;freshreview/currentCIpending"
+    },
+    {
+      "finding": "singlecode_mode_host configurationerror still hasunknownprefix;no causeproven",
+      "repair": "approvedcycle9:bounded private publicvocabulary projection withfailclosed privacy/origin/size eligibility",
+      "status": "localgatespassed;freshreviewpending;timelimitstopbeforerealprobe"
     }
   ],
   "verification": {
-    "python": "passed47tests/venv/hashedinstall atrevision7",
-    "rust": "passedrevision7unchangedfmt/Clippy/nativeallfeatures/workspaceinventory/selectedWasm",
+    "python": "passed47tests/venv/hashedinstall atrevision8",
+    "rust": "passedunchangedfullfmt/Clippy/nativeallfeatures/inventory/selectedWasm atrevision8",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
     "live_provider": "diagnostic4failed:oneunclassifieditemerror/code_mode_host;finalproposalvalid but rejected;4of7used;causeunknown;furthercallsstopped",
     "independent_review_ci_merge_main_guide": "a0cbb5fdiagnosticreviewpassed and CI38374122342passed;actualG40failed;notmerged;G41notactivated",
-    "diagnostics": "red-green publicerror origins/prefixes/identifierprivacy/limits/scopedproposalvalidity/error-eventcounts;unchangedacceptance"
+    "diagnostics": "revision8nativeprivacy/origin/word/byte/quotedvalue/overwrite regressions red-green;publicstdoutcontentunchanged"
   },
   "pending_additional_repair": {
-    "status": "stopped:unknowncause;noauthorityforunprovenrepair",
+    "status": "revision8approvedprivateprojectionphase",
     "current_runtime_repairs_remaining": 1,
-    "live_calls_remaining": 3,
+    "live_calls_remaining": 4,
     "normal_failure_stop_required": true
   },
   "continuation_evidence": {
@@ -335,5 +340,12 @@
       "user_config_values_read": false,
       "raw_error_exports": false
     }
+  },
+  "private_error_extension": {
+    "started_unix_ms": 1791886462000,
+    "active_minutes": 15,
+    "review_active_minutes": 10,
+    "status": "sourceworkstoppedatconservativetimebound;localgatespassed;separateapprovedreview/currentCIpending;zeroadditionalprovidercalls",
+    "additional_repair_right": 1
   }
 }

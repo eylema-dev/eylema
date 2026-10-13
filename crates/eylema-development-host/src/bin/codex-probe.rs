@@ -125,6 +125,37 @@ fn fixture(args: &[String]) {
                 r#"{{"type":"turn.completed","usage":{{"input_tokens":10,"cached_input_tokens":8,"cache_write_input_tokens":8,"output_tokens":5}}}}"#
             );
         }
+        mode if mode.starts_with("diag-projection-") => {
+            let proposed = r#"{"summary":"bounded fixture","changes":[{"path":"allowed.txt","text":"fixture","deleted":false}]}"#;
+            println!(
+                r#"{{"type":"item.completed","item":{{"type":"agent_message","text":{}}}}}"#,
+                quote(proposed)
+            );
+            let message = match mode {
+                "diag-projection-safe" => "`code_mode_host` is disabled via configuration. Remove OPAQUE_CANARY_9X /fixture/local/value https://fixture.invalid/value person@fixture.invalid. \"/fixture/code mode host\"".to_owned(),
+                "diag-projection-sensitive" => "code_mode_host configuration credential sk-fixture-private-value".to_owned(),
+                "diag-projection-words" => format!("code_mode_host configuration {}", "required ".repeat(64)),
+                "diag-projection-bytes" => format!("code_mode_host configuration {}", "guardian_enhanced_node_repl_transcripts ".repeat(20)),
+                _ => "code_mode_host is disabled via configuration".to_owned(),
+            };
+            if mode == "diag-projection-origin" {
+                println!(r#"{{"type":"error","message":{}}}"#, quote(&message));
+            } else {
+                for _ in 0..if mode == "diag-projection-multiple" {
+                    2
+                } else {
+                    1
+                } {
+                    println!(
+                        r#"{{"type":"item.completed","item":{{"type":"error","message":{}}}}}"#,
+                        quote(&message)
+                    );
+                }
+            }
+            println!(
+                r#"{{"type":"turn.completed","usage":{{"input_tokens":11,"output_tokens":5}}}}"#
+            );
+        }
         "diag-many-identifiers" => {
             for _ in 0..2 {
                 println!(
@@ -261,11 +292,21 @@ fn main() {
         synthetic || args.first().map(String::as_str) == Some("--live"),
         "explicit observation mode required"
     );
-    assert!(args.len() <= 2, "unexpected arguments");
+    assert!(args.len() <= 2 || args.len() == 4, "unexpected arguments");
     let mode = args.get(1).map(String::as_str).unwrap_or("success");
     let expected = match mode {
         "success" | "permissions" => CallStatus::Completed,
         "diag-schema" | "diag-exit" | "diag-incomplete" | "diag-feature-notice" if synthetic => {
+            CallStatus::TransportFailed
+        }
+        "diag-projection-safe"
+        | "diag-projection-sensitive"
+        | "diag-projection-words"
+        | "diag-projection-bytes"
+        | "diag-projection-origin"
+        | "diag-projection-multiple"
+            if synthetic =>
+        {
             CallStatus::TransportFailed
         }
         "diag-many-identifiers" if synthetic => CallStatus::TransportFailed,
@@ -275,6 +316,29 @@ fn main() {
         "timeout" => CallStatus::TimedOut,
         "unavailable" => CallStatus::ModelUnavailable,
         _ => panic!("unknown mode"),
+    };
+    let private_output = if args.len() == 4 {
+        assert!(
+            args[2] == "--private-diagnostic-output"
+                && (mode == "success" || synthetic && mode.starts_with("diag-projection-")),
+            "private output scope"
+        );
+        let path = PathBuf::from(&args[3]);
+        assert!(
+            fs::symlink_metadata(&path).is_err_and(|e| e.kind() == std::io::ErrorKind::NotFound),
+            "private output must be new"
+        );
+        use std::os::unix::fs::OpenOptionsExt;
+        Some(
+            fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .mode(0o600)
+                .open(path)
+                .expect("new private diagnostic file"),
+        )
+    } else {
+        None
     };
     let mut fixture = support::Fixture::with_limits(Limits {
         model_calls: 4,
@@ -319,6 +383,7 @@ fn main() {
         limits,
         cancel: &CancelHandle::default(),
         unavailable_probe: mode == "unavailable",
+        private_diagnostic: private_output.is_some(),
     };
     let requested_model = request.requested_model();
     let result = tool
@@ -330,6 +395,18 @@ fn main() {
             request,
         )
         .expect("controlled provider observation");
+    if let Some(mut file) = private_output {
+        let projection = result
+            .private_projection
+            .as_ref()
+            .map_or("null".into(), |v| quote(v.as_str()));
+        writeln!(
+            file,
+            "{{\"status\":\"{:?}\",\"projection\":{}}}",
+            result.private_projection_status, projection
+        )
+        .expect("private diagnostic write");
+    }
     let count = result.proposal.as_ref().map_or(0, |p| p.changes.len());
     println!(
         r#"{{"kind":"{}","status":"{:?}","transport":"{:?}","cli_version":"{}","cli_sha256":"{}","requested_model":"{}","requested_effort":"{}","elapsed_ms":{},"proposal_changes":{},"reported_total_tokens":{},"authority":"synthetic_host_fixture","filesystem_process":"actual_native","remote_cancellation":"unknown_after_local_stop","hidden_model_identity":"not_established","rejected_item_kind":{},"diagnostics":{}}}"#,
