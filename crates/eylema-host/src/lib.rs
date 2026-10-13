@@ -609,3 +609,5 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
         drop(self)
     }
 }
+
+pub mod tool;

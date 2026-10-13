@@ -47,8 +47,8 @@
     {
       "en": "docs/en/deterministic-runtime.md",
       "tr": "docs/tr/deterministic-runtime.md",
-      "en_sha256": "728a198a368216a3200e44ee1d796fa302d858ef0a8ddf0f6354db77e9eb0e5b",
-      "tr_sha256": "c832f589c9753850ee9962edc4ac49c2d09fe5d3a3f8290140866f7a9ea548ba"
+      "en_sha256": "663a89ed29aa834a5c9ee80d242b2ac821be4c06c9ab737dbbd450536c2cf3a0",
+      "tr_sha256": "0e6c8045833046d6f9b67da1fbb4501a4cab161883d2f1d0a161c741e33dbb4f"
     },
     {
       "en": "docs/en/human-oversight.md",
@@ -133,6 +133,12 @@
       "tr": "docs/tr/memory-contracts.md",
       "en_sha256": "c7711bde6078869fcd65dd4df0c620c34282e025aa62794538501e1c999ebd53",
       "tr_sha256": "406eb874d65d6996d56286315f6198cf155bfbcf139ac8ce2e7568c1496d6793"
+    },
+    {
+      "en": "docs/en/typed-tools.md",
+      "tr": "docs/tr/typed-tools.md",
+      "en_sha256": "c6c00d163ccfd01581ea529473b5dc03a4c3f8277fcbdc6117ac650477b14852",
+      "tr_sha256": "50053ebb9bdac472b1043abb3799b4c3aed9d802fc27e5847bd784a4a4a73663"
     }
   ],
   "documents": []
