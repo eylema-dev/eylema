@@ -1,0 +1,58 @@
+{
+  "language": "en",
+  "title": "Why Eylema",
+  "edition": "11 October 2026",
+  "footer": "VISION BROCHURE  /  OCTOBER 2026",
+  "cover": {
+    "kicker": "WHY EYLEMA?",
+    "headline": ["From idea", "to action."],
+    "subhead": "You're in control.",
+    "intro": "A web platform vision for applications built by AI teams, operated by local agents and directed by people.",
+    "statement": ["A clear purpose.", "AI with direction."],
+    "caption": "Continuous development and operations",
+    "status": "EARLY DEVELOPMENT  /  PRODUCT VISION"
+  },
+  "why": {
+    "kicker": "THE REASONS BEHIND EYLEMA",
+    "headline": ["More possibilities.", "Clearer control."],
+    "intro": "Turning a need into working software takes a shared goal, clear authority and results you can inspect. Eylema is being designed to bring them together.",
+    "reasons": [
+      {"title": "One goal. A shared language.", "body": "A shared contract for people and AI: define what the application should do, which actions it may take and what success means. Keep development and operations connected to the same purpose."},
+      {"title": "Set the boundaries.", "body": "Goals, permissions and budgets stay under human direction. The design includes approval where required, visible outcomes and the ability to intervene. A model cannot grant itself more authority."},
+      {"title": "Put your device to work.", "body": "Local agents and models are planned around the task and available resources. The aim is to choose suitable capabilities using measured quality, latency and memory. Development providers and GitHub remain explicitly online."},
+      {"title": "Make progress measurable.", "body": "The learning design connects permitted experience and human corrections to evaluated model candidates. Every improvement must earn its place through independent evaluation tasks and acceptance checks."}
+    ]
+  },
+  "cycle": {
+    "kicker": "THE ENVISIONED WORKFLOW",
+    "headline": ["Develop. Operate.", "Verify. Improve."],
+    "intro": "One connected cycle, with defined human authority and acceptance criteria at every stage. The full cycle remains a development goal.",
+    "steps": [
+      {"title": "DEFINE THE GOAL", "body": "Describe the need, allowed actions, resource budget and expected result."},
+      {"title": "BUILD AND REVIEW", "body": "AI teams prepare changes for testing, review and acceptance before a release."},
+      {"title": "OPERATE AND OBSERVE", "body": "Local agents execute within granted authority. Outcomes and intervention results stay visible."},
+      {"title": "EVALUATE AND IMPROVE", "body": "Permitted records inform development and training. Candidates need fresh evaluation before acceptance."}
+    ],
+    "foundation_title": "A small core. Room to grow.",
+    "foundation_body": "Owned Rust components form the foundation. 3D, local language models and world models are optional planned capabilities. The OS, browser, drivers and training tools remain explicit dependencies."
+  },
+  "join": {
+    "kicker": "BUILD WITH US",
+    "headline": ["Help shape", "what comes next."],
+    "intro": "Eylema is at an early stage. A clear need, a reproducible experiment or a thoughtful contribution can help shape its direction.",
+    "contributions": [
+      {"title": "Build", "body": "Contribute Rust components, tools and meaningful tests."},
+      {"title": "Investigate", "body": "Develop evaluation tasks, hardware measurements and permitted learning recipes."},
+      {"title": "Make it clearer", "body": "Improve documentation, examples and English–Turkish explanations."}
+    ],
+    "status_title": "WHERE WE ARE TODAY",
+    "status_now_label": "The foundation",
+    "status_now": "An initial Rust workspace, bootstrap commands, validated task types and bilingual design documents exist. The full platform remains in development.",
+    "status_next_label": "The next proof",
+    "status_next": "Demonstrate creating, running, stopping, saving and reopening a task in the browser. GPU, models, learning and autonomous development have separate future acceptance gates.",
+    "cta": "Start with your first contribution.",
+    "link_label": "github.com/eylema-dev/eylema",
+    "link": "https://github.com/eylema-dev/eylema",
+    "cta_body": "Explore the project. Describe a need. Shape a contribution."
+  }
+}

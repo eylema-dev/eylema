@@ -1,0 +1,38 @@
+{
+  "purpose": "Editorial authoring and optional artifact QA only; no runtime or CI dependency change",
+  "runtime": "Bundled Codex Python 3.12.14; repository gates use their separate Python 3.14 environment",
+  "packages": {
+    "reportlab": "4.4.9",
+    "Pillow": "12.3.0",
+    "pypdf": "6.10.0",
+    "pypdfium2": "5.13.0"
+  },
+  "font_policy": "Read licensed installed Arial fonts; distribute PDF glyph subsets only",
+  "fonts": {
+    "Arial.ttf": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+    "Arial Bold.ttf": "d72db21f9242aedd6b917d8549ad5921766b24d5f8d0becfda2ff4c620b3c2e0",
+    "Arial Black.ttf": "7d7db3ad96a31373c1437c6ab14266f6605495544c8e663558b047521174c42e"
+  },
+  "sources": {
+    "Core status": "https://github.com/eylema-dev/eylema/blob/7e64118196845814d9e8de531fb817c9f14fde5a/README.md",
+    "Typed task contracts": "https://github.com/eylema-dev/eylema/blob/7e64118196845814d9e8de531fb817c9f14fde5a/docs/en/typed-contracts.md",
+    "Architecture": "https://github.com/eylema-dev/eylema-docs-en/blob/4e8f91ce6515bb7d0a02aab89c97cfca8e086a4f/docs/architecture.md",
+    "API and oversight": "https://github.com/eylema-dev/eylema-docs-en/blob/4e8f91ce6515bb7d0a02aab89c97cfca8e086a4f/docs/api-reference.md",
+    "Roadmap": "https://github.com/eylema-dev/eylema-docs-en/blob/4e8f91ce6515bb7d0a02aab89c97cfca8e086a4f/docs/roadmap.md"
+  },
+  "outputs": [
+    {
+      "language": "en",
+      "copy_sha256": "6ccab5f10fadcefe36db5e70e12a14c20b4ad7aafddc9ee9cc4aaf16d725d345",
+      "pdf_sha256": "da0ab60a92d1a89304d23a5ebb7d678e6a548d8ca714d810a361d994dcbccb48",
+      "transcript_sha256": "22dbd48061910b65aa28d1552459e7fecda7e43abe0b3e72fa19ba6331c142a1"
+    },
+    {
+      "language": "tr",
+      "copy_sha256": "b326a34f61559162407ed91ef03766d738ee3854f392c0dbe6f6fa35edb2a78e",
+      "pdf_sha256": "3ecaf4bf8b45b26b307d4bc7cbf9f018064345c3aba026c2205e56cee21d6db8",
+      "transcript_sha256": "b9bfcbcb1379d5c4ebb2e213a3e609ac466cdcb38961ce3f14707b7fa5ea301e"
+    }
+  ],
+  "pdf_intent": "Four A4 pages, digital/ordinary print; no bleed or CMYK; not tagged for PDF accessibility"
+}

@@ -5,3 +5,4 @@
 *.yaml text eol=lf
 *.py text eol=lf
 *.txt text eol=lf
+assets/eylema-brochure/*.pdf binary

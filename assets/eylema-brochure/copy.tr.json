@@ -1,0 +1,58 @@
+{
+  "language": "tr",
+  "title": "Neden Eylema",
+  "edition": "11 Ekim 2026",
+  "footer": "VİZYON BROŞÜRÜ  /  EKİM 2026",
+  "cover": {
+    "kicker": "NEDEN EYLEMA?",
+    "headline": ["Fikirden", "eyleme."],
+    "subhead": "Kontrol sende.",
+    "intro": "Yapay zekâ ekiplerinin geliştirdiği, yerel ajanların işlettiği ve insanın yön verdiği web uygulamaları için bir platform vizyonu.",
+    "statement": ["Net bir amaç.", "Yönü belli yapay zekâ."],
+    "caption": "Sürekli geliştirme ve işletim",
+    "status": "ERKEN GELİŞTİRME  /  ÜRÜN VİZYONU"
+  },
+  "why": {
+    "kicker": "EYLEMA'NIN ARKASINDAKİ NEDENLER",
+    "headline": ["Daha fazla olasılık.", "Daha açık kontrol."],
+    "intro": "Bir ihtiyacı çalışan yazılıma dönüştürmek; ortak bir hedef, açık yetkiler ve incelenebilir sonuçlar gerektirir. Eylema bunları bir araya getirmek için tasarlanıyor.",
+    "reasons": [
+      {"title": "Bir hedef. Ortak bir dil.", "body": "İnsan ve yapay zekâ için ortak bir sözleşme: uygulamanın ne yapacağını, hangi eylemlere izin verildiğini ve başarının ne olduğunu tanımla. Geliştirme ve işletimi aynı amaç etrafında buluştur."},
+      {"title": "Yetkiyi sen belirle.", "body": "Hedefler, izinler ve bütçeler insanın yönetiminde. Tasarım; gerekli adımlarda onayı, görünür sonuçları ve müdahale olanağını içeriyor. Bir model kendi yetkisini genişletemez."},
+      {"title": "Cihazındaki gücü işe kat.", "body": "Yerel ajanlar ve modeller, işe ve kullanılabilir kaynaklara göre planlanıyor. Amaç; kalite, gecikme ve bellek ölçümleriyle uygun yetenekleri seçmek. Geliştirme sağlayıcıları ve GitHub ise açıkça çevrimiçi."},
+      {"title": "Gelişimi kanıtla.", "body": "Öğrenme tasarımı, izinli deneyim kayıtlarını ve insan düzeltmelerini değerlendirilen model adaylarına bağlıyor. Her iyileştirme, bağımsız değerlendirme görevleri ve kabul kontrolleriyle yerini hak etmeli."}
+    ]
+  },
+  "cycle": {
+    "kicker": "TASARLANAN İŞLEYİŞ",
+    "headline": ["Geliştir. İşlet.", "Kanıtla. İyileştir."],
+    "intro": "Her adımında insanın yetkisi ve kabul ölçütleri tanımlı, birbirine bağlı bir döngü. Bu döngünün tamamı bir geliştirme hedefidir.",
+    "steps": [
+      {"title": "HEDEFİ TANIMLA", "body": "İhtiyacı, izin verilen eylemleri, kaynak bütçesini ve beklenen sonucu tarif et."},
+      {"title": "GELİŞTİR VE İNCELE", "body": "Yapay zekâ ekipleri değişiklikleri sürüm öncesi test, inceleme ve kabul için hazırlar."},
+      {"title": "İŞLET VE GÖZLEMLE", "body": "Yerel ajanlar verilen yetki içinde çalışır. Sonuçlar ve müdahalenin etkisi görünür kalır."},
+      {"title": "DEĞERLENDİR VE İYİLEŞTİR", "body": "İzinli kayıtlar geliştirmeye ve eğitime katkı sağlar. Adaylar kabulden önce yeniden değerlendirilir."}
+    ],
+    "foundation_title": "Küçük çekirdek. Büyük olasılıklar.",
+    "foundation_body": "Temelde projeye ait Rust bileşenleri var. 3B, yerel dil modelleri ve dünya modelleri isteğe bağlı yetenekler olarak planlanıyor. İşletim sistemi, tarayıcı, sürücüler ve eğitim araçları açık bağımlılıklar olarak kalıyor."
+  },
+  "join": {
+    "kicker": "BİRLİKTE GELİŞTİRELİM",
+    "headline": ["Geleceği birlikte", "geliştirelim."],
+    "intro": "Eylema yolun başında. Net bir ihtiyaç, tekrarlanabilir bir deney ya da düşünülmüş bir katkı, projenin yönünü şekillendirebilir.",
+    "contributions": [
+      {"title": "Geliştir", "body": "Rust bileşenlerine, araçlara ve anlamlı testlere katkı ver."},
+      {"title": "Araştır", "body": "Değerlendirme görevleri, donanım ölçümleri ve izinli öğrenme tarifleri geliştir."},
+      {"title": "Anlaşılır kıl", "body": "Belgeleri, örnekleri ve İngilizce–Türkçe anlatımı iyileştir."}
+    ],
+    "status_title": "BUGÜN NEREDEYİZ?",
+    "status_now_label": "Atılan temel",
+    "status_now": "İlk Rust çalışma alanı, başlangıç komutları, doğrulanan görev tipleri ve iki dilli tasarım belgeleri mevcut. Platformun bütünü geliştirme aşamasında.",
+    "status_next_label": "Sıradaki kanıt",
+    "status_next": "Görev oluşturma, yürütme, durdurma, kaydetme ve yeniden açmayı tarayıcıda göstermek. GPU, modeller, öğrenme ve otonom geliştirme için ayrı kabul adımları var.",
+    "cta": "İlk katkınla yön ver.",
+    "link_label": "github.com/eylema-dev/eylema",
+    "link": "https://github.com/eylema-dev/eylema",
+    "cta_body": "Projeyi incele. Bir ihtiyaç öner. Katkını şekillendir."
+  }
+}
