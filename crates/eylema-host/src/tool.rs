@@ -1,10 +1,13 @@
 //! Sealed own-tool facade: no raw scheduler escape, no implicit data grant.
+use crate::decision::{DecisionEvidence, Measurement};
 use crate::{
     project_data::{DataClock, DataError, DataSession, ProjectStore},
     *,
 };
+use eylema_contracts::decision::DecisionDeclaration;
 use eylema_contracts::{project_data::DataUse, tool::ToolPlan};
 use eylema_runtime::tool::ToolRegistry;
+use std::time::Instant;
 use std::{collections::BTreeMap, sync::Arc};
 pub const MAX_TOOL_EXECUTIONS: usize = 128;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -67,6 +70,9 @@ pub struct RecoveryInspection {
 struct Provenance {
     plan: ToolPlan,
     session: DataSession,
+    actor: DurableSession,
+    decision: Option<DecisionDeclaration>,
+    measurement: Measurement,
 }
 struct Pending {
     id: ExecutionId,
@@ -78,6 +84,7 @@ pub struct ToolHost<T: Storage, H: Sha256, S: HostServices> {
     records: BTreeMap<ExecutionId, Provenance>,
     active: Option<Pending>,
     data_identity: Option<Arc<()>>,
+    measurement_identity: Arc<()>,
 }
 impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
     /// Fresh host only: importing recovered tasks without durable tool lineage
@@ -95,6 +102,7 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
             records: BTreeMap::new(),
             active: None,
             data_identity: None,
+            measurement_identity: Arc::new(()),
         })
     }
     pub fn enroll(
@@ -249,6 +257,7 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         plan: ToolPlan,
         approvals: &[EventId],
     ) -> std::result::Result<ExecutionId, ToolError> {
+        let started = Instant::now();
         self.registry.validate(&plan).map_err(ToolError::Runtime)?;
         self.host.task(s, &plan.task().fields().task_id)?;
         let task = &plan.task().fields().task_id;
@@ -281,6 +290,9 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         let row = Provenance {
             plan,
             session: ds.clone(),
+            actor: s.clone(),
+            decision: None,
+            measurement: Measurement::new(started, self.records.is_empty()),
         };
         self.task_sources(
             data,
@@ -305,6 +317,12 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
             }
         } else {
             self.records.insert(id.clone(), row);
+            self.records
+                .get_mut(&id)
+                .expect("inserted own row")
+                .measurement
+                .timing
+                .admission = started.elapsed();
         }
         self.data_identity
             .get_or_insert_with(|| data.memory_binding().1.clone());
@@ -320,6 +338,7 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         &mut self,
         data: &mut ProjectStore<D, F, C>,
     ) -> std::result::Result<Option<ExecutionId>, ToolError> {
+        let started = Instant::now();
         let Some(p) = &self.active else {
             return Ok(None);
         };
@@ -339,7 +358,13 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         }
         // This facade owns the only queued job. A revoked actor may no longer
         // read its terminal record; use the trusted scheduler's actual idle flag.
-        if !self.host.has_pending_work()? {
+        let terminal = !self.host.has_pending_work()?;
+        self.records
+            .get_mut(&id)
+            .expect("owned active row")
+            .measurement
+            .step(started, terminal);
+        if terminal {
             self.active = None;
         }
         Ok(result)
@@ -349,14 +374,103 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         h: &DurableHuman,
         id: &ExecutionId,
     ) -> std::result::Result<CancellationOutcome, ToolError> {
+        let started = Instant::now();
         let result = self.host.request_cancellation(h, id)?;
         if matches!(&result,CancellationOutcome::Requested(receipt) if &receipt.execution_id==id)
             && let Some(p) = &mut self.active
             && &p.id == id
         {
             p.cancel_requested = true;
+            self.records
+                .get_mut(id)
+                .expect("owned active row")
+                .measurement
+                .cancellation_started
+                .get_or_insert(started);
         }
         Ok(result)
+    }
+    pub fn attach_decision<D: Storage, F: Sha256, C: DataClock>(
+        &mut self,
+        data: &mut ProjectStore<D, F, C>,
+        s: &DurableSession,
+        id: &ExecutionId,
+        declaration: DecisionDeclaration,
+    ) -> std::result::Result<(), ToolError> {
+        self.report(data, s, id)?;
+        let row = self
+            .records
+            .get_mut(id)
+            .ok_or(ToolError::ProvenanceUnavailable)?;
+        if !Arc::ptr_eq(&row.actor.identity, &s.identity) || row.actor.slot != s.slot {
+            return Err(ToolError::Runtime(ErrorCode::Forbidden));
+        }
+        if let Some(old) = &row.decision {
+            return if old == &declaration {
+                Ok(())
+            } else {
+                Err(ToolError::InvalidEvidence)
+            };
+        }
+        if !row.measurement.timing.steps.is_empty() || row.measurement.ended.is_some() {
+            return Err(ToolError::InvalidEvidence);
+        }
+        let c = declaration.selected();
+        if !row
+            .plan
+            .bindings()
+            .iter()
+            .any(|b| b.action_id == c.action && b.profile == c.profile && b.revision == c.revision)
+        {
+            return Err(ToolError::InvalidEvidence);
+        }
+        row.decision = Some(declaration);
+        Ok(())
+    }
+    pub fn decision_evidence<D: Storage, F: Sha256, C: DataClock>(
+        &self,
+        data: &mut ProjectStore<D, F, C>,
+        s: &DurableSession,
+        id: &ExecutionId,
+    ) -> std::result::Result<DecisionEvidence, ToolError> {
+        let outcome = self.report(data, s, id)?;
+        let row = self
+            .records
+            .get(id)
+            .ok_or(ToolError::ProvenanceUnavailable)?;
+        let declaration = row
+            .decision
+            .clone()
+            .ok_or(ToolError::ProvenanceUnavailable)?;
+        let values = row
+            .plan
+            .bindings()
+            .iter()
+            .zip(&row.plan.proposal().fields().actions)
+            .map(|(b, a)| {
+                let a = a.fields();
+                codec::Value::List(vec![
+                    codec::Value::Text(b.profile.as_str().into()),
+                    codec::Value::Unsigned(b.revision.get()),
+                    codec::Value::Text(a.operation_id.as_str().into()),
+                    codec::Value::Bytes(a.payload.clone()),
+                    codec::Value::Unsigned(a.budget.max_payload_bytes() as u64),
+                ])
+            })
+            .collect();
+        let workload =
+            codec::encode(&codec::Value::List(values)).map_err(|_| ToolError::InvalidEvidence)?;
+        Ok(DecisionEvidence {
+            task: row.plan.task().fields().task_id.clone(),
+            declaration,
+            outcome,
+            timing: row.measurement.timing.clone(),
+            identity: self.measurement_identity.clone(),
+            started: row.measurement.started,
+            ended: row.measurement.ended,
+            workload,
+            declared_payload_budget: row.plan.task().fields().budget.max_payload_bytes(),
+        })
     }
     pub fn report<D: Storage, F: Sha256, C: DataClock>(
         &self,
