@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "3264d968a215f40f5a21c3f0fbbd2e8d2e28fd7a88ee84dcb5135b0d5edf61a1",
-      "tr_sha256": "2a7929c1ccfe9aad5099274fcd24cdce46979e5eddd460d6f195eee7034b0f84"
+      "en_sha256": "9c1ef25ba8c804be7aa18868c6352a0829258a7b75b92534a59f200ad3094e2a",
+      "tr_sha256": "92578129a0bd2433fde543d58cb81f760b3b7866b9ba5045ad8e29fe76c34fc0"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -127,6 +127,12 @@
       "tr": "docs/tr/project-data.md",
       "en_sha256": "9608ac4699deab6ed03a8c7363cc62fd509eb1cc89b074ac2817633aa223df88",
       "tr_sha256": "89cd3d1db848768cae17e73db432bd195abea849f1cf27d09d6990d206c7dfec"
+    },
+    {
+      "en": "docs/en/memory-contracts.md",
+      "tr": "docs/tr/memory-contracts.md",
+      "en_sha256": "c7711bde6078869fcd65dd4df0c620c34282e025aa62794538501e1c999ebd53",
+      "tr_sha256": "406eb874d65d6996d56286315f6198cf155bfbcf139ac8ce2e7568c1496d6793"
     }
   ],
   "documents": []
