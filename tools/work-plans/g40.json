@@ -106,7 +106,7 @@
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
   "targeted_repairs_used": 11,
-  "live_cli_invocations_used": 5,
+  "live_cli_invocations_used": 6,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
     "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
@@ -174,14 +174,14 @@
     "python": "passedfreshvenv/hashedinstall/47tests/repository/template/body/diff atrevision10",
     "rust": "passedunchangedfullfmt/Clippy/nativeallfeatures/build/inventory/selectedWasm atrevision10;26Codexintegrationtests",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
-    "live_provider": "diagnostic5failed;causeinsufficientlyproved;5of9slotsused;zero revision10 realcalls",
+    "live_provider": "diagnostic6TransportFailed14001ms/0accepted;host_disabled_phrase_observed=true/code_mode_fail_closed_phrase_observed=true;scopedvalidfinalrejected;6of9used;offline allcompanionsalreadyfalse so allowedcorrectionnotproved;mandatory stop",
     "independent_review_ci_merge_main_guide": "db289f0cutoffreview/CI38386880668passed;revision10freshgates/currentCI/separate review before invocation6pending;notmerged/G41notactivated",
     "diagnostics": "revision10fixed safeprojected publicphrase nullablefieldsred-green;no raw/quoted/sensitive/configvalue export"
   },
   "pending_additional_repair": {
-    "status": "revision10approvedfixed_public_diagnostic_phase",
+    "status": "stopped_after_diagnostic6_no_proved_restrictive_correction",
     "current_runtime_repairs_remaining": 1,
-    "live_calls_remaining": 4,
+    "live_calls_remaining": 3,
     "normal_failure_stop_required": true,
     "remaining_repair_condition": "cycle12 only actualprovedCLIcause/offlinefailingregression and restriction-only correction;no host/tool enablement or policy relaxation"
   },
@@ -365,6 +365,58 @@
       "private_projection_contents_public": false,
       "original_free_form_persisted": false,
       "actual_cause": "not_proved;safeprojectioninsufficient;policychangeifrequiredneedsnewauthority"
+    },
+    {
+      "ordinal": 6,
+      "purpose": "approvedsinglefixedpublicphrasediagnostic",
+      "head": "5c63c54f24433fb1439673eaed7f19ef2424e8cf",
+      "status": "TransportFailed",
+      "elapsed_ms": 14001,
+      "proposal_changes": 0,
+      "reported_total_tokens": 11828,
+      "source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "679e98b211fcb48c2ba4bb41a92f217aa09ecd27300be933537fd6976f410723",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "99603e69ce4fd31491e75592e131dedde525cbd0806f1ca3dd783d08ac155c12",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "c2afae0d1ac1763a7584314cd29931dc338542020f22ac9e2679418e3fa17978",
+      "settings_sha256": "8699c6b17f7021fe75e496baabc7b94c43760db7a323881f7989a47e3856d6f2",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "final_proposal_valid": true,
+        "host_disabled_phrase_observed": true,
+        "code_mode_fail_closed_phrase_observed": true,
+        "provider_error_seen": true,
+        "error_event_count": 1,
+        "unclassified_error_events": 1,
+        "item_error_seen": true,
+        "turn_failed_seen": false,
+        "top_level_error_seen": false,
+        "error_prefixes": [],
+        "public_error_identifiers": [
+          "code_mode_host"
+        ],
+        "error_identifier_limit_reached": false,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11762,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 66,
+          "reasoning_output_tokens": 22
+        },
+        "invalid_usage_seen": false
+      },
+      "private_projection_status": "Available",
+      "private_projection_contents_public": false,
+      "original_free_form_persisted": false,
+      "actual_cause": "disabledhost/failclosedroute observed;whycode_modeactive despite local false flags/notproved;no allowedrestrictivefixproved"
     }
   ],
   "diagnostic_extension": {
@@ -430,10 +482,53 @@
     "repair_cycle": 11,
     "repair_cap": 12,
     "live_call_cap": 9,
-    "live_calls_used": 5,
+    "live_calls_used": 6,
     "public_literal_provenance": "pinnedCLI74c6a6d binary contains host is disabled / Code mode will fail closed;static evidence does not prove actual cause",
     "observed_predicate_source": "only safe available eligible opt-in projected words;punctuation normalized,token-boundary phrase observations,not original error/configuration state",
-    "status": "root_source_and_provider_work_stopped_at_conservative_timebound;existing_checked_delta_prepared_for_approved_separate_review;invocation6notrun",
+    "status": "diagnostic6failed;fixedsafephrasesconfirmed;offline companions alreadyfalse;no proved restrictive cause correction;no repair12/furthercalls/merge/G41",
     "root_elapsed_seconds_at_cutoff": 1499.7002999782562
+  },
+  "revision10_time_extension": {
+    "authority": "actualhuman approves30root/5review;repair12/CLI9capsunchanged",
+    "started_unix_ms": 1791892110000,
+    "root_active_minutes": 30,
+    "review_available_minutes": 9.62,
+    "status": "stopped no proved restrictive correction;remainingconditionalrepair12unused",
+    "offline_feature_controls": [
+      {
+        "purpose": "current_disabled_host",
+        "exit_code": 0,
+        "features": [
+          "code_mode                                under development  false",
+          "code_mode_buffered_exec                  removed            false",
+          "code_mode_host                           stable             false",
+          "code_mode_interrupt                      under development  false",
+          "code_mode_only                           under development  false",
+          "code_mode_only_strict_3p_tools           under development  false",
+          "code_mode_prewarm                        under development  false",
+          "code_mode_tool_search                    under development  false"
+        ],
+        "stderr_nonempty": false,
+        "provider_calls": 0,
+        "profile": "empty temporary HOME/CODEX_HOME,requested public model"
+      },
+      {
+        "purpose": "restrict_all_code_mode_companions",
+        "exit_code": 0,
+        "features": [
+          "code_mode                                under development  false",
+          "code_mode_buffered_exec                  removed            false",
+          "code_mode_host                           stable             false",
+          "code_mode_interrupt                      under development  false",
+          "code_mode_only                           under development  false",
+          "code_mode_only_strict_3p_tools           under development  false",
+          "code_mode_prewarm                        under development  false",
+          "code_mode_tool_search                    under development  false"
+        ],
+        "stderr_nonempty": false,
+        "provider_calls": 0,
+        "profile": "empty temporary HOME/CODEX_HOME,requested public model"
+      }
+    ]
   }
 }
