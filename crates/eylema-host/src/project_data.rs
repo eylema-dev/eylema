@@ -517,6 +517,28 @@ impl<T: Storage, H: Sha256, C: DataClock> ProjectStore<T, H, C> {
             .metadata
             .clone())
     }
+    /// Composed handoff check against the latest persisted observation, without
+    /// advancing time between sources. Callers must first observe trusted time.
+    pub(crate) fn authorized_metadata_at_observed_time(
+        &self,
+        s: &DataSession,
+        r: &DataRef,
+        purpose: DataUse,
+    ) -> DataResult<DataMetadata> {
+        if purpose.is_egress() {
+            return Err(DataError::Forbidden);
+        }
+        self.scoped(r)?;
+        self.session(s, &r.id, purpose)?;
+        self.session_expiry(s, self.last_now)?;
+        self.permitted(&r.id, purpose, self.last_now)?;
+        Ok(self
+            .items
+            .get(&r.id)
+            .expect("authorized item")
+            .metadata
+            .clone())
+    }
     pub fn read(&mut self, s: &DataSession, r: &DataRef, purpose: DataUse) -> DataResult<Vec<u8>> {
         if purpose.is_egress() {
             return Err(DataError::Forbidden);

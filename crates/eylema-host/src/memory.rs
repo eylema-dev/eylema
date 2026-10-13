@@ -303,7 +303,22 @@ impl MemoryRegistry {
             if metadata.digest != source.digest {
                 return Err(MemoryError::IncompatibleProfile);
             }
-            validity(&source.draft, data.trusted_time()?)?;
+        }
+        // One common persisted handoff observation covers every source and the
+        // session. Independent per-source clocks could expire earlier entries
+        // or the session while later entries are checked.
+        let handoff = data.trusted_time()?;
+        for id in &q.sources {
+            let source = self.sources.get(id).expect("validated source");
+            let metadata = data.authorized_metadata_at_observed_time(
+                session,
+                &source.draft.reference,
+                q.purpose,
+            )?;
+            if metadata.digest != source.digest {
+                return Err(MemoryError::IncompatibleProfile);
+            }
+            validity(&source.draft, handoff)?;
         }
         Ok(MemoryContext {
             bytes,

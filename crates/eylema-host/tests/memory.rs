@@ -586,3 +586,107 @@ fn profile_and_registered_source_limits_hold_at_the_boundary() {
         }
     }
 }
+
+#[test]
+fn multi_source_expiry_uses_common_handoff_time() {
+    let (mut d, o, s, c) = fixture();
+    add(&mut d, &o, &s, "source", b"first");
+    add(&mut d, &o, &s, "second", b"second");
+    let (mut m, mo) = registry();
+    let mut first = source("source", MemoryKind::Working, Verification::Observed);
+    first.expires_at = 1900;
+    m.register(&mo, &mut d, &o, first).unwrap();
+    m.register(
+        &mo,
+        &mut d,
+        &o,
+        source("second", MemoryKind::Working, Verification::Observed),
+    )
+    .unwrap();
+    let mut q = query(MemoryKind::Working);
+    q.sources.push(DataId::new("second").unwrap());
+    c.1.set(100);
+    let result = m.assemble(&mut d, &s, &MemoryQuery::new(q).unwrap());
+    assert_eq!(
+        result,
+        Err(MemoryError::Expired),
+        "last observed time={}, first TTL=1900",
+        c.0.get() - 100
+    );
+}
+#[test]
+fn session_expiry_uses_common_handoff_time() {
+    let (mut d, o, s, c) = fixture();
+    add(&mut d, &o, &s, "source", b"private");
+    let a = d
+        .enroll(
+            &o,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+                scope: vec![DataId::new("source").unwrap()],
+                expires_at: 1500,
+            },
+        )
+        .unwrap();
+    let (mut m, mo) = registry();
+    m.register(
+        &mo,
+        &mut d,
+        &o,
+        source("source", MemoryKind::Working, Verification::Observed),
+    )
+    .unwrap();
+    c.1.set(100);
+    let result = m.assemble(
+        &mut d,
+        &a,
+        &MemoryQuery::new(query(MemoryKind::Working)).unwrap(),
+    );
+    assert_eq!(
+        result,
+        Err(MemoryError::Data(DataError::Expired)),
+        "last observed time={}, session TTL=1500",
+        c.0.get() - 100
+    );
+}
+
+#[test]
+fn backing_source_and_ancestry_expiry_use_common_handoff_time() {
+    let (mut d, o, session, clock) = fixture();
+    for (id, parents) in [("second", vec![]), ("source", vec![reference("second")])] {
+        d.collect(
+            &session,
+            DataDraft {
+                reference: reference(id),
+                kind: if parents.is_empty() {
+                    DataKind::Artifact
+                } else {
+                    DataKind::Derived
+                },
+                parents,
+                payload: b"eligible".to_vec(),
+                expires_at: 1500,
+            },
+        )
+        .unwrap();
+        d.set_policy(
+            &o,
+            &reference(id),
+            Revision::new(1).unwrap(),
+            DataPermissions::new(vec![DataUse::Execute, DataUse::Collect]).unwrap(),
+            false,
+        )
+        .unwrap();
+    }
+    let (mut m, owner) = registry();
+    let mut draft = source("source", MemoryKind::Working, Verification::Observed);
+    draft.expires_at = 1500;
+    m.register(&owner, &mut d, &o, draft).unwrap();
+    let query = MemoryQuery::new(query(MemoryKind::Working)).unwrap();
+    assert!(m.assemble(&mut d, &session, &query).is_ok());
+    clock.1.set(100);
+    assert_eq!(
+        m.assemble(&mut d, &session, &query),
+        Err(MemoryError::Data(DataError::Expired))
+    );
+}
