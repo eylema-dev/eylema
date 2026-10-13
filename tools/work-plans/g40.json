@@ -106,7 +106,7 @@
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
   "targeted_repairs_used": 8,
-  "live_cli_invocations_used": 3,
+  "live_cli_invocations_used": 4,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
     "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
@@ -159,14 +159,14 @@
     "python": "passed47tests/venv/hashedinstall atrevision7",
     "rust": "passedrevision7unchangedfmt/Clippy/nativeallfeatures/workspaceinventory/selectedWasm",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
-    "live_provider": "failednormalprobe3:TransportFailed/ProviderError/ConfigurationMention;3of5invocationsused;0acceptedproposals;unavailable/timeout not_run due mandatory firstnormalfailurestop",
-    "independent_review_ci_merge_main_guide": "diagnosticruntime04dfcd8 separatelyreviewedpassed and CI38368524971passed;liveacceptancefailed;notmerged;guide/G41notstarted",
+    "live_provider": "diagnostic4failed:oneunclassifieditemerror/code_mode_host;finalproposalvalid but rejected;4of7used;causeunknown;furthercallsstopped",
+    "independent_review_ci_merge_main_guide": "a0cbb5fdiagnosticreviewpassed and CI38374122342passed;actualG40failed;notmerged;G41notactivated",
     "diagnostics": "red-green publicerror origins/prefixes/identifierprivacy/limits/scopedproposalvalidity/error-eventcounts;unchangedacceptance"
   },
   "pending_additional_repair": {
-    "status": "revision7approvedsafeoffline diagnosticphase",
+    "status": "stopped:unknowncause;noauthorityforunprovenrepair",
     "current_runtime_repairs_remaining": 1,
-    "live_calls_remaining": 4,
+    "live_calls_remaining": 3,
     "normal_failure_stop_required": true
   },
   "continuation_evidence": {
@@ -254,6 +254,51 @@
         },
         "invalid_usage_seen": false
       }
+    },
+    {
+      "ordinal": 4,
+      "mode": "success",
+      "purpose": "singleapproveddiagnosticobservation",
+      "status": "failedTransportFailed;actual7575ms;reported11827tokens;0acceptedproposals;causeunknown",
+      "started_unix_ms": 1791882710113,
+      "reviewed_runtime_head": "a0cbb5f9d8e5af0fa2ae6e6c03de5d2f1302eb48",
+      "runtime_source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "5523c8395481a8058f65ebefbbbc1a083b99e6fed1fb2856c4e2809558ca412f",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "7f6e73cb8a4cd80136db5b9d27257f0a39746334cdce7529532b2b2ee7d530e7",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "fa96c587c066ba2369294cf5847f1bef978772fd6a88096bf792763ec2e3dbea",
+      "settings_sha256": "884c408a1833cf1e2942edf7b069314afe2a233ddaf344314878f0af116279d8",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "final_proposal_valid": true,
+        "provider_error_seen": true,
+        "error_event_count": 1,
+        "unclassified_error_events": 1,
+        "item_error_seen": true,
+        "turn_failed_seen": false,
+        "top_level_error_seen": false,
+        "error_prefixes": [],
+        "public_error_identifiers": [
+          "code_mode_host"
+        ],
+        "error_identifier_limit_reached": false,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11759,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 68,
+          "reasoning_output_tokens": 24
+        },
+        "invalid_usage_seen": false
+      }
     }
   ],
   "diagnostic_extension": {
@@ -277,7 +322,7 @@
     "repair_cycles_max": 2,
     "repair_cycle_first": 8,
     "diagnostic_call_failure_exception": "one instrumented call only;unknowncause stops;noeffect after failure without proven cause/offline repair/newgates/review",
-    "status": "finaldiagnosticfullgatespassed;zeroadditionalprovidercalls;newexactheadreview/currentCIpending",
+    "status": "diagnostic4failed;unknowncausegateforcesstop;nosecondrepairorfurthercalls",
     "public_metadata_provenance": {
       "tool_sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
       "sources": [
