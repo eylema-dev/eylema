@@ -678,6 +678,7 @@ fn execute(
         &stdout,
         status,
         stopped.is_some(),
+        flags.malformed.load(Ordering::Acquire),
         exit.code(),
         exit.success(),
         wrote.is_ok(),
@@ -732,6 +733,7 @@ fn diagnose(
     data: &[u8],
     status: CallStatus,
     stopped: bool,
+    stream_rejected: bool,
     exit_code: Option<i32>,
     exit_success: bool,
     wrote: bool,
@@ -852,6 +854,8 @@ fn diagnose(
         FailurePath::ToolRejected
     } else if status == CallStatus::OutputLimit {
         FailurePath::OutputRejected
+    } else if stream_rejected {
+        FailurePath::StreamRejected
     } else if d.provider_error_seen {
         FailurePath::ProviderError
     } else if !exit_success || !wrote {

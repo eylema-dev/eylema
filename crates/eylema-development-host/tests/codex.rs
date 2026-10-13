@@ -491,3 +491,46 @@ fn diagnostics_do_not_export_overlapping_input_cache_buckets_as_valid_usage() {
     assert!(text.contains("\"invalid_usage_seen\":true"));
     assert!(text.contains("\"reported_usage\":null"));
 }
+
+#[test]
+fn late_capture_stream_rejection_is_distinct_from_proposal_rejection() {
+    for (mode, route) in [
+        ("diag-late-stream", FailurePath::StreamRejected),
+        ("outside", FailurePath::ProposalRejected),
+    ] {
+        let mut f = fixture();
+        let mut w = f.workspace();
+        let tool = tool(&f);
+        let start = f.started;
+        let result = tool
+            .invoke(
+                &mut w,
+                f.registry.get_mut(&f.key).unwrap(),
+                &f.auth,
+                || 1 + start.elapsed().as_millis() as u64,
+                CodexRequest {
+                    prompt: mode,
+                    limits: CallLimits {
+                        wall_ms: 5000,
+                        output_bytes: 8192,
+                    },
+                    cancel: &CancelHandle::default(),
+                    unavailable_probe: false,
+                },
+            )
+            .unwrap();
+        assert_eq!(result.status, CallStatus::MalformedOutput, "{mode}");
+        assert!(result.proposal.is_none());
+        let diagnostics = result.diagnostics.unwrap();
+        assert!(diagnostics.completed_turn_seen && diagnostics.final_message_seen);
+        assert_eq!(diagnostics.failure_path, route, "{mode}");
+        let run = f.registry.get_mut(&f.key).unwrap();
+        assert!(run.active_call().is_none());
+        assert_eq!(run.usage().model_calls, 1);
+        assert_eq!(run.usage().reserved_units, 7000);
+        assert_eq!(
+            fs::read_to_string(w.path().join("allowed.txt")).unwrap(),
+            "base\n"
+        );
+    }
+}

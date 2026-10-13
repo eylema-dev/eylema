@@ -161,6 +161,16 @@ fn fixture(args: &[String]) {
                     );
                 }
             }
+            if mode == "diag-late-stream" {
+                print!("bad-json");
+                std::io::stdout().flush().unwrap();
+                let _owned_descendant = std::process::Command::new("/bin/sleep")
+                    .arg("10")
+                    .spawn()
+                    .unwrap();
+                // The adapter reaps the owned group after this fixture leader exits.
+                std::process::exit(0);
+            }
             if mode == "diag-exit" {
                 std::process::exit(7);
             }

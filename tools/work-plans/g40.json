@@ -1,11 +1,11 @@
 {
   "goal": "G40",
-  "task_revision": 5,
+  "task_revision": 6,
   "issue": "https://github.com/eylema-dev/eylema/issues/33",
   "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
   "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
   "started_unix_ms": 1791834434319,
-  "authority": "Actual maintainer reply approves revision5 within concrete diagnostic plan:30additionalactive minutes,one diagnostic repair,total5liveCLIcap;stop on first failednormalprobe.",
+  "authority": "Actual maintainer reply approves revision6:15additionalactive minutes,one narrow diagnostic repair;total5liveCLIcap unchanged;stop on first failednormalprobe.",
   "accepted_dependencies": {
     "G39": [
       {
@@ -65,8 +65,8 @@
     "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
   },
   "budget": {
-    "active_minutes": 240,
-    "max_targeted_repairs": 6,
+    "active_minutes": 255,
+    "max_targeted_repairs": 7,
     "new_spending": false,
     "max_live_provider_cli_invocations": 5
   },
@@ -105,7 +105,7 @@
     "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
-  "targeted_repairs_used": 6,
+  "targeted_repairs_used": 7,
   "live_cli_invocations_used": 2,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
@@ -143,18 +143,23 @@
       "finding": "real TransportFailed is ambiguous with current sanitized observation;CLIusageaggregate lacks observed buckets",
       "repair": "singleapproved diagnostic cycle adds bounded enum/exit/write/turn/message/observedusage metadata only",
       "status": "diagnosticimplementationpassedmeaningfulred-greenandunchangedfullRustgate;freshreviewbeforeprovider"
+    },
+    {
+      "finding": "revision5independentreview:P2lateEOFmalformedstream falsely labels ProposalRejected",
+      "repair": "approvedsinglecycle7:pass existing capture flag to diagnostic route;native lateEOF regression and invalidproposal comparison",
+      "status": "native regression red-green;unchangedfullRust/Python/static gates passed;freshreviewpending"
     }
   ],
   "verification": {
-    "python": "passed47tests/hashinstall/venv atrevision5",
-    "rust": "passedunchangedfullfmt/Clippy/nativeworkspace/allfeatures/selectedWasm atrevision5",
+    "python": "passed47tests/hashinstall/venv atrevision6",
+    "rust": "passedunchangedfullfmt/Clippy/nativeworkspace/allfeatures/selectedWasm atrevision6;ambientRUST_LOGremovedwithoutgatechange",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
-    "live_provider": "failednormalconfiguredcalls1UnexpectedTool/2TransportFailed;2of4invocationsused;0acceptedproposals",
-    "independent_review_ci_merge_main_guide": "revision5freshreview/currentCI pending;realacceptanceincomplete;noauthorizedmergeyet",
+    "live_provider": "failednormalconfiguredcalls1UnexpectedTool/2TransportFailed;2of5invocationsused;0acceptedproposals",
+    "independent_review_ci_merge_main_guide": "revision6freshseparatereview/currentCIpending;realacceptanceincomplete;notmerged",
     "diagnostics": "passednativeenum/exit/stream/unknownusage/invalidcacheaggregate regressions;nochangeinproposalorstopdecision"
   },
   "pending_additional_repair": {
-    "status": "revision5approved;diagnosticphase",
+    "status": "revision6approveddiagnosticrepair",
     "current_runtime_repairs_remaining": 0,
     "live_calls_remaining": 3,
     "normal_failure_stop_required": true
@@ -217,7 +222,14 @@
     "started_unix_ms": 1791877652839,
     "active_minutes": 30,
     "repair_cycle": 6,
-    "status": "localgatespassed;separateexactheadreviewpending;zeroadditionalprovidercalls",
+    "status": "separateexactheadreviewchangesrequested:P2streamroute;sourcepausedawaitingadditionalrepairauthority;zeroadditionalprovidercalls",
     "review_budget_separate_minutes": 30
+  },
+  "diagnostic_fidelity_extension": {
+    "started_unix_ms": 1791879420856,
+    "active_minutes": 15,
+    "review_active_minutes": 15,
+    "repair_cycle": 7,
+    "status": "localgatespassed;freshreview/currentCIpending;zeroadditionalprovidercalls"
   }
 }
