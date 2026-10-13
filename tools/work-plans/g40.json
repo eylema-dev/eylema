@@ -157,8 +157,9 @@
     "usage_tracking_pr": "https://github.com/eylema-dev/devguide/pull/34",
     "usage_tracking": "accepted metadata-only collector refreshed before resumed G40; current private ledger includes this work",
     "source_changes_during_usage_task": "none; G40 original draft preserved",
-    "live_provider_cli_invocations_used": 0,
-    "additional_code_repair_applied": false
+    "snapshot_scope": "historical before revision3 source follow-up",
+    "live_provider_cli_invocations_used_at_snapshot": 0,
+    "additional_code_repair_applied_at_snapshot": false
   },
   "extension": {
     "approved_additional_active_minutes": 60,
@@ -170,17 +171,19 @@
       "active_minutes": 120,
       "max_targeted_repairs": 3
     },
-    "repair_cycle": 4,
     "status": "time_limit_exhausted;source repair stopped",
-    "stopped_unix_ms": 1791870927414
+    "stopped_unix_ms": 1791870927414,
+    "repair_cycle_at_extension_start": 4
   },
   "verification_extension": {
     "approved_minutes": 30,
     "started_unix_ms": 1791871302378,
     "status": "draftlocalgatespassed;realacceptancefailed;awaitingseparatedraftreview",
-    "repair_cycles_remaining": 1,
-    "provider_invocations_remaining": 4,
-    "review_budget_separate_minutes": 30
+    "review_budget_separate_minutes": 30,
+    "repair_cycles_remaining_at_extension_start": 1,
+    "provider_invocations_remaining_at_extension_start": 4,
+    "repair_cycles_remaining": 0,
+    "provider_invocations_remaining": 2
   },
   "live_invocations": [
     {
