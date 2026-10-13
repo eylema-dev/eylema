@@ -71,7 +71,9 @@ fn reference() -> DataRef {
         id: DataId::new("input").unwrap(),
     }
 }
-fn fixture() -> (
+fn fixture_with_controller(
+    enroll_controller: bool,
+) -> (
     Host,
     Owner,
     DurableSession,
@@ -97,6 +99,12 @@ fn fixture() -> (
     .unwrap();
     let mut h = ToolHost::new(h, registry()).unwrap();
     let s = h.enroll(&o, support::grant()).unwrap();
+    if enroll_controller {
+        let mut g = support::grant();
+        g.principal = PrincipalRef::new("principal:source-controller-fixture").unwrap();
+        g.permissions.push(Permission::RequestCancellation);
+        h.enroll_verified_human(&o, g).unwrap();
+    }
     let (mut d, owner) = Data::create_new(
         Journal::create_new(mem(), NativeHash, project_journal_limits()).unwrap(),
         reference().project.clone(),
@@ -116,6 +124,50 @@ fn fixture() -> (
         .unwrap();
     (h, o, s, d, owner, data_session, storage, clock)
 }
+fn fixture() -> (
+    Host,
+    Owner,
+    DurableSession,
+    Data,
+    Owner,
+    DataSession,
+    Memory,
+    Clock,
+) {
+    fixture_with_controller(true)
+}
+fn intervention(plan: ToolPlan, required: bool) -> ToolPlan {
+    let mut proposal = plan.proposal().fields().clone();
+    proposal.actions = proposal
+        .actions
+        .into_iter()
+        .map(|a| {
+            let mut a = a.fields().clone();
+            let r = &a.authority;
+            a.authority = AuthorityRequirement::new(
+                r.principal_ref().clone(),
+                r.policy_revision(),
+                r.resource_scope().clone(),
+                r.permissions().to_vec(),
+                OversightRequirements::new(
+                    r.oversight().checkpoints().to_vec(),
+                    r.oversight().requires_observation(),
+                    required,
+                    r.oversight().governance().cloned(),
+                )
+                .unwrap(),
+            )
+            .unwrap();
+            ActionSpec::new(a).unwrap()
+        })
+        .collect();
+    ToolPlan::new(
+        plan.task().clone(),
+        ActionProposal::new(proposal, plan.task()).unwrap(),
+        plan.bindings().to_vec(),
+    )
+    .unwrap()
+}
 fn plan(t: &TaskSpec, values: &[u64], source: bool) -> ToolPlan {
     let p = support::proposal(t, values);
     let bindings = p
@@ -131,7 +183,12 @@ fn plan(t: &TaskSpec, values: &[u64], source: bool) -> ToolPlan {
             source: source.then(reference),
         })
         .collect();
-    ToolPlan::new(t.clone(), p, bindings).unwrap()
+    let result = ToolPlan::new(t.clone(), p, bindings).unwrap();
+    if source {
+        intervention(result, true)
+    } else {
+        result
+    }
 }
 fn input(d: &mut Data, o: &Owner, s: &DataSession, n: u64, expiry: u64) {
     d.collect(
@@ -398,7 +455,15 @@ fn later_source_free_read_cannot_disclose_a_withdrawn_derived_value() {
     let id = h.admit(&mut d, &ds, &s, plan(&t, &[2], true), &[]).unwrap();
     h.step(&mut d).unwrap();
     let current = h.task_spec(&mut d, &s, &t.fields().task_id).unwrap();
-    let read = h.admit(&mut d, &ds, &s, read_plan(&current), &[]).unwrap();
+    let read = h
+        .admit(
+            &mut d,
+            &ds,
+            &s,
+            intervention(read_plan(&current), true),
+            &[],
+        )
+        .unwrap();
     h.step(&mut d).unwrap();
     assert_eq!(
         codec::decode(&h.report(&mut d, &s, &read).unwrap().outputs[0].bytes).unwrap(),
@@ -409,7 +474,13 @@ fn later_source_free_read_cannot_disclose_a_withdrawn_derived_value() {
     assert!(h.report(&mut d, &s, &read).is_err());
     assert!(h.task_spec(&mut d, &s, &t.fields().task_id).is_err());
     assert!(matches!(
-        h.admit(&mut d, &ds, &s, read_plan(&current), &[]),
+        h.admit(
+            &mut d,
+            &ds,
+            &s,
+            intervention(read_plan(&current), true),
+            &[]
+        ),
         Err(ToolError::Data(DataError::Forbidden))
     ));
 }
@@ -515,6 +586,10 @@ fn expiry_between_source_staging_and_runtime_observation_has_no_effect() {
     .unwrap();
     let mut h = ToolHost::new(raw, registry()).unwrap();
     let s = h.enroll(&o, support::grant()).unwrap();
+    let mut g = support::grant();
+    g.principal = PrincipalRef::new("principal:handoff-controller-fixture").unwrap();
+    g.permissions.push(Permission::RequestCancellation);
+    h.enroll_verified_human(&o, g).unwrap();
     let (mut d, owner) = Data::create_new(
         Journal::create_new(mem(), NativeHash, project_journal_limits()).unwrap(),
         reference().project.clone(),
@@ -771,4 +846,69 @@ fn expired_human_checkpoint_fails_before_owned_effect() {
     let report = h.report(&mut d, &s, &id).unwrap();
     assert_eq!(report.status, ToolStatus::Failed);
     assert!(report.outputs.is_empty());
+}
+
+#[test]
+fn source_plans_cannot_omit_intervention_or_admit_without_a_real_controller() {
+    let (mut h, o, s, mut d, owner, ds, _, _) = fixture_with_controller(false);
+    input(&mut d, &owner, &ds, 2, 9000);
+    let t = support::task("task:controller-floor", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let omitted = intervention(plan(&t, &[2], true), false);
+    assert!(matches!(
+        h.admit(&mut d, &ds, &s, omitted.clone(), &[]),
+        Err(ToolError::Runtime(ErrorCode::CapabilityUnavailable))
+    ));
+    let required = intervention(omitted.clone(), true);
+    assert!(matches!(
+        h.admit(&mut d, &ds, &s, required.clone(), &[]),
+        Err(ToolError::Host(HostError::Runtime(
+            ErrorCode::CapabilityUnavailable
+        )))
+    ));
+    let mut g = support::grant();
+    g.principal = PrincipalRef::new("principal:actual-scoped-controller").unwrap();
+    g.permissions.push(Permission::RequestCancellation);
+    let human = h.enroll_verified_human(&o, g).unwrap();
+    assert!(matches!(
+        h.admit(&mut d, &ds, &s, omitted, &[]),
+        Err(ToolError::Runtime(ErrorCode::CapabilityUnavailable))
+    ));
+    let id = h.admit(&mut d, &ds, &s, required, &[]).unwrap();
+    d.withdraw(&owner, &reference(), support::rev(2)).unwrap();
+    h.request_cancellation(&human, &id).unwrap();
+    assert_eq!(h.step(&mut d).unwrap(), Some(id));
+    assert_eq!(h.step(&mut d).unwrap(), None);
+}
+#[test]
+fn retained_sources_require_intervention_on_later_source_free_plans() {
+    let (mut h, _, s, mut d, o, ds, _, _) = fixture_with_controller(true);
+    input(&mut d, &o, &ds, 2, 9000);
+    let t = support::task("task:retained-controller-floor", 30, 100);
+    h.create_task(&s, t.clone()).unwrap();
+    let id = h
+        .admit(
+            &mut d,
+            &ds,
+            &s,
+            intervention(plan(&t, &[2], true), true),
+            &[],
+        )
+        .unwrap();
+    h.step(&mut d).unwrap();
+    assert_eq!(
+        h.report(&mut d, &s, &id).unwrap().status,
+        ToolStatus::Completed
+    );
+    let current = h.task_spec(&mut d, &s, &t.fields().task_id).unwrap();
+    assert!(matches!(
+        h.admit(
+            &mut d,
+            &ds,
+            &s,
+            intervention(read_plan(&current), false),
+            &[]
+        ),
+        Err(ToolError::Runtime(ErrorCode::CapabilityUnavailable))
+    ));
 }

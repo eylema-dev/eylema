@@ -251,6 +251,26 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
     ) -> std::result::Result<ExecutionId, ToolError> {
         self.registry.validate(&plan).map_err(ToolError::Runtime)?;
         self.host.task(s, &plan.task().fields().task_id)?;
+        let task = &plan.task().fields().task_id;
+        let source_constrained = plan.bindings().iter().any(|b| b.source.is_some())
+            || self.records.values().any(|row| {
+                &row.plan.task().fields().task_id == task
+                    && row.plan.bindings().iter().any(|b| b.source.is_some())
+            });
+        // A source denial can block normal stepping. Require explicit actual
+        // intervention so G11 reserves a real scoped cancellation path and
+        // checks controller availability again before every effect.
+        if source_constrained
+            && plan
+                .proposal()
+                .fields()
+                .actions
+                .iter()
+                .any(|a| !a.fields().authority.oversight().requires_intervention())
+        {
+            return Err(ToolError::Runtime(ErrorCode::CapabilityUnavailable));
+        }
+
         if self
             .active
             .as_ref()
