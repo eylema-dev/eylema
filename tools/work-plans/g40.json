@@ -106,7 +106,7 @@
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
   "targeted_repairs_used": 7,
-  "live_cli_invocations_used": 2,
+  "live_cli_invocations_used": 3,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
     "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
@@ -147,21 +147,21 @@
     {
       "finding": "revision5independentreview:P2lateEOFmalformedstream falsely labels ProposalRejected",
       "repair": "approvedsinglecycle7:pass existing capture flag to diagnostic route;native lateEOF regression and invalidproposal comparison",
-      "status": "native regression red-green;unchangedfullRust/Python/static gates passed;freshreviewpending"
+      "status": "red-green/fullgates/separateexactheadreview/currentCIpassed;realacceptancefailed"
     }
   ],
   "verification": {
     "python": "passed47tests/hashinstall/venv atrevision6",
     "rust": "passedunchangedfullfmt/Clippy/nativeworkspace/allfeatures/selectedWasm atrevision6;ambientRUST_LOGremovedwithoutgatechange",
     "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
-    "live_provider": "failednormalconfiguredcalls1UnexpectedTool/2TransportFailed;2of5invocationsused;0acceptedproposals",
-    "independent_review_ci_merge_main_guide": "revision6freshseparatereview/currentCIpending;realacceptanceincomplete;notmerged",
+    "live_provider": "failednormalprobe3:TransportFailed/ProviderError/ConfigurationMention;3of5invocationsused;0acceptedproposals;unavailable/timeout not_run due mandatory firstnormalfailurestop",
+    "independent_review_ci_merge_main_guide": "diagnosticruntime04dfcd8 separatelyreviewedpassed and CI38368524971passed;liveacceptancefailed;notmerged;guide/G41notstarted",
     "diagnostics": "passednativeenum/exit/stream/unknownusage/invalidcacheaggregate regressions;nochangeinproposalorstopdecision"
   },
   "pending_additional_repair": {
-    "status": "revision6approveddiagnosticrepair",
+    "status": "stoppedafterfailednormalprobe3;noadditionalrepairauthority",
     "current_runtime_repairs_remaining": 0,
-    "live_calls_remaining": 3,
+    "live_calls_remaining": 2,
     "normal_failure_stop_required": true
   },
   "continuation_evidence": {
@@ -216,6 +216,39 @@
         "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
       },
       "probe_binary_sha256": "f35e019f966eb174737afbabeaa4416f088e3ff3dc5aba7421968a884005856e"
+    },
+    {
+      "ordinal": 3,
+      "mode": "success",
+      "status": "failedTransportFailed;actual14289ms;reported11809tokens;0acceptedproposals",
+      "started_unix_ms": 1791879877481,
+      "reviewed_runtime_head": "04dfcd80129bcff4c32904bdbaa670003a28126e",
+      "runtime_source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "5469367f47d8cb3389a3e5d0c175e34b731710ffbdefbf297e6b12a31ec8913c",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "1bba36e827d3d230b2afc267da8aa3b4ab88f611edf39d738dc192ab7fc27c76",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "5934835ff0b576f64b0e664d8b8b88b04ab12abfba6e8b689e864046baae54bc",
+      "settings_sha256": "4db704627ff440f99ed11d8f8aae917fe0308e6aaeda3ae9555269eefb21e0f8",
+      "diagnostics": {
+        "failure_path": "ProviderError",
+        "child_exit_code": 0,
+        "child_exit_success": true,
+        "stdin_write_success": true,
+        "completed_turn_seen": true,
+        "final_message_seen": true,
+        "provider_error_seen": true,
+        "message_category": "ConfigurationMention",
+        "reported_usage": {
+          "kind": "cli_turn_aggregate",
+          "input_tokens": 11743,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 66,
+          "reasoning_output_tokens": 22
+        },
+        "invalid_usage_seen": false
+      }
     }
   ],
   "diagnostic_extension": {
@@ -230,6 +263,6 @@
     "active_minutes": 15,
     "review_active_minutes": 15,
     "repair_cycle": 7,
-    "status": "localgatespassed;freshreview/currentCIpending;zeroadditionalprovidercalls"
+    "status": "diagnosticpassed;realnormalprobe3failed;mandatoryfirstnormalfailurestop"
   }
 }
