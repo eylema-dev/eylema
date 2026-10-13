@@ -12,7 +12,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Stdio},
     sync::{
-        Arc,
+        Arc, Mutex,
         atomic::{AtomicBool, AtomicUsize, Ordering},
     },
     thread,
@@ -52,6 +52,7 @@ pub struct CallOutcome {
     pub reported_total_tokens: Option<u64>,
     pub elapsed_ms: u64,
     pub transport: Transport,
+    pub rejected_item_kind: Option<String>,
 }
 #[derive(Clone, Copy)]
 pub struct CallLimits {
@@ -65,26 +66,28 @@ pub struct CodexRequest<'a> {
     /// Deliberate negative acceptance probe; never a fallback model selection.
     pub unavailable_probe: bool,
 }
+impl CodexRequest<'_> {
+    pub fn requested_model(&self) -> &'static str {
+        if self.unavailable_probe {
+            "gpt-6.1-sol-g40-unavailable"
+        } else {
+            MODEL
+        }
+    }
+}
 pub struct CodexTool {
     program: PathBuf,
     user_home: PathBuf,
     auth_home: PathBuf,
     transport: Transport,
+    sha256: String,
 }
 impl CodexTool {
     /// Operator supplies trusted installed paths. Task/provider text cannot.
     pub fn installed(program: &Path, user_home: &Path, auth_home: &Path) -> Result<Self> {
-        let tool = Self::paths(program, user_home, auth_home, Transport::InstalledCodex)?;
-        let mut hash = Command::new("/usr/bin/shasum");
-        hash.env_clear()
-            .args(["-a", "256", "--"])
-            .arg(&tool.program);
-        let output = crate::process::host_output(&mut hash, 20_000, 4096, 4096)?;
-        if !output.status.success()
-            || !output
-                .stdout
-                .starts_with(format!("{CODEX_SHA256} ").as_bytes())
-        {
+        let mut tool = Self::paths(program, user_home, auth_home, Transport::InstalledCodex)?;
+        tool.sha256 = tool.hash()?;
+        if tool.sha256 != CODEX_SHA256 {
             return Err(Error::InvalidInput);
         }
         tool.version(CODEX_VERSION)?;
@@ -92,7 +95,8 @@ impl CodexTool {
     }
     /// Distinct synthetic transport; cannot claim installed-provider evidence.
     pub fn fixture(program: &Path, home: &Path) -> Result<Self> {
-        let tool = Self::paths(program, home, home, Transport::ExplicitFixture)?;
+        let mut tool = Self::paths(program, home, home, Transport::ExplicitFixture)?;
+        tool.sha256 = tool.hash()?;
         tool.version("g40-provider-fixture/1")?;
         Ok(tool)
     }
@@ -117,7 +121,80 @@ impl CodexTool {
             user_home,
             auth_home,
             transport,
+            sha256: String::new(),
         })
+    }
+    fn hash(&self) -> Result<String> {
+        files::regular(&self.program)?;
+        let mut command = Command::new("/usr/bin/shasum");
+        command
+            .env_clear()
+            .args(["-a", "256", "--"])
+            .arg(&self.program);
+        let output = crate::process::host_output(&mut command, 20_000, 4096, 4096)?;
+        let digest = output.stdout.get(..64).ok_or(Error::InvalidInput)?;
+        if !output.status.success()
+            || !digest.iter().all(u8::is_ascii_hexdigit)
+            || output.stdout.get(64) != Some(&b' ')
+        {
+            return Err(Error::InvalidInput);
+        }
+        String::from_utf8(digest.to_vec()).map_err(|_| Error::InvalidInput)
+    }
+    fn revalidate(&self) -> Result<()> {
+        if self.hash()? != self.sha256 {
+            return Err(Error::InvalidInput);
+        }
+        Ok(())
+    }
+    fn chatgpt_session(&self) -> Result<bool> {
+        let mut command = self.command();
+        command.args(["-c", "forced_login_method=\"chatgpt\"", "login", "status"]);
+        let output = crate::process::host_output(&mut command, 20_000, 4096, 4096)?;
+        let mut status = output.stdout;
+        status.extend(output.stderr);
+        Ok(output.status.success() && status.trim_ascii() == b"Logged in using ChatGPT")
+    }
+    fn filesystem_policy(&self, workspace: &Workspace) -> Result<String> {
+        use std::collections::BTreeSet;
+        let mut denied: BTreeSet<PathBuf> = [
+            "/Users",
+            "/Volumes",
+            "/tmp",
+            "/private/tmp",
+            "/var/folders",
+            "/private/var/folders",
+            "/System/Volumes/Data/Users",
+            "/System/Volumes/Data/Volumes",
+            "/System/Volumes/Data/private/tmp",
+            "/System/Volumes/Data/private/var/folders",
+        ]
+        .into_iter()
+        .map(PathBuf::from)
+        .collect();
+        denied.extend([
+            self.user_home.clone(),
+            self.auth_home.clone(),
+            workspace
+                .work
+                .parent()
+                .and_then(Path::parent)
+                .ok_or(Error::Scope)?
+                .to_path_buf(),
+        ]);
+        let mut policy = String::from("permissions.g40.filesystem={\"/\"=\"read\"");
+        for path in denied {
+            let text = path.to_str().ok_or(Error::InvalidInput)?;
+            if text.chars().any(char::is_control) {
+                return Err(Error::InvalidInput);
+            }
+            policy.push_str(&format!(
+                ",\"{}\"=\"deny\"",
+                text.replace('\\', "\\\\").replace('\"', "\\\"")
+            ));
+        }
+        policy.push_str(",\":workspace_roots\"={\".\"=\"read\"}}");
+        Ok(policy)
     }
     fn command(&self) -> Command {
         let mut command = Command::new(&self.program);
@@ -135,6 +212,60 @@ impl CodexTool {
         let output = crate::process::host_output(&mut command, 20_000, 4096, 4096)?;
         if !output.status.success() || output.stdout != format!("{expected}\n").as_bytes() {
             return Err(Error::InvalidInput);
+        }
+        Ok(())
+    }
+    /// Actual local CLI policy controls, without a provider request or secret read.
+    pub fn check_permissions(&self, workspace: &Workspace) -> Result<()> {
+        if self.transport != Transport::InstalledCodex {
+            return Err(Error::InvalidInput);
+        }
+        self.revalidate()?;
+        let schema = prepare_schema(workspace)?;
+        let private = schema.parent().ok_or(Error::Scope)?;
+        let outside = workspace
+            .work
+            .parent()
+            .ok_or(Error::Scope)?
+            .join("provider-permission-canary.txt");
+        match fs::symlink_metadata(&outside) {
+            Ok(_) => files::regular(&outside)?,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(e) => return Err(e.into()),
+        }
+        fs::write(&outside, b"G40 synthetic protected canary\n")?;
+        for (path, allowed) in [(&schema, true), (&outside, false)] {
+            let mut command = self.command();
+            command
+                .args([
+                    "-c",
+                    "default_permissions=\"g40\"",
+                    "-c",
+                    &self.filesystem_policy(workspace)?,
+                    "-c",
+                    "permissions.g40.network.enabled=false",
+                    "sandbox",
+                    "-P",
+                    "g40",
+                    "-C",
+                ])
+                .arg(private)
+                .args(["--", "/bin/cat"])
+                .arg(path);
+            let output = crate::process::host_output(&mut command, 20_000, 8192, 8192)?;
+            let valid = if allowed {
+                output.status.success() && output.stdout == SCHEMA.as_bytes()
+            } else {
+                output.status.code() == Some(1)
+                    && output.stdout.is_empty()
+                    && output
+                        .stderr
+                        .windows(b"Operation not permitted".len())
+                        .any(|v| v == b"Operation not permitted")
+            };
+            if !valid {
+                return Err(Error::InvalidInput);
+            }
         }
         Ok(())
     }
@@ -164,6 +295,7 @@ impl CodexTool {
                 reported_total_tokens: None,
                 elapsed_ms: 0,
                 transport: self.transport,
+                rejected_item_kind: None,
             });
         }
         for path in [&self.program, &self.auth_home, &self.user_home] {
@@ -171,31 +303,23 @@ impl CodexTool {
                 return Err(Error::Scope);
             }
         }
+        self.revalidate()?;
+        if !self.chatgpt_session()? {
+            return Ok(CallOutcome {
+                status: CallStatus::AuthenticationUnavailable,
+                proposal: None,
+                reported_total_tokens: None,
+                elapsed_ms: 0,
+                transport: self.transport,
+                rejected_item_kind: None,
+            });
+        }
         files::tree(&workspace.work, 100_000)?;
-        let private = workspace
-            .work
-            .parent()
-            .ok_or(Error::Scope)?
-            .join("provider");
-        match fs::create_dir(&private) {
-            Ok(()) => {
-                use std::os::unix::fs::PermissionsExt;
-                fs::set_permissions(&private, fs::Permissions::from_mode(0o700))?;
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
-                if fs::symlink_metadata(&private)?.is_symlink() || !private.is_dir() {
-                    return Err(Error::Scope);
-                }
-            }
-            Err(error) => return Err(error.into()),
+        let schema = prepare_schema(workspace)?;
+        let private = schema.parent().ok_or(Error::Scope)?;
+        if self.transport == Transport::InstalledCodex {
+            self.check_permissions(workspace)?;
         }
-        let schema = private.join("proposal-schema.json");
-        match fs::symlink_metadata(&schema) {
-            Ok(_) => files::regular(&schema)?,
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-            Err(error) => return Err(error.into()),
-        }
-        fs::write(&schema, SCHEMA)?;
         let mut command = self.command();
         command.args([
             "--no-daemon",
@@ -211,11 +335,7 @@ impl CodexTool {
             "--color",
             "never",
         ]);
-        command.arg("--model").arg(if request.unavailable_probe {
-            "gpt-6.1-sol-g40-unavailable"
-        } else {
-            MODEL
-        });
+        command.arg("--model").arg(request.requested_model());
         for flag in [
             "shell_tool",
             "unified_exec",
@@ -242,27 +362,30 @@ impl CodexTool {
         for setting in [
             "model_reasoning_effort=\"high\"",
             "model_provider=\"openai\"",
+            "forced_login_method=\"chatgpt\"",
             "web_search=\"disabled\"",
             "project_doc_max_bytes=0",
             "default_permissions=\"g40\"",
-            "permissions.g40.filesystem.\"/\"=\"deny\"",
-            "permissions.g40.filesystem.\":workspace_roots\".\".\"=\"read\"",
             "permissions.g40.network.enabled=false",
         ] {
             command.args(["-c", setting]);
         }
+        command.args(["-c", &self.filesystem_policy(workspace)?]);
         command
             .arg("--output-schema")
             .arg(&schema)
             .arg("-C")
-            .arg(&private)
+            .arg(private)
             .arg("-")
-            .current_dir(&private)
+            .current_dir(private)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
         // Usage units here are admitted CLI deadline milliseconds plus cleanup
         // allowance, not money/tokens or a count of hidden backend requests.
+        // Trusted operator may still replace a path between this check and spawn.
+        // No atomic executable binding or protection from a hostile operator is claimed.
+        self.revalidate()?;
         let ticket = run.reserve_call(request.limits.wall_ms + 2000, epoch, authority)?;
         let mut acknowledged_epoch = epoch;
         let mut tracked_clock = || {
@@ -300,11 +423,40 @@ impl CodexTool {
     }
 }
 
+fn prepare_schema(workspace: &Workspace) -> Result<PathBuf> {
+    let private = workspace
+        .work
+        .parent()
+        .ok_or(Error::Scope)?
+        .join("provider");
+    match fs::create_dir(&private) {
+        Ok(()) => {
+            use std::os::unix::fs::PermissionsExt;
+            fs::set_permissions(&private, fs::Permissions::from_mode(0o700))?;
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {
+            if fs::symlink_metadata(&private)?.is_symlink() || !private.is_dir() {
+                return Err(Error::Scope);
+            }
+        }
+        Err(error) => return Err(error.into()),
+    }
+    let schema = private.join("proposal-schema.json");
+    match fs::symlink_metadata(&schema) {
+        Ok(_) => files::regular(&schema)?,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error.into()),
+    }
+    fs::write(&schema, SCHEMA)?;
+    Ok(schema)
+}
+
 struct CaptureFlags {
     bytes: AtomicUsize,
     overflow: AtomicBool,
     malformed: AtomicBool,
     tool: AtomicBool,
+    rejected_kind: Mutex<Option<String>>,
 }
 fn capture(
     mut pipe: impl Read + Send + 'static,
@@ -357,7 +509,16 @@ fn inspect_event(data: &[u8], flags: &CaptureFlags) {
                 .field("item")
                 .and_then(|item| item.field("type"))
                 .and_then(Json::text);
-            if !matches!(item, Some("agent_message" | "reasoning")) {
+            if !matches!(item, Some("agent_message" | "reasoning" | "error")) {
+                if let Ok(mut rejected) = flags.rejected_kind.lock() {
+                    let safe = item
+                        .filter(|v| {
+                            v.len() <= 64
+                                && v.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_')
+                        })
+                        .unwrap_or("unknown");
+                    rejected.get_or_insert_with(|| safe.to_owned());
+                }
                 flags.tool.store(true, Ordering::Release);
             }
         }
@@ -385,6 +546,7 @@ fn execute(
         overflow: AtomicBool::new(false),
         malformed: AtomicBool::new(false),
         tool: AtomicBool::new(false),
+        rejected_kind: Mutex::new(None),
     });
     let out = capture(
         group.take_stdout().ok_or(Error::InvalidState)?,
@@ -468,10 +630,37 @@ fn execute(
             reported_total_tokens: usage,
             elapsed_ms,
             transport: Transport::ExplicitFixture,
+            rejected_item_kind: flags
+                .rejected_kind
+                .lock()
+                .map_err(|_| Error::InvalidState)?
+                .clone(),
         },
         valid_epoch,
     ))
 }
+fn failure_status(text: &str) -> CallStatus {
+    let lower = text.to_ascii_lowercase();
+    if lower.contains("usage limit") || lower.contains("rate limit") || lower.contains("quota") {
+        CallStatus::Quota
+    } else if lower.contains("model")
+        && (lower.contains("not supported")
+            || lower.contains("not found")
+            || lower.contains("does not exist")
+            || lower.contains("unavailable"))
+    {
+        CallStatus::ModelUnavailable
+    } else if lower.contains("not logged in")
+        || lower.contains("authentication")
+        || lower.contains("unauthorized")
+        || lower.contains("401")
+    {
+        CallStatus::AuthenticationUnavailable
+    } else {
+        CallStatus::TransportFailed
+    }
+}
+
 fn decode(
     data: &[u8],
     scope: &[String],
@@ -487,6 +676,13 @@ fn decode(
         };
         match value.field("type").and_then(Json::text) {
             Some("item.completed") => {
+                if let Some(item) = value.field("item")
+                    && item.field("type").and_then(Json::text) == Some("error")
+                {
+                    failure = Some(failure_status(
+                        item.field("message").and_then(Json::text).unwrap_or(""),
+                    ));
+                }
                 if let Some(item) = value.field("item")
                     && item.field("type").and_then(Json::text) == Some("agent_message")
                 {
@@ -510,30 +706,7 @@ fn decode(
                     .or_else(|| value.field("message"))
                     .and_then(Json::text)
                     .unwrap_or("");
-                let lower = text.to_ascii_lowercase();
-                failure = Some(
-                    if lower.contains("usage limit")
-                        || lower.contains("rate limit")
-                        || lower.contains("quota")
-                    {
-                        CallStatus::Quota
-                    } else if lower.contains("model")
-                        && (lower.contains("not supported")
-                            || lower.contains("not found")
-                            || lower.contains("does not exist")
-                            || lower.contains("unavailable"))
-                    {
-                        CallStatus::ModelUnavailable
-                    } else if lower.contains("not logged in")
-                        || lower.contains("authentication")
-                        || lower.contains("unauthorized")
-                        || lower.contains("401")
-                    {
-                        CallStatus::AuthenticationUnavailable
-                    } else {
-                        CallStatus::TransportFailed
-                    },
-                );
+                failure = Some(failure_status(text));
             }
             _ => {}
         }

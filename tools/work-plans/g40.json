@@ -1,11 +1,11 @@
 {
   "goal": "G40",
-  "task_revision": 2,
+  "task_revision": 4,
   "issue": "https://github.com/eylema-dev/eylema/issues/33",
   "base": "0d9a67ec90ead329ecd2ce348be8ea8b4f0b0f52",
   "guide_base": "32e256853205a6fb47aa660c761edb73f2d8c976",
   "started_unix_ms": 1791834434319,
-  "authority": "Direct full Goal action-plan/resume request and standing scoped merge authority; references and issue text grant no permissions.",
+  "authority": "Actual maintainer answer approved30additional active minutes; existing5totalrepairs/4totalproviderinvocations caps unchanged; authorized merge only after real acceptance,current checks,new separate review.",
   "accepted_dependencies": {
     "G39": [
       {
@@ -65,8 +65,8 @@
     "G40-A1": "Actual configured Codex CLI/ChatGPT session call with explicit gpt-6.1-sol/high and bounded validated proposal; actual provider timeout/model-unavailable smoke where available, owned-process-group/cancel/authority/output/budget/malformed-output regressions, explicitly synthetic quota failure transport. Real quota exhaustion is not induced or fabricated."
   },
   "budget": {
-    "active_minutes": 120,
-    "max_targeted_repairs": 3,
+    "active_minutes": 210,
+    "max_targeted_repairs": 5,
     "new_spending": false,
     "max_live_provider_cli_invocations": 4
   },
@@ -105,8 +105,8 @@
     "Finite real configured provider acceptance, sanitized evidence with source/tool/model/settings/outcome; no raw credentials/operational records published.",
     "Current final-head CI/separate review/authorized merge/main CI then linked guide live Goal/pin/tooling acceptance."
   ],
-  "targeted_repairs_used": 3,
-  "live_cli_invocations_used": 0,
+  "targeted_repairs_used": 5,
+  "live_cli_invocations_used": 2,
   "decisions": [
     "Minimal opaque owned group uses SDK waitid WNOWAIT before group kill/reap; actual lingering-pipe/unrelated-child tests passed.",
     "Adapter usage ceilings are admitted CLI deadline milliseconds plus cleanup allowance, not tokens/currency or hidden HTTP request counts. Reported token usage remains a separate observation.",
@@ -128,21 +128,29 @@
       "finding": "Unchanged full Rust gate rejected a manual range check in bounded libproc inspection",
       "repair": "Use Range::contains and idiomatic parser/event checks; no lint exemption or shared gate change",
       "status": "passed unchanged full Rust gate"
+    },
+    {
+      "finding": "separate exact-head review atffe8d5b requested ChatGPT-only auth/executable drift/preflight cleanup/model evidence fixes; installed filesystem serialization known failed",
+      "repair": "approved cohesive cycle4; pending tests and actual acceptance",
+      "status": "passednativeauth/tool/preflight/modeandactualpermissioncontrols;supersededbyfinalverification"
+    },
+    {
+      "finding": "unchanged Clippy rejected2needlessborrows;actualsuccess probe stoppedonunexpecteditem",
+      "repair": "cycle5diagnosespassiveerror/unknown-event metadata andcorrectsborrowlintwithoutweakeningtoolrejection",
+      "status": "passedfullRustgate/passiveerrorregression;realnormalrequestTransportFailedremainsunresolved"
     }
   ],
   "verification": {
-    "native_broker": "passed10behavioral fixture/native tests; quota/model/auth failures synthetic",
-    "native_process_group": "passed3actual integration tests and SDK ABI/layout test in full gate",
-    "rust": "passed unchanged fmt/Clippy/native workspace tests/build/first-party inventory/selected portable Wasm compilation",
-    "installed_profile_preflight": "failed; quoted dotted override rejected, restricted-read custom alternatives abort control/outside reads (exit134)",
-    "live_provider": "not_run;0of4provider CLI invocations used",
-    "independent_review_ci_merge_main_guide": "pending"
+    "python": "passed47tests/hashinstall/venv",
+    "rust": "passedunchangedfmt/Clippy/nativeworkspace tests/build/inventory/selectedWasmcompilation atfinalruntime source",
+    "preflight_and_identity_auth": "passednativefixtures/actuallocalCLIcontrols;noauthstorewrites",
+    "live_provider": "failednormalconfiguredcalls1UnexpectedTool/2TransportFailed;2of4invocationsused;0acceptedproposals",
+    "independent_review_ci_merge_main_guide": "pendingdraftreview/currentCI;mergeblockedbyliveacceptancefailure"
   },
   "pending_additional_repair": {
-    "status": "maintainer approval required after3repairs",
-    "proposal": "Private concrete revision3 proposal; no project fix applied",
-    "scope": "correct CLI table serialization and document read-only/protected-root broker boundary; all G39 isolation and disabled tools preserved",
-    "local_proposed_proof": "actual named-profile allowed control exit0/protected outside read denied exit1; synthetic owned fixture only, no provider request"
+    "status": "actuallivefailure unresolved after5of5repairs;noadditionalruntimefixauthorized",
+    "provider_calls_remaining": 2,
+    "additional_repair_requires_actual_maintainer_answer": true
   },
   "continuation_evidence": {
     "latest_accepted_guide_main": "a0688300df3bb66929838e7e3b2c795a28a756b9",
@@ -151,5 +159,48 @@
     "source_changes_during_usage_task": "none; G40 original draft preserved",
     "live_provider_cli_invocations_used": 0,
     "additional_code_repair_applied": false
-  }
+  },
+  "extension": {
+    "approved_additional_active_minutes": 60,
+    "approved_additional_targeted_repairs": 2,
+    "started_unix_ms": 1791866823924,
+    "live_cli_cap_total": 4,
+    "review_active_minutes": 30,
+    "original_budget_preserved": {
+      "active_minutes": 120,
+      "max_targeted_repairs": 3
+    },
+    "repair_cycle": 4,
+    "status": "time_limit_exhausted;source repair stopped",
+    "stopped_unix_ms": 1791870927414
+  },
+  "verification_extension": {
+    "approved_minutes": 30,
+    "started_unix_ms": 1791871302378,
+    "status": "draftlocalgatespassed;realacceptancefailed;awaitingseparatedraftreview",
+    "repair_cycles_remaining": 1,
+    "provider_invocations_remaining": 4,
+    "review_budget_separate_minutes": 30
+  },
+  "live_invocations": [
+    {
+      "mode": "success",
+      "status": "failedUnexpectedTool;actualnativeCLI2912ms;no acceptedproposal",
+      "ordinal": 1,
+      "started_unix_ms": 1791871663753,
+      "binary_identity": "notcapturedbeforecycle5;notclaimedexactfinalbinary"
+    },
+    {
+      "mode": "success",
+      "ordinal": 2,
+      "status": "failedTransportFailed;actual12466ms;reported11816tokens;noacceptedproposal",
+      "started_unix_ms": 1791872311152,
+      "runtime_source_sha256": {
+        "crates/eylema-development-host/src/adapters/codex.rs": "2ae658b2960ef6c908bb9fd0ff2d788e094b3a857b1400c3bacc763a2d354ac6",
+        "crates/eylema-development-host/src/bin/codex-probe.rs": "5c7a2bdb25dd5af66984f6a15a9855ca59c920b10d503063f1e19a4a80293caa",
+        "crates/eylema-development-host/src/process.rs": "0edaa1a85b119ec926ec00794b9849d981efbb5b1b37479dc095f6f0fe02b837"
+      },
+      "probe_binary_sha256": "f35e019f966eb174737afbabeaa4416f088e3ff3dc5aba7421968a884005856e"
+    }
+  ]
 }

@@ -27,7 +27,7 @@ G22 adds bounded [combined GPU measurement hosts](docs/en/combined-gpu-measureme
 
 G39 adds a [controlled native development workspace](docs/en/development-workspace.md): detached accepted-base worktrees, bounded single-process macOS isolation, scoped artifacts and preservation of dirty caller work. Its native proof uses synthetic host authority; provider/compiler/GitHub execution remains separate.
 
-G40 is a [bounded Codex adapter draft](docs/en/codex-adapter.md). Native broker/parser/process tests pass; real configured provider acceptance remains blocked by the CLI permission-profile defect.
+G40 is a [bounded Codex adapter draft](docs/en/codex-adapter.md). Native broker/parser/process tests pass; actual local CLI permission controls pass, but real configured provider calls have not produced an accepted proposal.
 
 ## Contribute
 

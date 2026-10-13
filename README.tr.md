@@ -28,7 +28,7 @@ G22, sınırlı [birleşik GPU ölçüm ana makineleri](docs/tr/combined-gpu-mea
 G39, [kontrollü yerel geliştirme çalışma alanı](docs/tr/development-workspace.md) ekler: kabul edilmiş tabana bağlı detached worktree, sınırlı tek süreçli macOS yalıtımı, kapsamlı artifactler ve kirli çağıran işinin korunması. Yerel kanıt sentetik host yetkisi kullanır; sağlayıcı/derleyici/GitHub yürütmesi ayrıdır.
 
 
-G40, [sınırlı Codex adaptörü taslağıdır](docs/tr/codex-adapter.md). Yerel broker/ayrıştırıcı/süreç testleri geçer; gerçek yapılandırılmış sağlayıcı kabulü CLI izin profili hatası nedeniyle henüz tamamlanmamıştır.
+G40, [sınırlı Codex adaptörü taslağıdır](docs/tr/codex-adapter.md). Yerel broker/ayrıştırıcı/süreç testleri geçer; gerçek yerel CLI izin kontrolleri geçer; yapılandırılmış sağlayıcı çağrıları kabul edilmiş öneri üretmediği için gerçek kabul henüz tamamlanmamıştır.
 
 ## Katkıda bulunma
 

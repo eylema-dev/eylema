@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "0206c0c1ea2f4e3373ce74223e4b71b635b2cab7fcf2c639dc8fc3f0e9203302",
-      "tr_sha256": "bbdd892eb617adc1047a68077e5f07e34c63c4a8ac93476c89cbad4705491727"
+      "en_sha256": "9d93c1f5c0beb5681568d312e9890fc06165bdd651cda9d034e7ba5f7a4b365d",
+      "tr_sha256": "2e4d49a99644ceb9af122d7d639406c89122361607197892a6bf7e7b9aea1f76"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -119,8 +119,8 @@
     {
       "en": "docs/en/codex-adapter.md",
       "tr": "docs/tr/codex-adapter.md",
-      "en_sha256": "1d4b4667c40f01815d0bc1564e37349ea4557e8dee31c26e7bcc6272d595c50b",
-      "tr_sha256": "44fdb9df079164598a6faf27a5a5f5d1cfa66323db8d98509fc84fdb040f1cc2"
+      "en_sha256": "132fea1c8baefcedaf30a163d7277dc9ed44eee3f7a32b48c8fb123f2f855445",
+      "tr_sha256": "e49839e8bd1b34bc76963d0995ae8f0fa96e9fb6ba21514ba6b983229eb7676e"
     }
   ],
   "documents": []

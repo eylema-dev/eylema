@@ -317,3 +317,117 @@ fn dangling_provider_schema_cannot_overwrite_outside_private_storage() {
     assert!(!outside.exists());
     assert_eq!(f.registry.get_mut(&f.key).unwrap().usage().model_calls, 0);
 }
+
+#[test]
+fn executable_replacement_after_construction_is_rejected_before_model_reservation() {
+    use std::os::unix::fs::symlink;
+    for replace_with_symlink in [false, true] {
+        let mut f = fixture();
+        let executable = f.root.join("mutable-cli");
+        fs::copy(env!("CARGO_BIN_EXE_codex-probe"), &executable).unwrap();
+        let tool = CodexTool::fixture(&executable, &f.root).unwrap();
+        fs::remove_file(&executable).unwrap();
+        if replace_with_symlink {
+            symlink("/usr/bin/true", &executable).unwrap();
+        } else {
+            fs::copy("/usr/bin/true", &executable).unwrap();
+        }
+        let mut w = f.workspace();
+        let start = f.started;
+        let result = tool.invoke(
+            &mut w,
+            f.registry.get_mut(&f.key).unwrap(),
+            &f.auth,
+            || 1 + start.elapsed().as_millis() as u64,
+            CodexRequest {
+                prompt: "good",
+                limits: CallLimits {
+                    wall_ms: 5000,
+                    output_bytes: 8192,
+                },
+                cancel: &CancelHandle::default(),
+                unavailable_probe: false,
+            },
+        );
+        assert!(result.is_err(), "changed executable must not launch");
+        assert_eq!(f.registry.get_mut(&f.key).unwrap().usage().model_calls, 0);
+    }
+}
+
+#[test]
+fn non_chatgpt_or_missing_session_is_refused_before_model_request() {
+    for mode in ["apikey", "missing"] {
+        let mut f = fixture();
+        fs::write(f.root.join("fixture-auth-mode.txt"), mode).unwrap();
+        let tool = tool(&f);
+        let mut w = f.workspace();
+        let start = f.started;
+        let result = tool
+            .invoke(
+                &mut w,
+                f.registry.get_mut(&f.key).unwrap(),
+                &f.auth,
+                || 1 + start.elapsed().as_millis() as u64,
+                CodexRequest {
+                    prompt: "good",
+                    limits: CallLimits {
+                        wall_ms: 5000,
+                        output_bytes: 8192,
+                    },
+                    cancel: &CancelHandle::default(),
+                    unavailable_probe: false,
+                },
+            )
+            .unwrap();
+        assert_eq!(result.status, CallStatus::AuthenticationUnavailable);
+        assert_eq!(f.registry.get_mut(&f.key).unwrap().usage().model_calls, 0);
+        assert!(
+            !w.path()
+                .parent()
+                .unwrap()
+                .join("provider/started.txt")
+                .exists()
+        );
+    }
+}
+
+#[test]
+fn invalid_live_probe_mode_is_rejected_before_tool_or_home_access() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+        .args(["--live", "invalid-mode"])
+        .env_clear()
+        .env("HOME", "/g40-nonexistent-home")
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unknown mode"));
+}
+
+#[test]
+fn synthetic_probe_evidence_reports_actual_selected_model() {
+    for (mode, model, status) in [
+        ("success", "gpt-6.1-sol", "Completed"),
+        (
+            "unavailable",
+            "gpt-6.1-sol-g40-unavailable",
+            "ModelUnavailable",
+        ),
+    ] {
+        let output = std::process::Command::new(env!("CARGO_BIN_EXE_codex-probe"))
+            .args(["--fixture-observation", mode])
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+        let text = String::from_utf8(output.stdout).unwrap();
+        assert!(text.contains(&format!("\"requested_model\":\"{model}\"")));
+        assert!(text.contains(&format!("\"status\":\"{status}\"")));
+        assert!(text.contains("\"transport\":\"ExplicitFixture\""));
+    }
+}
+
+#[test]
+fn passive_provider_error_item_is_a_failure_and_never_a_tool_or_proposal() {
+    let result = invoke("item-error", 5000, 8192);
+    assert_eq!(result.status, CallStatus::ModelUnavailable);
+    assert!(result.proposal.is_none());
+}

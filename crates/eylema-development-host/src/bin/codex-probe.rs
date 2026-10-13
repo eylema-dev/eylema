@@ -41,6 +41,15 @@ fn fixture(args: &[String]) {
         );
     }
     assert!(std::env::var_os("G40_SECRET_CANARY").is_none());
+    assert!(
+        args.windows(2)
+            .any(|v| v == ["-c", "forced_login_method=\"chatgpt\""])
+    );
+    assert!(
+        args.iter()
+            .any(|v| v.starts_with("permissions.g40.filesystem={"))
+    );
+    fs::write("fixture-args.txt", args.join("\n")).unwrap();
     let mut prompt = String::new();
     std::io::stdin()
         .take(16385)
@@ -61,6 +70,12 @@ fn fixture(args: &[String]) {
         "auth" => {
             println!(
                 r#"{{"type":"turn.failed","error":{{"message":"Authentication unavailable: not logged in"}}}}"#
+            );
+            std::process::exit(1);
+        }
+        "item-error" => {
+            println!(
+                r#"{{"type":"item.completed","item":{{"type":"error","message":"Requested model unavailable"}}}}"#
             );
             std::process::exit(1);
         }
@@ -111,16 +126,41 @@ fn main() {
         println!("g40-provider-fixture/1");
         return;
     }
+    if args.ends_with(&["login".into(), "status".into()]) {
+        assert!(
+            args.windows(2)
+                .any(|v| v == ["-c", "forced_login_method=\"chatgpt\""])
+        );
+        let home = PathBuf::from(std::env::var_os("HOME").unwrap());
+        let mode =
+            fs::read_to_string(home.join("fixture-auth-mode.txt")).unwrap_or("chatgpt".into());
+        if mode == "chatgpt" {
+            println!("Logged in using ChatGPT");
+        } else if mode == "apikey" {
+            println!("Logged in using an API key");
+        } else {
+            eprintln!("Not logged in");
+            std::process::exit(1);
+        }
+        return;
+    }
     if args.iter().any(|arg| arg == "exec") {
         fixture(&args);
         return;
     }
-    assert_eq!(
-        args.first().map(String::as_str),
-        Some("--live"),
-        "opt-in --live MODE required"
+    let synthetic = args.first().map(String::as_str) == Some("--fixture-observation");
+    assert!(
+        synthetic || args.first().map(String::as_str) == Some("--live"),
+        "explicit observation mode required"
     );
+    assert!(args.len() <= 2, "unexpected arguments");
     let mode = args.get(1).map(String::as_str).unwrap_or("success");
+    let expected = match mode {
+        "success" | "permissions" => CallStatus::Completed,
+        "timeout" => CallStatus::TimedOut,
+        "unavailable" => CallStatus::ModelUnavailable,
+        _ => panic!("unknown mode"),
+    };
     let mut fixture = support::Fixture::with_limits(Limits {
         model_calls: 4,
         repairs: 3,
@@ -128,52 +168,79 @@ fn main() {
         usage_units: 300_000,
     });
     let mut workspace = fixture.workspace();
-    let home = PathBuf::from(std::env::var_os("HOME").expect("operator HOME"));
-    let auth = std::env::var_os("CODEX_HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| home.join(".codex"));
-    let tool = CodexTool::installed(Path::new("/opt/homebrew/bin/codex"), &home, &auth)
-        .expect("pinned installed CLI");
+    let tool = if synthetic {
+        CodexTool::fixture(&std::env::current_exe().unwrap(), &fixture.root).unwrap()
+    } else {
+        let home = PathBuf::from(std::env::var_os("HOME").expect("operator HOME"));
+        let auth = std::env::var_os("CODEX_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| home.join(".codex"));
+        CodexTool::installed(Path::new("/opt/homebrew/bin/codex"), &home, &auth)
+            .expect("pinned installed CLI")
+    };
+    if mode == "permissions" {
+        assert!(!synthetic, "installed local policy control required");
+        tool.check_permissions(&workspace)
+            .expect("actual local permission controls");
+        println!(
+            r#"{{"kind":"codex_adapter_local_permission_controls","status":"passed","inside_control":"actual_allowed_read","outside_canary":"actual_denied_read","provider_calls":0,"cli_version":"{}","cli_sha256":"{}"}}"#,
+            CODEX_VERSION, CODEX_SHA256
+        );
+        return;
+    }
     let prompt = "Return only the structured proposal. Do not call any tools. This is a synthetic public acceptance task: replace allowed.txt with the text 'G40 bounded proposal\\n'. Include one change with deleted=false and a short summary. No execution, credentials, operational data or GitHub effect is requested.";
     let limits = CallLimits {
         wall_ms: if mode == "timeout" { 1 } else { 60_000 },
         output_bytes: 1024 * 1024,
     };
     let start = fixture.started;
+    let request = CodexRequest {
+        prompt,
+        limits,
+        cancel: &CancelHandle::default(),
+        unavailable_probe: mode == "unavailable",
+    };
+    let requested_model = request.requested_model();
     let result = tool
         .invoke(
             &mut workspace,
             fixture.registry.get_mut(&fixture.key).unwrap(),
             &fixture.auth,
             || 1 + start.elapsed().as_millis() as u64,
-            CodexRequest {
-                prompt,
-                limits,
-                cancel: &CancelHandle::default(),
-                unavailable_probe: mode == "unavailable",
-            },
+            request,
         )
         .expect("controlled provider observation");
     let count = result.proposal.as_ref().map_or(0, |p| p.changes.len());
     println!(
-        r#"{{"kind":"codex_adapter_live_observation","status":"{:?}","transport":"{:?}","cli_version":"{}","cli_sha256":"{}","requested_model":"{}","requested_effort":"{}","elapsed_ms":{},"proposal_changes":{},"reported_total_tokens":{},"authority":"synthetic_host_fixture","filesystem_process":"actual_native","remote_cancellation":"unknown_after_local_stop","hidden_model_identity":"not_established"}}"#,
+        r#"{{"kind":"{}","status":"{:?}","transport":"{:?}","cli_version":"{}","cli_sha256":"{}","requested_model":"{}","requested_effort":"{}","elapsed_ms":{},"proposal_changes":{},"reported_total_tokens":{},"authority":"synthetic_host_fixture","filesystem_process":"actual_native","remote_cancellation":"unknown_after_local_stop","hidden_model_identity":"not_established","rejected_item_kind":{}}}"#,
+        if synthetic {
+            "codex_adapter_fixture_observation"
+        } else {
+            "codex_adapter_live_observation"
+        },
         result.status,
         result.transport,
-        CODEX_VERSION,
-        CODEX_SHA256,
-        MODEL,
+        if synthetic {
+            "g40-provider-fixture/1"
+        } else {
+            CODEX_VERSION
+        },
+        if synthetic {
+            "not_claimed_for_fixture"
+        } else {
+            CODEX_SHA256
+        },
+        requested_model,
         EFFORT,
         result.elapsed_ms,
         count,
         result
             .reported_total_tokens
-            .map_or("null".into(), |tokens| tokens.to_string())
+            .map_or("null".into(), |tokens| tokens.to_string()),
+        result
+            .rejected_item_kind
+            .as_deref()
+            .map_or("null".into(), quote)
     );
-    let expected = match mode {
-        "success" => CallStatus::Completed,
-        "timeout" => CallStatus::TimedOut,
-        "unavailable" => CallStatus::ModelUnavailable,
-        _ => panic!("unknown mode"),
-    };
     assert_eq!(result.status, expected);
 }
