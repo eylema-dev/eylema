@@ -67,7 +67,7 @@ Hız veya maliyet iyileştirilmeden önce asgari kalite karşılanır. Kernel ya
 | Belge | İngilizce kaynak | Türkçe karşılık |
 |---|---|---|
 | Proje yapısı 0.5.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Mimari 0.6.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| Mimari 0.7.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
 | API ve denetim 0.3.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
 | Geliştirme ve işletim 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
 | Öğrenme ve eğitim 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
@@ -93,3 +93,5 @@ Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinl
 Bakımcı 12 Ekim 2026 tarihinde [ilk ürün kararları ve test envanterini](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) kabul etti: ilk kullanıcı yerel, tek kullanıcılı eylemci uygulaması geliştiren yazılımcıdır. Kullanılabilir görev konsolu önizlemesi ve erken ihtiyaçtan PR’a kanıt, isteğe bağlı model/eğitimden önce gelir. MacBook Pro M4 Pro/24 GB birincil kalır; Mac mini M4/24 GB ve Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM kendi yürütüm kanıtını bekleyen ek test cihazlarıdır. Mevcut Rust tipleri, EYL/EYLJ biçimleri ve sınırlı platform bağları uygulama temeli olarak korunur.
 
 - [G38 geliştirme koordinatörü](docs/tr/development-coordinator.md): Projeye ait Rust ihtiyaçtan incelemeye durum akışı, host tarafından çözümlenen yetki, sonlu bütçe/iptal ve eski kanıt reddi; süreç/sağlayıcı/GitHub izolasyonu ve gerçek teslim G39–G43 adımlarıdır.
+
+- [G63 proje veri kapısı](docs/tr/project-data.md): ayrı proje journal’ları, beş bağımsız amaç, kaynak mirası ve terminal geri çekme. Kapalı metaveri egress’i kayıt içeriği paylaşımı, gerçek insan kimliği ve tam bellek/model kabulünden ayrıdır.

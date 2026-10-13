@@ -66,7 +66,7 @@ Quality floors are mandatory before optimizing speed or cost. Compare complete a
 | Document | English source | Turkish companion |
 |---|---|---|
 | Project structure 0.5.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Architecture 0.6.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| Architecture 0.7.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
 | API and oversight 0.3.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
 | Development and operations 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
 | Learning and training 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
@@ -92,3 +92,5 @@ Read [the migration record](https://github.com/eylema-dev/devguide/blob/main/doc
 The maintainer accepted the [first-product decisions and test inventory](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) on 12 October 2026: deliver the usable task-console preview and an early need-to-PR proof before optional model/training work. MacBook Pro M4 Pro/24 GB remains primary; Mac mini M4/24 GB and Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM are additional test equipment awaiting their own execution evidence. Existing Rust types, EYL/EYLJ formats and scoped platform bindings remain the implementation baseline.
 
 - [G38 development coordinator](docs/en/development-coordinator.md): Owned Rust need-to-review state, host-resolved authority, finite budgets/cancellation and stale-evidence rejection; process/provider/GitHub isolation and real delivery remain G39–G43.
+
+- [G63 project-data gate](docs/en/project-data.md): separate project journals, five independent purposes, source inheritance and terminal withdrawal. Closed metadata egress is distinct from record-content sharing, actual human authentication and complete memory/model acceptance.

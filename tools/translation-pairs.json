@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "86d9bbd9c1df6b48732b9a57e152058770d06de530c18305a230d90c72aed7ba",
-      "tr_sha256": "bfd8b0c90c1bd9b5dd1266ef35456a81fc759ee90343ae9ddf9fd79d61dfd45e"
+      "en_sha256": "3264d968a215f40f5a21c3f0fbbd2e8d2e28fd7a88ee84dcb5135b0d5edf61a1",
+      "tr_sha256": "2a7929c1ccfe9aad5099274fcd24cdce46979e5eddd460d6f195eee7034b0f84"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -121,6 +121,12 @@
       "tr": "docs/tr/platform-contracts.md",
       "en_sha256": "f155eed929e84589e788d03e0c136e4c59f4febe555eea406b765735b9b22b87",
       "tr_sha256": "0878f1289471ae0a80b4c3f85ee084fad8183e4812ea0e6a036f19389aa01b2c"
+    },
+    {
+      "en": "docs/en/project-data.md",
+      "tr": "docs/tr/project-data.md",
+      "en_sha256": "731c8aa795f97fe9499241d3e147e31431c305de05f3bd4b0e794db5258a9b5c",
+      "tr_sha256": "d8639d265d1beeba22a5f75e8ef274dd52d3aa5b2d784e65a9b769596436abbf"
     }
   ],
   "documents": []

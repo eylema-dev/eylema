@@ -8,6 +8,7 @@
 pub mod codec;
 pub mod platform;
 mod primitives;
+pub mod project_data;
 mod records;
 pub mod transport;
 

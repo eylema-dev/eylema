@@ -1,0 +1,40 @@
+# G63 projeye özel veri ve amaç kapıları
+
+Kendi `eylema_contracts::project_data` türlerimiz ve `eylema_host::project_data::ProjectStore`, ayrı proje deneyim/artifact journal’ı ekler. Bu [bellek katmanı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/memory-layer.md), araç ve öğrenme için veri kullanım temelidir. Önceki tek kullanıcılı görev konsoluna proje yalıtımı eklemez; RAG/knowledge graph/model depolama motoru uygulamaz. G54/G55/G64/G87–G90 kabul edilmiş kapsamlarında kapıyı kullanmalıdır.
+
+Mantıksal `DataRef`, ProjectId ve DataId bağlar. Kimlikler sınırlı ASCII ResourceId sözleşmesini izler; `..` gibi değerler opak kimlik kalır, dosya sistemi yollarına eklenmez. Her canlı depo mühürlü owner kimliği döndürür; yalnız bu owner amaç/ID kapsamlı oturumu kaydeder/geri çeker, politikayı değiştirir ve öğeyi geri çeker. Başka depodaki aynı görünen proje/öğe kimliği bu kabiliyetleri yeniden üretmez. Owner bootstrap güvenilen host yapılandırmasıdır; **gerçek insan kimliği doğrulaması değildir**, bu G73’tür. İstek/model çıktısı owner token üretemez.
+
+`execute`, `collect`, `train`, `external_disclosure` ve `ecosystem_export` bağımsız amaçlardır. Oturum ve yeni kayıt varsayılan olarak amaç hakkı taşımaz; egress incelemesi false’tur. Toplama, kapsamlı collector yetkisi, uygun içerik ve bildirilen bütün kaynak soyunda collect izni gerektirir. Yalnız owner her kaydın bildirilen izinlerini ve açık egress inceleme beyanını kesin pozitif politika sürümüyle atar; uyuşmayan sürüm daha yeni politikayı ezemez. Beyan uydurulmuş insan incelemesi değildir.
+
+Türev ve eğitim adayı kayıtları değişmez mevcut aynı-proje ebeveynleri gerektirir. Her kullanım sınırlı ziyaret edilmiş-küme dolaşımıyla bütün kaynak politikası, süre sonu ve terminal geri çekmeyi tekrar denetler. Çocuk izin/inceleme bayrağı üst kaynağı genişletemez. `DataMetadata.permissions` ve `reviewed_egress` **yaprağın bildirilen politikasını** anlatır; etkin miras izin, kamusal sınıf veya yetki değildir; consumer güncel kapıyı çağırmalıdır. Ebeveyn kaynak bağı korunur, herhangi üst kaynak incelenmemiş/özel kalırsa egress reddedilir. Kaynağın geri çekilmesi eğitim adayı referansı dahil sonraki türev kullanımını engeller; ağırlıklara unlearning yapmaz veya önceden kopyalanmış veriyi geri almaz. Yük/tür toplamadan sonra değişmez; başarılı politika değişimi/geri çekme onaydan önce senkronize edilir.
+
+Yerel `read` yalnız execute/collect/train alır. `export_manifest` yalnız external disclosure/ecosystem export alır ve sır olmayan kimlik, kaynak referansı, tür, put-frame özeti, sürüm ve süre sonundan oluşan kapalı projeksiyon döndürür. Rastgele yük, prompt, açıklama veya erişim bilgisi alanı yoktur. Gerçek kayıt gövdesi yayını/provider aktarımı sonraki iştir. Tek türler episode/artifact/derived/training_candidate’tır; unknown, raw_reasoning ve credentials adları reddedilir. Rastgele çağıran yük baytları **otomatik sınıflandırılmaz veya arındırılmaz**; uygun içerik, sır olmayan kimlik ve doğru soy bağı güvenilen ingestion ön koşullarıdır. API kopyalanmış içeriğin lisanslı, sırdan arınmış veya doğru kaynaklı olduğunu kanıtlamaz.
+
+## Kalıcılık, zaman ve hata
+
+Mevcut görev sözleşmesi ve EYL/EYLJ v1 değişmez. Ayrı `project-data` yük etiketi/sürüm1 beklenen proje ve ilk güvenilen zaman damgasını bağlar. Canonical put, policy, withdraw ve kesin artan clock kayıtları kesin şema, tür, sürüm, soy bağı ve sınırlarla replay edilir. Beklenen proje uyuşmazlığı veya bilinmeyen/bozuk/desteksiz olay hata verir. Öğenin özeti senkronize put-frame journal digest’idir; yeni bağımsız payload hash değildir. Yeniden açılma yük/metaveri/politika/geri çekmeleri korur, yeni owner kimliği sağlar; slot ve kimlik aynı görünse bile eski oturum geçersizdir.
+
+Host güvenilen Unix milisaniye saati sağlar. Çağıran zaman damgası bunun yerini alamaz. Saat kullanılamaz veya gerilerse erişim reddedilir. Zaman ilerleyince süre sonu reddinden önce dahil **veri dönmeden önce** senkronize clock watermark yazılır; eski saatle yeniden açılma gözlenen süresi dolmuş kaydı canlandıramaz. Okuma IO gerektirebilir ve journal bütçesi tüketebilir; bu ilk doğruluk profili throughput iddiası değildir. Süresi dolmuş/geri çekilmiş oturum reddedilir, terminal kayıt geri çekme geri alınamaz, politika değişimi süre sonunu uzatamaz.
+
+`project_journal_limits()` en çok4096frame,70 KiB canonical frame yükü ve64 MiB journal belirler. Salt okunur `Journal::limits()` accessor, depoya daha gevşek profili reddettirir. Daha dar journal erken tükenebilir ve açık hata verir. Güvenilen çağıran, aktarmadan önce journal’ı kabul edilen profille kurmalıdır; generic journal oluşturma/açmanın kendi doğrulama/allocation sınırları vardır. ProjectStore ayrıcalıklı çağıranın önceki generic IO’sunu sınırladığını iddia etmez.
+
+| Sınır | Tavan |
+|---|---|
+| Öğe ve korunan yük | 1024öğe;8 MiB toplam |
+| Öğe yükü | Boş değil, en çok64 KiB |
+| Kaynak / soy | 16benzersiz ebeveyn;derinlik32 |
+| Oturum / kapsam | Canlı depo başına64slot;oturum başına64benzersizID |
+| Süre sonu | Gelecekte, en çok365gün;çocuk hiçbir ebeveynden geç olamaz |
+| Journal | 4096frame;70 KiB frame yükü;64 MiB dosya |
+
+Bunlar kabul/biçim sınırıdır; ölçülmüş allocator tepe değeri, kesin dosya sistemi deadline’ı veya SSD kapasitesi değildir. Geri çekme/süre sonu mantıksal kullanımı reddeder; append-only yük/geçmiş diskte ve kurtarma durumunda kalır. Compaction, backup temizleme, şifreleme veya fiziksel silme yoktur. Önceden okunmuş bayt geri alınamaz. Gelecekte cache/index/provider aktarımı gerçek aktarımda kaynak referanslarını yeniden yetkilendirmeli; metaveri bayrağı veya eski manifest’i grant olarak kullanmamalıdır.
+
+Journal hash’i, kilitli depolama ve saat güvenilen host servisidir. Native dosyalar owner kontrollü dizindeki host seçimi yolu,0600oluşturma, cooperative özel kilit ve gerçek dosya/ebeveyn/full senkronizasyon kullanır. Yazım/senkronizasyon belirsizliği başarı makbuzu vermez, sonraki erişimi zehirler; açık incelenmiş yeniden açılma ve yeni kayıt gerekir. Tam yazılmış belirsiz bayt yeniden açılmada bulunabilir; parsing geriye dönük onay kanıtlamaz. Sınır saldırgan aynı-kullanıcı sürecini engellemez veya dışarıdan yeniden yazılmış journal’ı kimliklendirmez. Desteksiz/native servis hatası açıktır, daha zayıf fallback eklenmez.
+
+## Yürütülmüş kanıt ve sınırlar
+
+ARM64 macOS ve sabit Rust1.99.0’da test-first host suite eksik project-data modüllerinde hata verdi, uygulamadan sonra geçti. On bir davranış testi her bağımsız amaç/varsayılan red, payload dışa çıkmaması, özel kaynak soyu, kapsamlı/yabancı owner/oturum ve aynı görünen proje kimliği, projeler arası toplama/okuma/ebeveyn, canlı çok kaynak/adayı mirası, terminal geri çekme, süre sonu ve kalıcı saat gerilemesi, kullanılamayan saat, politika sürüm çatışması, bozuk replay, IO belirsizliği/zehirlenme, kesin metaveri/yük yeniden açılma,64 KiB/8 MiB/1024öğe/16ebeveyn/32derinlik/64kapsam/64oturum sınırı, gevşek journal reddi ve açık tükenmeyi kapsar.
+
+Bir ek **gerçek native dosya testi** iki özel geçici proje dosyası oluşturur;0700dizin/0600dosya ve cooperative kilit çatışmasını denetler; gerçek SystemTime ve CommonCrypto/full-sync binding kullanır; kesin metaveri/gövde/politikayı kapatıp açar; yanlış beklenen proje ve eski/yabancı canlı oturumu reddeder; terminal geri çekmenin yeniden açılmada sürdüğünü kanıtlar. Mantıksal `..` proje kimliği yol olmaz. Veri sentetiktir, geçici dizin kaldırılır. Enjekte IO/saat hataları fixture’dır; fiziksel disk/saat arızası değildir.
+
+Tam native fmt/clippy/test/build ve seçili taşınabilir kütüphane Wasm derlemesi, AGENTS Python/depo/PR/diff kapılarıyla gereklidir; son PR kanıtı sürüm/sayı ve gerçek ayrı incelemeyi kaydeder. Yeni project-data Wasm yürütmesi, gerçek insan kaydı, saldırgan OS yalıtımı, fiziksel çökme/silme, gerçek RAG/graph erişimi, model inference/eğitim ve tam harness görevleri not_run kalır. Geri dönüş incelenmiş PR ile sınırlı API’yi kaldırır; mevcut proje journal’ları korunmalı, sürüm uyumu teşhis edilmeli ve eski görev journal’ı sanılmamalıdır.
