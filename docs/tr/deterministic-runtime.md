@@ -1,6 +1,6 @@
 # G10 — Deterministik gömülü yürütücü
 
-[English](../en/deterministic-runtime.md). Çalışma zamanı sözleşmesi0.1.0, yayımlanmamış paket0.1.0. [Plan](../../tools/work-plans/g10.json), [issue12](https://github.com/eylema-dev/eylema/issues/12), [codec/platform](codec-platform.md).
+[English](../en/deterministic-runtime.md). Çalışma zamanı sözleşmesi0.1.0, yayımlanmamış paket0.1.0. [Plan](../../tools/work-plans/g10.json), [issue12](https://github.com/eyleme-dev/eyleme/issues/12), [codec/platform](codec-platform.md).
 
 Birinci taraf güvenli [runtime](../../crates/eylema-runtime/src/lib.rs), süreç içi görev kabulü, FIFO kuyruk, sınırlı tek adım yürütümü, anlık görüntüler, gözlemler ve olaylar sağlar. Üretim bağımlılığı yalnız eylema-contracts’tır; birinci taraf platform kütüphanesi gerçek native tüketici/test için geliştirme bağımlılığıdır. Sunucu, üretim arka plan worker’ı, rastgele skill yükleme, dış etki, journal veya tarayıcı sağlamaz. Host executable help/version davranışı bootstrap olarak kalır; ayrı native örnek bu gerçek kütüphaneyi çalıştırır.
 

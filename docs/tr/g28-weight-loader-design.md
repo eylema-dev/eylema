@@ -1,6 +1,6 @@
 # G28 sınırlı birinci taraf ağırlık yükleyicisi tasarımı
 
-[İngilizce kanonik kaynak](../en/g28-weight-loader-design.md). İnsan incelemesi için yazılı tasarım; **üretim uygulaması veya kabul değildir**. Bakımcı 14 Ekim 2026'da kapsam/tasarım hazırlığını onayladı; yazılı tasarım ve G28’e özel profil bağı artık onaylıdır; gerçek insan somut sohbet içi planı da onayladı; kaynak teslim kontrolleri/incelemesi/CI hâlâ gerekir. Kaynak tabanı `6605080fcae225e099775f7856349c0aac6aa011`, rehber tabanı `affbcd456fc467b10155eb3b71b4860042220b30`; core issue [G28 / #25](https://github.com/eylema-dev/eylema/issues/25).
+[İngilizce kanonik kaynak](../en/g28-weight-loader-design.md). İnsan incelemesi için yazılı tasarım; **üretim uygulaması veya kabul değildir**. Bakımcı 14 Ekim 2026'da kapsam/tasarım hazırlığını onayladı; yazılı tasarım ve G28’e özel profil bağı artık onaylıdır; gerçek insan somut sohbet içi planı da onayladı; kaynak teslim kontrolleri/incelemesi/CI hâlâ gerekir. Kaynak tabanı `6605080fcae225e099775f7856349c0aac6aa011`, rehber tabanı `affbcd456fc467b10155eb3b71b4860042220b30`; core issue [G28 / #25](https://github.com/eyleme-dev/eyleme/issues/25).
 
 ## Amaç ve katkı sınırı
 

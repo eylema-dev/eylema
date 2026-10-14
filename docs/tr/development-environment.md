@@ -1,6 +1,6 @@
 # Native geliştirme ortamı — G04
 
-Kaynak revizyon 0.1.0. [English](../en/development-environment.md). Bu, tek fiziksel Mac için geliştirme aracı kanıtıdır; uygulanmış Eylema uygulaması değildir. Belge aşaması kaynak engeli etkin kalır; G07 kök workspace, toolchain dosyası ve gerçek uygulama CI’ını birlikte sağlar.
+Kaynak revizyon 0.1.0. [English](../en/development-environment.md). Bu, tek fiziksel Mac için geliştirme aracı kanıtıdır; uygulanmış Eyleme uygulaması değildir. Belge aşaması kaynak engeli etkin kalır; G07 kök workspace, toolchain dosyası ve gerçek uygulama CI’ını birlikte sağlar.
 
 ## Gözlenen ortam ve tekrarlanabilir denemeler
 
@@ -36,4 +36,4 @@ xcodebuild -downloadComponent MetalToolchain
 
 Kurulum öncesi Metal compiler stub bulunabiliyor, fakat çalışmıyordu; metallib eksikti. Resmî bileşen kurulunca derleyici/linker çağrısı geçti. Apple’ın [ek bileşen rehberi](https://developer.apple.com/documentation/xcode/downloading-and-installing-additional-xcode-components) araç sınırını açıklar. Sudo, depo yetkisi, yayın veya ücretli servis kullanılmadı.
 
-Passed: gerçek native Rust derleme/çalıştırma, Wasm derleme, Metal shader derleme/link ve yerel ortam envanteri. Not run: Eylema runtime/workspace, Wasm/tarayıcı yürütümü, GPU hesaplama/readback, model çıkarımı, eğitim, performans veya sürüm kabulü. Sekiz hata odaklı birim testi mock komutlar ve sentetik çıktılar kullanır; bunların başarısı doğrulayıcı kanıtıdır, gerçek yerel denemelerden ayrıdır. Çıktı değiştirme atomiktir; depolama hatası eski raporu korur. Hosted depo CI’ı bu testleri çalıştırır, belge Rust kapısını skipped bırakır; bu Mac’in ortam kabulünü tekrar çalıştırmaz. G07 ve G19 kendi gerçek uygulama/runtime/GPU kanıtını sağlamalıdır.
+Passed: gerçek native Rust derleme/çalıştırma, Wasm derleme, Metal shader derleme/link ve yerel ortam envanteri. Not run: Eyleme runtime/workspace, Wasm/tarayıcı yürütümü, GPU hesaplama/readback, model çıkarımı, eğitim, performans veya sürüm kabulü. Sekiz hata odaklı birim testi mock komutlar ve sentetik çıktılar kullanır; bunların başarısı doğrulayıcı kanıtıdır, gerçek yerel denemelerden ayrıdır. Çıktı değiştirme atomiktir; depolama hatası eski raporu korur. Hosted depo CI’ı bu testleri çalıştırır, belge Rust kapısını skipped bırakır; bu Mac’in ortam kabulünü tekrar çalıştırmaz. G07 ve G19 kendi gerçek uygulama/runtime/GPU kanıtını sağlamalıdır.

@@ -1,6 +1,6 @@
 # G09 — Kanonik codec ve platform hizmetleri
 
-[English](../en/codec-platform.md). Çalışma zamanı sözleşmesi **0.1.0**, EYL codec **1**, yayımlanmamış Rust paketleri **0.1.0**. [Görev planı](../../tools/work-plans/g09.json), [tipli sözleşmeler](typed-contracts.md), ana issue [eylema#11](https://github.com/eylema-dev/eylema/issues/11).
+[English](../en/codec-platform.md). Çalışma zamanı sözleşmesi **0.1.0**, EYL codec **1**, yayımlanmamış Rust paketleri **0.1.0**. [Görev planı](../../tools/work-plans/g09.json), [tipli sözleşmeler](typed-contracts.md), ana issue [eylema#11](https://github.com/eyleme-dev/eyleme/issues/11).
 
 ## Wire biçimi ve sınırlı ayrıştırma
 

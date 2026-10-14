@@ -1,0 +1,131 @@
+{
+  "task": "project-name-alignment",
+  "task_revision": 2,
+  "date": "2026-10-14",
+  "base": "d0dcc39c65c8229cc8d54f1c8a831adaecf66d80",
+  "authority": {
+    "source": "Actual direct human maintainer request in the trusted chat on 14 October 2026; no issue is invented.",
+    "request": "Rename Eylema to Eyleme and Derlema to Derleme across projects and documentation; retain Onama. The subsequent direct request includes actual GitHub organization renames eylema-dev to eyleme-dev and derlema-dev to derleme-dev; repository basenames stay unchanged.",
+    "limits": "This record documents existing human authority and grants no permission. No merge, deployment, release, paid action, domain migration or runtime/data migration is included."
+  },
+  "design": "Treat Eyleme and Derleme as the current product display names, record the 14 October 2026 decision in synchronized English/Turkish documentation, and retain Onama. Apply actual authorized organization identities consistently after GitHub confirms the renames. Preserve installed runtime identifiers, wire contracts, domain names and immutable accepted historical evidence. No additional runtime or data migration is required.",
+  "allowed_paths": [
+    "README.md",
+    "README.tr.md",
+    "CONTRIBUTING.md",
+    "CONTRIBUTING.tr.md",
+    "AGENTS.md",
+    "NOTICE",
+    "repository.json",
+    "docs/en/",
+    "docs/tr/",
+    ".github/",
+    "ai-team-protocol/",
+    "apps/eylema/",
+    "crates/",
+    "tools/check_repository.py",
+    "tools/check_workspace.py",
+    "tools/check_rust.py",
+    "tools/tests/",
+    "tools/vendor.json",
+    "tools/translation-pairs.json",
+    "tools/work-plans/project-name-alignment.json"
+  ],
+  "path_constraints": [
+    "Rust/app paths permit display strings, relevant display regression assertions and verified organization references only; public package/bin/module names and runtime semantics stay unchanged.",
+    "Schema changes are restricted to titles/descriptions and visible examples; schema IDs, keys, versions and validation behavior stay unchanged.",
+    "Shared checker changes belong first in devguide and must be synchronized by reviewed vendor hashes; never weaken repository identity or historical evidence checks.",
+    "Existing accepted work plans, review/qualification/acceptance records and historical migration snapshots remain byte-identical. Maintain current document fingerprints and repository-set pins separately."
+  ],
+  "owned_by_this_architect": [
+    "tools/work-plans/project-name-alignment.json"
+  ],
+  "linked_scope": {
+    "eylema-docs-en_and_eylema-docs-tr": "Current product documentation, bilingual naming decision and compatibility explanation; historical drafts remain historical.",
+    "devguide": "Current policy/templates, repository and organization references, checkers, focused verified-alias regressions if required, translation fingerprints and final member pins.",
+    "community_examples_evals_models_training": "Visible project names and active organization references; retain technical consumers and accepted historical evidence.",
+    "derlema": "Current EN/TR documentation, descriptive schema metadata, local UI/CLI labels and active organization references; preserve module, data and integration identifiers.",
+    "onama": "Update sibling display names and active sibling organization references; retain Onama identity and all installed/wire identifiers.",
+    "brand_and_website": "Assigned to a separate implementer: brand source/rendered assets, existing asset documentation and promotional website labels. Existing asset paths may be retained for compatibility; canonical domains stay unchanged.",
+    "github_organizations": "Root verifies and performs the explicitly authorized organization renames, then updates canonical remotes and current identity/CI allowlists. Repository basenames remain unchanged."
+  },
+  "compatibility_identifiers": [
+    "eylema and derlema package/bin/module names, environment variables and existing local data paths, including EYLEMA_DATA_DIR and the macOS Application Support/Eylema directory",
+    "eylema.dev and existing registered/candidate domain records; organization rename does not assert domain ownership or deployment",
+    "EYL/EYLJ/ONAMA1 magic/version values, serialized keys/enums, schema IDs and versions, hash salts/domain separators and evidence-kind strings",
+    "application/eylema, eylema_session, X-Eylema-CSRF, X-Derlema-Token and derlema-token",
+    "Derlema OPC UA /derlema/ endpoint and urn:derlema:synthetic:wind:v1 namespace",
+    "derlema.synthetic-evidence.v1, eylema_revision receipts, pinned adapter revisions and legacy eylema journal subdirectory",
+    "Immutable accepted historical identities/URLs/hashes; alias resolution may use only the two actually verified organization renames and must retain exact historical commit/content verification"
+  ],
+  "acceptance_mapping": {
+    "N1_display_consistency": "Search current maintained docs, templates, schema descriptions, UI/CLI labels and website for Eylema/EylemA/Derlema/DerlemA variants. Review every remaining occurrence as compatibility, actual address or labeled history; inspect split HTML wordmarks and generated raster/SVG assets visually.",
+    "N2_compatibility": "Compare final diff against the accepted base for unchanged package/bin/module/data/env identifiers, wire/magic/hash constants, schema IDs/keys/versions and immutable evidence. Run the unchanged full Rust gate and existing actual-process/browser contracts.",
+    "N3_organization_identity": "Read back GitHub organization identities and canonical remotes after the authorized operation. Update current links, CI conditions, repository.json, registry and checker allowlists consistently. Add meaningful rejection/acceptance coverage for any narrowly scoped history alias handling; unknown aliases and mismatched commits/hashes must fail.",
+    "N4_bilingual_and_cross_repository": "Review EN/TR semantic parity, refresh translation fingerprints, run each repository gate and devguide repository-set checks against final pinned member commits. Keep historical migration inventories and accepted evidence unchanged.",
+    "N5_visible_runtime": "Verify local CLI help/version and local console/browser branding without changing command syntax or authority. Check website and brand outputs locally in both locales and responsive viewports; publication/live deployment remains outside this task.",
+    "N6_delivery_integrity": "Inspect scoped diff for unrelated work, private paths, secrets, weights or operational data. Obtain genuine separate final-head review; record actual command/environment/revision outcomes and pending checks honestly."
+  },
+  "checks": [
+    "python3 -m venv .venv",
+    ".venv/bin/python -m pip install --require-hashes -r tools/requirements-ci.txt",
+    ".venv/bin/python -m unittest discover -s tools/tests -v",
+    ".venv/bin/python tools/check_repository.py",
+    ".venv/bin/python tools/check_pr.py --body-file .github/PULL_REQUEST_TEMPLATE.md --allow-template",
+    "git diff --check",
+    "env -u RUST_LOG .venv/bin/python tools/check_rust.py",
+    "Reviewed EN/TR fingerprint refresh and devguide pinned repository-set integration gate",
+    "Derlema and Onama existing local validation commands appropriate to display/organization changes; do not assert interactive human or field acceptance from static tests",
+    "Final exact-revision separate review; PR body/current CI are distinct delivery evidence when delivery is authorized"
+  ],
+  "budget": {
+    "active_minutes": 90,
+    "max_repair_cycles_per_gate": 3,
+    "new_spending": false,
+    "new_runtime_or_data_migration": false
+  },
+  "roles": {
+    "architect": {
+      "context": "qualified_rename_architect separate substantive architecture context",
+      "configured_model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "configuration_evidence": "Explicit profile configuration supplied at delegated activation; hidden serving identity is not exposed.",
+      "serving_identity": "unknown_not_exposed",
+      "qualification_profile": "sol61-high-contracts-2026-10-14",
+      "qualification_valid_through": "2026-11-13",
+      "scope": "Substantive compatibility architecture and bilingual documentation/contract metadata plan; no numerical, inference or training qualification claimed."
+    },
+    "root_implementer_verifier": {
+      "configured_model": "gpt-6-astra",
+      "reasoning_effort": "ultra",
+      "configuration_evidence": "Configured identity/effort reported by the root context; this record does not independently attest serving identity or confer qualification.",
+      "serving_identity": "unknown_not_exposed"
+    },
+    "linked_implementers": "Separate assigned documentation/consumer, Derlema/Onama and website/brand contexts; each must report actual configuration and tools used.",
+    "independent_reviewer": "Pending genuine separate owner-approved final-head context; this architecture assessment is not final independent review."
+  },
+  "tools_observed_by_architect": [
+    "Codex exec_command for Git, rg and file reads",
+    "Codex apply_patch for this plan only"
+  ],
+  "risks": [
+    "Broad text replacement can corrupt active headers, namespaces, imports, data paths, hash/wire identity or historical evidence.",
+    "Organization renames affect remotes, trusted identity checks, shared-tool hashes and immutable integration fetches; redirects alone do not establish current canonical identity.",
+    "Split HTML wordmarks, SVG text, raster assets and generated archives can retain old visible names despite source prose updates.",
+    "Current cross-repository fingerprints/pins must be refreshed in dependency order after final member commits; matching bytes do not prove semantic translation equivalence.",
+    "Existing command/data identifiers must be explained clearly so the new display name does not lead users to invoke unsupported commands or open a new empty data directory."
+  ],
+  "verification": {
+    "architecture_read_only_assessment": "passed; reviewed shared contributor/model policy, limited profile, current core status, architecture/roadmap, quality gates and concrete runtime/integration compatibility anchors",
+    "implementation_checks": "not_run by architect; root and assigned implementers must supply actual outcomes",
+    "github_organization_operations": "pending root verified execution; no success claimed here",
+    "independent_final_review": "pending"
+  },
+  "scope_extensions": {
+    "2026-10-14": "The maintainer additionally requested actual organization names eyleme-dev and derleme-dev, primary repository names eyleme and derleme, matching Derleme/Onama GitHub avatars, and Codex project labels. Both organization and primary repository renames were verified with unchanged GitHub numeric IDs; Onama remains unchanged. Codex UI rename unavailable through permitted tools."
+  },
+  "finite_scope_extension_budget": {
+    "total_minutes": 120,
+    "repair_cycles_per_gate": 3
+  }
+}

@@ -92,12 +92,12 @@ impl Fixture {
         .unwrap();
         let need = NeedSpec::new(NeedDraft {
             key: TaskKey::new(
-                "eylema-dev/eylema".into(),
+                "eyleme-dev/eyleme".into(),
                 eylema_contracts::RequestId::new("g39fixture").unwrap(),
                 eylema_contracts::Revision::new(1).unwrap(),
             )
             .unwrap(),
-            source_repository: "eylema-dev/eylema".into(),
+            source_repository: "eyleme-dev/eyleme".into(),
             issue_number: Some(32),
             objective: "Native isolated-workspace fixture".into(),
             acceptance: vec![Acceptance {

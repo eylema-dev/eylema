@@ -1,6 +1,6 @@
 # G63 projeye özel veri ve amaç kapıları
 
-Kendi `eylema_contracts::project_data` türlerimiz ve `eylema_host::project_data::ProjectStore`, ayrı proje deneyim/artifact journal’ı ekler. Bu [bellek katmanı](https://github.com/eylema-dev/devguide/blob/main/docs/tr/memory-layer.md), araç ve öğrenme için veri kullanım temelidir. Önceki tek kullanıcılı görev konsoluna proje yalıtımı eklemez; RAG/knowledge graph/model depolama motoru uygulamaz. G54/G55/G64/G87–G90 kabul edilmiş kapsamlarında kapıyı kullanmalıdır.
+Kendi `eylema_contracts::project_data` türlerimiz ve `eylema_host::project_data::ProjectStore`, ayrı proje deneyim/artifact journal’ı ekler. Bu [bellek katmanı](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/memory-layer.md), araç ve öğrenme için veri kullanım temelidir. Önceki tek kullanıcılı görev konsoluna proje yalıtımı eklemez; RAG/knowledge graph/model depolama motoru uygulamaz. G54/G55/G64/G87–G90 kabul edilmiş kapsamlarında kapıyı kullanmalıdır.
 
 Mantıksal `DataRef`, ProjectId ve DataId bağlar. Kimlikler sınırlı ASCII ResourceId sözleşmesini izler; `..` gibi değerler opak kimlik kalır, dosya sistemi yollarına eklenmez. Her canlı depo mühürlü owner kimliği döndürür; yalnız bu owner amaç/ID kapsamlı oturumu kaydeder/geri çeker, politikayı değiştirir ve öğeyi geri çeker. Başka depodaki aynı görünen proje/öğe kimliği bu kabiliyetleri yeniden üretmez. Owner bootstrap güvenilen host yapılandırmasıdır; **gerçek insan kimliği doğrulaması değildir**, bu G73’tür. İstek/model çıktısı owner token üretemez.
 

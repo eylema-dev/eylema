@@ -30,10 +30,10 @@ impl HumanPurpose {
     fn reason(self) -> &'static std::ffi::CStr {
         match self {
             Self::LocalCli => {
-                c"create an Eylema stop session of at most 5 minutes for local state:cli tasks"
+                c"create an Eyleme stop session of at most 5 minutes for local state:cli tasks"
             }
             Self::AcceptanceProof => {
-                c"approve and stop the bounded Eylema state:g73-proof counter demonstration"
+                c"approve and stop the bounded Eyleme state:g73-proof counter demonstration"
             }
         }
     }

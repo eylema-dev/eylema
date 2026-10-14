@@ -5,7 +5,7 @@
   "source": {
     "repository": "example/eylema"
   },
-  "objective": "Eylema design example: a user can start a local task and inspect its completion state and result on the same screen. Repository identifiers are placeholders. This record is an example, not an instruction to execute or publish.",
+  "objective": "Eyleme design example: a user can start a local task and inspect its completion state and result on the same screen. Repository identifiers are placeholders. This record is an example, not an instruction to execute or publish.",
   "acceptance_criteria": [
     {
       "id": "AC-1",

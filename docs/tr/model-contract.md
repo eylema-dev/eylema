@@ -1,6 +1,6 @@
 # Sabitlenmiş model sözleşmesi — G27
 
-G27, bildirilen model kökeni ve rol arayüzleri için gerçekten çalışan kendi Rust doğrulamamızı ekler. Ağırlık yüklemez, tokenizer/şablon/model çalıştırmaz, elde olmayan büyük artifact byte'larını doğrulamaz, eğitim/yetki/provider çağrısı yapmaz. [Model kataloğu](https://github.com/eylema-dev/eylema-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) ve eşleşen yerel fixture seçilen Qwen adayını bağlar; aday kaydı yürütme kabulünden ayrıdır.
+G27, bildirilen model kökeni ve rol arayüzleri için gerçekten çalışan kendi Rust doğrulamamızı ekler. Ağırlık yüklemez, tokenizer/şablon/model çalıştırmaz, elde olmayan büyük artifact byte'larını doğrulamaz, eğitim/yetki/provider çağrısı yapmaz. [Model kataloğu](https://github.com/eyleme-dev/eylema-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) ve eşleşen yerel fixture seçilen Qwen adayını bağlar; aday kaydı yürütme kabulünden ayrıdır.
 
 ## Kapalı metaveri ve destek
 
@@ -12,7 +12,7 @@ Katı decoder bilinmeyen yetki/destek alanlarını, yanlış tipleri, noncanonic
 
 ## Başlangıç adayı ve sınırlar
 
-Qwen/Qwen3-0.6B kaynakc1899de289a04d12100db370d81485cdf75e47ca korunan adaydır. Config/license/tokenizer_config byte'ları ve4168byte UTF8 chat-template dilimi ölçüldü; model.safetensors ve tokenizer.json kimlikleri yalnız yayımlayıcının LFS SHA256 bildirimidir. İki büyük dosya indirilmedi/byte doğrulanmadı. Üçüncü taraf hakları Eylema lisansından bağımsızdır. Tam hash/boyut ve denetlenen kaynak/referans pinleri katalogdadır; üçüncü taraf referans uygulaması veya şablon üretime kopyalanmadı/çalıştırılmadı.
+Qwen/Qwen3-0.6B kaynakc1899de289a04d12100db370d81485cdf75e47ca korunan adaydır. Config/license/tokenizer_config byte'ları ve4168byte UTF8 chat-template dilimi ölçüldü; model.safetensors ve tokenizer.json kimlikleri yalnız yayımlayıcının LFS SHA256 bildirimidir. İki büyük dosya indirilmedi/byte doğrulanmadı. Üçüncü taraf hakları Eyleme lisansından bağımsızdır. Tam hash/boyut ve denetlenen kaynak/referans pinleri katalogdadır; üçüncü taraf referans uygulaması veya şablon üretime kopyalanmadı/çalıştırılmadı.
 
 Bildirilen Qwen profili: bfloat16 safetensors/quantization yok,28layer, hidden1024/intermediate3072,16Qhead/8KVhead/head128, vocabulary151936 ve üst kaynak kapasitesi40960. Q projection width2048, hidden1024'ten geçerli biçimde farklıdır. Kontrol edilen grup başlık/projection/iş aritmetiği uyumsuz başlık/taşmayı reddeder. Dar planlanan batch1/context4096/en fazla128yeni token ölçülmüş kapasite/gecikme/kalite iddiası değildir. Kendi sabitlenmiş operator sözleşmemiz eager causal attention, FP32 RMS/softmax/position aritmetiği, default RoPE, Q/K head normalization, tied logits, KV reset ve greedy bounded generation tanımlar. Fiziksel yükleme/precision/tokenization/nümerik uyum sonraki G23/G28/G29/G30 kapılarıdır.
 

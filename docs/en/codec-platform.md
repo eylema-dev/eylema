@@ -1,6 +1,6 @@
 # G09 — Canonical codec and platform services
 
-[Türkçe](../tr/codec-platform.md). Runtime contract **0.1.0**, EYL codec **1**, unpublished Rust packages **0.1.0**. [Task plan](../../tools/work-plans/g09.json), [typed contracts](typed-contracts.md), primary issue [eylema#11](https://github.com/eylema-dev/eylema/issues/11).
+[Türkçe](../tr/codec-platform.md). Runtime contract **0.1.0**, EYL codec **1**, unpublished Rust packages **0.1.0**. [Task plan](../../tools/work-plans/g09.json), [typed contracts](typed-contracts.md), primary issue [eylema#11](https://github.com/eyleme-dev/eyleme/issues/11).
 
 ## Wire format and bounded parsing
 

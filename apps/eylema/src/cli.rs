@@ -156,7 +156,7 @@ fn run(arguments: impl IntoIterator<Item = OsString>) -> Result<()> {
 
 fn print_help() {
     println!(
-        "Eylema native task CLI\nUsage: eylema <start|create|run|inspect|stop|doctor|--help|--version>\n  start [--human]       Start loopback service; optional OS-verified 5-minute stop session\n  create <request-file>  Submit an encoded EYL Create request\n  run demo [delta]       Run one bounded local-state demonstration\n  run <request-file>     Submit an encoded EYL Admit request\n  inspect <task|execution> <id>\n  stop <execution-id>    Request cancellation using the current session\n  stop service           Stop the local foreground service\n  doctor                 Check the local session and service connection\n  human-proof <new-dir>   Explicit OS-verified bounded acceptance demonstration"
+        "Eyleme native task CLI\nUsage: eylema <start|create|run|inspect|stop|doctor|--help|--version>\n  start [--human]       Start loopback service; optional OS-verified 5-minute stop session\n  create <request-file>  Submit an encoded EYL Create request\n  run demo [delta]       Run one bounded local-state demonstration\n  run <request-file>     Submit an encoded EYL Admit request\n  inspect <task|execution> <id>\n  stop <execution-id>    Request cancellation using the current session\n  stop service           Stop the local foreground service\n  doctor                 Check the local session and service connection\n  human-proof <new-dir>   Explicit OS-verified bounded acceptance demonstration"
     );
 }
 

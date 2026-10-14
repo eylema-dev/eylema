@@ -23,9 +23,9 @@ async function main() {
   const dark = await inner('logo-dark');
   const avatar = await inner('github-avatar');
   const icon = await inner('logo-icon');
-  const preview = svg(1600, 1080, 'Eylema brand preview — light, dark and avatar applications', `
+  const preview = svg(1600, 1080, 'Eyleme brand preview — light, dark and avatar applications', `
     <rect width="1600" height="1080" fill="#F7F6F2"/>
-    <text x="96" y="86" fill="#17252B" font-family="${font}" font-size="22" letter-spacing="4">EYLEMA / BRAND IDENTITY</text>
+    <text x="96" y="86" fill="#17252B" font-family="${font}" font-size="22" letter-spacing="4">EYLEME / BRAND IDENTITY</text>
     <text x="1504" y="86" text-anchor="end" fill="#17252B" font-family="${font}" font-size="22">eylema.dev</text>
     <g transform="translate(268 125) scale(1.4)">${light}</g>
     <path d="M96 560H1504" stroke="#D8DCDA"/>
@@ -37,7 +37,7 @@ async function main() {
     <g transform="translate(1410 994) scale(.0625)">${icon}</g>
     <g transform="translate(1450 986) scale(.125)">${icon}</g>
   `);
-  const social = svg(1280, 640, 'Eylema — agentic AI for continuous development and operations', `
+  const social = svg(1280, 640, 'Eyleme — agentic AI for continuous development and operations', `
     <rect width="1280" height="640" fill="#17252B"/>
     <g transform="translate(166 70) scale(1.25)">${dark}</g>
     <text x="640" y="450" text-anchor="middle" fill="#FFFFFF" font-family="${font}" font-size="28">Continuous development. Continuous operations.</text>

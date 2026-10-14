@@ -1,4 +1,4 @@
-"""Development-only environment probes; not an Eylema runtime or GPU test."""
+"""Development-only environment probes; not an Eyleme runtime or GPU test."""
 import argparse
 import datetime
 import hashlib
@@ -196,7 +196,7 @@ def collect():
                 'metal_compile_link': {'status': 'passed', 'source_sha256': sha256(METAL_SOURCE.encode()), 'air': air_result, 'library': library_result, 'gpu_execution': 'not_run'},
             },
             'commands': runner.records,
-            'scope': 'Development smoke fixtures only; Eylema runtime/workspace, browser/Wasm execution, GPU/model/training/performance acceptance not_run. Temporary probe artifacts are deleted.',
+            'scope': 'Development smoke fixtures only; Eyleme runtime/workspace, browser/Wasm execution, GPU/model/training/performance acceptance not_run. Temporary probe artifacts are deleted.',
         }
 
 

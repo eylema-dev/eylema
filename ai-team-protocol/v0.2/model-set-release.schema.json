@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:ai-team-protocol:model-set-release:0.2.0",
-  "title": "Eylema macOS model team release manifest",
+  "title": "Eyleme macOS model team release manifest",
   "description": "Experimental macOS first-release manifest: one physical Apple Silicon device and separately identified execution workloads. Structural validity is not trust, approval, actual device identity, cross-reference validity, compatibility or successful execution. Model/schema/runtime/evidence versions are separate. Version 0.1 remains unchanged at its original path.",
   "type": "object",
   "additionalProperties": false,

@@ -1,6 +1,6 @@
 # G28 birinci taraf ağırlık baytlarının yüklenmesi
 
-[İngilizce](../en/weight-loader.md). Güvenli kendi Rust `eylema-model` crate'imiz sınırlı beyan edilmiş Safetensors alt kümesini değişmez sahiplenilmiş baytlara yükler. G28 native testleri bayt/layout/servis kanıtıdır; model çalıştırma değildir. [Tasarım](g28-weight-loader-design.md) ve [plan](https://github.com/eylema-dev/devguide/blob/codex/g28-weight-loader-plan/docs/plans/g28-weight-loader.md) kabul edilen kapsamı bağlar; teslim için PR/güncel CI/ayrı inceleme/main kanıtı hâlâ gerekir.
+[İngilizce](../en/weight-loader.md). Güvenli kendi Rust `eylema-model` crate'imiz sınırlı beyan edilmiş Safetensors alt kümesini değişmez sahiplenilmiş baytlara yükler. G28 native testleri bayt/layout/servis kanıtıdır; model çalıştırma değildir. [Tasarım](g28-weight-loader-design.md) ve [plan](https://github.com/eyleme-dev/devguide/blob/codex/g28-weight-loader-plan/docs/plans/g28-weight-loader.md) kabul edilen kapsamı bağlar; teslim için PR/güncel CI/ayrı inceleme/main kanıtı hâlâ gerekir.
 
 ## Çağıran sözleşmesi
 

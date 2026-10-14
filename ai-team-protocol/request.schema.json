@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:ai-team-protocol:request:0.1.0",
-  "title": "Eylema NeedSpec development request",
-  "description": "Defines a human need, acceptance criteria and development boundaries for Eylema. Schema validity does not establish authorization, model availability, repository access or satisfied acceptance criteria.",
+  "title": "Eyleme NeedSpec development request",
+  "description": "Defines a human need, acceptance criteria and development boundaries for Eyleme. Schema validity does not establish authorization, model availability, repository access or satisfied acceptance criteria.",
   "type": "object",
   "additionalProperties": false,
   "required": [

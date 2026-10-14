@@ -1,10 +1,10 @@
-# Eylema görsel kimliği
+# Eyleme görsel kimliği
 
 [English](README.md) · [Tüm paketi indir](../eylema-logo.zip)
 
-![Eylema görsel kimlik önizlemesi](brand-preview.png)
+![Eyleme görsel kimlik önizlemesi](brand-preview.png)
 
-**E / eylem** işareti, Eylema'nın baş harfini ileri yönelen bir orta kolla birleştirir. Eğik uçlar hareketi, yuvarlatılmış sol köşeler daha sıcak bir karakteri anlatır. Küçük harfli yazı logosu sade ve ulaşılabilir bir görünüm sağlar.
+**E / eylem** işareti, Eyleme'nın baş harfini ileri yönelen bir orta kolla birleştirir. Eğik uçlar hareketi, yuvarlatılmış sol köşeler daha sıcak bir karakteri anlatır. Küçük harfli yazı logosu sade ve ulaşılabilir bir görünüm sağlar.
 
 Ana renkler **eylem turuncusu `#EE5638`** ve **mürekkep `#17252B`**. Koyu zemindeki yazı beyazdır (`#FFFFFF`); sunum zemini kırık beyazdır (`#F7F6F2`).
 

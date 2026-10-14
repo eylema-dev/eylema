@@ -7,12 +7,12 @@ fn commit(value: char) -> Commit {
 fn draft() -> NeedDraft {
     NeedDraft {
         key: TaskKey::new(
-            "eylema-dev/eylema".into(),
+            "eyleme-dev/eyleme".into(),
             RequestId::new("G38-proof").unwrap(),
             Revision::new(2).unwrap(),
         )
         .unwrap(),
-        source_repository: "eylema-dev/eylema".into(),
+        source_repository: "eyleme-dev/eyleme".into(),
         issue_number: Some(31),
         objective: "Bound a development task".into(),
         acceptance: vec![Acceptance {
@@ -88,7 +88,7 @@ fn to_review(run: &mut Coordinator, host: &Host) {
 fn to_ready(run: &mut Coordinator, host: &Host) {
     to_review(run, host);
     run.reviewed(review('b'), 16, host).unwrap();
-    run.pr_observed("eylema-dev/eylema", &commit('b'), 99, 17, host)
+    run.pr_observed("eyleme-dev/eyleme", &commit('b'), 99, 17, host)
         .unwrap();
     run.repository_verified(checks('b'), 18, host).unwrap();
 }
@@ -399,7 +399,7 @@ fn call_tickets_are_task_scoped() {
     let need = NeedSpec::new(draft()).unwrap();
     let mut other = draft();
     other.key = TaskKey::new(
-        "eylema-dev/eylema".into(),
+        "eyleme-dev/eyleme".into(),
         RequestId::new("other-task").unwrap(),
         Revision::new(2).unwrap(),
     )
@@ -604,7 +604,7 @@ fn registry_is_bounded_and_terminal_same_key_retries_remain_terminal() {
     );
     let mut other = draft();
     other.key = TaskKey::new(
-        "eylema-dev/eylema".into(),
+        "eyleme-dev/eyleme".into(),
         RequestId::new("other").unwrap(),
         Revision::new(1).unwrap(),
     )
@@ -627,7 +627,7 @@ fn repair_preserves_pr_identity_but_requires_fresh_checks_and_review() {
         run.pr_observed("other/repo", &commit('b'), 99, 17, &host),
         Err(Error::StaleBinding)
     );
-    run.pr_observed("eylema-dev/eylema", &commit('b'), 99, 18, &host)
+    run.pr_observed("eyleme-dev/eyleme", &commit('b'), 99, 18, &host)
         .unwrap();
     run.repair("CI failure".into(), 19, &host).unwrap();
     assert_eq!(run.pr_number(), Some(99));
@@ -637,10 +637,10 @@ fn repair_preserves_pr_identity_but_requires_fresh_checks_and_review() {
     run.local_verified(checks('c'), 22, &host).unwrap();
     run.reviewed(review('c'), 23, &host).unwrap();
     assert_eq!(
-        run.pr_observed("eylema-dev/eylema", &commit('c'), 100, 24, &host),
+        run.pr_observed("eyleme-dev/eyleme", &commit('c'), 100, 24, &host),
         Err(Error::StaleBinding)
     );
-    run.pr_observed("eylema-dev/eylema", &commit('c'), 99, 25, &host)
+    run.pr_observed("eyleme-dev/eyleme", &commit('c'), 99, 25, &host)
         .unwrap();
     assert_eq!(
         run.repository_verified(checks('b'), 26, &host),

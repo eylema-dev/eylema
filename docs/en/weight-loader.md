@@ -1,6 +1,6 @@
 # G28 owned weight-byte loading
 
-[Türkçe](../tr/weight-loader.md). Own safe Rust `eylema-model` loads a bounded declared Safetensors subset into immutable owned bytes. G28's native tests are byte/layout/service evidence, not model execution. [Design](g28-weight-loader-design.md) and [plan](https://github.com/eylema-dev/devguide/blob/codex/g28-weight-loader-plan/docs/plans/g28-weight-loader.md) bind the accepted scope; PR/current CI/separate review/main proof remains required for delivery.
+[Türkçe](../tr/weight-loader.md). Own safe Rust `eylema-model` loads a bounded declared Safetensors subset into immutable owned bytes. G28's native tests are byte/layout/service evidence, not model execution. [Design](g28-weight-loader-design.md) and [plan](https://github.com/eyleme-dev/devguide/blob/codex/g28-weight-loader-plan/docs/plans/g28-weight-loader.md) bind the accepted scope; PR/current CI/separate review/main proof remains required for delivery.
 
 ## Caller contract
 

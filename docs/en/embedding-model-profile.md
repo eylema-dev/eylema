@@ -1,6 +1,6 @@
 # Declared embedding and retrieval behavior profile
 
-G67 pins Qwen3-Embedding-0.6B as an optional Representation participant in Eylema's existing owned Rust model manifest/EYL flow. Six actual Rust tests consume its real metadata fixture; eight Python development tests audit the catalog, literal UTF8 prefix behavior and independent synthetic pooling/normalization/retrieval references. No weights, tokenizer/model inference, native embedding kernels, actual EN/TR retrieval quality or memory/performance acceptance is supplied here. Real execution remains G68 and its dependencies.
+G67 pins Qwen3-Embedding-0.6B as an optional Representation participant in Eyleme's existing owned Rust model manifest/EYL flow. Six actual Rust tests consume its real metadata fixture; eight Python development tests audit the catalog, literal UTF8 prefix behavior and independent synthetic pooling/normalization/retrieval references. No weights, tokenizer/model inference, native embedding kernels, actual EN/TR retrieval quality or memory/performance acceptance is supplied here. Real execution remains G68 and its dependencies.
 
 ## Candidate and measured provenance
 
@@ -28,4 +28,4 @@ Model/core fixture is byte-identical: 5003bytes, SHA256ca3cde459437692c9ae877b66
 
 ## Platform and data direction
 
-Eylema targets a resource-aware cooperative local open-weight specialist ecosystem under controlled qualified frontier-LLM source development. Owned Rust harness/memory/RAG/model-specific training and recipes evolve through measured outcomes and human corrections. Private project/institution records and derivatives remain scoped; only separately authorized rights/provenance/anonymity-reviewed candidates may enter the ecosystem. This goal uses public metadata and own synthetic vectors/text; no user data collection, anonymization, training or export.
+Eyleme targets a resource-aware cooperative local open-weight specialist ecosystem under controlled qualified frontier-LLM source development. Owned Rust harness/memory/RAG/model-specific training and recipes evolve through measured outcomes and human corrections. Private project/institution records and derivatives remain scoped; only separately authorized rights/provenance/anonymity-reviewed candidates may enter the ecosystem. This goal uses public metadata and own synthetic vectors/text; no user data collection, anonymization, training or export.
