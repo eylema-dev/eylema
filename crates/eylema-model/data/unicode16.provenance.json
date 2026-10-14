@@ -1,0 +1,17 @@
+{
+  "format": "g29-unicode16-data.v1",
+  "unicode": "16.0.0",
+  "property_source_sha256": "3627a624f63370f0e726dde726f42934c8ca898c5e18fb69abdeee5a27ff00d8",
+  "composition_source_sha256": "e83834fdad296e46779fb702e11dd9b8686409a6346461d02fe3a22afaf26dd4",
+  "binary_sha256": "6797aff88e12c5a56e4e28a7be08b66dfa7e2bcd9d37e6c834b7f7c407100fe6",
+  "binary_bytes": 287516,
+  "counts": [
+    4098,
+    934,
+    13253,
+    1360,
+    17
+  ],
+  "provenance": "Derived by authored stdlib-only generator from CPython3.14 unicodedata16.0.0; data under accompanying Unicode LicenseV3; own algorithms Apache-2.0.",
+  "runtime_engine": "none"
+}
