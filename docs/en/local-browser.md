@@ -6,6 +6,8 @@ The page stores only task and execution identifiers and the selected language in
 
 The browser receives the host-issued bearer only in an `HttpOnly`, `SameSite=Strict` cookie scoped to the console API path. It is not placed in the URL, page script, browser storage, logs, or journal. Mutating requests require the exact loopback `Host` and `Origin`, a same-origin fetch signal, and the page's CSRF token. Responses are bounded and uncached, and the page loads no third-party assets.
 
-This CLI session is not a verified person. The stop button sends the normal typed cancellation request; the host denies it with `FORBIDDEN`, and the UI keeps the observed execution state. The console does not claim that work stopped. Verified-human enrollment remains a separate trusted host operation.
+The ordinary CLI session is not a verified person. The stop button sends the normal typed cancellation request; the host denies it with `FORBIDDEN`, and the UI keeps the observed execution state. The console does not claim that work stopped. Verified-human enrollment remains a separate trusted host operation.
 
 The browser interface does not add a runtime, model, GPU path, remote authentication, TLS, or deployment. Native socket/journal tests and an actual browser session are separate evidence; a browser run does not establish GPU/model or cross-platform behavior.
+
+G73 adds explicit `eylema start --human` OS enrollment and a leased stop path: [real-human notes](real-human.md). Plain start stays ordinary; real person acceptance remains pending.

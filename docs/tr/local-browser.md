@@ -6,6 +6,8 @@ Sayfa, tarayıcının yerel depolamasında yalnızca görev ve yürütme kimlikl
 
 Tarayıcı, host tarafından verilen bearer değerini yalnızca konsol API yoluna kapsamlanmış `HttpOnly`, `SameSite=Strict` çerezinde alır. Değer URL'ye, sayfa betiğine, tarayıcı depolamasına, günlüklere veya iş günlüğüne yazılmaz. Değişiklik yapan istekler tam loopback `Host` ve `Origin`, same-origin fetch sinyali ve sayfanın CSRF belirtecini gerektirir. Yanıtlar sınırlandırılmış ve önbelleksizdir; sayfa üçüncü taraf varlık yüklemez.
 
-Bu CLI oturumu doğrulanmış bir kişi değildir. Durdurma düğmesi normal typed iptal isteğini gönderir; host isteği `FORBIDDEN` ile reddeder ve arayüz gözlenen yürütme durumunu korur. Konsol işin durduğunu iddia etmez. Doğrulanmış insan kaydı ayrı ve güvenilir bir host işlemidir.
+Olağan CLI oturumu doğrulanmış bir kişi değildir. Durdurma düğmesi normal typed iptal isteğini gönderir; host isteği `FORBIDDEN` ile reddeder ve arayüz gözlenen yürütme durumunu korur. Konsol işin durduğunu iddia etmez. Doğrulanmış insan kaydı ayrı ve güvenilir bir host işlemidir.
 
 Tarayıcı arayüzü çalışma zamanı, model, GPU yolu, uzaktan kimlik doğrulama, TLS veya dağıtım eklemez. Yerel soket/günlük testleri ve gerçek tarayıcı oturumu ayrı kanıtlardır; tarayıcı çalışması GPU/model veya platformlar arası davranışı kanıtlamaz.
+
+G73, açık `eylema start --human` OS kaydı ve süreli durdurma yolu ekler: [gerçek insan notları](real-human.md). Düz start olağan kalır; gerçek kişi kabulü henüz bekler.

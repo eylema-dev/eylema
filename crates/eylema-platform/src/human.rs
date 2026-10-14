@@ -1,5 +1,8 @@
 //! Minimal local device-owner proof. No request field can construct a proof.
-use std::sync::{Arc, Condvar, Mutex};
+#[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+use std::sync::Arc;
+#[cfg(any(test, all(target_os = "macos", target_arch = "aarch64")))]
+use std::sync::{Condvar, Mutex};
 use std::time::{Duration, Instant};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -23,9 +26,12 @@ impl HumanPurpose {
             Self::AcceptanceProof => "state:g73-proof",
         }
     }
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
     fn reason(self) -> &'static std::ffi::CStr {
         match self {
-            Self::LocalCli => c"create a 5-minute Eylema stop session for local state:cli tasks",
+            Self::LocalCli => {
+                c"create an Eylema stop session of at most 5 minutes for local state:cli tasks"
+            }
             Self::AcceptanceProof => {
                 c"approve and stop the bounded Eylema state:g73-proof counter demonstration"
             }
@@ -56,17 +62,20 @@ impl DeviceOwnerProof {
         Ok(self.binding)
     }
 }
+#[cfg(any(test, all(target_os = "macos", target_arch = "aarch64")))]
 #[derive(Clone, Copy)]
 enum Reply {
     Pending,
     Complete(bool, Instant),
     Closed,
 }
+#[cfg(any(test, all(target_os = "macos", target_arch = "aarch64")))]
 struct Completion {
     state: Mutex<Reply>,
     wake: Condvar,
     deadline: Instant,
 }
+#[cfg(any(test, all(target_os = "macos", target_arch = "aarch64")))]
 impl Completion {
     fn new(deadline: Instant) -> Self {
         Self {
@@ -212,6 +221,10 @@ mod native {
         }
     }
     pub(super) fn available() -> Result<bool, HumanError> {
+        let _pool = OwnedObject(object0(
+            object0(class(c"NSAutoreleasePool")?, c"alloc"),
+            c"init",
+        ));
         let context = context()?;
         Ok(can_evaluate(context.0))
     }
@@ -437,5 +450,15 @@ mod tests {
     #[test]
     fn actual_os_block_copy_holds_reply_state_until_last_dispose() {
         native::test_block_lifetime();
+    }
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    #[test]
+    fn real_os_capability_preflight_issues_no_person_proof() {
+        let result = device_owner_available();
+        println!("Device owner availability (not authentication): {result:?}");
+        assert!(matches!(
+            result,
+            Ok(true) | Ok(false) | Err(HumanError::Unavailable)
+        ));
     }
 }
