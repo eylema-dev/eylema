@@ -2,6 +2,7 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod human;
+pub mod sha256_stream;
 
 use eylema_contracts::codec::MAX_WIRE_BYTES;
 

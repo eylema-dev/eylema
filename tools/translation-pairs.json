@@ -41,8 +41,8 @@
     {
       "en": "docs/en/codec-platform.md",
       "tr": "docs/tr/codec-platform.md",
-      "en_sha256": "f3979b3b1a7d20e5b20f28747baea2acf5ed4b9e98f2ca13f2f8031f3a7a7eff",
-      "tr_sha256": "bd5b053fd478eed489781e0267a87bbe108d1736a9c4a4a642d14061f0cb051d"
+      "en_sha256": "eead9d368ab5927668450ad502dde8b86122285f6e098b2bc3712bfcd71f78b0",
+      "tr_sha256": "e921919c486056a65f5d85b5124d08fabbfc8edf623e32242a903772633acbb1"
     },
     {
       "en": "docs/en/deterministic-runtime.md",
@@ -199,6 +199,18 @@
       "tr": "docs/tr/cpu-reference.md",
       "en_sha256": "5dccce635638f181b08998e5f2b79fcd08ead3c17dd644873962ade1a724c304",
       "tr_sha256": "bbb08976cc703383a27ee2399682493ef77de169a43e14a1e5fa156e05d60ebc"
+    },
+    {
+      "en": "docs/en/g28-weight-loader-design.md",
+      "tr": "docs/tr/g28-weight-loader-design.md",
+      "en_sha256": "d25f24e2323e1a9fad39fa4657aa90f118460bfc12c8b86cfad582df096b0d1f",
+      "tr_sha256": "0c049b964ece623f1518f4a355c413054a0e92cfc7b862a9229bac7c73627a29"
+    },
+    {
+      "en": "docs/en/weight-loader.md",
+      "tr": "docs/tr/weight-loader.md",
+      "en_sha256": "3262ad877e1b411dff8ae1557287689fd24000e35a491d3f69d80aa18f7e117c",
+      "tr_sha256": "9a67cfd4b0ec53398c667fccb1b36800d8b48f8135fd73e554d6062fa2c68727"
     }
   ],
   "documents": []
