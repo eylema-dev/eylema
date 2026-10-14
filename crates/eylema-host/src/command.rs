@@ -149,7 +149,7 @@ pub(crate) struct State<S: HostServices> {
     pub(crate) runtime: Runtime<services::Services<S>>,
     pub(crate) owner: HostKey,
     pub(crate) slots: Vec<Enrollment>,
-    bindings: std::collections::BTreeMap<ExecutionId, (TaskSpec, ActionProposal)>,
+    pub(crate) bindings: std::collections::BTreeMap<ExecutionId, (TaskSpec, ActionProposal)>,
     pub(crate) last_approval: Option<ApprovalRecord>,
     pub(crate) last_policy: Option<PolicyChange>,
 }

@@ -776,3 +776,35 @@ pub fn run_native_proof() {
 fn running_native_http_acceptance() {
     run_native_proof();
 }
+
+#[test]
+fn device_owner_registration_rejects_foreign_scope_before_any_os_prompt() {
+    use std::os::unix::fs::DirBuilderExt;
+    let dir = std::env::temp_dir().join(format!(
+        "eylema-human-negative-{}",
+        eylema_platform::random_id(eylema_platform::IdKind::Request).unwrap()
+    ));
+    std::fs::DirBuilder::new().mode(0o700).create(&dir).unwrap();
+    let storage = NativeStorage::create_new(&dir.join("journal.eylj"), sync).unwrap();
+    let journal =
+        Journal::create_new(storage, NativeHash, eylema_journal::Limits::default()).unwrap();
+    let (host, owner) =
+        DurableHost::create_new(journal, NativeServices, eylema_runtime::Limits::default())
+            .unwrap();
+    let mut server = Server::bind(host, owner, Config::default()).unwrap();
+    let mut grant = support::grant();
+    grant.permissions.push(Permission::RequestCancellation);
+    assert!(matches!(
+        server.register_device_owner(
+            grant,
+            eylema_platform::human::HumanPurpose::LocalCli,
+            Duration::from_secs(300),
+            Duration::from_secs(60)
+        ),
+        Err(WebError::Host(eylema_host::HostError::Runtime(
+            ErrorCode::Forbidden
+        )))
+    ));
+    drop(server);
+    std::fs::remove_dir_all(dir).unwrap();
+}

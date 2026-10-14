@@ -11,6 +11,8 @@ use std::sync::Arc;
 mod command;
 pub mod decision;
 mod encoding;
+pub mod human;
+pub use human::{DeviceOwnerHuman, HumanEnrollment};
 pub mod memory;
 pub mod native;
 pub mod project_data;
@@ -77,6 +79,8 @@ pub struct DurableHost<T: Storage, H: Sha256, S: HostServices> {
     active_from: usize,
     poisoned: bool,
     report: RecoveryReport,
+    real_humans: Vec<Arc<human::Lease>>,
+    human_tasks: std::collections::BTreeMap<TaskId, Arc<human::Lease>>,
 }
 fn encoded_length(v: &Value, limit: usize) -> Result<usize> {
     let n = codec::encode(v)
@@ -131,6 +135,8 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
                 attempt: 0,
                 active_from: 0,
                 poisoned: false,
+                real_humans: vec![],
+                human_tasks: Default::default(),
                 report: RecoveryReport {
                     abandoned_attempt: None,
                     unfinished: vec![],
@@ -255,6 +261,8 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
                 attempt,
                 active_from,
                 poisoned: false,
+                real_humans: vec![],
+                human_tasks: Default::default(),
                 report: RecoveryReport {
                     abandoned_attempt: abandoned,
                     unfinished,
@@ -280,6 +288,7 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
     }
     fn session(&self, s: &DurableSession) -> Result<usize> {
         self.healthy()?;
+        self.real_session(s.slot)?;
         if !Arc::ptr_eq(&self.identity, &s.identity)
             || s.slot < self.active_from
             || s.slot >= self.state.slots.len()
@@ -299,6 +308,7 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
     }
     fn transaction(&mut self, command: Command) -> Result<Value> {
         self.healthy()?;
+        let real_binding = self.real_command(&command)?;
         let attempt = self
             .attempt
             .checked_add(1)
@@ -349,7 +359,11 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
             }
         };
         self.attempt = attempt;
-        decode_outcome(&result)
+        let value = decode_outcome(&result)?;
+        if let Some((task, lease)) = real_binding {
+            self.human_tasks.entry(task).or_insert(lease);
+        }
+        Ok(value)
     }
     pub fn enroll(&mut self, owner: &Owner, grant: Grant) -> Result<DurableSession> {
         self.owner(owner)?;
