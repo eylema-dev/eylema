@@ -79,8 +79,6 @@ fn duplicate_mixed_and_unsupported_layouts_reject() {
         let mut d = m.fields().clone();
         d.artifact_format = fmt.into();
         d.quantization = q.into();
-        assert!(
-            WeightLayout::new(&ModelManifest::new(d).unwrap(), &layout(&m).tensors()[..]).is_err()
-        );
+        assert!(WeightLayout::new(&ModelManifest::new(d).unwrap(), layout(&m).tensors()).is_err());
     }
 }
