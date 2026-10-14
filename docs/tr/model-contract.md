@@ -20,7 +20,7 @@ Dokuz isteğe bağlı rol perception, reasoning, planning, decision, policy, wor
 
 ## Gerçek kanıt ve sınırlar
 
-On dört yerel test gerçek katalog fixture çözümlemesini, tam kaynak/ağırlık metaverisini, canonical roundtrip'i, rol uyumsuzluğunu, katı alan/sınır/hakları ve yerelden dışa geçiş reddini kapsar. Core ile model kataloğu EYL byte'larının SHA256 değeri aynıdır:c087a033d4d193acd9912d0f555c99f14f9b968c9f308aca8acb52b07af85af2. On bir yalnız geliştirme Python testi offline katalog/rol/operator/hash/byte tutarlılığını ve hatalı girdiyi çalıştırır; Python üretim motoru değildir. Tam native gate, yerel Python kapıları, güncel CI, ayrı inceleme ve kabul edilmiş main kanıtları bağlı G27 kartı/PR'larında kaydedilir. Statik eşleşme ve constructor yürütmesi inference/kalite/GPU/eğitim/model byte doğrulaması/izin kanıtlamaz. Ortak kanonik JSON şemaları core'da kalır; validator/kaynak rolü/bağımlılık istisnası eklenmez.
+On beş yerel test gerçek katalog fixture çözümlemesini, tam kaynak/ağırlık metaverisini, canonical roundtrip'i, rol uyumsuzluğunu, katı alan/sınır/hakları ve yerelden dışa geçiş reddini kapsar. Core ile model kataloğu EYL byte'larının SHA256 değeri aynıdır:c087a033d4d193acd9912d0f555c99f14f9b968c9f308aca8acb52b07af85af2. On bir yalnız geliştirme Python testi offline katalog/rol/operator/hash/byte tutarlılığını ve hatalı girdiyi çalıştırır; Python üretim motoru değildir. Tam native gate, yerel Python kapıları, güncel CI, ayrı inceleme ve kabul edilmiş main kanıtları bağlı G27 kartı/PR'larında kaydedilir. Statik eşleşme ve constructor yürütmesi inference/kalite/GPU/eğitim/model byte doğrulaması/izin kanıtlamaz. Ortak kanonik JSON şemaları core'da kalır; validator/kaynak rolü/bağımlılık istisnası eklenmez.
 
 Güven sınırları: incelenmiş denetim girdileri/kaynak alımı/saatler, kendi typed sözleşmemiz ve bildirilen profil anlamları. Sonraki yükleyici kullanımdan önce gerçek byte'ları doğrulamalı, gerekli her operator/backend/tokenizer'ı ayrıca kanıtlamalıdır. Bilinmeyen/desteklenmeyen profil fallback olmadan reddedilir. Withdrawal/collect/train/disclosure/export izinleri ayrı proje verisi kapılarında kalır.
 
@@ -29,3 +29,5 @@ Birincil kaynaklar: [sabit publisher dosyaları](https://huggingface.co/Qwen/Qwe
 Kaynak precision BF16, planlanan FP32 CPU referansı ve FP16 Metal yürütme/dönüştürme profillerinden ayrıdır. Dönüştürme ve nümerik kabul sonraki kapılarda kalır; bu katalog özgün hedef yükümlülüklerinin yerini almaz.
 
 Ayrı inceleme onarımı tam integer/identifier kabulünü, sabit ölçülmüş şablon kimliği/uzunluğunu, generic ve tüm layer Qwen extent taşma kontrollerini, açık tam operator kümesini ekledi. Semantik RED→GREEN regresyonları dört bulguyu doğrular; pozitif runtime desteği veya gerçek kaynak tahmini verilmez.
+
+Onarım2, birleşik token sayısı × Q projection aktivasyon genişliğini taşma sınırının hemen altı ve sınırdaki regresyonla denetler; bu yapısal boyut kontrolü bellek tahmini veya çıkarım kanıtı değildir.

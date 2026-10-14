@@ -453,3 +453,28 @@ fn unknown_qwen_prefixed_or_missing_operators_report_operator_gap() {
         AssignmentStatus::UnsupportedLocal(UnsupportedReason::Operators)
     );
 }
+
+#[test]
+fn qwen_combined_query_activation_extent_checks_exact_overflow_boundary() {
+    let mut d = draft();
+    for (name, value) in &mut d.configuration.dimensions {
+        match name.as_str() {
+            "hidden_size" | "intermediate_size" | "layers" | "kv_heads" | "vocab_size" => {
+                *value = 1
+            }
+            "attention_heads" => *value = 16,
+            "head_dim" => *value = (1_u64 << 48) - 1,
+            _ => {}
+        }
+    }
+    d.configuration.batch_size = 1;
+    d.configuration.context_limit = 4096;
+    assert!(ModelManifest::new(d.clone()).is_ok());
+    d.configuration
+        .dimensions
+        .iter_mut()
+        .find(|(name, _)| name == "head_dim")
+        .unwrap()
+        .1 = 1_u64 << 48;
+    assert_eq!(error_field(d), "configuration");
+}

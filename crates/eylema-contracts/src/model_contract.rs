@@ -609,6 +609,7 @@ fn qwen_extents_fit(d: &BTreeMap<&str, u64>, c: &ConfigurationRecord) -> bool {
             .checked_mul(kv)?
             .checked_mul(2)?
             .checked_mul(layers)?;
+        tokens.checked_mul(q)?;
         tokens.checked_mul(h)?;
         tokens.checked_mul(intermediate)?;
         tokens.checked_mul(d["vocab_size"])
