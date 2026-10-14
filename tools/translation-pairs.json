@@ -163,6 +163,12 @@
       "tr": "docs/tr/model-contract.md",
       "en_sha256": "b7c29fc95f6ee73530e541b5c531d8e94854d35a0e1bbfb8b188e9703244880b",
       "tr_sha256": "b016a34989f59020c67678072e9e802097d764efba1e429795831662f5f429ba"
+    },
+    {
+      "en": "docs/en/decision-model-profile.md",
+      "tr": "docs/tr/decision-model-profile.md",
+      "en_sha256": "24d43b7e88627edf38cd2a0a4baa9cc224063d363ba768ea29c37000f6166457",
+      "tr_sha256": "76e6b340139ade8c9d6d9c52d52e3c37ddf53b424eb9985e9e626f36f6d6f99a"
     }
   ],
   "documents": []

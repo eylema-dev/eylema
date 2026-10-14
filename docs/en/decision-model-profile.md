@@ -1,0 +1,31 @@
+# Declared decision-score model profile
+
+G56 registers a narrow text relevance decision/score candidate in the existing owned Rust model contract. Actual Rust tests decode the real EYL metadata fixture; Python is an offline development audit and synthetic reference oracle. No weights, tokenizer/template/model inference, native scoring kernels, calibrated confidence or task-quality acceptance is supplied by this slice.
+
+## Candidate and provenance
+
+The selected candidate is [Qwen3-Reranker-0.6B](https://huggingface.co/Qwen/Qwen3-Reranker-0.6B/tree/e61197ed45024b0ed8a2d74b80b4d909f1255473), source e61197ed45024b0ed8a2d74b80b4d909f1255473, checked 14 October 2026. Publisher metadata advertises 595,776,512 BF16 parameters and model.safetensors 1,191,588,280 bytes; these are not a weight-byte audit or measured resident memory. Hidden1024, intermediate3072,28layers,Q16/KV8/head128,vocabulary151669 and positional capacity40960 are declared config. Our intended batch1/context4096 profile is narrower; scoring does not generate text, while max_new_tokens1 is a reserved positive metadata cap only. SourceBF16, futureCPUFP32 and futureMetalFP16 are distinct profiles, not validated conversions.
+
+Measured public config/README/tokenizer_config/vocab bytes are pinned. Vocab records yes9693/no2152; full tokenizer.json and weights remain absent, with publisher-advertised LFS digests. No LICENSE file exists in the pinned tree; rights bind the measured README publisher Apache-2.0 declaration, not fabricated LICENSE bytes, project access or distribution authority. Rights remain artifact-specific.
+
+The dated comparison also observed [Jina reranker v3](https://huggingface.co/jinaai/jina-reranker-v3/tree/d7d7e73b6ea138ced340b83865931b5dfb6c97aa): publisher metadata last-modified 10 August 2026, 596,836,352 parameters and cc-by-nc-4.0 license identifier; Qwen metadata last-modified 16 April 2026. This is source metadata, not a same-device benchmark or a legal compatibility conclusion. Jina's exact head/operator/native/rights profile is not accepted here. The initial Qwen candidate reuses the pinned dense backbone description and explicit score head; no newest/largest/best-global or native-support claim is made. Future dated discovery and independent quality/resource acceptance remain G65/G80–G82.
+
+## Stable role and score semantics
+
+The one optional Decision interface is decision.query-options.v1 → decision.score-choice.v1, UTF8-pair input, uncalibrated-score-micros output, proposal-only effects and reset-per-pair state. Nine stable roles/default-null assignments are preserved; a score model is not a general action-policy or world model.
+
+The owned component specifies the exact 236-byte authored role template and its hash c91af212ad3548b6a9f87c8b54901bb171e2f596e7d61f666634e44fc690a637. It differs from publisher example preprocessing; later G57 must evaluate actual quality for this exact prompt. Literal field substitutions, reserved-control-marker rejection, post-tokenization context bounds and no silent truncation are declared requirements, not a currently executed tokenizer/renderer. No private reasoning is collected. Read-only reference descriptions do not install or execute Transformers, SentenceTransformers or another engine.
+
+For each pair the planned head selects the last nonpadding yes/no logits. Raw output is yes-minus-no logit difference; its two-label sigmoid produces an uncalibrated relevance score. Fixed-point score micros use scale1,000,000/half-even rounding. Choice requires all candidate scores, floor750,000 and margin100,000; ties, below-floor, small margins and missing scores abstain explicitly. Invalid/nonfinite/out-of-profile input rejects. Limits:4questions×4options,16total pairs,64-byte identifiers and synthetic-reference absolute delta≤32. These are frozen proposed profile gates, not learned success probabilities.
+
+Six frozen reference cases cover multiple questions, ties, low floor, small margin, missing score, bounded extremes and conversion of publisher-reported raw deltas7.625/−11.375. Scalar values were independently frozen with standard-library Decimal80 and manually specified choice outcomes; the audit uses an independently implemented stable sigmoid form. Publisher example inference was not reproduced, and its preprocessing differs from our authored prompt. Reference success is arithmetic/declaration evidence only.
+
+## Actual checks and limits
+
+Eight development tests cover real JSON/EYL equality, immutable heads/source/config/prompt/operator/reference pins, exact integer types, false support/authority flags, duplicate/oversized/symlink JSON and malformed/bounded question data. Six actual Rust fixture tests exercise canonical metadata decoding, declared provenance, exact role/reset/units, unchanged source/rights/workload rejections and closed authority fields. New head/choice operators remain UnsupportedLocal(Operators) for CPU/Metal. LocalOnly rejects external routing; ExplicitExternal returns only ExternalConfigurationRequired, never a call. Production Rust modules, canonical schemas and EYL/task/journal interfaces are unchanged.
+
+Model/core fixture SHA256 076c625c334ee9e2619fcb6016acc2314a51288a9a22baa6dde4029962a87da2 (4517 bytes) is byte-identical. Full local/currentCI/separate review/accepted-main evidence is bound in G56's card and PRs; matching hashes do not prove actual model, numerical, memory/performance or authorization acceptance.
+
+## Platform and data direction
+
+Eylema's target is a complete agent execution platform: qualified large-model development under human control, privacy-first local open-weight specialist cooperation on available/planned resources, owned Rust harness/memory/RAG/model-specific training and recipe/improvement loops. Local artifacts and derivatives remain project/institution private unless actual separate collect/train/disclose/export rights permit reviewed sharing. Anonymous ecosystem experience/recipes require rights, consent and residual re-identification review; source/model scores and redaction alone do not authorize publication. This goal consumes only public candidate metadata and own synthetic fixtures. No user/organization records are collected or exported here.
