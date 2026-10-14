@@ -1,6 +1,6 @@
 # G29 owned tokenizer and template design
 
-Status: actual owner approved G29 scope and written-design preparation. This written specification and G29-only contribution-profile binding await actual human review; production and implementation planning have not started. [Türkçe](../tr/g29-tokenizer-design.md).
+Status: actual owner approved G29 scope/preparation and continued after reviewing this written specification and the proposed G29-only contribution-profile binding. The concrete implementation plan is prepared for human review; production and full tokenizer/reference execution have not started. [Türkçe](../tr/g29-tokenizer-design.md).
 
 ## Intent and accepted base
 
@@ -56,6 +56,6 @@ At least four actual compiled source mutants must expose incorrect NFC compositi
 
 Core allowed paths remain `crates/eylema-model/`, paired `docs/en/`/`docs/tr/` and `tools/translation-pairs.json`. Linked guide scope is G29 plan/card, paired action/tooling notes, necessary actual owner qualification binding, source pin and fingerprints only. Preserve all67other current cards, original criteria/dependencies, accepted history/root policy and blocked G40. Generated data/notice/development reference tools stay inside the scoped model package; no root dependency/workflow exception.
 
-Existing contracts profile is only a candidate for deterministic symbolic text validation/preprocessing. G28's expired task binding cannot transfer. Actual owner must admit a G29-only binding or require a bounded additional evaluation before product code; no numerical/inference/training/performance scope is added. Serving identity stays unknown. Architect/implementer/verifier are recorded gpt-6.1-sol/high under actual permitted scope; genuinely separate exact-head reviewer is required later. This document confers neither qualification nor execution authority.
+The actual owner admitted a G29-only binding of the existing contracts profile for deterministic symbolic text validation/preprocessing through the continuation decision. G28's expired task binding does not transfer. Actual concrete-plan review still precedes product code; no numerical/inference/training/performance scope is added. Serving identity stays unknown. Architect/implementer/verifier are recorded gpt-6.1-sol/high under actual permitted scope; genuinely separate exact-head reviewer is required later. This document confers neither qualification nor execution authority.
 
 After actual human written-spec and profile-scope decisions, prepare the concrete plan under the existing inline method. That plan freezes exact APIs/counters/data-read/reference steps, source/repair/review/time evidence and coordinated delivery. Original120/3/900 includes all preparation. Existing conditional maintainer merge permission remains, without release/admin/spend/private-export permission.

@@ -1,6 +1,6 @@
 # G29 kendi tokenizer ve şablon tasarımımız
 
-Durum: İnsan G29 kapsamını ve yazılı tasarım hazırlığını onayladı. Bu yazılı şartname ve G29’a özel katkı profili bağı gerçek insan incelemesini bekliyor; üretim ve uygulama planlaması başlamadı. [English](../en/g29-tokenizer-design.md).
+Durum: İnsan G29 kapsam/hazırlığını onayladı; bu yazılı şartname ve önerilen G29’a özel katkı profili bağını inceleyip devam talimatı verdi. Somut uygulama planı insan incelemesine hazırdır; üretim ve tam tokenizer/referans yürütmesi başlamadı. [English](../en/g29-tokenizer-design.md).
 
 ## Amaç ve kabul edilmiş taban
 
@@ -56,6 +56,6 @@ En az dört gerçek derlenmiş kaynak mutasyonu yanlış NFC composition/sıras�
 
 Core yolları `crates/eylema-model/`, eşlenik `docs/en/`/`docs/tr/`, `tools/translation-pairs.json` kalır. Devguide bağlantısı yalnız G29 plan/kart, eşlenik aksiyon/tooling notu, gerekli gerçek insan yeterlilik bağı, kaynak pin ve fingerprint’tir. Diğer67kart, özgün kriter/bağımlılık, kabul edilmiş geçmiş/kök politika ve blocked G40 korunur. Üretilmiş veri/bildirim/geliştirme referans araçları model paketi içinde kalır; kök bağımlılık/workflow istisnası yoktur.
 
-Mevcut contracts profili deterministik sembolik metin doğrulama/ön işleme için yalnız adaydır. G28’in biten görev bağı taşınamaz. İnsan ürün kodundan önce G29’a özel bağı kabul etmeli veya sınırlı ek değerlendirme istemelidir; numerical/inference/training/performance kapsamı eklenmez. Serving identity bilinmez. Architect/implementer/verifier gerçek izinli kapsamda kayıtlı gpt-6.1-sol/high; sonra gerçekten ayrı son-head reviewer gerekir. Belge yeterlilik/yürütme yetkisi vermez.
+İnsan devam kararıyla mevcut contracts profilinin deterministik sembolik metin doğrulama/ön işleme için G29’a özel bağını kabul etti. G28’in biten görev bağı taşınmaz. Ürün kodundan önce somut planın gerçek incelemesi gerekir; numerical/inference/training/performance kapsamı eklenmez. Serving identity bilinmez. Architect/implementer/verifier gerçek izinli kapsamda kayıtlı gpt-6.1-sol/high; sonra gerçekten ayrı son-head reviewer gerekir. Belge yeterlilik/yürütme yetkisi vermez.
 
 Gerçek insan yazılı şartname ve profil kapsamı kararından sonra mevcut sohbet içi yöntemle somut plan hazırlanır. Plan tam API/sayaç/veri okuma/referans adımı, kaynak/onarım/inceleme/süre kanıtı ve koordineli teslimi sabitler. Özgün120/3/900 bütün hazırlığı içerir. Mevcut koşullu merge izni geçerlidir; release/admin/spend/özel-export izni değildir.
