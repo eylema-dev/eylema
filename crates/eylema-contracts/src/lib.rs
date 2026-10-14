@@ -8,6 +8,7 @@
 pub mod codec;
 pub mod decision;
 pub mod memory;
+pub mod model_contract;
 pub mod platform;
 mod primitives;
 pub mod project_data;
