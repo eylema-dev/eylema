@@ -5,7 +5,7 @@ use eylema_contracts::{
     codec::{self, Value, WireRecord},
     *,
 };
-use eylema_host::{DurableHost, DurableHuman, DurableSession, HostError, Owner};
+use eylema_host::{DeviceOwnerHuman, DurableHost, DurableHuman, DurableSession, HostError, Owner};
 use eylema_journal::{Sha256, Storage};
 use eylema_runtime::{CancellationOutcome, Grant, HostServices};
 use protocol::Request;
@@ -63,6 +63,7 @@ impl WebError {
             Self::Configuration => "INVALID_CONFIGURATION",
             Self::Entropy => "ENTROPY_UNAVAILABLE",
             Self::Host(HostError::Runtime(e)) => e.as_str(),
+            Self::Host(HostError::HumanPaused) => "HUMAN_CONTROL_PAUSED",
             Self::Host(_) => "STORAGE_UNAVAILABLE",
         }
     }
@@ -136,10 +137,14 @@ impl Credentials {
         &self.csrf
     }
 }
+enum HumanAuthority {
+    Attested(DurableHuman),
+    DeviceOwner(DeviceOwnerHuman),
+}
 struct Actor {
     credentials: Credentials,
     session: DurableSession,
-    human: Option<DurableHuman>,
+    human: Option<HumanAuthority>,
     grant: Grant,
     expires: Instant,
     last_console_execution: Option<ExecutionId>,
@@ -229,7 +234,7 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
     pub fn register_verified_human(&mut self, grant: Grant) -> Result<Credentials, WebError> {
         self.register(grant, true)
     }
-    fn register(&mut self, grant: Grant, human: bool) -> Result<Credentials, WebError> {
+    fn new_credentials(&self) -> Result<Credentials, WebError> {
         if self.actors.len() >= self.config.sessions {
             return Err(WebError::Configuration);
         }
@@ -247,7 +252,10 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
                 break;
             }
         }
-        let credentials = candidate.ok_or(WebError::Entropy)?;
+        candidate.ok_or(WebError::Entropy)
+    }
+    fn register(&mut self, grant: Grant, human: bool) -> Result<Credentials, WebError> {
+        let credentials = self.new_credentials()?;
         let expires = Instant::now()
             .checked_add(self.config.session_lifetime)
             .ok_or(WebError::Configuration)?;
@@ -255,7 +263,7 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             let h = self
                 .host
                 .enroll_verified_human(&self.owner, grant.clone())?;
-            (h.session().clone(), Some(h))
+            (h.session().clone(), Some(HumanAuthority::Attested(h)))
         } else {
             (self.host.enroll(&self.owner, grant.clone())?, None)
         };
@@ -263,6 +271,44 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             credentials: credentials.clone(),
             session,
             human,
+            grant,
+            expires,
+            last_console_execution: None,
+        });
+        Ok(credentials)
+    }
+    /// Explicit trusted-host entry point. Never exposed as an HTTP enrollment endpoint.
+    pub fn register_device_owner(
+        &mut self,
+        grant: Grant,
+        purpose: eylema_platform::human::HumanPurpose,
+        ttl: Duration,
+        timeout: Duration,
+    ) -> Result<Credentials, WebError> {
+        let credentials = self.new_credentials()?;
+        let request = self
+            .host
+            .request_device_owner(&self.owner, grant.clone(), purpose, ttl)?;
+        let proof = request.authenticate(timeout).map_err(|error| match error {
+            eylema_platform::human::HumanError::Denied => WebError::Forbidden,
+            eylema_platform::human::HumanError::Timeout => WebError::Timeout,
+            _ => WebError::Configuration,
+        })?;
+        let human = self.host.enroll_device_owner(&self.owner, request, proof)?;
+        let expires = human.expires().min(
+            Instant::now()
+                .checked_add(self.config.session_lifetime)
+                .ok_or(WebError::Configuration)?,
+        );
+        if Instant::now() >= expires {
+            self.host.revoke_device_owner(&human)?;
+            return Err(WebError::Unauthorized);
+        }
+        let session = human.session().clone();
+        self.actors.push(Actor {
+            credentials: credentials.clone(),
+            session,
+            human: Some(HumanAuthority::DeviceOwner(human)),
             grant,
             expires,
             last_console_execution: None,
@@ -378,7 +424,11 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             Request::Cancel(id) => {
                 a.permission(Permission::RequestCancellation)?;
                 let h = a.human.as_ref().ok_or(WebError::Forbidden)?;
-                match self.host.request_cancellation(h, &id)? {
+                let outcome = match h {
+                    HumanAuthority::Attested(h) => self.host.request_cancellation(h, &id)?,
+                    HumanAuthority::DeviceOwner(h) => self.host.device_owner_cancel(h, &id)?,
+                };
+                match outcome {
                     CancellationOutcome::Requested(r) => Ok(list(vec![
                         text("requested"),
                         text(r.execution_id.as_str()),
@@ -573,7 +623,7 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             Err(_) => return Err(WebError::Io),
         }
         if self.host.has_pending_work()? {
-            self.host.step()?;
+            worker_result(self.host.step())?;
         }
         Ok(())
     }
@@ -583,5 +633,31 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             std::thread::sleep(self.config.worker_interval);
         }
         Ok(())
+    }
+}
+
+// A cooperative control pause keeps the listener/read/stop path alive. All
+// permission, journal, replay and other actual failures still propagate.
+fn worker_result(result: eylema_host::Result<Option<ExecutionId>>) -> Result<(), WebError> {
+    match result {
+        Ok(_) | Err(HostError::HumanPaused) => Ok(()),
+        Err(error) => Err(WebError::Host(error)),
+    }
+}
+
+#[cfg(test)]
+mod human_pause_tests {
+    use super::*;
+    #[test]
+    fn control_pause_keeps_service_alive_without_masking_other_failures() {
+        assert_eq!(worker_result(Err(HostError::HumanPaused)), Ok(()));
+        assert_eq!(
+            worker_result(Err(HostError::Poisoned)),
+            Err(WebError::Host(HostError::Poisoned))
+        );
+        assert_eq!(
+            worker_result(Err(HostError::Runtime(ErrorCode::Forbidden))),
+            Err(WebError::Host(HostError::Runtime(ErrorCode::Forbidden)))
+        );
     }
 }

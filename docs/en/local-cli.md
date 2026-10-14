@@ -1,6 +1,6 @@
 # Local CLI
 
-The native `eylema` command now owns the G15 entrypoint for the G14 loopback service. It is a macOS local prototype, not a remote client or a real-person login system.
+The native `eylema` command now owns the G15 entrypoint for the G14 loopback service. Its default session is an ordinary macOS local actor. G73 adds the explicit OS device-owner path described below; this is not remote identity.
 
 ## Start and operate
 
@@ -27,3 +27,5 @@ eylema stop service
 ## Evidence boundary
 
 G15's native macOS child-process test starts the real CLI service, creates and runs a typed task, checks shared IDs and machine errors, requests and verifies authorized cancellation with a separately host-issued human session, denies cancellation for the stock non-human session, gracefully stops/restarts the service and inspects the retained journal state. These tests do not prove a GUI, real-user identity provider, remote TLS, deployment, GPU/model/training behavior or physical power-loss recovery.
+
+G73 adds explicit `start --human` and `human-proof <new-private-directory>`: [device-owner scope, lifetime and evidence](real-human.md). The existing plain CLI remains an ordinary local actor. Physical authentication is not inferred from native CI.

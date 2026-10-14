@@ -27,6 +27,9 @@ use std::{
     time::Duration,
 };
 
+#[path = "human_proof.rs"]
+mod human_proof;
+
 const JOURNAL_FILE: &str = "journal.eylj";
 const SESSION_FILE: &str = "session.txt";
 const STOP_FILE: &str = "stop.request";
@@ -74,10 +77,19 @@ fn run(arguments: impl IntoIterator<Item = OsString>) -> Result<()> {
             Ok(())
         }
         "start" => {
-            if args.len() != 1 {
+            let human = args.len() == 2 && args[1].to_str() == Some("--human");
+            if args.len() != 1 && !human {
                 return Err(CliError("INVALID_ARGUMENT"));
             }
-            start_service()
+            start_service(human)
+        }
+        "human-proof" => {
+            if args.len() != 2 {
+                return Err(CliError("INVALID_ARGUMENT"));
+            }
+            human_proof::run(Path::new(
+                args[1].to_str().ok_or(CliError("INVALID_ARGUMENT"))?,
+            ))
         }
         "doctor" => {
             if args.len() != 1 {
@@ -144,7 +156,7 @@ fn run(arguments: impl IntoIterator<Item = OsString>) -> Result<()> {
 
 fn print_help() {
     println!(
-        "Eylema native task CLI\nUsage: eylema <start|create|run|inspect|stop|doctor|--help|--version>\n  start                 Start the local loopback service in the foreground\n  create <request-file>  Submit an encoded EYL Create request\n  run demo [delta]       Run one bounded local-state demonstration\n  run <request-file>     Submit an encoded EYL Admit request\n  inspect <task|execution> <id>\n  stop <execution-id>    Request cancellation using the current session\n  stop service           Stop the local foreground service\n  doctor                 Check the local session and service connection"
+        "Eylema native task CLI\nUsage: eylema <start|create|run|inspect|stop|doctor|--help|--version>\n  start [--human]       Start loopback service; optional OS-verified 5-minute stop session\n  create <request-file>  Submit an encoded EYL Create request\n  run demo [delta]       Run one bounded local-state demonstration\n  run <request-file>     Submit an encoded EYL Admit request\n  inspect <task|execution> <id>\n  stop <execution-id>    Request cancellation using the current session\n  stop service           Stop the local foreground service\n  doctor                 Check the local session and service connection\n  human-proof <new-dir>   Explicit OS-verified bounded acceptance demonstration"
     );
 }
 
@@ -273,7 +285,7 @@ fn write_session(path: &Path, origin: &str, bearer: &str, csrf: &str) -> Result<
     fs::rename(&tmp, path).map_err(|_| CliError("SESSION_UNAVAILABLE"))
 }
 
-fn start_service() -> Result<()> {
+fn start_service(human: bool) -> Result<()> {
     let directory = data_dir()?;
     let journal_path = directory.join(JOURNAL_FILE);
     let session_path = directory.join(SESSION_FILE);
@@ -293,9 +305,22 @@ fn start_service() -> Result<()> {
     let mut server =
         Server::bind(host, owner, config).map_err(|_| CliError("SERVICE_UNAVAILABLE"))?;
     save_service_origin(&directory, server.origin())?;
-    let credentials = server
-        .register_session(cli_grant()?)
-        .map_err(|_| CliError("SESSION_UNAVAILABLE"))?;
+    let credentials = if human {
+        let mut grant = cli_grant()?;
+        grant.permissions.push(Permission::RequestCancellation);
+        server
+            .register_device_owner(
+                grant,
+                eylema_platform::human::HumanPurpose::LocalCli,
+                Duration::from_secs(300),
+                Duration::from_secs(60),
+            )
+            .map_err(|_| CliError("HUMAN_ENROLLMENT_UNAVAILABLE"))?
+    } else {
+        server
+            .register_session(cli_grant()?)
+            .map_err(|_| CliError("SESSION_UNAVAILABLE"))?
+    };
     let origin = server.origin().to_owned();
     write_session(
         &session_path,

@@ -77,14 +77,14 @@
     {
       "en": "docs/en/local-cli.md",
       "tr": "docs/tr/local-cli.md",
-      "en_sha256": "ef040f41d920858d795a96c97cc4e58c8d793cbc9fb657f1761e2e8d0a1b7465",
-      "tr_sha256": "e499e1f87e5e8115411e6c3eabbab7b0b22d76aafe2c162a18417c0deb6d0eba"
+      "en_sha256": "5ebc3ea351db05160caa7a92489faec8b3572a60c2a20e2dd444b03f1998d7b5",
+      "tr_sha256": "13e25f39d95f942ce0fcbcc1046f246743dfa228b54bf0efd4c26a7f47f3f335"
     },
     {
       "en": "docs/en/local-browser.md",
       "tr": "docs/tr/local-browser.md",
-      "en_sha256": "6557ac041a087ac75c70fc54d7bd4035f989111418fd446eeed2164cd69388e3",
-      "tr_sha256": "58759056cc18004f0efa3195e10497c02ad4357bfc84df5fc9c50b769ecef812"
+      "en_sha256": "c460ce75d40cd53631a42928b487d8a10b3e7de95e64ed0b6828e033c91df6df",
+      "tr_sha256": "ec68f4cc03383a69102bd1904204b860506500b5d21e59277dd15058b9ef0987"
     },
     {
       "en": "docs/en/local-webgpu.md",
@@ -151,6 +151,12 @@
       "tr": "docs/tr/versioned-skills.md",
       "en_sha256": "6bf122f41fb44b26d98a58224aa398a6c46e15ce4d9a3df39f4dfa165998cc38",
       "tr_sha256": "875cd51d58e8d59e50223e310e423e2ef7659339e6f2a51666ea07851ac11645"
+    },
+    {
+      "en": "docs/en/real-human.md",
+      "tr": "docs/tr/real-human.md",
+      "en_sha256": "94a88fdc4fa008fd128b621ca3757028ad7cb802ba546fef29e1437062778711",
+      "tr_sha256": "0ce9e161e5d401d4d9877d7298d49188a42dc7802ee0baf2da0afbd3eacd9486"
     }
   ],
   "documents": []

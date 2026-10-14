@@ -1,6 +1,8 @@
 //! Narrow platform services. Portable contracts do not implement cryptography.
 #![deny(unsafe_op_in_unsafe_fn)]
 
+pub mod human;
+
 use eylema_contracts::codec::MAX_WIRE_BYTES;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

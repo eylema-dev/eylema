@@ -1,6 +1,6 @@
 # Yerel CLI
 
-Native `eylema` komutu artık G14 loopback servisinin G15 giriş noktasıdır. macOS üzerinde yerel bir prototiptir; uzak istemci veya gerçek kişi giriş sistemi değildir.
+Native `eylema` komutu artık G14 loopback servisinin G15 giriş noktasıdır. Varsayılan oturumu macOS üzerinde olağan yerel aktördür. G73 aşağıdaki açık OS cihaz sahibi yolunu ekler; bu uzaktan kimlik değildir.
 
 ## Başlatma ve kullanım
 
@@ -27,3 +27,5 @@ eylema stop service
 ## Kanıt sınırı
 
 G15’in native macOS alt-süreç testi gerçek CLI servisini başlatır, tipli görev oluşturup çalıştırır, ortak kimlik ve makine hatalarını denetler, ayrı host tarafından verilmiş insan oturumuyla yetkili iptal ister ve sonucunu doğrular, standart insan olmayan oturumun iptalini reddeder, servisi düzgün durdurup yeniden başlatır ve günlükteki durumu inceler. Bu testler GUI, gerçek kullanıcı kimlik sağlayıcısı, uzak TLS, yayın, GPU/model/eğitim veya fiziksel güç kaybında kurtarma kanıtı değildir.
+
+G73, açık `start --human` ve `human-proof <new-private-directory>` ekler: [cihaz sahibi kapsamı, süre ve kanıtı](real-human.md). Mevcut düz CLI olağan yerel aktör kalır. Fiziksel doğrulama yerel CI’dan çıkarılmaz.

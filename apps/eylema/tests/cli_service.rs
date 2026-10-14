@@ -535,3 +535,17 @@ fn doctor_does_not_create_or_repair_a_missing_data_directory() {
     assert!(!absent.exists());
     fs::remove_dir_all(root).unwrap();
 }
+
+#[test]
+fn human_proof_requires_a_new_explicit_directory_and_never_prompts_on_bad_arguments() {
+    let root = std::env::temp_dir();
+    let missing = cli(&root, &["human-proof"]);
+    assert_eq!(missing.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&missing.stdout).contains("INVALID_ARGUMENT"));
+    let existing = cli(&root, &["human-proof", root.to_str().unwrap()]);
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&existing.stdout).contains("PROOF_DIRECTORY_EXISTS"));
+    let extra = cli(&root, &["start", "--human", "extra"]);
+    assert_eq!(extra.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&extra.stdout).contains("INVALID_ARGUMENT"));
+}
