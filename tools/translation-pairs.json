@@ -187,6 +187,12 @@
       "tr": "docs/tr/resource-estimator.md",
       "en_sha256": "8df5311423feefb9407935514de0522de8e8ea8f409fd6057f6df5c4674bba04",
       "tr_sha256": "26371183ddc39709dfaa4074b60773f2fef0d0c3b3847023ff25c163abc5d71f"
+    },
+    {
+      "en": "docs/en/g23-cpu-reference-design.md",
+      "tr": "docs/tr/g23-cpu-reference-design.md",
+      "en_sha256": "b12a9b8dec3862fe28ced5c2781bc56c8d680f315f0f26ba92ac7a6da3c8a9b3",
+      "tr_sha256": "85c737b6f1fdb002b5f79975071c3c878eed729712ffb1ecaf3b34245a6816e9"
     }
   ],
   "documents": []
