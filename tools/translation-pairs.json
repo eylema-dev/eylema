@@ -175,6 +175,12 @@
       "tr": "docs/tr/embedding-model-profile.md",
       "en_sha256": "0e96c2894210ecec3474b7b36fb6cc72670da7f6cb745628f28928bc30e02ef4",
       "tr_sha256": "c90056c3f1ae356ca5503477348063c3d6eb785469160338c9673a05ff7d7a5d"
+    },
+    {
+      "en": "docs/en/g80-resource-estimator-design.md",
+      "tr": "docs/tr/g80-resource-estimator-design.md",
+      "en_sha256": "c04f94c562ec295be6a8117b935c0dabe362b8d6ddde6d516260945be9d5d061",
+      "tr_sha256": "955c53899ca0521c75dcf44a52aa8fad451bff63034003be5a4723cd3d9b527e"
     }
   ],
   "documents": []
