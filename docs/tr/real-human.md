@@ -1,6 +1,6 @@
 # Yerel cihaz sahibinin yetkilendirilmesi — G73
 
-G73, gerçek macOS LocalAuthentication sonucunu mevcut kapsamlı insan gözetimi API'sine bağlayan kendi Rust yolumuzu ekler. Yerel kod ve regresyon testleri uygulanmıştır; açık fiziksel etkileşim kaydedilene kadar **gerçek bakımcı doğrulaması/kabulü not_run** durumundadır. Birincil Apple M4 Pro/24 GiB macOS27.0.1 ARM64 üzerinde yetenek ön kontrolü kullanılabilir sonucu verdi; kullanılabilirlik insan doğrulamaz. Genel model işleri, uzaktan kimlik ve eğitim kabulü ayrıdır.
+G73, gerçek macOS LocalAuthentication sonucunu mevcut kapsamlı insan gözetimi API'sine bağlayan kendi Rust yolumuzu ekler. Yerel kod ve regresyon testleri uygulanmıştır. **Gerçek bakımcı doğrulaması ve sınırlı yerel onay/durdurma/yeniden açma kabulü**, 14 Ekim 2026 tarihinde geçti; kanıt bilinen sayaç gösterimiyle sınırlıdır. Birincil Apple M4 Pro/24 GiB macOS27.0.1 ARM64 üzerinde yetenek ön kontrolü kullanılabilir sonucu verdi; kullanılabilirlik insan doğrulamaz. Genel model işleri, uzaktan kimlik ve eğitim kabulü ayrıdır.
 
 ## Kanıt, kapsam ve süre
 
@@ -35,3 +35,9 @@ Bir runtime testi owner-only FIFO seçicisini ve gerçek worker sırasını doğ
 Güven varsayımları açıktır: incelenmiş yerel embedding kodu/OS, uygun girdiler, özel günlük sahipliği, doğru saatler ve tanımlanan veri lineage'ı. Güvenilir owner'ı kontrol eden veya yerel programı değiştiren aynı hesaptaki kod bu yerel profilin dışındadır; model mesajı veya tarayıcı bayrağı o owner değildir. Dönen bilgi geri çağrılamaz. Bu, yerel insan doğrulaması ekler; uzaktan TLS, hesap/izin yönetimi, yeni inference motoru veya otomatik veri paylaşımı sağlamaz.
 
 Birincil kaynaklar: [Apple LAContext policy değerlendirmesi](https://developer.apple.com/documentation/localauthentication/lacontext/evaluatepolicy(_:localizedreason:reply:)), [Apple yerel doğrulaması](https://developer.apple.com/documentation/localauthentication), [Clang Apple Blocks ABI](https://clang.llvm.org/docs/Block-ABI-Apple.html). Kurulu SDK bildirimleri incelendi; ABI ve yerel davranış, gerçek insan kabulünden ayrıdır.
+
+## Kaydedilen fiziksel kabul
+
+14 Ekim 2026,05:57UTC tarihinde fiziksel olarak hazır bakımcı, `state:g73-proof` için gerçek macOS cihaz sahibi arayüzünü tamamladı. Tek doğrulama denemesi toplam20.100s sürdü ve60s doğrulama sınırını aşmadı; tekrar yapılmadı. İncelenen kaynak `01761ce0a46c084b3f8af4ff117fb78a06fe1846` üzerinden derlenen binary'nin SHA256 değeri `08b2e3f08e32cf1a04625ac76399461e9faa3770486209e5d048ead6a669af00` idi. Standard error atıldı; yalnız sabit ve sınırlı sonuç metaverisi özel olarak tutuldu. Erişim bilgisi, hesap kimliği, biyometrik veri, ham OS hatası veya journal içeriği okunmadı/yayımlanmadı.
+
+Gerçek yerel komut passed döndürdü: eksik onay reddedildi; tam onaylanan iki eylemli öneri value2 uyguladı; alınan iptal, value3 öncesinde etkili oldu ve tamamlanmış value2 korundu. İptal edilmiş ayrıcalık reddedildi. Yeniden açmada doğrulanmış Cancelled durum/değer korundu, eski insan handle'ı reddedildi ve sonraki gözetimli iş için yeni kayıt gerekti. Tek yeni özel journal ve iki deterministik görev kullanıldı; listener veya hizmet alt süreci kullanılmadı. OS doğrulama yöntemi özellikle kaydedilmedi. Ayrı gerçek `start --human`/tarayıcı etkileşimi, uzaktan kimlik, keyfî harness işleri, modeller, eğitim ve performans kabulü not_run durumundadır. Otomatik süre/callback/taklit vakaları bu fiziksel başarıdan ayrıdır.
