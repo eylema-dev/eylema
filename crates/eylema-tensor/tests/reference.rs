@@ -3,8 +3,144 @@ use eylema_tensor::{
     transpose,
 };
 
+use eylema_tensor::{
+    AttentionMask, KvCache, RopeSpec, attention, causal_mask, greedy, repeat_kv, rope, softmax,
+};
+
 fn tensor(shape: &[usize], values: &[f32]) -> Tensor {
     Tensor::new(shape, values).unwrap()
+}
+
+#[test]
+fn attention_rope_split_half_frequencies_and_grouped_head_order() {
+    let input = tensor(&[1, 1, 1, 4], &[1., 2., 3., 4.]);
+    values(
+        &rope(
+            &input,
+            &RopeSpec {
+                positions: vec![0],
+                theta: 10000.,
+                rotary_dim: 4,
+            },
+        )
+        .unwrap(),
+        &[1, 1, 1, 4],
+        &[1., 2., 3., 4.],
+    );
+    values(
+        &rope(
+            &input,
+            &RopeSpec {
+                positions: vec![1],
+                theta: 10000.,
+                rotary_dim: 4,
+            },
+        )
+        .unwrap(),
+        &[1, 1, 1, 4],
+        &[
+            -1.9841106485555495,
+            1.959900667496664,
+            2.4623779024123156,
+            4.019799668334994,
+        ],
+    );
+    values(
+        &rope(
+            &input,
+            &RopeSpec {
+                positions: vec![1],
+                theta: 1000000.,
+                rotary_dim: 4,
+            },
+        )
+        .unwrap(),
+        &[1, 1, 1, 4],
+        &[
+            -1.9841106485555495,
+            1.99599900066675,
+            2.4623779024123156,
+            4.001997999666833,
+        ],
+    );
+    values(
+        &repeat_kv(&tensor(&[1, 2, 2, 1], &[1., 2., 3., 4.]), 4).unwrap(),
+        &[1, 4, 2, 1],
+        &[1., 2., 1., 2., 3., 4., 3., 4.],
+    );
+}
+
+#[test]
+fn attention_typed_masks_stable_softmax_and_value_axes() {
+    let mask = causal_mask(1, 1, &[1, 2], &[0, 1, 2], &[true, false, true]).unwrap();
+    assert_eq!(mask.shape(), &[1, 1, 2, 3]);
+    assert_eq!(mask.allowed(), &[true, false, false, true, false, true]);
+    values(
+        &softmax(&tensor(&[2], &[1001., 1002.]), &[true, true]).unwrap(),
+        &[2],
+        &[0.2689414213699951, 0.7310585786300049],
+    );
+    values(
+        &softmax(&tensor(&[2], &[1001., 1002.]), &[true, false]).unwrap(),
+        &[2],
+        &[1., 0.],
+    );
+    let q = tensor(&[1, 1, 2, 2], &[1., 1., 1., 1.]);
+    let k = tensor(&[1, 1, 2, 2], &[1., 0., 0., 1.]);
+    let v = tensor(&[1, 1, 2, 2], &[2., 4., 6., 8.]);
+    let all = AttentionMask::new([1, 1, 2, 2], &[true; 4]).unwrap();
+    values(
+        &attention(&q, &k, &v, &all, 1.).unwrap(),
+        &[1, 1, 2, 2],
+        &[4., 6., 4., 6.],
+    );
+    let causal = causal_mask(1, 1, &[0, 1], &[0, 1], &[true, true]).unwrap();
+    values(
+        &attention(&q, &k, &v, &causal, 1.).unwrap(),
+        &[1, 1, 2, 2],
+        &[2., 4., 4., 6.],
+    );
+    let q2 = tensor(&[1, 2, 1, 1], &[0., 0.]);
+    let k2 = tensor(&[1, 2, 2, 1], &[1., 3., 5., 7.]);
+    let v2 = tensor(&[1, 2, 2, 1], &[2., 4., 10., 14.]);
+    values(
+        &attention(
+            &q2,
+            &k2,
+            &v2,
+            &AttentionMask::new([1, 2, 1, 2], &[true; 4]).unwrap(),
+            1.,
+        )
+        .unwrap(),
+        &[1, 2, 1, 1],
+        &[3., 12.],
+    );
+}
+
+#[test]
+fn attention_cache_appends_tokens_per_head_and_greedy_uses_original_ids() {
+    let empty = KvCache::empty(2).unwrap();
+    let first = empty
+        .append(
+            &tensor(&[1, 2, 1, 1], &[1., 10.]),
+            &tensor(&[1, 2, 1, 2], &[2., 3., 20., 30.]),
+        )
+        .unwrap();
+    let second = first
+        .append(
+            &tensor(&[1, 2, 1, 1], &[4., 40.]),
+            &tensor(&[1, 2, 1, 2], &[5., 6., 50., 60.]),
+        )
+        .unwrap();
+    values(second.key().unwrap(), &[1, 2, 2, 1], &[1., 4., 10., 40.]);
+    values(
+        second.value().unwrap(),
+        &[1, 2, 2, 2],
+        &[2., 3., 5., 6., 20., 30., 50., 60.],
+    );
+    assert_eq!(first.len(), 1);
+    assert_eq!(empty.len(), 0);
+    assert_eq!(greedy(&[5., 5., 1.], &[9, 3, 1]), Ok(3));
 }
 fn close(actual: f32, expected: f64) -> bool {
     let error = (f64::from(actual) - expected).abs();
