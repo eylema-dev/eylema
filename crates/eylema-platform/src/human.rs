@@ -39,6 +39,7 @@ impl HumanPurpose {
     }
 }
 pub struct DeviceOwnerProof {
+    purpose: HumanPurpose,
     binding: [u8; 32],
     verified_at: Instant,
 }
@@ -48,8 +49,19 @@ impl std::fmt::Debug for DeviceOwnerProof {
     }
 }
 impl DeviceOwnerProof {
+    /// The actual shown OS purpose must match the consuming host request.
+    pub fn consume_binding_for(
+        self,
+        expected: HumanPurpose,
+        max_age: Duration,
+    ) -> Result<[u8; 32], HumanError> {
+        if self.purpose != expected {
+            return Err(HumanError::Denied);
+        }
+        self.consume_binding(max_age)
+    }
     /// Consumes the proof. This returns its challenge, never a constructor.
-    pub fn consume_binding(self, max_age: Duration) -> Result<[u8; 32], HumanError> {
+    fn consume_binding(self, max_age: Duration) -> Result<[u8; 32], HumanError> {
         if max_age.is_zero() || max_age > Duration::from_secs(15) {
             return Err(HumanError::InvalidInput);
         }
@@ -135,6 +147,7 @@ pub fn authenticate_device_owner(
         .ok_or(HumanError::InvalidInput)?;
     let verified_at = native::authenticate(purpose, deadline)?;
     Ok(DeviceOwnerProof {
+        purpose,
         binding,
         verified_at,
     })
@@ -433,11 +446,13 @@ mod tests {
     fn proof_binding_and_freshness_are_consumed_not_caller_attestation() {
         let now = Instant::now();
         let good = DeviceOwnerProof {
+            purpose: HumanPurpose::AcceptanceProof,
             binding: [7; 32],
             verified_at: now,
         };
         assert_eq!(good.consume_binding(Duration::from_secs(15)), Ok([7; 32]));
         let stale = DeviceOwnerProof {
+            purpose: HumanPurpose::AcceptanceProof,
             binding: [7; 32],
             verified_at: now - Duration::from_secs(20),
         };
@@ -460,5 +475,17 @@ mod tests {
             result,
             Ok(true) | Ok(false) | Err(HumanError::Unavailable)
         ));
+    }
+    #[test]
+    fn proof_for_one_shown_purpose_cannot_be_consumed_for_another() {
+        let proof = DeviceOwnerProof {
+            purpose: HumanPurpose::AcceptanceProof,
+            binding: [7; 32],
+            verified_at: Instant::now(),
+        };
+        assert_eq!(
+            proof.consume_binding_for(HumanPurpose::LocalCli, Duration::from_secs(15)),
+            Err(HumanError::Denied)
+        );
     }
 }

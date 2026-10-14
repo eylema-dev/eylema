@@ -65,6 +65,19 @@ impl HumanEnrollment {
         }
         Ok(())
     }
+    fn purpose(&self) -> HumanPurpose {
+        if self
+            .grant
+            .resource_scope
+            .resources()
+            .next()
+            .is_some_and(|r| r.as_str() == HumanPurpose::LocalCli.resource())
+        {
+            HumanPurpose::LocalCli
+        } else {
+            HumanPurpose::AcceptanceProof
+        }
+    }
     /// Explicit OS UI operation; no authentication retry and no caller-provided attestation.
     pub fn authenticate(
         &self,
@@ -186,7 +199,7 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
     ) -> Result<DeviceOwnerHuman> {
         self.owner(owner)?;
         let challenge = proof
-            .consume_binding(Duration::from_secs(15))
+            .consume_binding_for(request.purpose(), Duration::from_secs(15))
             .map_err(|_| forbidden())?;
         self.finish_device_owner(owner, request, challenge)
     }
