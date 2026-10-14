@@ -63,6 +63,7 @@ impl WebError {
             Self::Configuration => "INVALID_CONFIGURATION",
             Self::Entropy => "ENTROPY_UNAVAILABLE",
             Self::Host(HostError::Runtime(e)) => e.as_str(),
+            Self::Host(HostError::HumanPaused) => "HUMAN_CONTROL_PAUSED",
             Self::Host(_) => "STORAGE_UNAVAILABLE",
         }
     }
@@ -622,7 +623,7 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             Err(_) => return Err(WebError::Io),
         }
         if self.host.has_pending_work()? {
-            self.host.step()?;
+            worker_result(self.host.step())?;
         }
         Ok(())
     }
@@ -632,5 +633,31 @@ impl<T: Storage, H: Sha256, S: HostServices> Server<T, H, S> {
             std::thread::sleep(self.config.worker_interval);
         }
         Ok(())
+    }
+}
+
+// A cooperative control pause keeps the listener/read/stop path alive. All
+// permission, journal, replay and other actual failures still propagate.
+fn worker_result(result: eylema_host::Result<Option<ExecutionId>>) -> Result<(), WebError> {
+    match result {
+        Ok(_) | Err(HostError::HumanPaused) => Ok(()),
+        Err(error) => Err(WebError::Host(error)),
+    }
+}
+
+#[cfg(test)]
+mod human_pause_tests {
+    use super::*;
+    #[test]
+    fn control_pause_keeps_service_alive_without_masking_other_failures() {
+        assert_eq!(worker_result(Err(HostError::HumanPaused)), Ok(()));
+        assert_eq!(
+            worker_result(Err(HostError::Poisoned)),
+            Err(WebError::Host(HostError::Poisoned))
+        );
+        assert_eq!(
+            worker_result(Err(HostError::Runtime(ErrorCode::Forbidden))),
+            Err(WebError::Host(HostError::Runtime(ErrorCode::Forbidden)))
+        );
     }
 }

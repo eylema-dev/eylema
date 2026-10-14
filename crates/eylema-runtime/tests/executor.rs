@@ -535,3 +535,25 @@ fn deadline_is_rechecked_after_fallible_host_metadata_reservations() {
         1
     );
 }
+
+#[test]
+fn trusted_fifo_head_is_read_only_instance_scoped_and_matches_worker_order() {
+    let (mut r, key, s, _, _) = fixture(Limits::default());
+    let (_, foreign, _, _, _) = fixture(Limits::default());
+    assert_eq!(r.pending_execution(&foreign), Err(ErrorCode::Forbidden));
+    assert_eq!(r.pending_execution(&key), Ok(None));
+    let a = task("task:fifo-a", 10, 30);
+    let b = task("task:fifo-b", 10, 30);
+    r.create_task(&s, a.clone()).unwrap();
+    r.create_task(&s, b.clone()).unwrap();
+    let ae = r.admit(&s, a.clone(), proposal(&a, &[1, 2])).unwrap();
+    let be = r.admit(&s, b.clone(), proposal(&b, &[7])).unwrap();
+    assert_eq!(r.pending_execution(&key), Ok(Some(ae.clone())));
+    assert_eq!(r.task(&s, &a.fields().task_id).unwrap().value, 0);
+    r.step().unwrap();
+    assert_eq!(r.pending_execution(&key), Ok(Some(ae)));
+    r.step().unwrap();
+    assert_eq!(r.pending_execution(&key), Ok(Some(be)));
+    r.step().unwrap();
+    assert_eq!(r.pending_execution(&key), Ok(None));
+}

@@ -311,26 +311,38 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
                 Ok(Some((task.fields().task_id.clone(), lease)))
             }
             Command::Step => {
-                for (id, (task, _)) in &self.state.bindings {
-                    let Some(lease) = self.human_tasks.get(&task.fields().task_id) else {
-                        continue;
-                    };
-                    if lease.valid_at(Instant::now()) {
-                        continue;
-                    }
-                    let e = self
-                        .state
-                        .runtime
-                        .execution(&self.state.slots[lease.slot].session, id)
-                        .map_err(HostError::Runtime)?;
-                    if matches!(
-                        e.fields().state,
-                        ExecutionState::Accepted | ExecutionState::Queued | ExecutionState::Running
-                    ) {
-                        return Err(forbidden());
-                    }
-                    // A valid earlier cancellation receipt remains effective despite lease expiry.
+                let Some(id) = self
+                    .state
+                    .runtime
+                    .pending_execution(&self.state.owner)
+                    .map_err(HostError::Runtime)?
+                else {
+                    return Ok(None);
+                };
+                let (task, _) = self
+                    .state
+                    .bindings
+                    .get(&id)
+                    .ok_or(HostError::ReplayMismatch)?;
+                let Some(lease) = self.human_tasks.get(&task.fields().task_id) else {
+                    return Ok(None);
+                };
+                if lease.valid_at(Instant::now()) {
+                    return Ok(None);
                 }
+                let e = self
+                    .state
+                    .runtime
+                    .execution(&self.state.slots[lease.slot].session, &id)
+                    .map_err(HostError::Runtime)?;
+                if matches!(
+                    e.fields().state,
+                    ExecutionState::Accepted | ExecutionState::Queued | ExecutionState::Running
+                ) {
+                    return Err(HostError::HumanPaused);
+                }
+                // Check the actual FIFO head only. A prior valid cancellation at the
+                // head must become effective even if an expired later task remains queued.
                 Ok(None)
             }
             _ => Ok(None),
@@ -481,7 +493,7 @@ mod tests {
         let e = h.admit(&s, t.clone(), p).unwrap();
         h.step().unwrap();
         h.revoke_device_owner(&human).unwrap();
-        assert_eq!(h.step(), Err(forbidden()));
+        assert_eq!(h.step(), Err(HostError::HumanPaused));
         assert_eq!(h.task(&s, &t.fields().task_id).unwrap().value, 2);
         assert!(h.device_owner_cancel(&human, &e).is_err());
         let fresh = simulated(&mut h, &o, Duration::from_secs(300));
@@ -550,7 +562,7 @@ mod tests {
         let e = h.admit_with_approvals(&s, t.clone(), p, &[a]).unwrap();
         h.step().unwrap();
         h.revoke_device_owner(&human).unwrap();
-        assert_eq!(h.step(), Err(forbidden()));
+        assert_eq!(h.step(), Err(HostError::HumanPaused));
         assert_eq!(
             h.execution(&s, &e).unwrap().fields().state,
             ExecutionState::Running
@@ -635,5 +647,42 @@ mod tests {
         let _fresh = simulated(&mut h, &o, Duration::from_secs(300));
         let (_, p) = task_plan("task:human-deadline", &[1]);
         assert!(h.admit(&s, t, p).is_err());
+    }
+    #[test]
+    fn earlier_received_stop_progresses_before_later_revoked_queued_task() {
+        let (mut h, o, _) = fixture();
+        let person = simulated(&mut h, &o, Duration::from_secs(300));
+        let actor = h.enroll(&o, grant()).unwrap();
+        let (a, ap) = task_plan("task:stop-head", &[2, 3]);
+        let (b, bp) = task_plan("task:pause-tail", &[7]);
+        h.create_task(&actor, a.clone()).unwrap();
+        h.create_task(&actor, b.clone()).unwrap();
+        let ae = h.admit(&actor, a.clone(), ap).unwrap();
+        let be = h.admit(&actor, b.clone(), bp).unwrap();
+        h.step().unwrap();
+        h.device_owner_cancel(&person, &ae).unwrap();
+        h.revoke_device_owner(&person).unwrap();
+        assert!(
+            h.step().is_ok(),
+            "received stop must become effective despite an expired tail"
+        );
+        assert_eq!(
+            h.execution(&actor, &ae).unwrap().fields().state,
+            ExecutionState::Cancelled
+        );
+        assert!(
+            h.execution(&actor, &ae)
+                .unwrap()
+                .fields()
+                .effective_stop_evidence
+                .is_some()
+        );
+        assert_eq!(h.task(&actor, &a.fields().task_id).unwrap().value, 2);
+        assert!(h.step().is_err());
+        assert_eq!(
+            h.execution(&actor, &be).unwrap().fields().state,
+            ExecutionState::Queued
+        );
+        assert_eq!(h.task(&actor, &b.fields().task_id).unwrap().value, 0);
     }
 }

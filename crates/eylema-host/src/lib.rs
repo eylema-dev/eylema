@@ -26,6 +26,7 @@ const MAX_COMMIT_BYTES: usize = 256 * 1024;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HostError {
     Runtime(ErrorCode),
+    HumanPaused,
     Journal(JournalError),
     InvalidRecord,
     IncompatibleFormat,

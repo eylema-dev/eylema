@@ -220,6 +220,14 @@ impl<S: HostServices> Runtime<S> {
         }
         Ok(!self.queue.is_empty())
     }
+    /// Read-only FIFO inspection for the trusted scheduler owner. This is exactly
+    /// the head used by step(), not a mutable queue or session authority.
+    pub fn pending_execution(&self, host: &HostKey) -> Result<Option<ExecutionId>> {
+        if !Arc::ptr_eq(&self.identity, &host.identity) {
+            return Err(ErrorCode::Forbidden);
+        }
+        Ok(self.queue.front().cloned())
+    }
     fn grant(&self, session: &Session) -> Result<&Grant> {
         if !Arc::ptr_eq(&self.identity, &session.identity)
             || self.revoked_slots.contains_key(&session.slot)

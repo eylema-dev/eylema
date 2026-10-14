@@ -6,6 +6,7 @@ fn checked<T>(r: eylema_host::Result<T>) -> Result<T> {
     r.map_err(|e| {
         CliError(match e {
             eylema_host::HostError::Runtime(code) => code.as_str(),
+            eylema_host::HostError::HumanPaused => "HUMAN_CONTROL_PAUSED",
             eylema_host::HostError::Journal(_) => "HUMAN_PROOF_STORAGE_FAILED",
             _ => "HUMAN_PROOF_RECORD_FAILED",
         })
