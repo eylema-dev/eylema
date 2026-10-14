@@ -4,7 +4,7 @@ Durum: İnsan yazılı şartname, G29’a özel katkı bağı ve somut sohbet i�
 
 ## Amaç ve kabul edilmiş taban
 
-EylemA, yerel dil/karar/embedding yürütmesini kabul etmeden önce yeniden kullanılabilir kendi Rust metin ön ucuna ihtiyaç duyar. Modele özel kimlik ve ön işleme, sabit rol arayüzlerinden ayrıdır. Kendi Rust üretim kodumuzu, sınırlı kaynakları, proje gizliliğini ve açık desteklenmeme durumlarını koru; tokenization model/eylem/veri yetkisi vermez.
+Eyleme, yerel dil/karar/embedding yürütmesini kabul etmeden önce yeniden kullanılabilir kendi Rust metin ön ucuna ihtiyaç duyar. Modele özel kimlik ve ön işleme, sabit rol arayüzlerinden ayrıdır. Kendi Rust üretim kodumuzu, sınırlı kaynakları, proje gizliliğini ve açık desteklenmeme durumlarını koru; tokenization model/eylem/veri yetkisi vermez.
 
 Kaynak taban `d0dcc39c65c8229cc8d54f1c8a831adaecf66d80`; devguide tabanı `45541cb916c5253bb6d3f2832a2dbffab1e9ad9d`. Özgün G27 bağımlılığı kalır. Mevcut sınırlı native hash akışı için kabul edilmiş G28’i ekle. `eylema-model` zaten kayıtlıdır; kök Cargo/platform/ortak araçlar değişmez. Özgün G29-P1/A1/CP1 ve120aktif dakika/3hedefli onarım/900inceleme saniyesi hazırlığı da kapsar; sıfırlanmaz. Provider/model/eğitim/ağırlık çağrısı, yeni paket, harcama, izin veya G40 değişikliği yoktur.
 
@@ -59,3 +59,5 @@ Core yolları `crates/eylema-model/`, eşlenik `docs/en/`/`docs/tr/`, `tools/tra
 İnsan devam kararıyla mevcut contracts profilinin deterministik sembolik metin doğrulama/ön işleme için G29’a özel bağını kabul etti. G28’in biten görev bağı taşınmaz. Ürün kodundan önce somut planın gerçek incelemesi gerekir; numerical/inference/training/performance kapsamı eklenmez. Serving identity bilinmez. Architect/implementer/verifier gerçek izinli kapsamda kayıtlı gpt-6.1-sol/high; sonra gerçekten ayrı son-head reviewer gerekir. Belge yeterlilik/yürütme yetkisi vermez.
 
 Gerçek insan yazılı şartname ve profil kapsamı kararından sonra mevcut sohbet içi yöntemle somut plan hazırlanır. Plan tam API/sayaç/veri okuma/referans adımı, kaynak/onarım/inceleme/süre kanıtı ve koordineli teslimi sabitler. Özgün120/3/900 bütün hazırlığı içerir. Mevcut koşullu merge izni geçerlidir; release/admin/spend/özel-export izni değildir.
+
+Ayrı depo adı hizalama PR109 sonrası uygulama tabanı kabul edilmiş kaynak `460e4aecc7a47a10abb62b501185ede7d963186b`; PR56 sonrası devguide tabanı `db56022d1f09b11b8cc8eda873059053bf1aa7a9` oldu. Main’den gelen değişim özgün Rust crate yolları/model fixture kimlikleri/G29 kapsam-bütçesini korur; bu Goal yönetim/politika istisnası yapmaz.

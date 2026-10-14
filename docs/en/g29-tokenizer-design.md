@@ -4,7 +4,7 @@ Status: actual owner approved written specification, G29-only contribution bindi
 
 ## Intent and accepted base
 
-EylemA needs a reusable owned Rust text frontend before local language, decision and embedding execution. Model-specific identities and preprocessing remain separate from stable role interfaces. Keep first-party production Rust, bounded resources, private project data and explicit unsupported states; tokenization grants no model/action/data authority.
+Eyleme needs a reusable owned Rust text frontend before local language, decision and embedding execution. Model-specific identities and preprocessing remain separate from stable role interfaces. Keep first-party production Rust, bounded resources, private project data and explicit unsupported states; tokenization grants no model/action/data authority.
 
 Source base `d0dcc39c65c8229cc8d54f1c8a831adaecf66d80`; guide base `45541cb916c5253bb6d3f2832a2dbffab1e9ad9d`. Original G27 dependency remains. Add accepted G28 for the existing bounded native hash stream. Existing `eylema-model` is already registered; root Cargo/platform/shared tools stay unchanged. Original G29-P1/A1/CP1 criteria and120active minutes/3targeted repairs/900review seconds include preparation; no reset. No provider/model/training/weight call, new package, spending, permission or G40 change.
 
@@ -59,3 +59,5 @@ Core allowed paths remain `crates/eylema-model/`, paired `docs/en/`/`docs/tr/` a
 The actual owner admitted a G29-only binding of the existing contracts profile for deterministic symbolic text validation/preprocessing through the continuation decision. G28's expired task binding does not transfer. Actual concrete-plan review still precedes product code; no numerical/inference/training/performance scope is added. Serving identity stays unknown. Architect/implementer/verifier are recorded gpt-6.1-sol/high under actual permitted scope; genuinely separate exact-head reviewer is required later. This document confers neither qualification nor execution authority.
 
 After actual human written-spec and profile-scope decisions, prepare the concrete plan under the existing inline method. That plan freezes exact APIs/counters/data-read/reference steps, source/repair/review/time evidence and coordinated delivery. Original120/3/900 includes all preparation. Existing conditional maintainer merge permission remains, without release/admin/spend/private-export permission.
+
+Execution base advanced to accepted source `460e4aecc7a47a10abb62b501185ede7d963186b` after independent repository-name alignment PR109; guide base `db56022d1f09b11b8cc8eda873059053bf1aa7a9` after PR56. Inherited main changes preserve original Rust crate paths/model fixture identities and G29 scope/budgets; no administration/policy override by this Goal.

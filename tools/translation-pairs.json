@@ -215,14 +215,14 @@
     {
       "en": "docs/en/g29-tokenizer-design.md",
       "tr": "docs/tr/g29-tokenizer-design.md",
-      "en_sha256": "6bb0936540633b53d4cbb016e08a06f86274ecac9c9b5001160f4aef13c1f292",
-      "tr_sha256": "d6758baf547d1624760bea643b896cfc289a47ad2286ce50fdcff7299b8f7d53"
+      "en_sha256": "1d915c1a7eada220ff4ba88273c54c1eba514da7f25ca34be3cf34bcf84c57a1",
+      "tr_sha256": "82890c462ecbc3fb37c4f7ba07739165f9a375509f7be4c15696f48e8e5ab4e4"
     },
     {
       "en": "docs/en/tokenizer.md",
       "tr": "docs/tr/tokenizer.md",
-      "en_sha256": "591b1f0b9d71123759aaa5f08c54f2ade130e08a02dd5c103fae2e2e806d2cac",
-      "tr_sha256": "4ae31179334b0b0fa6ad857a2cfb80ed78f110d734567d60b1b1342dcdee4f9e"
+      "en_sha256": "e04448335c7bae4f5d793d583837b0b977aed688317b0de2fd95a5dd15540886",
+      "tr_sha256": "0f8a654614769decce1cedbee83f1572569965a82c9d8e5b3c8a1f9a967b815d"
     }
   ],
   "documents": []
