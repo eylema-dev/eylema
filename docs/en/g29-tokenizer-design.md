@@ -1,6 +1,6 @@
 # G29 owned tokenizer and template design
 
-Status: actual owner approved G29 scope/preparation and continued after reviewing this written specification and the proposed G29-only contribution-profile binding. The concrete implementation plan is prepared for human review; production and full tokenizer/reference execution have not started. [Türkçe](../tr/g29-tokenizer-design.md).
+Status: actual owner approved written specification, G29-only contribution binding and concrete inline plan. Owned tokenizer/reference/native work is implemented locally; final checks/currentCI/separate review/coordinated delivery remain pending. [Türkçe](../tr/g29-tokenizer-design.md).
 
 ## Intent and accepted base
 

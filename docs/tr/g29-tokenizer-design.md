@@ -1,6 +1,6 @@
 # G29 kendi tokenizer ve şablon tasarımımız
 
-Durum: İnsan G29 kapsam/hazırlığını onayladı; bu yazılı şartname ve önerilen G29’a özel katkı profili bağını inceleyip devam talimatı verdi. Somut uygulama planı insan incelemesine hazırdır; üretim ve tam tokenizer/referans yürütmesi başlamadı. [English](../en/g29-tokenizer-design.md).
+Durum: İnsan yazılı şartname, G29’a özel katkı bağı ve somut sohbet içi planı onayladı. Kendi tokenizer/referans/native çalışması yerelde uygulandı; son kontroller/güncelCI/ayrı inceleme/koordineli teslim bekliyor. [English](../en/g29-tokenizer-design.md).
 
 ## Amaç ve kabul edilmiş taban
 

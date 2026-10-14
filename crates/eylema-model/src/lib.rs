@@ -12,3 +12,4 @@ extern crate self as eylema_model;
 mod header_tests;
 
 pub use loader::{LoadBudget, LoadedWeights, load};
+pub mod tokenizer;
