@@ -199,6 +199,12 @@
       "tr": "docs/tr/cpu-reference.md",
       "en_sha256": "5dccce635638f181b08998e5f2b79fcd08ead3c17dd644873962ade1a724c304",
       "tr_sha256": "bbb08976cc703383a27ee2399682493ef77de169a43e14a1e5fa156e05d60ebc"
+    },
+    {
+      "en": "docs/en/g28-weight-loader-design.md",
+      "tr": "docs/tr/g28-weight-loader-design.md",
+      "en_sha256": "9b612499bf0225a2b5116f770113c290ae5546609615baaa3b2de1adec771f3b",
+      "tr_sha256": "98dfebe33fc2c5b5c0d3a991b9f5e79f14e87b57cbc39b3fe839aefab256ccab"
     }
   ],
   "documents": []
