@@ -127,7 +127,7 @@ pub fn load<R: Read>(
         .iter()
         .find(|c| c.name == d.configuration.weights_component)
         .ok_or(LoadError::InvalidProfile)?;
-    if c.size > MAX_ARTIFACT || c.size > budget.max_artifact_bytes {
+    if c.size < 8 || c.size > MAX_ARTIFACT || c.size > budget.max_artifact_bytes {
         return Err(LoadError::SizeLimit);
     }
     if c.size

@@ -222,3 +222,23 @@ fn owned_file_snapshot_survives_overwrite_and_removal() {
         Some(&[0, 0, 128, 63, 0, 0, 0, 192][..])
     );
 }
+
+#[test]
+fn undersized_artifact_rejects_before_prefix_read() {
+    struct NoRead;
+    impl Read for NoRead {
+        fn read(&mut self, _: &mut [u8]) -> io::Result<usize> {
+            panic!("known undersized artifact consumed input")
+        }
+    }
+    for dt in [StoredDtype::F32, StoredDtype::BF16] {
+        for size in 1..8 {
+            let m = manifest(dt, size, digest(dt));
+            let l = layout(&m);
+            assert_eq!(
+                load(&mut NoRead, &m, &l, budget(size)).unwrap_err(),
+                LoadError::SizeLimit
+            );
+        }
+    }
+}
