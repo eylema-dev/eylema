@@ -1,0 +1,61 @@
+# G29 kendi tokenizer ve şablon tasarımımız
+
+Durum: İnsan G29 kapsamını ve yazılı tasarım hazırlığını onayladı. Bu yazılı şartname ve G29’a özel katkı profili bağı gerçek insan incelemesini bekliyor; üretim ve uygulama planlaması başlamadı. [English](../en/g29-tokenizer-design.md).
+
+## Amaç ve kabul edilmiş taban
+
+EylemA, yerel dil/karar/embedding yürütmesini kabul etmeden önce yeniden kullanılabilir kendi Rust metin ön ucuna ihtiyaç duyar. Modele özel kimlik ve ön işleme, sabit rol arayüzlerinden ayrıdır. Kendi Rust üretim kodumuzu, sınırlı kaynakları, proje gizliliğini ve açık desteklenmeme durumlarını koru; tokenization model/eylem/veri yetkisi vermez.
+
+Kaynak taban `d0dcc39c65c8229cc8d54f1c8a831adaecf66d80`; devguide tabanı `45541cb916c5253bb6d3f2832a2dbffab1e9ad9d`. Özgün G27 bağımlılığı kalır. Mevcut sınırlı native hash akışı için kabul edilmiş G28’i ekle. `eylema-model` zaten kayıtlıdır; kök Cargo/platform/ortak araçlar değişmez. Özgün G29-P1/A1/CP1 ve120aktif dakika/3hedefli onarım/900inceleme saniyesi hazırlığı da kapsar; sıfırlanmaz. Provider/model/eğitim/ağırlık çağrısı, yeni paket, harcama, izin veya G40 değişikliği yoktur.
+
+## Seçilen profil ve gerçek gözlemler
+
+Qwen/Qwen3-0.6B kaynak `c1899de289a04d12100db370d81485cdf75e47ca` ve [kabul edilmiş katalog](https://github.com/eylema-dev/eylema-models/blob/09b9b92e250367148bf8396e87aa4c70fee1abcc/catalog/qwen3-0.6b.v1.json) korunur. `tokenizer.json`11422654bayt, bildirilen SHA256 `aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4`; tam dosya indirilmedi/doğrulanmadı. Ölçülmüş `tokenizer_config.json`9732bayt/SHA256 `d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101` ve4168bayt şablon dilimi/SHA256 `a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8` sabittir.
+
+Yalnız ilk65536bayt HTTP206 metaveri okuması NFC, sabit Qwen Split sonra ByteLevel,26added token, BPE/no dropout/no unknown token/no byte fallback/no ignored merges gösterir. Boş subword prefix/suffix ile ByteLevel prefix-space/regex kapalı değerleri tam profil koşuludur; değişebilir varsayılan değildir. Önek okuması tam hash veya tokenization kanıtlamaz. Önbellekteki açık vocab, kaynak Git blob `4783fe10ac3adce15ac8f358ef5462739852c569` ile eşleşir; Hello9707/boşluk-world1879 yayımlanmış bağımsız Qwen örneğiyle de eşleşir, tam aday yürütmesi değildir.
+
+## Sahiplik ve arayüzler
+
+`crates/eylema-model` içinde beş ayrı birim: doğrulanmış tokenizer kimliği/veri kabulü; sabit Unicode verisi/NFC; sabit desenle bölme; tersinir byte alphabet/BPE; tipli prompt biçimleme ve decoding. Public `Tokenizer` alanları private kalır; denetimsiz constructor, mutable veri accessor’ı, rastgele regex/Jinja/program yürütmesi veya harici fallback yoktur. Public işlemler `encode_text`, `encode_prompt` ve strict UTF8 `decode`; sonuçlar çağıran bütçesi ve değişmez manifest kimliğine bağlıdır. Kesin imza/hata ve bağımsız literal’ler sonraki incelenmiş uygulama planında sabitlenir.
+
+Kabul gerçek tokenizer/config baytları için yetkili sınırlı reader, kanonik `ModelManifest` ve açık kaynak bütçesi alır. Model/kaynak/config/component/template kimlikleri, desteklenen JSON semantiği, benzersiz token ID/string, eksiksiz256byte alphabet, geçerli merge referansı/sırası ve vocabulary sınırı eşleşir. Kullanılabilir tokenizer kurulmadan gerçek tam boyut/bayt/digest doğrulanır. G28 ağırlık yükleyicisi JSON için kullanılmaz; yalnız mevcut native akış hizmeti kullanılır. Dosya/ağ açma veya hash’ten yetki yoktur. Bloklayan reader deadline’ı çağıranın sorumluluğudur.
+
+Sabit iç birimler ayrı kabul edilen profillerde yeniden kullanılabilir. İlk olumlu profil yalnız sabit Qwen adayı ve açıkça sentetik geliştirme fixture’larıdır; başka model/ön işleme/şablon sürümü reddedilir. Mevcut `check_assignment`/`UnsupportedLocal` ve model yürütme durumu değişmez.
+
+## Unicode sözleşmesi ve kökeni
+
+Mevcut incelenmiş CPython3.14 geliştirme aracından **Unicode16.0.0** seçilir. Gözlenen geliştirme interpreter’ı3.14.8, `unicodedata.unidata_version`16.0.0. Rust’ın değişen karakter sınıflarını kullanma; yerel Python3.15/Unicode17 ile sessiz üretim yapma. Runtime kendi Rust algoritmamız ve üretilmiş değişmez veriyi kullanır; Python çağırmaz. Türetilen Unicode verisi [Unicode koşullarına](https://www.unicode.org/license.txt) bağlı, ayrıca atıflı açık veri girdisidir; üçüncü taraf engine/crate değildir. Bildirim/köken verinin yanında korunur; kendi kodumuz Apache-2.0 kalır. Upstream uygulama kopyalanmaz.
+
+Salt okunur property denetimi kaynak veri SHA256 `3627a624f63370f0e726dde726f42934c8ca898c5e18fb69abdeee5a27ff00d8` sabitler: `g29-unicode-data.v1` NUL + `16.0.0` NUL, artan geçerli scalar kayıtları: codepointu32BE,2ASCII category baytı, combining classu16BE, decomposition uzunluku16BE+ASCII, full-casefold uzunluku16BE+UTF8. Surrogate’lar dışlanır. Bağımsız composition verisi SHA256 `e83834fdad296e46779fb702e11dd9b8686409a6346461d02fe3a22afaf26dd4`: `g29-unicode-composition.v1` NUL/sürüm NUL ardından mevcut Python NFC(a+b)==result koşulunu sağlayan kanonik iki-codepoint decomposition için sıralı3xu32BE `(a,b,result)` üçlüleri. Üretilecek sıkı tablolar bu kimlikleri yeniden üretmeli ve kendi gerçek dosya hash’lerini taşımalıdır; henüz üretilmediler.
+
+Kendi NFC’miz [Unicode16 UAX15](https://www.unicode.org/reports/tr15/tr15-56.html) izler: recursive kanonik decomposition, stable combining-class sırası, blocked kanonik composition ve Hangul. Compatibility eşlemesi NFC değildir. Veri L*/N* category, combining class/decomposition/composition ve tam Unicode White_Space içerir; daha geniş Python/Rust whitespace kısayolu kullanılmaz. Sabit İngilizce contraction alternatifleri kaynak sırasını ve Unicode simple-case eşitliğini (long-s dahil) korur; genel regex engine yoktur. Unicode16 unassigned scalar açıkça reddedilir; kabul edilen assigned/control/private-use scalar’lar sınırlıdır. Upstream regex/Unicode build sürümü gözlenemediği için bütün sürüm/codepoint eşitliği iddiası yoktur.
+
+## Byte encoding ve prompt alt kümesi
+
+NFC’den sonra sabit desenin sıralı alternatifleri, isolated split ve byte-level dönüşümü prefix-space eklenmeden uygulanır.256byte eşleme doğrulanmış bijection’dır. BPE tam merge rank, deterministik soldan sağa non-overlap ve checked iş bütçesi kullanır; unknown replacement veya stochastic dropout yoktur. Decoder bilinmeyen ID ve bozuk/eksik UTF8’i reddeder; geçerli bildirilen added-token ID kendi literal yazımı olur, yetki olmaz. Kayıplı replacement, örtük truncation veya şablon değiştirme yoktur.
+
+İlk prompt isteğe bağlı ilk system, sonra user ve dönüşümlü assistant/user düz metin geçmişini, son mesaj user olacak şekilde destekler; en fazla8mesaj. Tam no-tools/non-thinking sabit şablon alt kümesi ve generation prefix yeniden üretilir. Tool kaydı, multimodal alan, rastgele role, reasoning-content veya Jinja yürütmesi yoktur.NFC öncesinde veya sonrasında26added-token yazımından birini içeren düz mesaj/metin girdi çıktıdan önce reddedilir; yapısal ID yalnız tipli formatter tarafından eklenir. Bu kasıtlı kabul alt kümesi kullanıcı içeriğinin kontrol sınırına dönüşmesini engeller; sınırsız upstream metin/şablon uyumu iddia etmez. Decoder çıktısı veridir; role/eylem talimatı değildir.
+
+## Sonlu kaynak ve hata sözleşmesi
+
+Tokenizer<=16MiB; config<=64KiB; <=160000token ve160000merge kaydı, decode edilmiş kayıt<=4096bayt; toplam mantıksal istenen resident içerik<=128MiB. Ayrı scratch/içerik hesabı allocation öncesinde ham girdi, parser/tutulan veri, üretilmiş veri çalışma görünümü, normalized bayt, ID ve merge iş yapılarını içerir. Allocator/OS/RSS/throughput mantıksal sınırdan çıkarılmaz.
+
+Metin<=8192UTF8bayt; <=8mesaj ve32768toplam içerik baytı; normalization scratch<=65536bayt; <=4096çıktı token, prompt kabulünde manifest generation payı checked subtraction ile ayrılır. EOF probe dahil ortak okuma<=1024çağrı/16Interrupted tekrar; artifact işlemi başına kabul parsing/validation<=134217728açık iş birimi; encoding/decoding işlemi başına<=2000000açık scan/normalization/merge iş birimi. Kabul tüketilen/decode edilen bayt, JSON node/field ve kayıt doğrulamasını; encoding scalar tarama, decomposition/order/composition, byte eşleme, rank karşılaştırması ve üretilen/decode edilen baytları sayar. Küçük metin iş sınırı tam tokenizer girdisinin taramasına uygulanıp bilinen dosya boyutu reddedilmez. Bilinen uzunluk sınırı okumadan/büyük reservation’dan önce, sonraki büyüme/iş adımları da önceden denetlenir. Tükenme kategorik ret olur; kabul edilmiş kısmi sonuç veya sessiz truncation olmaz. Kesin sayaç/fallible depolama yöntemi incelenmiş planda sabitlenir.
+
+Hatalar unsupported/profile/hash/config/header/vocabulary/merge/Unicode/input/token/size/resident/work/I/O/allocation/platform ayrımını yapar; ham metin, metadata, yol, caller I/O string veya reasoning içermez. Debug yalnız sayıları gösterir. API persistence/collect/train/share/proje erişim izni vermez.
+
+## Terfiden önce bağımsız kabul
+
+Yeni ürün kodundan önce mevcut Python3.14 standart kitaplıklarıyla dondurulmuş referans hazırla: bağımsız full-scan BPE, açık Unicode-category/White_Space regex sınıfları ve Python NFC. Rust çıktısını tekrar kullanma; Transformers/tokenizers/regex/Jinja engine kurma/çalıştırma. Gerçek aday vektörü üretmeden yayımlanmış Hello-world anchor’ı ve bağımsız denetlenmiş küçük merge örneklerini doğrula; bilinmeyen kapsama kabul verilmez. Sonraki sınırlı veri okuma planı yalnız açık tokenizer/Unicode referansını, toplam<=20MiB ve tam kaynak/hash/haklar kaydıyla alabilir; ağırlık/özel kayıt yoktur. Bu yazılı tasarım hazırlığında böyle tam paket indirme yetkisi/kullanımı yoktur.
+
+Korpus boş/başında boşluk/İngilizce contraction, Türkçe noktalı/noktasız I ve Ç/Ğ/Ş, decomposition eşdeğeri, yeniden sıralanan combining mark, Hangul, CJK, emoji/non-BMP, sayı, CR/LF, son whitespace ve yinelenen/overlap merge içerir. Prompt örnekleri optional system, çok turlu role, tam son prefix, hatalı role/sıra, sentinel injection ve desteklenmeyen tool/reasoning alanlarını kapsar. Negatifler değişmiş/kesik/fazla dosya, duplicate, bozuk alphabet/merge rank/reference/ID, profile/hash mismatch, Unicode sürüm kayması, unassigned scalar, eksik UTF8 ve tam pre-read/work/resident/context sınırlarıdır.
+
+En az dört gerçek derlenmiş kaynak mutasyonu yanlış NFC composition/sırası, yanlış split/byte eşleme, değiştirilmiş BPE rank ve data-to-control-token/template karışmasını yakalamalıdır. Kaynağı geri yükleyip GREEN kanıtla; compile/setup başarısızlığı davranış kanıtı sayılmaz. Gerçek native aday-vector kabulü özel tutulan açık artifact’lerle, temizlenmiş hash/sonuçlarla yapılır; normal CI küçük açıkça sentetik fixture tutar ve eksik gerçek-asset testini dürüstçe etiketler. Yerel/güncelCI/gerçek ayrı yetkili son-head inceleme/aynı main/mainCI gerekir. Tokenization model/GPU/eğitim/performance kabulü değildir.
+
+## Kapsam, yeterlilik ve devir
+
+Core yolları `crates/eylema-model/`, eşlenik `docs/en/`/`docs/tr/`, `tools/translation-pairs.json` kalır. Devguide bağlantısı yalnız G29 plan/kart, eşlenik aksiyon/tooling notu, gerekli gerçek insan yeterlilik bağı, kaynak pin ve fingerprint’tir. Diğer67kart, özgün kriter/bağımlılık, kabul edilmiş geçmiş/kök politika ve blocked G40 korunur. Üretilmiş veri/bildirim/geliştirme referans araçları model paketi içinde kalır; kök bağımlılık/workflow istisnası yoktur.
+
+Mevcut contracts profili deterministik sembolik metin doğrulama/ön işleme için yalnız adaydır. G28’in biten görev bağı taşınamaz. İnsan ürün kodundan önce G29’a özel bağı kabul etmeli veya sınırlı ek değerlendirme istemelidir; numerical/inference/training/performance kapsamı eklenmez. Serving identity bilinmez. Architect/implementer/verifier gerçek izinli kapsamda kayıtlı gpt-6.1-sol/high; sonra gerçekten ayrı son-head reviewer gerekir. Belge yeterlilik/yürütme yetkisi vermez.
+
+Gerçek insan yazılı şartname ve profil kapsamı kararından sonra mevcut sohbet içi yöntemle somut plan hazırlanır. Plan tam API/sayaç/veri okuma/referans adımı, kaynak/onarım/inceleme/süre kanıtı ve koordineli teslimi sabitler. Özgün120/3/900 bütün hazırlığı içerir. Mevcut koşullu merge izni geçerlidir; release/admin/spend/özel-export izni değildir.

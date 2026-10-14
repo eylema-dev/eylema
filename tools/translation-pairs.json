@@ -211,6 +211,12 @@
       "tr": "docs/tr/weight-loader.md",
       "en_sha256": "5aa1b2ef4d3423d8138e8bb92c18e7999dfe0cf5e40fbf2a74ef4c2636f6efc1",
       "tr_sha256": "692c797667a17cf7183b72a34bf2ef01fbfa3e1c9e11453b664686fcd3e118a1"
+    },
+    {
+      "en": "docs/en/g29-tokenizer-design.md",
+      "tr": "docs/tr/g29-tokenizer-design.md",
+      "en_sha256": "9e09163b2f42c0713f6de23e8007bb392b4e0b3d2109c4770583655914a79348",
+      "tr_sha256": "7383e0fb73808cecff33fc5607ba23362eb4f68af6446a1ce3ee2c71e0cfe7cb"
     }
   ],
   "documents": []
