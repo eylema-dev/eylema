@@ -427,6 +427,179 @@ fn portfolio_cardinality_bounds() {
     assert_eq!(r.verdict, Verdict::EstimatedFit);
 }
 
+#[test]
+fn rag_qlora_and_modal_workload() {
+    let mut p = Portfolio::basic();
+    p.pools = vec![
+        pool("unified", PoolKind::Unified, 1000),
+        pool("disk", PoolKind::Storage, 400),
+    ];
+    p.residents[0].weights = known(Formula::Quantized {
+        parameters: 10,
+        bits: 4,
+        group_size: 4,
+        scale_bytes: 2,
+        metadata: known(bytes(1, 3)),
+    });
+    p.invocations = vec![invocation("i1", 100, 10)];
+    let targets = [LoraTarget {
+        input: 4,
+        output: 6,
+        rank: 2,
+    }];
+    p.auxiliary = vec![
+        auxiliary("adapter", "unified", Lifetime::Persistent, 40, 40),
+        auxiliary("gradient", "unified", Lifetime::Persistent, 40, 40),
+        auxiliary("optimizer", "unified", Lifetime::Persistent, 80, 80),
+        auxiliary("recurrent", "unified", Lifetime::Persistent, 72, 72),
+        auxiliary("vectors", "unified", Lifetime::Persistent, 48, 48),
+        auxiliary("index", "unified", Lifetime::Persistent, 16, 16),
+        auxiliary("checkpoint", "unified", Lifetime::Transient, 20, 20),
+        auxiliary("modality", "unified", Lifetime::Transient, 8, 8),
+        auxiliary("working", "unified", Lifetime::Transient, 4, 4),
+        auxiliary("source", "disk", Lifetime::Persistent, 300, 300),
+    ];
+    p.auxiliary[0].kind = AuxiliaryKind::Adapter;
+    p.auxiliary[1].kind = AuxiliaryKind::Gradient;
+    p.auxiliary[2].kind = AuxiliaryKind::Optimizer;
+    p.auxiliary[3].kind = AuxiliaryKind::ModelState;
+    p.auxiliary[4].kind = AuxiliaryKind::RagIndex;
+    p.auxiliary[0].size = known(Formula::Lora {
+        targets: &targets,
+        bits: 16,
+        copies: Ratio {
+            numerator: 1,
+            denominator: 1,
+        },
+    });
+    p.auxiliary[1].size = known(Formula::Lora {
+        targets: &targets,
+        bits: 16,
+        copies: Ratio {
+            numerator: 1,
+            denominator: 1,
+        },
+    });
+    p.auxiliary[2].size = known(Formula::Lora {
+        targets: &targets,
+        bits: 16,
+        copies: Ratio {
+            numerator: 2,
+            denominator: 1,
+        },
+    });
+    p.auxiliary[3].size = known(Formula::Recurrent {
+        batch: 2,
+        state_elements: 12,
+        bits: 16,
+        coefficient: Ratio {
+            numerator: 3,
+            denominator: 2,
+        },
+    });
+    p.auxiliary[4].size = known(Formula::RagVectors {
+        count: 3,
+        dimensions: 4,
+        bits: 32,
+    });
+    p.overlaps = vec![Overlap {
+        id: "train",
+        members: &[
+            Member::Invocation("i1"),
+            Member::Auxiliary("checkpoint"),
+            Member::Auxiliary("modality"),
+            Member::Auxiliary("working"),
+        ],
+    }];
+    let s = p.snapshot();
+    let report = estimate(&s, 15).unwrap();
+    assert_eq!(report.pools[0].unwrap().total, Some(bytes(450, 452)));
+    assert_eq!(report.pools[1].unwrap().total, Some(bytes(300, 300)));
+    assert_eq!(report.verdict, Verdict::EstimatedFit);
+    assert!(report.planning_only);
+    p.auxiliary[2].size = Claim::Unknown {
+        reason: UnknownReason::MissingCoefficient,
+        source: "optimizer",
+    };
+    let s = p.snapshot();
+    let report = estimate(&s, 15).unwrap();
+    assert_eq!(report.pools[0].unwrap().total, None);
+    assert_eq!(report.pools[0].unwrap().verdict, Verdict::Unknown);
+    assert_eq!(report.pools[1].unwrap().verdict, Verdict::EstimatedFit);
+    p.auxiliary[2].size = known(Formula::Bytes(bytes(80, 80)));
+    p.auxiliary[3].size = known(Formula::Unsupported(UnknownReason::UnsupportedArchitecture));
+    total(&p, None, Verdict::Unknown);
+
+    let mut p = Portfolio::basic();
+    p.residents.clear();
+    p.invocations.clear();
+    p.auxiliary = vec![
+        auxiliary("source", "unified", Lifetime::Transient, 12, 12),
+        auxiliary("destination", "unified", Lifetime::Transient, 14, 14),
+        auxiliary("staging", "unified", Lifetime::Transient, 8, 8),
+    ];
+    p.overlaps = vec![Overlap {
+        id: "convert",
+        members: &[
+            Member::Auxiliary("source"),
+            Member::Auxiliary("destination"),
+            Member::Auxiliary("staging"),
+        ],
+    }];
+    total(&p, Some(bytes(34, 34)), Verdict::EstimatedFit);
+    p.pools = vec![
+        pool("ram", PoolKind::HostRam, 100),
+        pool("vram", PoolKind::DeviceVram, 100),
+    ];
+    p.auxiliary[0].pool = "ram";
+    p.auxiliary[1].pool = "vram";
+    p.auxiliary[2].pool = "vram";
+    let s = p.snapshot();
+    let report = estimate(&s, 15).unwrap();
+    assert_eq!(report.pools[0].unwrap().total, Some(bytes(12, 12)));
+    assert_eq!(report.pools[1].unwrap().total, Some(bytes(22, 22)));
+}
+
+#[test]
+fn maximum_pool_and_target_counts_remain_valid() {
+    let targets = [LoraTarget {
+        input: 4,
+        output: 6,
+        rank: 2,
+    }; 32];
+    assert_eq!(
+        size(Formula::Lora {
+            targets: &targets,
+            bits: 16,
+            copies: Ratio {
+                numerator: 1,
+                denominator: 1
+            }
+        }),
+        Ok(SizeStatus::Known(bytes(1280, 1280)))
+    );
+    let ids = ["p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7"];
+    let pools: Vec<_> = ids
+        .iter()
+        .map(|id| pool(id, PoolKind::HostRam, 100))
+        .collect();
+    let snapshot = Snapshot {
+        id: "pools",
+        expected_id: "pools",
+        revision: 1,
+        expected_revision: 1,
+        pools: &pools,
+        residents: &[],
+        invocations: &[],
+        auxiliary: &[],
+        overlaps: Some(&[]),
+    };
+    let report = estimate(&snapshot, 15).unwrap();
+    assert_eq!(report.pool_count, 8);
+    assert_eq!(report.verdict, Verdict::EstimatedFit);
+    assert_eq!(report.pools[7].unwrap().total, Some(bytes(0, 0)));
+}
+
 fn evidence() -> Evidence<'static> {
     Evidence {
         origin: Origin::SuppliedAssumption,
