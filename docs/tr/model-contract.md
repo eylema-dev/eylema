@@ -25,3 +25,5 @@ On bir yerel test gerçek katalog fixture çözümlemesini, tam kaynak/ağırlı
 Güven sınırları: incelenmiş denetim girdileri/kaynak alımı/saatler, kendi typed sözleşmemiz ve bildirilen profil anlamları. Sonraki yükleyici kullanımdan önce gerçek byte'ları doğrulamalı, gerekli her operator/backend/tokenizer'ı ayrıca kanıtlamalıdır. Bilinmeyen/desteklenmeyen profil fallback olmadan reddedilir. Withdrawal/collect/train/disclosure/export izinleri ayrı proje verisi kapılarında kalır.
 
 Birincil kaynaklar: [sabit publisher dosyaları](https://huggingface.co/Qwen/Qwen3-0.6B/tree/c1899de289a04d12100db370d81485cdf75e47ca), [denetlenen referans commit](https://github.com/huggingface/transformers/tree/0720e206c6ba28887e4d60ef60a6a089f6c1cc76). Referans yalnız okundu/hash denetlendi; Transformers/PyTorch kurulmadı/çalıştırılmadı.
+
+Kaynak precision BF16, planlanan FP32 CPU referansı ve FP16 Metal yürütme/dönüştürme profillerinden ayrıdır. Dönüştürme ve nümerik kabul sonraki kapılarda kalır; bu katalog özgün hedef yükümlülüklerinin yerini almaz.

@@ -25,3 +25,5 @@ Eleven native tests include actual catalog fixture decoding, exact source/weight
 Trust boundaries: reviewed audit inputs/source retrieval and clocks, own typed contract and declared profile semantics. Later loading must verify actual bytes before use and independently establish every required operator/backend/tokenizer. Unknown/unsupported profiles fail without a fallback. Withdrawal/collect/train/disclosure/export permissions remain in their separate project-data gates.
 
 Primary sources: [pinned publisher files](https://huggingface.co/Qwen/Qwen3-0.6B/tree/c1899de289a04d12100db370d81485cdf75e47ca), [audited reference commit](https://github.com/huggingface/transformers/tree/0720e206c6ba28887e4d60ef60a6a089f6c1cc76). The reference was read/hash-audited only; Transformers/PyTorch was not installed or executed.
+
+Source precision BF16 is separate from the planned FP32 CPU reference and FP16 Metal execution/conversion profiles. Those conversions and numerical acceptance remain later gates; this catalog does not replace the original target obligations.
