@@ -1,6 +1,6 @@
 # Native development environment — G04
 
-Revision 0.1.0. [Türkçe](../tr/development-environment.md). This is development-tool evidence for one physical Mac, not an implemented Eylema application. The documentation source guard remains active; G07 supplies the root workspace, toolchain file and actual implementation CI together.
+Revision 0.1.0. [Türkçe](../tr/development-environment.md). This is development-tool evidence for one physical Mac, not an implemented Eyleme application. The documentation source guard remains active; G07 supplies the root workspace, toolchain file and actual implementation CI together.
 
 ## Observed environment and reproducible probes
 
@@ -36,4 +36,4 @@ xcodebuild -downloadComponent MetalToolchain
 
 The Metal compiler stub was discoverable before installation but could not execute; metallib was missing. Installing the official component made compiler/linker invocation succeed. Apple's [additional-component instructions](https://developer.apple.com/documentation/xcode/downloading-and-installing-additional-xcode-components) describe this tool boundary. No sudo, repository permission, deployment or paid service was used.
 
-Passed: actual native Rust compile/run, Wasm compile, Metal shader compile/link and local environment inventory. Not run: Eylema runtime/workspace, Wasm/browser execution, GPU compute/readback, model inference, training, performance or release acceptance. Eight failure-oriented unit tests use mocked commands and synthetic artifacts; their success is validator evidence, separate from the real local probes. Output replacement is atomic and storage failure preserves the prior report. Hosted repository CI executes those tests and keeps the documentation Rust gate skipped; it does not rerun this Mac's environment acceptance. G07 and G19 must provide their own actual implementation/runtime/GPU evidence.
+Passed: actual native Rust compile/run, Wasm compile, Metal shader compile/link and local environment inventory. Not run: Eyleme runtime/workspace, Wasm/browser execution, GPU compute/readback, model inference, training, performance or release acceptance. Eight failure-oriented unit tests use mocked commands and synthetic artifacts; their success is validator evidence, separate from the real local probes. Output replacement is atomic and storage failure preserves the prior report. Hosted repository CI executes those tests and keeps the documentation Rust gate skipped; it does not rerun this Mac's environment acceptance. G07 and G19 must provide their own actual implementation/runtime/GPU evidence.

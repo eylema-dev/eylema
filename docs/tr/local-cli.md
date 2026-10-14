@@ -16,7 +16,7 @@ eylema inspect execution <execution-id>
 eylema stop service
 ```
 
-`run demo [delta]`, yalnızca Eylema’nın sahip olduğu görev durumundaki değeri artıran sınırlı bir görev oluşturur. Delta 1–1.000.000 arasındadır. Dosya sistemi, shell, ağ veya başka dış etkisi yoktur. `create <request-file>` ve `run <request-file>`, var olan sürümlü EYL taşıma codec’iyle kodlanmış, boyutu sınırlı ikili istekleri alır. `inspect`, kararlı JSON kayıtları yazdırır ve servisin görev/yürütme kimliklerini ve makine hata kodlarını kullanır. Hatalar `{"status":"error","code":"..."}` biçiminde yazdırılır ve sıfırdan farklı çıkış kodu döndürür.
+`run demo [delta]`, yalnızca Eyleme’nin sahip olduğu görev durumundaki değeri artıran sınırlı bir görev oluşturur. Delta 1–1.000.000 arasındadır. Dosya sistemi, shell, ağ veya başka dış etkisi yoktur. `create <request-file>` ve `run <request-file>`, var olan sürümlü EYL taşıma codec’iyle kodlanmış, boyutu sınırlı ikili istekleri alır. `inspect`, kararlı JSON kayıtları yazdırır ve servisin görev/yürütme kimliklerini ve makine hata kodlarını kullanır. Hatalar `{"status":"error","code":"..."}` biçiminde yazdırılır ve sıfırdan farklı çıkış kodu döndürür.
 
 ## Yetki ve sınırlar
 

@@ -24,11 +24,11 @@ fn main() -> Result<()> {
     let head = Commit::new("b".repeat(40))?;
     let need = NeedSpec::new(NeedDraft {
         key: TaskKey::new(
-            "eylema-dev/eylema".into(),
+            "eyleme-dev/eyleme".into(),
             RequestId::new("native-coordinator-fixture").map_err(|_| Error::InvalidInput)?,
             Revision::new(1).map_err(|_| Error::InvalidInput)?,
         )?,
-        source_repository: "eylema-dev/eylema".into(),
+        source_repository: "eyleme-dev/eyleme".into(),
         issue_number: None,
         objective: "Exercise owned coordinator CPU transitions with fixture observations".into(),
         acceptance: vec![Acceptance {

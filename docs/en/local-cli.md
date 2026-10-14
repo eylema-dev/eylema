@@ -16,7 +16,7 @@ eylema inspect execution <execution-id>
 eylema stop service
 ```
 
-`run demo [delta]` creates one bounded task that adds a value only to Eylema's owned task state. The delta is 1–1,000,000. It has no filesystem, shell, network or other external effect. `create <request-file>` and `run <request-file>` accept bounded binary requests encoded by the existing versioned EYL transport codec. `inspect` prints stable JSON records and reuses the service's task/execution IDs and machine errors. Errors print `{"status":"error","code":"..."}` and return a nonzero exit status.
+`run demo [delta]` creates one bounded task that adds a value only to Eyleme's owned task state. The delta is 1–1,000,000. It has no filesystem, shell, network or other external effect. `create <request-file>` and `run <request-file>` accept bounded binary requests encoded by the existing versioned EYL transport codec. `inspect` prints stable JSON records and reuses the service's task/execution IDs and machine errors. Errors print `{"status":"error","code":"..."}` and return a nonzero exit status.
 
 ## Authorization and limits
 

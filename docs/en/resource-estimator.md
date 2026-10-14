@@ -1,6 +1,6 @@
 # Declared resource estimator
 
-G80 adds a pure owned Rust sizing module beside the existing [resource manager](resource-manager.md). [Turkish](../tr/resource-estimator.md). The [approved design](g80-resource-estimator-design.md) fixes scope; the [technical plan](https://github.com/eylema-dev/devguide/blob/main/docs/plans/g80-resource-estimator.md) records its implementation and acceptance gates.
+G80 adds a pure owned Rust sizing module beside the existing [resource manager](resource-manager.md). [Turkish](../tr/resource-estimator.md). The [approved design](g80-resource-estimator-design.md) fixes scope; the [technical plan](https://github.com/eyleme-dev/devguide/blob/main/docs/plans/g80-resource-estimator.md) records its implementation and acceptance gates.
 
 ## Caller contract
 

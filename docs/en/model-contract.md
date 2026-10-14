@@ -1,6 +1,6 @@
 # Pinned model contract — G27
 
-G27 adds actual owned Rust validation of declared model provenance and role interfaces. It does not load weights, run a tokenizer/template/model, verify absent large artifact bytes, train, grant authority or invoke a provider. [Model catalog](https://github.com/eylema-dev/eylema-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) and the matching native fixture bind the selected Qwen candidate; candidate registration is separate from execution acceptance.
+G27 adds actual owned Rust validation of declared model provenance and role interfaces. It does not load weights, run a tokenizer/template/model, verify absent large artifact bytes, train, grant authority or invoke a provider. [Model catalog](https://github.com/eyleme-dev/eylema-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) and the matching native fixture bind the selected Qwen candidate; candidate registration is separate from execution acceptance.
 
 ## Closed metadata and support
 
@@ -12,7 +12,7 @@ The strict decoder rejects unknown authority/support fields, wrong types, noncan
 
 ## Baseline and limits
 
-Qwen/Qwen3-0.6B sourcec1899de289a04d12100db370d81485cdf75e47ca is the retained candidate. Config/license/tokenizer_config bytes and the4168byte UTF8 chat-template slice were measured; model.safetensors and tokenizer.json identities are publisher-advertised LFS SHA256 only. Neither large file was downloaded or byte-verified. Third-party rights remain independent of Eylema licensing. Exact hashes/sizes and audited source/reference pins are in the catalog; no third-party reference implementation or template is copied into production or executed.
+Qwen/Qwen3-0.6B sourcec1899de289a04d12100db370d81485cdf75e47ca is the retained candidate. Config/license/tokenizer_config bytes and the4168byte UTF8 chat-template slice were measured; model.safetensors and tokenizer.json identities are publisher-advertised LFS SHA256 only. Neither large file was downloaded or byte-verified. Third-party rights remain independent of Eyleme licensing. Exact hashes/sizes and audited source/reference pins are in the catalog; no third-party reference implementation or template is copied into production or executed.
 
 Declared Qwen profile: bfloat16 safetensors/noquantization,28layers, hidden1024/intermediate3072,16Qheads/8KVheads/head128, vocabulary151936 and upstream capacity40960. Q projection width2048 legitimately differs from hidden1024. Checked grouped-head/projection/workload arithmetic rejects incompatible heads/overflow. Narrow planned batch1/context4096/max128newtokens is not a measured capacity, latency or quality claim. The authored pinned operator contract specifies eager causal attention, FP32 RMS/softmax/position arithmetic, default RoPE, Q/K head normalization, tied logits, KV reset and greedy bounded generation. Physical loading/precision/tokenization/numerical conformance are later G23/G28/G29/G30 gates.
 

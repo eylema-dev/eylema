@@ -1,6 +1,6 @@
 # G28 bounded owned weight-loader design
 
-English canonical; [Türkçe](../tr/g28-weight-loader-design.md). Written design for human review, **not production implementation or acceptance**. The maintainer approved scope/design preparation on 14 October 2026; the written design and G28-only profile binding are now approved; the actual human also approved the concrete inline plan; source delivery checks/review/CI remain required. Source base `6605080fcae225e099775f7856349c0aac6aa011`, guide base `affbcd456fc467b10155eb3b71b4860042220b30`; core issue [G28 / #25](https://github.com/eylema-dev/eylema/issues/25).
+English canonical; [Türkçe](../tr/g28-weight-loader-design.md). Written design for human review, **not production implementation or acceptance**. The maintainer approved scope/design preparation on 14 October 2026; the written design and G28-only profile binding are now approved; the actual human also approved the concrete inline plan; source delivery checks/review/CI remain required. Source base `6605080fcae225e099775f7856349c0aac6aa011`, guide base `affbcd456fc467b10155eb3b71b4860042220b30`; core issue [G28 / #25](https://github.com/eyleme-dev/eyleme/issues/25).
 
 ## Purpose and contribution boundary
 

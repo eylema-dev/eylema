@@ -1,19 +1,21 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/eylema-logo/logo-dark.png">
-    <img src="assets/eylema-logo/logo.png" alt="Eylema" width="520">
+    <img src="assets/eylema-logo/logo.png" alt="Eyleme" width="520">
   </picture>
 </p>
 
-# Eylema
+# Eyleme
 
 **A Simple, High-Performance Agentic AI Web Platform for Continuous Development and Operations.**
 
-Code, identifiers, file names and contribution templates use English. Documentation is available in English and [Turkish](README.tr.md), with English as the canonical source. The product name **Eylema** was accepted on **11 October 2026**; the description above states its intended purpose.
+Code, identifiers, file names and contribution templates use English. Documentation is available in English and [Turkish](README.tr.md), with English as the canonical source. The product name changed from **Eylema** to **Eyleme** on **14 October 2026**; the description above states its intended purpose.
 
-Core project repository: [eylema-dev/eylema](https://github.com/eylema-dev/eylema), under the [eylema-dev organization](https://github.com/eylema-dev). The package prefix and native host CLI are `eylema`; local service start, task run/inspect, service stop and doctor commands are implemented. Task cancellation still requires an independently host-verified human session. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. First-party source and documentation are licensed under [Apache-2.0](LICENSE). Separately identified third-party material, model weights and datasets retain their own terms.
+Core project repository: [eyleme-dev/eyleme](https://github.com/eyleme-dev/eyleme), under the [eyleme-dev organization](https://github.com/eyleme-dev). The package prefix and native host CLI are `eylema`; local service start, task run/inspect, service stop and doctor commands are implemented. Task cancellation still requires an independently host-verified human session. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. First-party source and documentation are licensed under [Apache-2.0](LICENSE). Separately identified third-party material, model weights and datasets retain their own terms.
 
-The [name and availability record](https://github.com/eylema-dev/devguide/blob/main/docs/en/name-availability.md) preserves the checks made before organization creation and the subsequent registration update. `eylema-dev` and this public repository were established on 11 October 2026. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
+The [name and availability record](https://github.com/eyleme-dev/devguide/blob/main/docs/en/name-availability.md) preserves the checks made before organization creation and the subsequent registration update. The organization and this public repository were established under their former names on 11 October 2026; their current names are `eyleme-dev` and `eyleme`. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
+
+**Name transition:** Eyleme is the current product name; Derlema is now **Derleme**, and **Onama** keeps its name. The GitHub organization and core repository are now `eyleme-dev/eyleme`. Existing `eylema` commands, crate/package names, `EYLEMA_DATA_DIR`, `~/Library/Application Support/Eylema`, protocol identifiers and the `eylema.dev` domain are retained for compatibility. This rename does not migrate stored data or change EYL/EYLJ bytes. Historical records and copyright attribution preserve their original names.
 
 Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
@@ -29,7 +31,7 @@ G39 adds a [controlled native development workspace](docs/en/development-workspa
 
 ## Contribute
 
-Start with [contribution rules](https://github.com/eylema-dev/devguide/blob/main/CONTRIBUTING.md) and the shared [AI agent contract](https://github.com/eylema-dev/devguide/blob/main/AGENTS.md). Follow the [first-release roadmap](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/roadmap.md), [quality gates](https://github.com/eylema-dev/devguide/blob/main/docs/en/quality-gates.md) and [CI tooling inventory](https://github.com/eylema-dev/devguide/blob/main/docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.
+Start with [contribution rules](https://github.com/eyleme-dev/devguide/blob/main/CONTRIBUTING.md) and the shared [AI agent contract](https://github.com/eyleme-dev/devguide/blob/main/AGENTS.md). Follow the [first-release roadmap](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/roadmap.md), [quality gates](https://github.com/eyleme-dev/devguide/blob/main/docs/en/quality-gates.md) and [CI tooling inventory](https://github.com/eyleme-dev/devguide/blob/main/docs/en/tooling.md). Issue and PR templates collect scope, acceptance and evidence. Maintainer review remains separate from CI; required-check branch rules are not enabled by these files.
 
 G46 adds portable [loop, role and model-binding contracts](docs/en/platform-contracts.md): immutable declared profiles and bounded loop definitions. Native constructor checks are separate from model, training and harness-job acceptance.
 
@@ -65,31 +67,31 @@ Quality floors are mandatory before optimizing speed or cost. Compare complete a
 
 | Document | English source | Turkish companion |
 |---|---|---|
-| Project structure 0.5.0 | [First application and component proposal](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Architecture 0.7.0 | [Architecture](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
-| API and oversight 0.3.0 | [API reference](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
-| Development and operations 0.2.0 | [Team protocols](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
-| Learning and training 0.2.0 | [Learning protocol](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eylema-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
+| Project structure 0.5.0 | [First application and component proposal](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
+| Architecture 0.7.0 | [Architecture](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
+| API and oversight 0.3.0 | [API reference](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
+| Development and operations 0.2.0 | [Team protocols](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
+| Learning and training 0.2.0 | [Learning protocol](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
 
 Machine-readable drafts: [development request schema](ai-team-protocol/request.schema.json), [illustrative request](ai-team-protocol/request.example.json), [macOS model-set 0.2.0 schema](ai-team-protocol/v0.2/model-set-release.schema.json), [synthetic candidate](ai-team-protocol/v0.2/model-set-release.example.json), [preserved historical 0.1.0 schema](ai-team-protocol/model-set-release.schema.json). Schema validity is not authorization or evidence of successful execution.
 
-English identifiers, paths, fields, enums and error codes are shared across languages. Current documents use matching English file names under `docs/` in `eylema-docs-en` and `eylema-docs-tr`; translations track source revisions. Earlier Turkish architecture versions and the original API outline are retained in `eylema-docs-tr/archive/` as historical records. See [project structure](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) for the layout and migration notes.
+English identifiers, paths, fields, enums and error codes are shared across languages. Current documents use matching English file names under `docs/` in `eylema-docs-en` and `eylema-docs-tr`; translations track source revisions. Earlier Turkish architecture versions and the original API outline are retained in `eylema-docs-tr/archive/` as historical records. See [project structure](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/project-structure.md) for the layout and migration notes.
 
 ## First proof
 
-The first user is a developer building a single-user local agent application. The selected first working application is a task console: create a task, run deterministic steps, inspect progress, stop remaining work, save state and reopen it after a service restart. Build the Rust contracts, executor and journal, then demonstrate the minimal web interface. [Acceptance scenarios and proposed components](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) define what that demonstration must prove.
+The first user is a developer building a single-user local agent application. The selected first working application is a task console: create a task, run deterministic steps, inspect progress, stop remaining work, save state and reopen it after a service restart. Build the Rust contracts, executor and journal, then demonstrate the minimal web interface. [Acceptance scenarios and proposed components](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/project-structure.md) define what that demonstration must prove.
 
 The later 3D environment, learned policy/dynamics model, local language model, permitted training loop and development-team PR flow remain separate roadmap milestones. The first browser demonstration requires neither model access nor a GPU. The G15 CLI and G16 browser console now run and inspect the local task service; the non-human CLI session receives a truthful `FORBIDDEN` response to a stop request.
 
 ## Organization repositories
 
-[English product docs](https://github.com/eylema-dev/eylema-docs-en) · [Turkish product docs](https://github.com/eylema-dev/eylema-docs-tr) · [Developer guide](https://github.com/eylema-dev/devguide) · [Repository map](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-map.md)
+[English product docs](https://github.com/eyleme-dev/eylema-docs-en) · [Turkish product docs](https://github.com/eyleme-dev/eylema-docs-tr) · [Developer guide](https://github.com/eyleme-dev/devguide) · [Repository map](https://github.com/eyleme-dev/devguide/blob/main/docs/en/repository-map.md)
 
-`eylema` owns the current Rust task core, service/CLI/browser components, platform contracts, machine-readable schemas and brand assets. Product prose lives in the language repositories; shared contribution policy lives in devguide. Example/evaluation repositories contain accepted consumer and scoped measurement evidence; model/training repositories await their execution gates. The website is managed separately in [eylemadotdev](https://github.com/eylema-dev/eylemadotdev). Repository separation alone is not execution evidence; component notes bind actual acceptance scope.
+`eylema` owns the current Rust task core, service/CLI/browser components, platform contracts, machine-readable schemas and brand assets. Product prose lives in the language repositories; shared contribution policy lives in devguide. Example/evaluation repositories contain accepted consumer and scoped measurement evidence; model/training repositories await their execution gates. The website is managed separately in [eylemadotdev](https://github.com/eyleme-dev/eylemadotdev). Repository separation alone is not execution evidence; component notes bind actual acceptance scope.
 
-Read [the migration record](https://github.com/eylema-dev/devguide/blob/main/docs/en/repository-migration.md) for exact sources, destinations, linked PRs, integration checks and rollback. New document links target the coordinated post-merge layout; the PRs and pinned repository set provide review copies before then.
+Read [the migration record](https://github.com/eyleme-dev/devguide/blob/main/docs/en/repository-migration.md) for exact sources, destinations, linked PRs, integration checks and rollback. New document links target the coordinated post-merge layout; the PRs and pinned repository set provide review copies before then.
 
-The maintainer accepted the [first-product decisions and test inventory](https://github.com/eylema-dev/eylema-docs-en/blob/main/docs/project-structure.md) on 12 October 2026: deliver the usable task-console preview and an early need-to-PR proof before optional model/training work. MacBook Pro M4 Pro/24 GB remains primary; Mac mini M4/24 GB and Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM are additional test equipment awaiting their own execution evidence. Existing Rust types, EYL/EYLJ formats and scoped platform bindings remain the implementation baseline.
+The maintainer accepted the [first-product decisions and test inventory](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/project-structure.md) on 12 October 2026: deliver the usable task-console preview and an early need-to-PR proof before optional model/training work. MacBook Pro M4 Pro/24 GB remains primary; Mac mini M4/24 GB and Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM are additional test equipment awaiting their own execution evidence. Existing Rust types, EYL/EYLJ formats and scoped platform bindings remain the implementation baseline.
 
 - [G38 development coordinator](docs/en/development-coordinator.md): Owned Rust need-to-review state, host-resolved authority, finite budgets/cancellation and stale-evidence rejection; process/provider/GitHub isolation and real delivery remain G39–G43.
 

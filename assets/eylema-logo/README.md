@@ -1,10 +1,10 @@
-# Eylema identity
+# Eyleme identity
 
 [Türkçe](README.tr.md) · [Download the complete pack](../eylema-logo.zip)
 
-![Eylema identity preview](brand-preview.png)
+![Eyleme identity preview](brand-preview.png)
 
-The **E / action** mark combines Eylema's initial with a forward-pointing centre. Its angled terminals suggest movement; the rounded left corners soften the silhouette. The lowercase wordmark keeps the identity approachable.
+The **E / action** mark combines Eyleme's initial with a forward-pointing centre. Its angled terminals suggest movement; the rounded left corners soften the silhouette. The lowercase wordmark keeps the identity approachable.
 
 | Color | Hex | Use |
 |---|---|---|
@@ -35,4 +35,4 @@ Keep the proportions and colors intact. Preserve at least one stem-width of clea
 
 With Node.js and `sharp` available, run `node tools/render-brand.cjs` from the repository root. The script renders the canonical SVGs and builds the overview and social image using their exact geometry. It does not change the five source SVGs. The initial export used sharp 0.35.5. If dependencies live elsewhere, set `NODE_PATH` to that installation's `node_modules` directory. Rebuild the zip from this directory after changing assets.
 
-Brand assets identify Eylema. A repository license has not yet been selected; this package does not grant a trademark license or make a trademark-clearance claim.
+Brand assets identify Eyleme. A repository license has not yet been selected; this package does not grant a trademark license or make a trademark-clearance claim.

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 280" role="img" aria-labelledby="title desc">
-  <title id="title">Eylema</title>
-  <desc id="desc">An orange E with a forward-pointing centre, beside the lowercase Eylema wordmark in dark ink.</desc>
+  <title id="title">Eyleme</title>
+  <desc id="desc">An orange E with a forward-pointing centre, beside the lowercase Eyleme wordmark in dark ink.</desc>
   <path fill="#EE5638" transform="translate(24 42) scale(.76)" d="M48 24H216L176 72H80V104H184L216 128L184 152H80V184H176L216 232H48Q32 232 32 216V40Q32 24 48 24Z"/>
-  <text x="240" y="191" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="148" font-weight="600" letter-spacing="-5">eylema</text>
+  <text x="240" y="191" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="148" font-weight="600" letter-spacing="-5">eyleme</text>
 </svg>

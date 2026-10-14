@@ -1,16 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1080" role="img" aria-labelledby="title"><title id="title">Eylema brand preview — light, dark and avatar applications</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1080" role="img" aria-labelledby="title"><title id="title">Eyleme brand preview — light, dark and avatar applications</title>
     <rect width="1600" height="1080" fill="#F7F6F2"/>
-    <text x="96" y="86" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" letter-spacing="4">EYLEMA / BRAND IDENTITY</text>
+    <text x="96" y="86" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22" letter-spacing="4">EYLEME / BRAND IDENTITY</text>
     <text x="1504" y="86" text-anchor="end" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="22">eylema.dev</text>
     <g transform="translate(268 125) scale(1.4)">
   <path fill="#EE5638" transform="translate(24 42) scale(.76)" d="M48 24H216L176 72H80V104H184L216 128L184 152H80V184H176L216 232H48Q32 232 32 216V40Q32 24 48 24Z"/>
-  <text x="240" y="191" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="148" font-weight="600" letter-spacing="-5">eylema</text>
+  <text x="240" y="191" fill="#17252B" font-family="'Helvetica Neue', Arial, sans-serif" font-size="148" font-weight="600" letter-spacing="-5">eyleme</text>
 </g>
     <path d="M96 560H1504" stroke="#D8DCDA"/>
     <rect x="96" y="624" width="882" height="324" rx="16" fill="#17252B"/>
     <g transform="translate(154 646) scale(1)">
   <path fill="#EE5638" transform="translate(24 42) scale(.76)" d="M48 24H216L176 72H80V104H184L216 128L184 152H80V184H176L216 232H48Q32 232 32 216V40Q32 24 48 24Z"/>
-  <text x="240" y="191" fill="#FFFFFF" font-family="'Helvetica Neue', Arial, sans-serif" font-size="148" font-weight="600" letter-spacing="-5">eylema</text>
+  <text x="240" y="191" fill="#FFFFFF" font-family="'Helvetica Neue', Arial, sans-serif" font-size="148" font-weight="600" letter-spacing="-5">eyleme</text>
 </g>
     <g transform="translate(1050 624) scale(1.265625)">
   <rect width="256" height="256" fill="#17252B"/>

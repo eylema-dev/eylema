@@ -1,6 +1,6 @@
 # G10 — Deterministic embedded executor
 
-[Türkçe](../tr/deterministic-runtime.md). Runtime contract0.1.0, unpublished package0.1.0. [Plan](../../tools/work-plans/g10.json), [issue12](https://github.com/eylema-dev/eylema/issues/12), [codec/platform](codec-platform.md).
+[Türkçe](../tr/deterministic-runtime.md). Runtime contract0.1.0, unpublished package0.1.0. [Plan](../../tools/work-plans/g10.json), [issue12](https://github.com/eyleme-dev/eyleme/issues/12), [codec/platform](codec-platform.md).
 
 The owned safe [runtime](../../crates/eylema-runtime/src/lib.rs) supplies in-process task admission, a FIFO queue, bounded single-step execution, snapshots, observations and events. Its production dependency is only eylema-contracts; the owned platform library is a development dependency for actual native consumers/tests. It has no server, production background worker, arbitrary skill loading, external effect, journal or browser. The host executable's help/version remains bootstrap behavior; the separate native example exercises this actual library.
 

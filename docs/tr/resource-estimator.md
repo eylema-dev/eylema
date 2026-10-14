@@ -1,6 +1,6 @@
 # Beyan edilen kaynak tahmini
 
-G80, mevcut [kaynak yöneticisinin](resource-manager.md) yanına kendi Rust kodumuzdan oluşan saf bir boyut hesaplama modülü ekler. [English](../en/resource-estimator.md). [Onaylanan tasarım](g80-resource-estimator-design.md) kapsamı, [teknik plan](https://github.com/eylema-dev/devguide/blob/main/docs/plans/g80-resource-estimator.md) uygulama ve kabul kapılarını belirler.
+G80, mevcut [kaynak yöneticisinin](resource-manager.md) yanına kendi Rust kodumuzdan oluşan saf bir boyut hesaplama modülü ekler. [English](../en/resource-estimator.md). [Onaylanan tasarım](g80-resource-estimator-design.md) kapsamı, [teknik plan](https://github.com/eyleme-dev/devguide/blob/main/docs/plans/g80-resource-estimator.md) uygulama ve kabul kapılarını belirler.
 
 ## Çağıranın sözleşmesi
 

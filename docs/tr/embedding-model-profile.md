@@ -1,6 +1,6 @@
 # İlan edilen embedding ve erişim davranış profili
 
-G67, Qwen3-Embedding-0.6B’yi Eylema’nın mevcut kendi Rust model manifest/EYL akışında isteğe bağlı Representation katılımcısı olarak sabitler. Altı gerçek Rust testi gerçek metaveri fixture’ını kullanır; sekiz Python geliştirme testi katalog, düz UTF8 prefix davranışı ve bağımsız sentetik pooling/normalizasyon/erişim referanslarını denetler. Ağırlık, tokenizer/model çıkarımı, native embedding kernel, gerçek EN/TR erişim kalitesi veya bellek/performans kabulü yoktur. Gerçek yürütme G68 ve bağımlılıklarında kalır.
+G67, Qwen3-Embedding-0.6B’yi Eyleme’nin mevcut kendi Rust model manifest/EYL akışında isteğe bağlı Representation katılımcısı olarak sabitler. Altı gerçek Rust testi gerçek metaveri fixture’ını kullanır; sekiz Python geliştirme testi katalog, düz UTF8 prefix davranışı ve bağımsız sentetik pooling/normalizasyon/erişim referanslarını denetler. Ağırlık, tokenizer/model çıkarımı, native embedding kernel, gerçek EN/TR erişim kalitesi veya bellek/performans kabulü yoktur. Gerçek yürütme G68 ve bağımlılıklarında kalır.
 
 ## Aday ve ölçülmüş köken
 
@@ -28,4 +28,4 @@ Model/core fixture’ı bayt eşittir: 5003bayt, SHA256ca3cde459437692c9ae877b66
 
 ## Platform ve veri yönü
 
-Eylema, uygunluğu onaylanmış frontier LLM kaynak geliştirmesi altında kaynaklara uyumlu işbirlikçi yerel açık ağırlık uzman ekosistemini hedefler. Kendi Rust harness/memory/RAG/modele özel eğitim ve reçetelerimiz ölçülmüş sonuçlar ve insan düzeltmeleriyle gelişir. Özel proje/kurum kayıtları ve türevleri kapsamda kalır; yalnız ayrıca yetkilendirilmiş hak/köken/anonimlik incelemesinden geçmiş adaylar ekosisteme girebilir. Bu Goal kamuya açık metaveri ve kendi sentetik vektör/metinlerimizi kullanır; kullanıcı verisi toplama, anonimleştirme, eğitim veya dışa aktarma yoktur.
+Eyleme, uygunluğu onaylanmış frontier LLM kaynak geliştirmesi altında kaynaklara uyumlu işbirlikçi yerel açık ağırlık uzman ekosistemini hedefler. Kendi Rust harness/memory/RAG/modele özel eğitim ve reçetelerimiz ölçülmüş sonuçlar ve insan düzeltmeleriyle gelişir. Özel proje/kurum kayıtları ve türevleri kapsamda kalır; yalnız ayrıca yetkilendirilmiş hak/köken/anonimlik incelemesinden geçmiş adaylar ekosisteme girebilir. Bu Goal kamuya açık metaveri ve kendi sentetik vektör/metinlerimizi kullanır; kullanıcı verisi toplama, anonimleştirme, eğitim veya dışa aktarma yoktur.
