@@ -118,6 +118,35 @@ fn attention_typed_masks_stable_softmax_and_value_axes() {
 }
 
 #[test]
+fn attention_nonuniform_scores_and_scale_across_distinct_batches() {
+    // Independent Decimal80 expectations; catches zeroed QK scores or ignored scale.
+    let q = tensor(&[2, 1, 2, 1], &[1., 2., -1., 1.]);
+    let k = tensor(&[2, 1, 2, 1], &[0., 2., 1., 3.]);
+    let v = tensor(&[2, 1, 2, 1], &[2., 6., 10., 20.]);
+    let mask = AttentionMask::new([2, 1, 2, 2], &[true; 8]).unwrap();
+    values(
+        &attention(&q, &k, &v, &mask, 0.5).unwrap(),
+        &[2, 1, 2, 1],
+        &[
+            4.9242343145200195,
+            5.52318831191153,
+            12.689414213699951,
+            17.31058578630005,
+        ],
+    );
+    values(
+        &attention(&q, &k, &v, &mask, 1.).unwrap(),
+        &[2, 1, 2, 1],
+        &[
+            5.52318831191153,
+            5.928055160151634,
+            11.192029220221176,
+            18.807970779778824,
+        ],
+    );
+}
+
+#[test]
 fn attention_cache_appends_tokens_per_head_and_greedy_uses_original_ids() {
     let empty = KvCache::empty(2).unwrap();
     let first = empty
