@@ -1,0 +1,27 @@
+# Versioned own skill packages
+
+G75 reuses two closed native leaf skills over [typed tools](typed-tools.md), [decision evidence](decision-evidence.md) and [project-data permissions](project-data.md). It does not load Rust, scripts, plugins, processes, database engines or models.
+
+## Package and loop contracts
+
+A SkillDefinition has a stable skill ID/revision, immutable tool profile/revision/operation with exact input/output schemas, an adapter identity, optional declared model profile/artifact/revision/adapter and a declared acceptance reference. Separate closed skill/v1 metadata uses exactly12 fields; extra authority fields, nested operations, unknown versions/handlers, incompatible schemas, invalid/zero model digests or revisions reject. Identity/revision/digest equality is a pin, not proof of model compatibility or an accepted training run. Only the existing readTaskValue/addTaskValue handlers and owned:native-counter:v1 adapter execute. Any model dependency or other adapter returns unavailable; there is no silent fallback.
+
+A flat SkillLoop pins loop ID/revision,1–8 ordered project source/skill/revision calls and1–8iterations. Expanded calls must total≤8 and stay in one project. Nested/recursive programs are unavailable. A caller supplies the concrete ToolPlan; the loader matches every expanded call against actual profile/revision/schema/operation, then unchanged G10/G11 admission verifies actual scope, authority, state revision, input, approval and resource budget. A package/reference/acceptance label cannot grant those rights.
+
+Actual G63 Execute-authorized Artifact/Derived records provide canonical package bytes (≤4096bytes). Decoding uses the existing bounded EYL codec and round-trip equality. The acceptance reference remains submitted metadata. A sealed SkillWitness binds the actual loaded loop, ordered calls, source IDs and original put-receipt digests; SkillEvidence pairs it with actual task/execution/action observations and complete/partial/unknown outcome. The put digest is not advertised as an independently verified weight/content signature. Artifact registry/model acceptance and actual native inference remain separate gates.
+
+## Control-source privacy
+
+A definition can influence an action without supplying its scalar argument. G54 provenance now retains≤8unique control sources alongside ordinary argument sources. Admission, every normal step and every result/task read reauthorize all retained task controls, source parents and sealed data sessions. A common persisted time observation checks all controls and arguments at handoff; every action deadline must fit source/session expiry. Foreign equal-looking stores cannot replace the original live binding.
+
+Control-bearing plans require explicit intervention on every action, actual scoped controller availability and G11 reserved cancellation events. Actual scoped human cancellation can still terminate work after source withdrawal/expiry without reading private bodies. Later source-free actions remain constrained by historical control sources. Exact plan/control/loop/version/digest replay preserves original witness; changing/removing a skill witness cannot relabel a private run as literal. Completed prefix effects are not undone by stop or withdrawal.
+
+Private-derived package parents inherit current purpose/expiry/withdrawal restrictions through G63. Execute evidence creates no Collect/Train/external_disclosure/ecosystem_export grant. Eligible literals, nonsecret metadata, complete declared lineage, trusted ingestion/host/storage/hash/clocks and dedicated private journals remain prerequisites; no automatic DLP or actual person authentication is claimed. Returned bytes cannot be recalled. Typed witness/control lineage is transient; importing hosts with command history remains denied, with unknown recovery inspection giving scoped status/counts only. Legacy raw journal consumers must not bypass these private gates.
+
+## Measurement and acceptance scope
+
+G50 comparable-workload keys now include actual skill loader/loop/source/version/put-digest pins when present. Different skill provenance cannot enter one completed distribution merely because counter payloads match. Existing decision timings cover inner typed admission/steps/terminal state; package loading/decoding precedes that timing and is not a whole-skill startup benchmark. No physical memory, model performance, complete multimodel loop or training claim follows.
+
+Native tests actually reuse add/read packages in two distinct bounded loop definitions and verify counter outputs and immutable replay. Failure tests cover model/adapter/schema/extra-field denial before effects, wrong call order, missing source scope, foreign data session/store, original and retained-control restrictions, derived-parent withdrawal, Collect-only denial, sealed-session deadline, absent actual controller and effective scoped stop. Portable tests cover closed codec and bounded iteration/product/project rules. Sources and clock/human authority fixtures are synthetic; inherited full native tests keep their existing scopes.
+
+ARM64 macOS/Rust1.99.0 is the local target; no new physical IO/process/provider/G40/model/GPU/training/engine/dependency trial. Full exact AGENTS checks, current CI and genuine separate final-head review remain required. Native API only: generic nested workflows, durable typed skill reattachment, actual human login, trained-model skill packaging, dataset/export and end-to-end user applications retain later acceptance.

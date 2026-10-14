@@ -137,14 +137,20 @@
     {
       "en": "docs/en/typed-tools.md",
       "tr": "docs/tr/typed-tools.md",
-      "en_sha256": "40a6b6a72a727a367ef9ae0f61b34fd2374cbb4151677cead04453bcfcf9437f",
-      "tr_sha256": "48aa80d7f9242f1d13cdb2fbae3ac84da0ec9f14597831e614e26d41b3239629"
+      "en_sha256": "2d8f1d3d4bd191e14425cd24b702b8ef6af969c704b99d8dc69afbccb54fec76",
+      "tr_sha256": "3fbc7a2f2f45d4ab4e52d711056e9d39d148b3d26fa21121477877486b38e65b"
     },
     {
       "en": "docs/en/decision-evidence.md",
       "tr": "docs/tr/decision-evidence.md",
       "en_sha256": "8f757141b87c3ab1d922056eef44d3bdb2d57cbc55f1ac1abee0fb448834ab1b",
       "tr_sha256": "77ef268da2208c45ef5d57b25fdacf658e56eb434430e090452b4d671b887c12"
+    },
+    {
+      "en": "docs/en/versioned-skills.md",
+      "tr": "docs/tr/versioned-skills.md",
+      "en_sha256": "6bf122f41fb44b26d98a58224aa398a6c46e15ce4d9a3df39f4dfa165998cc38",
+      "tr_sha256": "875cd51d58e8d59e50223e310e423e2ef7659339e6f2a51666ea07851ac11645"
     }
   ],
   "documents": []

@@ -1,10 +1,12 @@
 //! Sealed own-tool facade: no raw scheduler escape, no implicit data grant.
 use crate::decision::{DecisionEvidence, Measurement};
+use crate::skill::{SkillEvidence, SkillWitness};
 use crate::{
     project_data::{DataClock, DataError, DataSession, ProjectStore},
     *,
 };
 use eylema_contracts::decision::DecisionDeclaration;
+use eylema_contracts::skill::SkillLoop;
 use eylema_contracts::{project_data::DataUse, tool::ToolPlan};
 use eylema_runtime::tool::ToolRegistry;
 use std::time::Instant;
@@ -73,6 +75,7 @@ struct Provenance {
     actor: DurableSession,
     decision: Option<DecisionDeclaration>,
     measurement: Measurement,
+    skill: Option<SkillWitness>,
 }
 struct Pending {
     id: ExecutionId,
@@ -174,6 +177,18 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         data: &mut ProjectStore<D, F, C>,
         row: &Provenance,
     ) -> std::result::Result<(), ToolError> {
+        if let Some(skill) = &row.skill {
+            for source in &skill.controls {
+                let metadata = data.authorized_metadata(&row.session, source, DataUse::Execute)?;
+                if skill
+                    .uses
+                    .iter()
+                    .any(|u| &u.reference == source && u.source_put_digest != metadata.digest)
+                {
+                    return Err(ToolError::InvalidEvidence);
+                }
+            }
+        }
         for (b, a) in row
             .plan
             .bindings()
@@ -194,6 +209,16 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         row: &Provenance,
     ) -> std::result::Result<Option<u64>, ToolError> {
         let mut deadline: Option<u64> = None;
+        if let Some(skill) = &row.skill {
+            for source in &skill.controls {
+                let bound = data.authorized_deadline_at_observed_time(
+                    &row.session,
+                    source,
+                    DataUse::Execute,
+                )?;
+                deadline = Some(deadline.map_or(bound, |old| old.min(bound)));
+            }
+        }
         for b in row.plan.bindings() {
             if let Some(r) = &b.source {
                 let bound =
@@ -257,14 +282,48 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         plan: ToolPlan,
         approvals: &[EventId],
     ) -> std::result::Result<ExecutionId, ToolError> {
+        self.admit_inner(data, ds, s, (plan, None), approvals)
+    }
+    pub fn admit_skill<D: Storage, F: Sha256, C: DataClock>(
+        &mut self,
+        data: &mut ProjectStore<D, F, C>,
+        ds: &DataSession,
+        s: &DurableSession,
+        request: (ToolPlan, SkillLoop),
+        approvals: &[EventId],
+    ) -> std::result::Result<ExecutionId, ToolError> {
+        let (plan, definition) = request;
+        self.binding(data)?;
+        self.host.task(s, &plan.task().fields().task_id)?;
+        let skill = crate::skill::resolve(data, ds, &plan, definition)?;
+        self.admit_inner(data, ds, s, (plan, Some(skill)), approvals)
+    }
+    fn admit_inner<D: Storage, F: Sha256, C: DataClock>(
+        &mut self,
+        data: &mut ProjectStore<D, F, C>,
+        ds: &DataSession,
+        s: &DurableSession,
+        request: (ToolPlan, Option<SkillWitness>),
+        approvals: &[EventId],
+    ) -> std::result::Result<ExecutionId, ToolError> {
+        let (plan, skill) = request;
         let started = Instant::now();
         self.registry.validate(&plan).map_err(ToolError::Runtime)?;
         self.host.task(s, &plan.task().fields().task_id)?;
         let task = &plan.task().fields().task_id;
-        let source_constrained = plan.bindings().iter().any(|b| b.source.is_some())
+        if self
+            .records
+            .values()
+            .any(|old| old.plan == plan && old.skill != skill)
+        {
+            return Err(ToolError::ProvenanceUnavailable);
+        }
+        let source_constrained = skill.is_some()
+            || plan.bindings().iter().any(|b| b.source.is_some())
             || self.records.values().any(|row| {
                 &row.plan.task().fields().task_id == task
-                    && row.plan.bindings().iter().any(|b| b.source.is_some())
+                    && (row.skill.is_some()
+                        || row.plan.bindings().iter().any(|b| b.source.is_some()))
             });
         // A source denial can block normal stepping. Require explicit actual
         // intervention so G11 reserves a real scoped cancellation path and
@@ -293,6 +352,7 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
             actor: s.clone(),
             decision: None,
             measurement: Measurement::new(started, self.records.is_empty()),
+            skill,
         };
         self.task_sources(
             data,
@@ -301,7 +361,10 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
             Some(&row.plan),
         )?;
         if self.records.len() >= MAX_TOOL_EXECUTIONS
-            && !self.records.values().any(|old| old.plan == row.plan)
+            && !self
+                .records
+                .values()
+                .any(|old| old.plan == row.plan && old.skill == row.skill)
         {
             return Err(ToolError::Runtime(ErrorCode::BudgetExceeded));
         }
@@ -312,7 +375,7 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
             approvals,
         )?;
         if let Some(old) = self.records.get(&id) {
-            if old.plan != row.plan {
+            if old.plan != row.plan || old.skill != row.skill {
                 return Err(ToolError::ProvenanceUnavailable);
             }
         } else {
@@ -458,8 +521,13 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
                 ])
             })
             .collect();
-        let workload =
-            codec::encode(&codec::Value::List(values)).map_err(|_| ToolError::InvalidEvidence)?;
+        let workload = codec::encode(&codec::Value::List(vec![
+            codec::Value::List(values),
+            row.skill
+                .as_ref()
+                .map_or(codec::Value::Null, |w| w.workload_key()),
+        ]))
+        .map_err(|_| ToolError::InvalidEvidence)?;
         Ok(DecisionEvidence {
             task: row.plan.task().fields().task_id.clone(),
             declaration,
@@ -471,6 +539,20 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
             workload,
             declared_payload_budget: row.plan.task().fields().budget.max_payload_bytes(),
         })
+    }
+    pub fn skill_evidence<D: Storage, F: Sha256, C: DataClock>(
+        &self,
+        data: &mut ProjectStore<D, F, C>,
+        s: &DurableSession,
+        id: &ExecutionId,
+    ) -> std::result::Result<SkillEvidence, ToolError> {
+        let outcome = self.report(data, s, id)?;
+        let witness = self
+            .records
+            .get(id)
+            .and_then(|row| row.skill.clone())
+            .ok_or(ToolError::ProvenanceUnavailable)?;
+        Ok(SkillEvidence { witness, outcome })
     }
     pub fn report<D: Storage, F: Sha256, C: DataClock>(
         &self,

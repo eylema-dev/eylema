@@ -12,6 +12,7 @@ pub mod platform;
 mod primitives;
 pub mod project_data;
 mod records;
+pub mod skill;
 pub mod transport;
 
 pub use primitives::*;
