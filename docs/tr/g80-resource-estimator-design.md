@@ -1,6 +1,6 @@
 # G80 kaynak tahmin katmanı — insan incelemesi için yazılı tasarım
 
-Tarih:14Ekim2026. Durum:tasarım önerisi; tahmin katmanı uygulaması veya kabulü yoktur. [İngilizce kanonik kaynak](../en/g80-resource-estimator-design.md).
+Tarih:14Ekim2026. Durum:yazılı tasarım onaylandı; saf boyutlandırma yerelde uygulandı, son teslim kabulü bekliyor. [İngilizce kanonik kaynak](../en/g80-resource-estimator-design.md).
 
 ## Amaç ve mevcut temel
 

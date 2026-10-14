@@ -1,6 +1,6 @@
 # G80 resource estimator — written design for human review
 
-Date: 14 October 2026. Status: proposed design; no estimator implementation or acceptance. English canonical; [Turkish](../tr/g80-resource-estimator-design.md).
+Date: 14 October 2026. Status: written design approved; pure sizing implemented locally, final delivery acceptance pending. English canonical; [Turkish](../tr/g80-resource-estimator-design.md).
 
 ## Purpose and existing foundation
 
