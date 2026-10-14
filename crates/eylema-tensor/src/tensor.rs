@@ -1,4 +1,17 @@
 pub(crate) const MAX_ELEMENTS: usize = 4096;
+pub(crate) const MAX_WORK: usize = 262144;
+
+pub(crate) fn zeroed(length: usize) -> Result<Vec<f32>, TensorError> {
+    if length > MAX_ELEMENTS {
+        return Err(TensorError::ExtentLimit);
+    }
+    let mut result = Vec::new();
+    result
+        .try_reserve_exact(length)
+        .map_err(|_| TensorError::AllocationFailed)?;
+    result.resize(length, 0.);
+    Ok(result)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TensorError {
