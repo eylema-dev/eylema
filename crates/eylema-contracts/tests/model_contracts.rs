@@ -328,3 +328,49 @@ fn local_unsupported_never_external_fallback() {
         );
     }
 }
+#[test]
+fn actual_catalog_fixture_decodes_to_declared_identity_without_execution() {
+    let m = ModelManifest::from_bytes(include_bytes!("fixtures/qwen3-profile.v1.eyl")).unwrap();
+    assert_eq!(m.fields().id.as_str(), "qwen3-0.6b");
+    assert_eq!(m.fields().configuration.context_limit, 4096);
+    assert_eq!(m.attention_projection_width(), Some(2048));
+    assert_eq!(
+        m.fields()
+            .profiles
+            .iter()
+            .map(|p| p.role)
+            .collect::<Vec<_>>(),
+        vec![
+            RoleKind::Reasoning,
+            RoleKind::Planning,
+            RoleKind::Specialist
+        ]
+    );
+    let weight = m
+        .fields()
+        .components
+        .iter()
+        .find(|c| c.name == "model.safetensors")
+        .unwrap();
+    assert_eq!(weight.size, 1503300328);
+    assert_eq!(weight.digest_source, DigestSource::PublisherAdvertised);
+    let expected = "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b";
+    let actual = weight
+        .sha256
+        .iter()
+        .map(|x| format!("{x:02x}"))
+        .collect::<String>();
+    assert_eq!(actual, expected);
+    for p in &m.fields().profiles {
+        for deployment in [DeploymentKind::OwnedRustCpu, DeploymentKind::OwnedRustMetal] {
+            assert_eq!(
+                check_assignment(&m, p, deployment, LoopMode::LocalOnly).unwrap(),
+                AssignmentStatus::UnsupportedLocal(UnsupportedReason::ModelExecutionNotImplemented)
+            );
+        }
+    }
+    assert_eq!(
+        m.to_bytes().unwrap(),
+        include_bytes!("fixtures/qwen3-profile.v1.eyl")
+    );
+}
