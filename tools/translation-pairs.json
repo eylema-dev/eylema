@@ -191,8 +191,14 @@
     {
       "en": "docs/en/g23-cpu-reference-design.md",
       "tr": "docs/tr/g23-cpu-reference-design.md",
-      "en_sha256": "b12a9b8dec3862fe28ced5c2781bc56c8d680f315f0f26ba92ac7a6da3c8a9b3",
-      "tr_sha256": "85c737b6f1fdb002b5f79975071c3c878eed729712ffb1ecaf3b34245a6816e9"
+      "en_sha256": "c734a8dbaff32a95075e0c42e3d3ed3d3e5ad5c6934d4b10f343a047dc0547a4",
+      "tr_sha256": "b69cc2bc69af0ab2a4c73042e4ee75eddd5c58ab286feca71aa577473e041ca3"
+    },
+    {
+      "en": "docs/en/cpu-reference.md",
+      "tr": "docs/tr/cpu-reference.md",
+      "en_sha256": "5dccce635638f181b08998e5f2b79fcd08ead3c17dd644873962ade1a724c304",
+      "tr_sha256": "bbb08976cc703383a27ee2399682493ef77de169a43e14a1e5fa156e05d60ebc"
     }
   ],
   "documents": []

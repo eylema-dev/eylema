@@ -1,12 +1,12 @@
-# G23 bounded CPU reference — written design for review
+# G23 bounded CPU reference — approved written design
 
-Date:14October2026. Status: proposed design; no tensor crate, numerical qualification or operator acceptance. English canonical; [Turkish](../tr/g23-cpu-reference-design.md).
+Date:14October2026. Status: written design and concrete plan approved; G23-only numerical contribution profile admitted after Task0. Bounded reference implemented locally; final production review/CI acceptance pending. English canonical; [Turkish](../tr/g23-cpu-reference-design.md).
 
 ## Intent and authority
 
-The maintainer approved narrow G23 evaluation/scope preparation after accepted G80. Build owned Rust CPU reference operators as a foundation for interchangeable local language/decision/perception/world/policy profiles. Each architecture retains independently verified operator/profile gates; one Qwen-like reference never establishes universal support. The approved scope-preparation decision does not accept this new written design, its later implementation plan, numerical qualification, full models or performance.
+The maintainer approved narrow G23 evaluation/scope preparation after accepted G80. Build owned Rust CPU reference operators as a foundation for interchangeable local language/decision/perception/world/policy profiles. Each architecture retains independently verified operator/profile gates; one Qwen-like reference never establishes universal support. Subsequent actual maintainer decisions approved this written design and concrete inline plan, then admitted the G23-only numerical contribution profile after the private trial and separate reference review. Full models and performance remain outside those decisions.
 
-Core base `177e9d322b82682683ae84ec8e84a13a04de11e9`; accepted guide base `2d76bf240da23682db2fd0f7f9e59ec89f52c5b5`. Rebind current accepted G18/G27 evidence and current main before activation. Existing platform CPU addition is a test-only integer reference for the narrow Metal proof; no `eylema-tensor` crate exists. Existing contracts/model manifests and their support states stay unchanged.
+Design-time core base `177e9d322b82682683ae84ec8e84a13a04de11e9`; guide base `2d76bf240da23682db2fd0f7f9e59ec89f52c5b5`. Activation rebinds accepted guide `ab74acc4b4af09b4f3a8c22b84b542ce0e3a9505`. Rebind current accepted G18/G27 evidence and current main before activation. At design time, the existing platform CPU addition was a test-only integer reference for the narrow Metal proof and no `eylema-tensor` crate existed. Existing contracts/model manifests and their support states stay unchanged.
 
 ## Approach
 
@@ -51,4 +51,4 @@ Run unchanged full native/repository/PR/fingerprint/whitespace gates with exact 
 
 Proposed paths: `crates/eylema-tensor/`, root `Cargo.toml`/`Cargo.lock` registration, paired G23 notes/design and translation fingerprints; necessary G23-only guide/card/source-pin/plan/dated evaluation records. No model-contract/schema/checker/permission/G40 change. Original120active minutes/3targetedrepairs/15separate-review minutes,zero provider/model/weight/training trials and new spending; qualification preparation does not reset these budgets. One scoped branch, private usage boundary refresh, independent exact-head review/currentCI/standing-authorized merge and identical-main-tree/mainCI evidence remain required.
 
-This written design awaits actual human review. After approval, prepare the concrete plan using the established inline method; actual numerical contribution admission remains separate and must precede activation.
+Actual human written-design/plan/profile decisions preceded production activation. Follow the approved concrete plan and retained original budget; production still needs full local checks, current CI and genuine separate final-head review.

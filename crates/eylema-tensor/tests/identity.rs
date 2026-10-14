@@ -1,4 +1,34 @@
+use eylema_tensor::{Layout, RopeSpec, Tensor, rope, validate_layout};
 use eylema_tensor::{OperatorKey, PrimitiveCoverage, TensorError, reference_coverage};
+
+#[test]
+fn complete_primitive_identity_does_not_admit_full_model_dimensions_or_dtype() {
+    let keys: Vec<_> = IDS
+        .iter()
+        .map(|id| OperatorKey {
+            id,
+            spec_sha256: SPEC,
+        })
+        .collect();
+    assert_eq!(reference_coverage(&keys), Ok(PrimitiveCoverage::Complete));
+    let original_head_layout = Tensor::new(&[1, 16, 1, 128], &vec![0.; 2048]).unwrap();
+    assert_eq!(
+        rope(
+            &original_head_layout,
+            &RopeSpec {
+                positions: vec![0],
+                theta: 1000000.,
+                rotary_dim: 128
+            }
+        )
+        .unwrap_err(),
+        TensorError::ExtentLimit
+    );
+    assert_eq!(
+        validate_layout(Layout::BF16RowMajor),
+        Err(TensorError::UnsupportedLayout)
+    );
+}
 
 const SPEC: [u8; 32] = [
     0xac, 0xbb, 0xf6, 0x87, 0x55, 0xde, 0xe5, 0xca, 0x2b, 0x9d, 0x25, 0xbd, 0xcd, 0x3a, 0xa4, 0x20,

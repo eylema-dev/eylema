@@ -1,12 +1,12 @@
-# G23 sınırlı CPU referansı — inceleme için yazılı tasarım
+# G23 sınırlı CPU referansı — onaylı yazılı tasarım
 
-Tarih:14Ekim2026. Durum:tasarım önerisi; tensor crate, sayısal yeterlilik veya operatör kabulü yoktur. [English canonical](../en/g23-cpu-reference-design.md).
+Tarih:14Ekim2026. Durum: yazılı tasarım ve somut plan onaylandı; Task0 sonrasında G23’e özel sayısal katkı profili kabul edildi. Sınırlı referans yerelde uygulandı; son üretim incelemesi/CI kabulü bekliyor. [English canonical](../en/g23-cpu-reference-design.md).
 
 ## Amaç ve yetki
 
-Kullanıcı, kabul edilmiş G80sonrasında dar G23değerlendirme/kapsam hazırlığını onayladı. Yerel dil/karar/algı/dünya/policy profillerine temel olacak kendi Rust CPU referans operatörlerimizi kuracağız. Her mimari bağımsız doğrulanmış operatör/profil kapısını korur; tek Qwen-benzeri referans evrensel destek sağlamaz. Kapsam hazırlığı onayı, bu yeni yazılı tasarımı, sonraki uygulama planını, sayısal yeterliliği, tam modelleri veya performansı kabul etmez.
+Kullanıcı, kabul edilmiş G80sonrasında dar G23değerlendirme/kapsam hazırlığını onayladı. Yerel dil/karar/algı/dünya/policy profillerine temel olacak kendi Rust CPU referans operatörlerimizi kuracağız. Her mimari bağımsız doğrulanmış operatör/profil kapısını korur; tek Qwen-benzeri referans evrensel destek sağlamaz. Sonraki gerçek insan kararları bu yazılı tasarım ve somut sohbet içi planı onayladı; özel deneme ve ayrı referans incelemesi sonrasında G23’e özel sayısal katkı profilini kabul etti. Tam model ve performans bu kararların kapsamı dışında kalır.
 
-Core temel`177e9d322b82682683ae84ec8e84a13a04de11e9`; kabul edilmiş guide temel`2d76bf240da23682db2fd0f7f9e59ec89f52c5b5`. Aktivasyondan önce güncel kabul edilmiş G18/G27kanıtı ve main yeniden bağlanır. Mevcut platform CPU toplaması dar Metal kanıtı için test-only integer referansıdır; `eylema-tensor` crate'i yoktur. Mevcut sözleşme/model manifest'i ve destek durumları korunur.
+Tasarım zamanı core temel`177e9d322b82682683ae84ec8e84a13a04de11e9`; guide temel`2d76bf240da23682db2fd0f7f9e59ec89f52c5b5`. Aktivasyon kabul edilmiş guide `ab74acc4b4af09b4f3a8c22b84b542ce0e3a9505` sürümünü yeniden bağlar. Aktivasyondan önce güncel kabul edilmiş G18/G27kanıtı ve main yeniden bağlanır. Tasarım zamanında mevcut platform CPU toplaması dar Metal kanıtı için test-only integer referansıydı; `eylema-tensor` crate'i yoktu. Mevcut sözleşme/model manifest'i ve destek durumları korunur.
 
 ## Yaklaşım
 
@@ -51,4 +51,4 @@ Değişmemiş tam native/repository/PR/fingerprint/whitespace kapıları tam rev
 
 Önerilen yollar: `crates/eylema-tensor/`, root `Cargo.toml`/`Cargo.lock`kaydı, eş EN/TR G23not/tasarımı ve çeviri fingerprint; gereken yalnızG23guide/kart/kaynak pin/plan/tarihli değerlendirme kayıtları. Model-contract/schema/checker/izin/G40değişikliği yoktur. Asıl120aktif dakika/3hedefli onarım/15ayrı inceleme dakikası, sıfır provider/model/ağırlık/eğitim denemesi ve yeni harcama; yeterlilik hazırlığı bütçeyi sıfırlamaz. Tek kapsamlı dal, özel kullanım defteri yenilemesi, ayrı tam commit incelemesi/güncelCI/mevcut izinle merge ve eş main tree/mainCIkanıtı gerekir.
 
-Bu yazılı tasarım insan incelemesini bekler. Onaydan sonra mevcut sohbet içi yöntemle somut plan hazırlanır; gerçek sayısal katkı kabulü ayrı kalır ve aktivasyondan önce tamamlanmalıdır.
+Gerçek insan tasarım/plan/profil kararları üretim aktivasyonundan önce geldi. Onaylı somut plan ve korunmuş özgün bütçe izlenir; üretim hâlâ tam yerel kontroller, güncel CI ve gerçekten ayrı son-sürüm incelemesi ister.
