@@ -7,6 +7,25 @@ use crate::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 pub const MAX_MANIFEST_BYTES: usize = 32768;
+const QWEN_OPERATORS: [&str; 16] = [
+    "qwen3.embedding_gather.v1",
+    "qwen3.linear_no_bias.v1",
+    "qwen3.rmsnorm_fp32.v1",
+    "qwen3.silu.v1",
+    "qwen3.swiglu.v1",
+    "qwen3.residual_add.v1",
+    "qwen3.rope_default.v1",
+    "qwen3.reshape_transpose.v1",
+    "qwen3.grouped_kv_repeat.v1",
+    "qwen3.causal_mask.v1",
+    "qwen3.scaled_attention.v1",
+    "qwen3.softmax_fp32.v1",
+    "qwen3.kv_cache_append.v1",
+    "qwen3.tied_logits.v1",
+    "qwen3.greedy_bounded.v1",
+    "qwen3.dtype_and_layout.v1",
+];
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DigestSource {
     PublisherAdvertised,
@@ -245,6 +264,11 @@ impl ModelManifest {
                 "invalid/duplicate dimension",
             )?;
         }
+        require(
+            c.batch_size.checked_mul(c.context_limit).is_some(),
+            "configuration",
+            "generic workload extent overflow",
+        )?;
         if d.architecture == "qwen3-dense.v1" {
             require(
                 [
@@ -263,22 +287,9 @@ impl ModelManifest {
                 "missing Qwen dimension",
             )?;
             require(
-                dims["attention_heads"] % dims["kv_heads"] == 0
-                    && dims["attention_heads"]
-                        .checked_mul(dims["head_dim"])
-                        .is_some()
-                    && dims["kv_heads"].checked_mul(dims["head_dim"]).is_some()
-                    && dims["hidden_size"]
-                        .checked_mul(dims["intermediate_size"])
-                        .is_some()
-                    && c.batch_size
-                        .checked_mul(c.context_limit)
-                        .and_then(|x| x.checked_mul(dims["attention_heads"]))
-                        .and_then(|x| x.checked_mul(dims["head_dim"]))
-                        .is_some()
-                    && c.context_limit <= dims["context_capacity"],
+                qwen_extents_fit(&dims, c) && c.context_limit <= dims["context_capacity"],
                 "configuration",
-                "invalid grouped heads, projection, workload or capacity",
+                "invalid grouped heads or tensor/cache/model/workload extent overflow",
             )?;
             require(
                 c.tokenizer_component.is_some(),
@@ -568,6 +579,42 @@ impl ModelManifest {
         .map_err(Into::into)
     }
 }
+// Structural element extents only, not a resident-memory or parameter estimate.
+fn qwen_extents_fit(d: &BTreeMap<&str, u64>, c: &ConfigurationRecord) -> bool {
+    let calculate = || -> Option<u64> {
+        let h = d["hidden_size"];
+        let intermediate = d["intermediate_size"];
+        let layers = d["layers"];
+        let q = d["attention_heads"].checked_mul(d["head_dim"])?;
+        let kv = d["kv_heads"].checked_mul(d["head_dim"])?;
+        if !d["attention_heads"].is_multiple_of(d["kv_heads"]) {
+            return None;
+        }
+        let attention = h.checked_mul(q.checked_mul(2)?.checked_add(kv.checked_mul(2)?)?)?;
+        let mlp = h.checked_mul(intermediate)?.checked_mul(3)?;
+        let norms = h
+            .checked_mul(2)?
+            .checked_add(d["head_dim"].checked_mul(2)?)?;
+        let embedding = d["vocab_size"].checked_mul(h)?;
+        let all_layers = attention
+            .checked_add(mlp)?
+            .checked_add(norms)?
+            .checked_mul(layers)?;
+        all_layers.checked_add(embedding)?.checked_add(h)?;
+        let tokens = c.batch_size.checked_mul(c.context_limit)?;
+        tokens
+            .checked_mul(d["attention_heads"])?
+            .checked_mul(c.context_limit)?;
+        tokens
+            .checked_mul(kv)?
+            .checked_mul(2)?
+            .checked_mul(layers)?;
+        tokens.checked_mul(h)?;
+        tokens.checked_mul(intermediate)?;
+        tokens.checked_mul(d["vocab_size"])
+    };
+    calculate().is_some()
+}
 pub fn check_assignment(
     m: &ModelManifest,
     p: &RoleInterface,
@@ -596,10 +643,10 @@ pub fn check_assignment(
         UnsupportedReason::Precision
     } else if d.configuration.tokenizer_component.is_none() {
         UnsupportedReason::Tokenizer
-    } else if d
-        .operators
-        .iter()
-        .any(|o| !o.id.as_str().starts_with("qwen3."))
+    } else if d.operators.len() != QWEN_OPERATORS.len()
+        || d.operators
+            .iter()
+            .any(|o| !QWEN_OPERATORS.contains(&o.id.as_str()))
     {
         UnsupportedReason::Operators
     } else {

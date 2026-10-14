@@ -61,10 +61,30 @@ fn draft() -> ModelManifestDraft {
         numeric_format: "bfloat16".into(),
         quantization: "none".into(),
         components,
-        operators: vec![OperatorRequirement {
-            id: sem("qwen3.forward.v1"),
+        operators: [
+            "qwen3.embedding_gather.v1",
+            "qwen3.linear_no_bias.v1",
+            "qwen3.rmsnorm_fp32.v1",
+            "qwen3.silu.v1",
+            "qwen3.swiglu.v1",
+            "qwen3.residual_add.v1",
+            "qwen3.rope_default.v1",
+            "qwen3.reshape_transpose.v1",
+            "qwen3.grouped_kv_repeat.v1",
+            "qwen3.causal_mask.v1",
+            "qwen3.scaled_attention.v1",
+            "qwen3.softmax_fp32.v1",
+            "qwen3.kv_cache_append.v1",
+            "qwen3.tied_logits.v1",
+            "qwen3.greedy_bounded.v1",
+            "qwen3.dtype_and_layout.v1",
+        ]
+        .into_iter()
+        .map(|id| OperatorRequirement {
+            id: sem(id),
             spec_sha256: [6; 32],
-        }],
+        })
+        .collect(),
         rights: RightsRecord {
             publisher: "Qwen".into(),
             source_repository: "https://huggingface.co/Qwen/Qwen3-0.6B".into(),
@@ -372,5 +392,64 @@ fn actual_catalog_fixture_decodes_to_declared_identity_without_execution() {
     assert_eq!(
         m.to_bytes().unwrap(),
         include_bytes!("fixtures/qwen3-profile.v1.eyl")
+    );
+}
+#[test]
+fn qwen_layer_vocabulary_and_cache_extents_cannot_overflow() {
+    for name in [
+        "layers",
+        "vocab_size",
+        "hidden_size",
+        "intermediate_size",
+        "attention_heads",
+        "head_dim",
+    ] {
+        let mut d = draft();
+        d.configuration
+            .dimensions
+            .iter_mut()
+            .find(|(k, _)| k == name)
+            .unwrap()
+            .1 = u64::MAX;
+        assert_eq!(error_field(d), "configuration");
+    }
+}
+#[test]
+fn generic_workload_multiplication_is_checked_before_profile_classification() {
+    let mut d = draft();
+    d.architecture = "foreign.v1".into();
+    d.configuration.batch_size = u64::MAX;
+    d.configuration.context_limit = u64::MAX;
+    assert_eq!(error_field(d), "configuration");
+}
+#[test]
+fn unknown_qwen_prefixed_or_missing_operators_report_operator_gap() {
+    for id in ["qwen3.not_a_real_operator.v1", "foreign.op.v1"] {
+        let mut d = draft();
+        d.operators[0].id = sem(id);
+        let m = ModelManifest::new(d).unwrap();
+        assert_eq!(
+            check_assignment(
+                &m,
+                &role(RoleKind::Planning),
+                DeploymentKind::OwnedRustCpu,
+                LoopMode::LocalOnly
+            )
+            .unwrap(),
+            AssignmentStatus::UnsupportedLocal(UnsupportedReason::Operators)
+        );
+    }
+    let mut d = draft();
+    d.operators.pop();
+    let m = ModelManifest::new(d).unwrap();
+    assert_eq!(
+        check_assignment(
+            &m,
+            &role(RoleKind::Planning),
+            DeploymentKind::OwnedRustCpu,
+            LoopMode::LocalOnly
+        )
+        .unwrap(),
+        AssignmentStatus::UnsupportedLocal(UnsupportedReason::Operators)
     );
 }
