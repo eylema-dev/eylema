@@ -128,7 +128,7 @@ fn attention_nonuniform_scores_and_scale_across_distinct_batches() {
         &attention(&q, &k, &v, &mask, 0.5).unwrap(),
         &[2, 1, 2, 1],
         &[
-            4.9242343145200195,
+            4.924234314520019,
             5.52318831191153,
             12.689414213699951,
             17.31058578630005,
