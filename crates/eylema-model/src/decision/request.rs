@@ -1,4 +1,5 @@
 use super::score::{DecisionReceipt, DecisionResult, OptionScore, QuestionScores};
+use crate::cpu::CpuControl;
 use crate::cpu::CpuError as E;
 pub struct DecisionOption<'a> {
     pub id: &'a str,
@@ -92,6 +93,82 @@ pub(crate) fn output_reservation(batch: &DecisionBatch<'_>) -> Result<u64, E> {
             .ok_or(E::ResidentLimit)?;
     }
     Ok(bytes)
+}
+
+pub(crate) fn workspace_reservation(context: usize) -> Result<(u64, u64), E> {
+    crate::decision::profile::workspace_reservation(context)
+}
+
+pub(crate) fn preflight(
+    batch: &DecisionBatch<'_>,
+    base: u64,
+    context: usize,
+    max_resident: u64,
+    max_work: u64,
+    observed_work: u64,
+) -> Result<u64, E> {
+    let output = output_reservation(batch)?;
+    let (workspace_bytes, workspace_work) = workspace_reservation(context)?;
+    let resident = base
+        .checked_add(output)
+        .and_then(|n| n.checked_add(workspace_bytes))
+        .ok_or(E::ResidentLimit)?;
+    if resident > max_resident {
+        return Err(E::ResidentLimit);
+    }
+    if observed_work
+        .checked_add(output)
+        .and_then(|n| n.checked_add(workspace_work))
+        .is_none_or(|n| n > max_work)
+    {
+        return Err(E::WorkLimit);
+    }
+    Ok(output)
+}
+
+pub(crate) fn identity(batch: &DecisionBatch<'_>, control: &CpuControl) -> Result<[u8; 32], E> {
+    let mut hash = eylema_platform::sha256_stream::Sha256Stream::new(1048576)
+        .map_err(|_| E::PlatformUnavailable)?;
+    hash_part(&mut hash, b"decision.query-options.v1", control)?;
+    hash_count(&mut hash, batch.questions.len(), control)?;
+    for q in batch.questions {
+        for s in [q.id, q.instruction, q.query] {
+            hash_part(&mut hash, s.as_bytes(), control)?;
+        }
+        hash_count(&mut hash, q.options.len(), control)?;
+        for o in q.options {
+            hash_part(&mut hash, o.id.as_bytes(), control)?;
+            hash_part(&mut hash, o.candidate.as_bytes(), control)?;
+        }
+    }
+    hash.finish().map_err(|_| E::PlatformUnavailable)
+}
+
+fn hash_count(
+    hash: &mut eylema_platform::sha256_stream::Sha256Stream,
+    count: usize,
+    control: &CpuControl,
+) -> Result<(), E> {
+    let count = u32::try_from(count).map_err(|_| E::InvalidInput)?;
+    control.charge(4)?;
+    hash.update(&count.to_le_bytes())
+        .map_err(|_| E::PlatformUnavailable)
+}
+
+fn hash_part(
+    hash: &mut eylema_platform::sha256_stream::Sha256Stream,
+    bytes: &[u8],
+    control: &CpuControl,
+) -> Result<(), E> {
+    let len = u32::try_from(bytes.len()).map_err(|_| E::InvalidInput)?;
+    control.charge(4)?;
+    hash.update(&len.to_le_bytes())
+        .map_err(|_| E::PlatformUnavailable)?;
+    for block in bytes.chunks(4096) {
+        control.charge(block.len() as u64)?;
+        hash.update(block).map_err(|_| E::PlatformUnavailable)?;
+    }
+    Ok(())
 }
 
 pub(crate) fn actual_output_bytes(questions: &[QuestionScores], capacity: usize) -> Result<u64, E> {

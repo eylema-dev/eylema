@@ -19,6 +19,37 @@ pub(crate) fn dimensions() -> Dimensions {
         vocab: 151669,
     }
 }
+
+pub(crate) fn workspace_reservation(context: usize) -> Result<(u64, u64), E> {
+    let d = dimensions();
+    d.validate()?;
+    let cache = d.cache(context)?;
+    let lengths = [
+        d.h,
+        d.h,
+        d.qh * d.w,
+        d.kh * d.w,
+        d.kh * d.w,
+        d.qh * d.w,
+        d.h,
+        d.h,
+        d.inter,
+        d.inter,
+        d.inter,
+        d.h,
+        d.h,
+        2,
+        cache,
+        cache,
+        context,
+        d.layers * d.h,
+    ];
+    let elements = lengths.iter().try_fold(0u64, |sum, n| {
+        sum.checked_add(*n as u64).ok_or(E::ResidentLimit)
+    })?;
+    let bytes = elements.checked_mul(4).ok_or(E::ResidentLimit)?;
+    Ok((bytes, elements))
+}
 pub fn decision_layout(manifest: &ModelManifest) -> Result<WeightLayout, E> {
     let wire = manifest.to_bytes().map_err(|_| E::UnsupportedProfile)?;
     if eylema_platform::sha256(&wire).map_err(|_| E::PlatformUnavailable)? != SHA {

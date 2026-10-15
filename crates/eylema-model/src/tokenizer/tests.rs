@@ -633,12 +633,13 @@ fn decision_private_positive_parser_profile() {
 
 #[test]
 fn decision_pair_rejects_control_markers_and_never_truncates() {
-    let tokenizer = DecisionTokenizer {
-        inner: Tokenizer::test_synthetic(),
-    };
     let control =
         crate::cpu::CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(30))
             .unwrap();
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+        control: control.clone(),
+    };
     let budget = TextBudget {
         max_resident_bytes: 134217728,
         max_tokens: 4096,
@@ -679,16 +680,17 @@ fn decision_pair_rejects_control_markers_and_never_truncates() {
 
 #[test]
 fn decision_pair_uses_nfc_and_preserves_literal_braces() {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    let a = crate::cpu::CpuControl::new(deadline).unwrap();
     let tokenizer = DecisionTokenizer {
         inner: Tokenizer::test_synthetic(),
+        control: a.clone(),
     };
-    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
     let budget = TextBudget {
         max_resident_bytes: 134217728,
         max_tokens: 4096,
         max_work: 2000000,
     };
-    let a = crate::cpu::CpuControl::new(deadline).unwrap();
     let b = crate::cpu::CpuControl::new(deadline).unwrap();
     let composed = tokenizer
         .encode_pair("judge", "café", "answer {query}", budget, &a)
@@ -702,4 +704,22 @@ fn decision_pair_uses_nfc_and_preserves_literal_braces() {
         .encode_pair("judge", "cafe", "answer query", budget, &c)
         .unwrap();
     assert_ne!(composed.ids(), replacement.ids());
+}
+
+#[test]
+fn decision_tokenizer_cannot_switch_execution_control_after_admission() {
+    use std::time::{Duration, Instant};
+    let deadline = Instant::now() + Duration::from_secs(30);
+    let admitted = crate::cpu::CpuControl::new(deadline).unwrap();
+    let same_execution = admitted.clone();
+    let other_execution = crate::cpu::CpuControl::new(deadline).unwrap();
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+        control: admitted,
+    };
+    assert!(tokenizer.ensure_execution(&same_execution).is_ok());
+    assert_eq!(
+        tokenizer.ensure_execution(&other_execution),
+        Err(crate::cpu::CpuError::IdentityMismatch)
+    );
 }

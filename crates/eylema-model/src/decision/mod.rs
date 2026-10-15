@@ -111,6 +111,7 @@ impl<'a> DecisionModel<'a> {
     ) -> Result<Self, E> {
         budget.validate()?;
         control.check()?;
+        tokenizer.ensure_execution(control)?;
         if tokenizer.manifest_sha256() != profile::SHA {
             return Err(E::IdentityMismatch);
         }
@@ -186,20 +187,6 @@ fn token_error(e: crate::tokenizer::TokenizeError) -> E {
         _ => E::InvalidInput,
     }
 }
-fn hash_part(
-    h: &mut eylema_platform::sha256_stream::Sha256Stream,
-    s: &[u8],
-    c: &CpuControl,
-) -> Result<(), E> {
-    c.charge(4)?;
-    h.update(&(s.len() as u32).to_le_bytes())
-        .map_err(|_| E::PlatformUnavailable)?;
-    for block in s.chunks(4096) {
-        c.charge(block.len() as u64)?;
-        h.update(block).map_err(|_| E::PlatformUnavailable)?;
-    }
-    Ok(())
-}
 impl DecisionModel<'_> {
     pub fn score(
         &self,
@@ -213,28 +200,16 @@ impl DecisionModel<'_> {
         budget.validate()?;
         control.check()?;
         control.restrict_work(budget.max_work)?;
-        let output_reservation = request::output_reservation(batch)?;
-        let minimum_live = self
-            .base
-            .checked_add(output_reservation)
-            .ok_or(E::ResidentLimit)?;
-        if minimum_live > budget.max_resident_bytes {
-            return Err(E::ResidentLimit);
-        }
+        let output_reservation = request::preflight(
+            batch,
+            self.base,
+            budget.context,
+            budget.max_resident_bytes,
+            budget.max_work,
+            control.observed_work(),
+        )?;
         control.charge(output_reservation)?;
-        let mut hash = eylema_platform::sha256_stream::Sha256Stream::new(1048576)
-            .map_err(|_| E::PlatformUnavailable)?;
-        hash_part(&mut hash, b"decision.query-options.v1", &control)?;
-        for q in batch.questions {
-            for s in [q.id, q.instruction, q.query] {
-                hash_part(&mut hash, s.as_bytes(), &control)?;
-            }
-            for o in q.options {
-                hash_part(&mut hash, o.id.as_bytes(), &control)?;
-                hash_part(&mut hash, o.candidate.as_bytes(), &control)?;
-            }
-        }
-        let request = hash.finish().map_err(|_| E::PlatformUnavailable)?;
+        let request = request::identity(batch, &control)?;
         let mut questions = Vec::new();
         questions
             .try_reserve_exact(batch.questions.len())

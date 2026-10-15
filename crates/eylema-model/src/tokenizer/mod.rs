@@ -185,6 +185,19 @@ impl Tokenizer {
 #[derive(Debug)]
 pub struct DecisionTokenizer {
     pub(crate) inner: Tokenizer,
+    pub(crate) control: crate::cpu::CpuControl,
+}
+impl DecisionTokenizer {
+    pub(crate) fn ensure_execution(
+        &self,
+        control: &crate::cpu::CpuControl,
+    ) -> Result<(), crate::cpu::CpuError> {
+        if self.control.same_execution(control) {
+            Ok(())
+        } else {
+            Err(crate::cpu::CpuError::IdentityMismatch)
+        }
+    }
 }
 impl DecisionTokenizer {
     pub fn load<T: std::io::Read, C: std::io::Read>(
@@ -217,7 +230,10 @@ impl DecisionTokenizer {
                 return Err(TokenizeError::InvalidVocabulary);
             }
         }
-        Ok(Self { inner })
+        Ok(Self {
+            inner,
+            control: control.clone(),
+        })
     }
     pub fn manifest_sha256(&self) -> [u8; 32] {
         self.inner.manifest_sha256()
