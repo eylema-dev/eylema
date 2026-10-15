@@ -38,6 +38,83 @@ fn known_limits_before_reader() {
         TokenizeError::UnsupportedProfile
     );
 }
+struct CountingEof(u32);
+impl Read for CountingEof {
+    fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
+        self.0 += 1;
+        Ok(0)
+    }
+}
+#[test]
+fn known_work_and_reads_reject_before_either_reader() {
+    // Independent constants: ceil(11_422_654 / 65_536) + ceil(9732 / 65_536)
+    // + one EOF probe per artifact = 178 shared reader calls at minimum.
+    for (work, reads) in [
+        (1, 1024),
+        (11_422_653, 1024),
+        (134217728, 1),
+        (134217728, 177),
+    ] {
+        let mut budget = ab();
+        budget.max_work_per_artifact = work;
+        budget.max_read_calls = reads;
+        let mut tokenizer = CountingEof(0);
+        let mut config = CountingEof(0);
+        let error = Tokenizer::load(&mut tokenizer, &mut config, &manifest(), budget).unwrap_err();
+        assert_eq!(
+            (error, tokenizer.0, config.0),
+            (TokenizeError::WorkLimit, 0, 0)
+        );
+        assert_eq!(
+            Tokenizer::load(&mut Never, &mut Never, &manifest(), budget).unwrap_err(),
+            TokenizeError::WorkLimit
+        );
+    }
+}
+#[test]
+fn necessary_input_floors_do_not_replace_incremental_checks() {
+    let mut budget = ab();
+    budget.max_work_per_artifact = 11_422_654;
+    budget.max_read_calls = 178;
+    let mut tokenizer = CountingEof(0);
+    let mut config = CountingEof(0);
+    assert_eq!(
+        Tokenizer::load(&mut tokenizer, &mut config, &manifest(), budget).unwrap_err(),
+        TokenizeError::Io
+    );
+    assert_eq!((tokenizer.0, config.0), (1, 0));
+    // The synthetic tokenizer is smaller than its config: check both known sizes.
+    budget = ab();
+    budget.max_work_per_artifact = TINY.len() as u64;
+    assert!(CONFIG.len() > TINY.len());
+    assert_eq!(
+        admission::admit(
+            &mut Never,
+            &mut Never,
+            &manifest(),
+            budget,
+            admission::test_expected()
+        )
+        .unwrap_err(),
+        TokenizeError::WorkLimit
+    );
+    budget = ab();
+    // Two data reads and two EOF probes; accepting this floor must still reject EOF.
+    budget.max_read_calls = 4;
+    let mut tokenizer = CountingEof(0);
+    assert_eq!(
+        admission::admit(
+            &mut tokenizer,
+            &mut Never,
+            &manifest(),
+            budget,
+            admission::test_expected()
+        )
+        .unwrap_err(),
+        TokenizeError::Io
+    );
+    assert_eq!(tokenizer.0, 1);
+}
 #[test]
 fn full_identity_and_closed_semantics() {
     let got = admission::test_load(TINY, CONFIG, ab()).unwrap();

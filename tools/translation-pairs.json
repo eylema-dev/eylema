@@ -221,8 +221,8 @@
     {
       "en": "docs/en/tokenizer.md",
       "tr": "docs/tr/tokenizer.md",
-      "en_sha256": "e04448335c7bae4f5d793d583837b0b977aed688317b0de2fd95a5dd15540886",
-      "tr_sha256": "0f8a654614769decce1cedbee83f1572569965a82c9d8e5b3c8a1f9a967b815d"
+      "en_sha256": "3a491828f5475d480a06f5ac2226016ac2574c9baf6dd166431de17dfdc12a96",
+      "tr_sha256": "590f866f62a66e14b334f4762357bdeb74e188fc6fc1847a4ea92b375449c8b6"
     }
   ],
   "documents": []

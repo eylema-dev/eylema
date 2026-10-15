@@ -7,6 +7,7 @@ use eylema_contracts::model_contract::ModelManifest;
 use eylema_platform::sha256_stream::Sha256Stream;
 use std::cmp::Ordering;
 use std::io::{ErrorKind, Read};
+const READ_CHUNK_BYTES: usize = 65536;
 pub(super) const MANIFEST_SHA: [u8; 32] =
     hex(b"c087a033d4d193acd9912d0f555c99f14f9b968c9f308aca8acb52b07af85af2");
 const TOKEN_SHA: [u8; 32] =
@@ -87,7 +88,7 @@ fn read<R: Read>(r: &mut R, size: usize, hash: [u8; 32], c: &mut Counters) -> Re
     let mut bytes = Vec::new();
     c.vec(&mut bytes, size)?;
     let mut h = Sha256Stream::new(size.max(1) as u64)?;
-    let mut buf = [0; 65536];
+    let mut buf = [0; READ_CHUNK_BYTES];
     loop {
         if c.reads >= c.max_reads {
             return Err(E::WorkLimit);
@@ -242,6 +243,22 @@ pub(super) fn admit<T: Read, C: Read>(
         .ok_or(E::ResidentLimit)?;
     if rawsize + 65536 > c.max_resident {
         return Err(E::ResidentLimit);
+    }
+    // Necessary lower bounds only: parsing and short/interrupted reads still
+    // consume the unchanged incremental budgets after this preflight.
+    let tokenizer_work = u64::try_from(e.tokenizer_size).map_err(|_| E::WorkLimit)?;
+    let config_work = u64::try_from(e.config_size).map_err(|_| E::WorkLimit)?;
+    let minimum_reads = e
+        .tokenizer_size
+        .div_ceil(READ_CHUNK_BYTES)
+        .checked_add(e.config_size.div_ceil(READ_CHUNK_BYTES))
+        .and_then(|n| n.checked_add(2)) // One EOF probe for each artifact.
+        .ok_or(E::WorkLimit)?;
+    if tokenizer_work > c.max_work
+        || config_work > c.max_work
+        || u64::try_from(minimum_reads).map_err(|_| E::WorkLimit)? > u64::from(c.max_reads)
+    {
+        return Err(E::WorkLimit);
     }
     c.hold(65536 + 32768)?;
     let m = manifest.to_bytes().map_err(|_| E::InvalidProfile)?;
