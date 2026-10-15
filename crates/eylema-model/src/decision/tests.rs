@@ -305,10 +305,14 @@ fn synthetic_score_api_batches_resets_and_cancels_atomically() {
         vocab: 151669,
     };
     let mut tensors = BTreeMap::<String, Vec<f32>>::new();
-    tensors.insert(
-        "model.embed_tokens.weight".into(),
-        vec![0.0; dimensions.vocab * dimensions.h],
-    );
+    let embedding = (0..dimensions.vocab * dimensions.h)
+        .map(|index| {
+            let token = index / dimensions.h;
+            let feature = index % dimensions.h;
+            (((token * 31 + feature * 17) % 101) as f32 / 101.0 - 0.5) * 0.2
+        })
+        .collect();
+    tensors.insert("model.embed_tokens.weight".into(), embedding);
     tensors.insert("model.norm.weight".into(), vec![1.0; dimensions.h]);
     for (name, len) in [
         ("input_layernorm.weight", dimensions.h),
@@ -335,7 +339,14 @@ fn synthetic_score_api_batches_resets_and_cancels_atomically() {
         ("mlp.up_proj.weight", dimensions.inter * dimensions.h),
         ("mlp.down_proj.weight", dimensions.h * dimensions.inter),
     ] {
-        tensors.insert(crate::cpu::profile::name(0, name).unwrap(), vec![0.0; len]);
+        let values = if name.contains("norm") {
+            vec![1.0; len]
+        } else {
+            (0..len)
+                .map(|index| (((index * 13 + 7) % 29) as f32 / 29.0 - 0.5) * 0.2)
+                .collect()
+        };
+        tensors.insert(crate::cpu::profile::name(0, name).unwrap(), values);
     }
     let weights = BoundWeights::synthetic(dimensions, &tensors).unwrap();
     let manifest = ModelManifest::from_bytes(include_bytes!(
@@ -388,7 +399,7 @@ fn synthetic_score_api_batches_resets_and_cancels_atomically() {
         DecisionQuestion {
             id: "second",
             instruction: "judge",
-            query: "city",
+            query: "capital",
             options: &options_b,
         },
     ];
@@ -403,10 +414,7 @@ fn synthetic_score_api_batches_resets_and_cancels_atomically() {
     assert_eq!(result.questions()[0].question_id(), "first");
     assert_eq!(result.questions()[1].question_id(), "second");
     for q in result.questions() {
-        assert_eq!(q.choice(), None);
-        assert_eq!(q.reason(), DecisionReason::Tie);
         assert_eq!(q.scores().len(), 2);
-        assert!(q.scores().iter().all(|s| s.score_micros() == 500_000));
     }
     for (qid, oid) in [
         ("first", "a"),
@@ -414,14 +422,38 @@ fn synthetic_score_api_batches_resets_and_cancels_atomically() {
         ("second", "a"),
         ("second", "b"),
     ] {
-        assert_eq!(pair_score_for_test(&result, qid, oid).logits(), [0.0, 0.0]);
+        let score = pair_score_for_test(&result, qid, oid);
+        assert!(score.logits().iter().any(|logit| *logit != 0.0));
+        assert!((0..2).all(|i| score.logits()[i].is_finite()));
     }
+    for qid in ["first", "second"] {
+        assert_ne!(
+            pair_score_for_test(&result, qid, "a").logits(),
+            pair_score_for_test(&result, qid, "b").logits(),
+            "different candidates must exercise non-degenerate model outputs"
+        );
+    }
+    // A reordered batch must preserve pair outputs: each candidate gets a fresh KV cache.
+    for (qid, oid) in [("first", "a"), ("first", "b")] {
+        assert_eq!(
+            pair_score_for_test(&result, qid, oid).logits(),
+            pair_score_for_test(&result, "second", oid).logits()
+        );
+    }
+
+    // Stop only after the first complete pair has published its measured work, then
+    // pass the second pair's tokenizer and 20,510-unit workspace initialization and
+    // interrupt its forward pass. The threshold is relative to observed pair-1 work.
+    let first_pair = pair_score_for_test(&result, "first", "a").cumulative_work();
+    let stop_during_second_pair = first_pair + 24_576;
     let cancelled = CpuControl::new_job(deadline, 800_000_000_000, group).unwrap();
-    cancelled.stop_after(1_000);
+    cancelled.stop_after(stop_during_second_pair);
+    let cancelled_observer = cancelled.clone();
     assert!(matches!(
         model.score(&batch, budget, cancelled),
         Err(crate::cpu::CpuError::Cancelled)
     ));
+    assert!(cancelled_observer.observed_work() >= stop_during_second_pair);
 }
 
 fn pair_score_for_test<'a>(

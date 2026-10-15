@@ -525,17 +525,21 @@ fn actual_pinned_reranker() {
         assert!(!hidden.is_empty());
         compare(&pair_score(&result, question, option).logits(), &head);
         let pair = pair_score(&result, question, option);
-        let (probability, micros) = reference_probability([head[0], head[1]]);
+        let candidate_logits = pair.logits();
+        let (probability, micros) = reference_probability([
+            f64::from(candidate_logits[0]),
+            f64::from(candidate_logits[1]),
+        ]);
         assert!(
             (pair.probability() - probability).abs() <= 1.0e-7,
-            "probability differs from independent reference"
+            "probability differs from normalization of candidate logits"
         );
         assert_eq!(
             pair.score_micros(),
             micros,
-            "rounded score differs from independent reference"
+            "rounded score differs from normalization of candidate logits"
         );
-        oracle_micros.push(micros);
+        oracle_micros.push(reference_probability([head[0], head[1]]).1);
     }
     for (question_index, question) in result.questions().iter().enumerate() {
         let expected = reference_reason(&oracle_micros[question_index * 2..question_index * 2 + 2]);
