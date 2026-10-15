@@ -1,0 +1,48 @@
+{
+  "stage": "development-only numerical qualification, not pretrained model/production execution",
+  "cases": [
+    [
+      3,
+      7,
+      4,
+      2,
+      4,
+      2,
+      3
+    ],
+    [
+      5,
+      6,
+      2,
+      1,
+      2,
+      1,
+      3
+    ],
+    [
+      3,
+      5,
+      2,
+      1,
+      128,
+      2,
+      2
+    ]
+  ],
+  "fields": [
+    "hidden",
+    "intermediate",
+    "query_heads",
+    "kv_heads",
+    "head_dim",
+    "layers",
+    "tokens"
+  ],
+  "input": "fully synthetic deterministic signed dyadic values; vocabulary7; no pretrained artifact",
+  "oracle": "Python3.14 Decimal80, layer-major batched causal computation, Taylor sin/cos; no Rust outputs as expected values",
+  "candidate": "standalone owned RustF32, token-major persistent per-layerKV; no production imports or copied upstream code",
+  "tolerance": "abs(actual-expected)<=0.00005+0.00005*abs(expected); finite required; exact shapes/greedy IDs/BF16bits; freeze before candidate",
+  "bounds": "3cases, <=8192synthetic scalar weights/case, <=2000000scalar multiply-adds/case, <=32MiB output, each subprocess<=20seconds; one candidate; qualification no auto-admission",
+  "negative": "nonfinite BF16; malformed/grouped dimensions; context overflow; cancelled before work; smallest-token tie; wrong grouping/rotation/cache/logit orientation mutants must be detected",
+  "budget": "G30 original120active/3repair/900review includes trial; no production/weights/provider/training/newdependency"
+}

@@ -1,0 +1,61 @@
+{
+  "authority": "role intent only; no execution authority, model quality claim, or permissions",
+  "format": "qwen3-cpu-roles.v1",
+  "parent_manifest_sha256": "c087a033d4d193acd9912d0f555c99f14f9b968c9f308aca8acb52b07af85af2",
+  "profiles": [
+    {
+      "action_semantics": "proposal-only.v1",
+      "input_schema": "text.messages.v1",
+      "input_units": "utf8.v1",
+      "output_schema": "reasoning.summary.v1",
+      "output_units": "utf8.v1",
+      "preprocessing": "qwen3.template.v1",
+      "role": "reasoning",
+      "state_reset": "reset-between-steps.v1",
+      "version": 1
+    },
+    {
+      "action_semantics": "proposal-only.v1",
+      "input_schema": "text.messages.v1",
+      "input_units": "utf8.v1",
+      "output_schema": "plan.proposal.v1",
+      "output_units": "utf8.v1",
+      "preprocessing": "qwen3.template.v1",
+      "role": "planning",
+      "state_reset": "reset-between-steps.v1",
+      "version": 1
+    },
+    {
+      "action_semantics": "proposal-only.v1",
+      "input_schema": "text.messages.v1",
+      "input_units": "utf8.v1",
+      "output_schema": "domain.result.v1",
+      "output_units": "schema-defined.v1",
+      "preprocessing": "qwen3.template.v1",
+      "role": "specialist",
+      "state_reset": "reset-between-steps.v1",
+      "version": 1
+    },
+    {
+      "action_semantics": "proposal-only.v1",
+      "input_schema": "candidate.evidence.v1",
+      "input_units": "declared-units.v1",
+      "output_schema": "evaluation.proposal.v1",
+      "output_units": "declared-units.v1",
+      "preprocessing": "qwen3.critic-evidence.v1",
+      "role": "critic",
+      "state_reset": "reset-between-steps.v1",
+      "version": 1
+    }
+  ],
+  "revision": 1,
+  "role_limits": {
+    "critic_candidate_utf8_bytes": 1024,
+    "critic_evidence_utf8_bytes": 1024,
+    "maximum_context_positions": 64,
+    "maximum_new_tokens": 8,
+    "proposal_only": true,
+    "reset_between_roles": true,
+    "unsupported_role": "reject"
+  }
+}
