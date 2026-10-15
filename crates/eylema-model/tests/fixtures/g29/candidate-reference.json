@@ -1,0 +1,1165 @@
+{
+  "format": "g29-tokenizer-reference.v1",
+  "unicode": "16.0.0",
+  "source": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "config_sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "cases": [
+    {
+      "name": "text_00",
+      "input_hex": "",
+      "normalized_hex": "",
+      "pieces_hex": [],
+      "ids": [],
+      "decoded_hex": ""
+    },
+    {
+      "name": "text_01",
+      "input_hex": "48656c6c6f20776f726c64",
+      "normalized_hex": "48656c6c6f20776f726c64",
+      "pieces_hex": [
+        "48656c6c6f",
+        "20776f726c64"
+      ],
+      "ids": [
+        9707,
+        1879
+      ],
+      "decoded_hex": "48656c6c6f20776f726c64"
+    },
+    {
+      "name": "text_02",
+      "input_hex": "2048656c6c6f20776f726c64",
+      "normalized_hex": "2048656c6c6f20776f726c64",
+      "pieces_hex": [
+        "2048656c6c6f",
+        "20776f726c64"
+      ],
+      "ids": [
+        21927,
+        1879
+      ],
+      "decoded_hex": "2048656c6c6f20776f726c64"
+    },
+    {
+      "name": "text_03",
+      "input_hex": "49274d2077652772652063616e27742027c5bf",
+      "normalized_hex": "49274d2077652772652063616e27742027c5bf",
+      "pieces_hex": [
+        "49",
+        "274d",
+        "207765",
+        "277265",
+        "2063616e",
+        "2774",
+        "2027",
+        "c5bf"
+      ],
+      "ids": [
+        40,
+        27603,
+        582,
+        2299,
+        646,
+        944,
+        364,
+        144815
+      ],
+      "decoded_hex": "49274d2077652772652063616e27742027c5bf"
+    },
+    {
+      "name": "text_04",
+      "input_hex": "c4b07374616e62756c20c4b1204920c387c49ec59e",
+      "normalized_hex": "c4b07374616e62756c20c4b1204920c387c49ec59e",
+      "pieces_hex": [
+        "c4b07374616e62756c",
+        "20c4b1",
+        "2049",
+        "20c387c49ec59e"
+      ],
+      "ids": [
+        47780,
+        45116,
+        220,
+        3777,
+        358,
+        63005,
+        125823,
+        125074
+      ],
+      "decoded_hex": "c4b07374616e62756c20c4b1204920c387c49ec59e"
+    },
+    {
+      "name": "text_05",
+      "input_hex": "43cca747cc8653cca7",
+      "normalized_hex": "c387c49ec59e",
+      "pieces_hex": [
+        "c387c49ec59e"
+      ],
+      "ids": [
+        45913,
+        125823,
+        125074
+      ],
+      "decoded_hex": "c387c49ec59e"
+    },
+    {
+      "name": "text_06",
+      "input_hex": "71cc87cca3",
+      "normalized_hex": "71cca3cc87",
+      "pieces_hex": [
+        "71",
+        "cca3cc87"
+      ],
+      "ids": [
+        80,
+        136,
+        96,
+        136,
+        229
+      ],
+      "decoded_hex": "71cca3cc87"
+    },
+    {
+      "name": "text_07",
+      "input_hex": "e18480e185a1",
+      "normalized_hex": "eab080",
+      "pieces_hex": [
+        "eab080"
+      ],
+      "ids": [
+        19969
+      ],
+      "decoded_hex": "eab080"
+    },
+    {
+      "name": "text_08",
+      "input_hex": "e4bda0e5a5bde4b896e7958c",
+      "normalized_hex": "e4bda0e5a5bde4b896e7958c",
+      "pieces_hex": [
+        "e4bda0e5a5bde4b896e7958c"
+      ],
+      "ids": [
+        108386,
+        99489
+      ],
+      "decoded_hex": "e4bda0e5a5bde4b896e7958c"
+    },
+    {
+      "name": "text_09",
+      "input_hex": "f09f9982f09f9a80f0909080",
+      "normalized_hex": "f09f9982f09f9a80f0909080",
+      "pieces_hex": [
+        "f09f9982f09f9a80",
+        "f0909080"
+      ],
+      "ids": [
+        145080,
+        145836,
+        123934,
+        238,
+        222
+      ],
+      "decoded_hex": "f09f9982f09f9a80f0909080"
+    },
+    {
+      "name": "text_10",
+      "input_hex": "313233343536",
+      "normalized_hex": "313233343536",
+      "pieces_hex": [
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36"
+      ],
+      "ids": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "decoded_hex": "313233343536"
+    },
+    {
+      "name": "text_11",
+      "input_hex": "20092048656c6c6f0d0a776f726c6420200a09",
+      "normalized_hex": "20092048656c6c6f0d0a776f726c6420200a09",
+      "pieces_hex": [
+        "2009",
+        "2048656c6c6f",
+        "0d0a",
+        "776f726c64",
+        "20200a",
+        "09"
+      ],
+      "ids": [
+        7018,
+        21927,
+        319,
+        14615,
+        2303,
+        197
+      ],
+      "decoded_hex": "20092048656c6c6f0d0a776f726c6420200a09"
+    },
+    {
+      "name": "text_12",
+      "input_hex": "61626162616261",
+      "normalized_hex": "61626162616261",
+      "pieces_hex": [
+        "61626162616261"
+      ],
+      "ids": [
+        370,
+        370,
+        12004
+      ],
+      "decoded_hex": "61626162616261"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "prompt_00",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "4869"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a48693c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        13048,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_01",
+      "messages": [
+        {
+          "role": "system",
+          "content_hex": "426520707265636973652e"
+        },
+        {
+          "role": "user",
+          "content_hex": "c4b07374616e62756c3f"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e73797374656d0a426520707265636973652e3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e757365720ac4b07374616e62756c3f3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        8948,
+        198,
+        3430,
+        23560,
+        13,
+        151645,
+        198,
+        151644,
+        872,
+        198,
+        47780,
+        45116,
+        30,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_02",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "4f6e65"
+        },
+        {
+          "role": "assistant",
+          "content_hex": "54776f"
+        },
+        {
+          "role": "user",
+          "content_hex": "5468726565"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a4f6e653c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a54776f3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e757365720a54687265653c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        3966,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        11613,
+        151645,
+        198,
+        151644,
+        872,
+        198,
+        19641,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_03",
+      "messages": [
+        {
+          "role": "system",
+          "content_hex": "426520707265636973652e"
+        },
+        {
+          "role": "user",
+          "content_hex": "4f6e65"
+        },
+        {
+          "role": "assistant",
+          "content_hex": "54776f"
+        },
+        {
+          "role": "user",
+          "content_hex": "5468726565"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e73797374656d0a426520707265636973652e3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e757365720a4f6e653c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a54776f3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e757365720a54687265653c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        8948,
+        198,
+        3430,
+        23560,
+        13,
+        151645,
+        198,
+        151644,
+        872,
+        198,
+        3966,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        11613,
+        151645,
+        198,
+        151644,
+        872,
+        198,
+        19641,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_04",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": ""
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_05",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "0a"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a0a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        271,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_06",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "0d0a"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a0d0a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        319,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_07",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "200a"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a200a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        26809,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_08",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "09"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a093c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        197,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_09",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "0ac4b07374616e62756c"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a0ac4b07374616e62756c3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        271,
+        47780,
+        45116,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_10",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "cca7"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720acca73c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        136,
+        100,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_11",
+      "messages": [
+        {
+          "role": "system",
+          "content_hex": "0a"
+        },
+        {
+          "role": "user",
+          "content_hex": "0d0a"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e73797374656d0a0a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e757365720a0d0a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        8948,
+        271,
+        151645,
+        198,
+        151644,
+        872,
+        198,
+        319,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_12",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "4f6e65"
+        },
+        {
+          "role": "assistant",
+          "content_hex": "0a54776f"
+        },
+        {
+          "role": "user",
+          "content_hex": "0a5468726565"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a4f6e653c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a0a54776f3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e757365720a0a54687265653c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        3966,
+        151645,
+        198,
+        151644,
+        77091,
+        271,
+        11613,
+        151645,
+        198,
+        151644,
+        872,
+        271,
+        19641,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    },
+    {
+      "name": "prompt_13",
+      "messages": [
+        {
+          "role": "user",
+          "content_hex": "200d0a"
+        }
+      ],
+      "rendered_hex": "3c7c696d5f73746172747c3e757365720a200d0a3c7c696d5f656e647c3e0a3c7c696d5f73746172747c3e617373697374616e740a3c7468696e6b3e0a0a3c2f7468696e6b3e0a0a",
+      "ids": [
+        151644,
+        872,
+        198,
+        2529,
+        151645,
+        198,
+        151644,
+        77091,
+        198,
+        151667,
+        271,
+        151668,
+        271
+      ]
+    }
+  ],
+  "added": [
+    {
+      "id": 151643,
+      "content": "<|endoftext|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151644,
+      "content": "<|im_start|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151645,
+      "content": "<|im_end|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151646,
+      "content": "<|object_ref_start|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151647,
+      "content": "<|object_ref_end|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151648,
+      "content": "<|box_start|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151649,
+      "content": "<|box_end|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151650,
+      "content": "<|quad_start|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151651,
+      "content": "<|quad_end|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151652,
+      "content": "<|vision_start|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151653,
+      "content": "<|vision_end|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151654,
+      "content": "<|vision_pad|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151655,
+      "content": "<|image_pad|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151656,
+      "content": "<|video_pad|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": true
+    },
+    {
+      "id": 151657,
+      "content": "<tool_call>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151658,
+      "content": "</tool_call>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151659,
+      "content": "<|fim_prefix|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151660,
+      "content": "<|fim_middle|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151661,
+      "content": "<|fim_suffix|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151662,
+      "content": "<|fim_pad|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151663,
+      "content": "<|repo_name|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151664,
+      "content": "<|file_sep|>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151665,
+      "content": "<tool_response>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151666,
+      "content": "</tool_response>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151667,
+      "content": "<think>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    },
+    {
+      "id": 151668,
+      "content": "</think>",
+      "single_word": false,
+      "lstrip": false,
+      "rstrip": false,
+      "normalized": false,
+      "special": false
+    }
+  ],
+  "byte_ids": [
+    188,
+    189,
+    190,
+    191,
+    192,
+    193,
+    194,
+    195,
+    196,
+    197,
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    206,
+    207,
+    208,
+    209,
+    210,
+    211,
+    212,
+    213,
+    214,
+    215,
+    216,
+    217,
+    218,
+    219,
+    220,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    221,
+    222,
+    223,
+    224,
+    225,
+    226,
+    227,
+    228,
+    229,
+    230,
+    231,
+    232,
+    233,
+    234,
+    235,
+    236,
+    237,
+    238,
+    239,
+    240,
+    241,
+    242,
+    243,
+    244,
+    245,
+    246,
+    247,
+    248,
+    249,
+    250,
+    251,
+    252,
+    253,
+    254,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    255,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175,
+    176,
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187
+  ]
+}
