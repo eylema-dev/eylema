@@ -245,8 +245,14 @@
     {
       "en": "docs/en/g57-cpu-decision-design.md",
       "tr": "docs/tr/g57-cpu-decision-design.md",
-      "en_sha256": "19987667b5d56e394fe88986b5500a3fe0b3bad51c46fb2b75bf3e071109fb75",
-      "tr_sha256": "6e47b54b0f29aaeb82768fcb693bf96bd73dbd81aa64be2f55806b8003535403"
+      "en_sha256": "d48a0d967e61ad89e4ac0af234d337bea24040c428f2771056e047662bf883d4",
+      "tr_sha256": "0aaa8e697acb625b29222deba696b74aa98bc6cdf032dd37455491b9eb013c5c"
+    },
+    {
+      "en": "docs/en/cpu-decision.md",
+      "tr": "docs/tr/cpu-decision.md",
+      "en_sha256": "95d5b6ef7518e2c0be0441923e36554b3c182637b5b9c2f29ccf7e7781e32290",
+      "tr_sha256": "b0d313959c2d519145167a5bed88b8acbf3cf4f14acc195fc1609b024c7efb9d"
     }
   ],
   "documents": []
