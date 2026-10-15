@@ -1,6 +1,6 @@
 # Sınırlı kendi CPU model yürütmemiz
 
-[English](../en/cpu-model.md). G30 uygulaması doğrulanıyor; gerçek önceden eğitilmiş model yürütümü, son ayrı inceleme ve kabul edilmiş teslim hâlâ **not_run**.
+[English](../en/cpu-model.md). G30 sınırlı önceden eğitilmiş model kabulü aşağıdaki yerel cihazda geçti; son head için ayrı inceleme, güncel teslim CI’ı ve koordineli main kabulü bekliyor.
 
 `eylema-model::cpu` API'si yalnız ayrı kimlikli Qwen CPU manifestini kabul eder. Tam311tensor BF16 düzenini, değişmez G28 snapshot'ını ve özgün G29 tokenizer ebeveynini bağlar. Saklanan her skaler sonlu olmalıdır; fiziksel `lm_head.weight` embedding baytlarıyla eşit olmalıdır. Model tek snapshot ve tokenizer'ı ödünç alır; oturumlar yalnız sınırlı görünüm metaverisini kopyalar ve yeni KV/çalışma alanı tutar. G23 operatörleri ve genel unsupported-local ataması değişmez.
 
@@ -13,3 +13,20 @@ F32 aritmetiği sıralı skaler indirgeme, tam alan RMS/softmax, head başına Q
 `generate`, ayrı reasoning, planning, specialist ve critic istek türlerini kabul eder. Critic, sınırlı sabit sıralı JSON candidate/evidence nesnesini sıradan tipli user biçimlemesinden alır. Her çağrı yeni oturum başlatır. Çıktı türleri ve değişmez makbuzlar kesin rol arayüzünü, CPU/tokenizer/artifact kimliklerini, sayısal profili, token sayılarını, işi, mantıksal tepeyi ve EOS/token-limit sonucunu bağlar. Metin **doğrulanmamış tekliftir**; kalibre hüküm, skor, araç eylemi veya izin değildir. Boş, geçersiz UTF8ve kontrol işaretli çıktı reddedilir. Debug yalnız tür/sayı/açık kimlik özetleri içerir; prompt veya üretilmiş metin içermez.
 
 Ek `encode_prompt_controlled`/`decode_controlled` yolları eski G29 sonuçlarını korur; normalizasyon, BPE ve decode içinde iptali taşır. G29'un4096token girdi sınırı ve128token rezervasyonu, küçük CPU prompt+generation denetiminden bağımsız kalır. Kütüphanede kesme, fallback, model indirme veya gizli motor yoktur.
+
+## Gerçek sınırlı yerel kabul
+
+Kaynak`7bd5debc4745ffda9abb36a81790b1c28511d5e5`, AppleM4Pro/macOSARM64,24GiB birleşik RAM, Rust1.99.0 ve CPython3.14.8 üzerinde: tek açık1503300328bayt artifact162,19saniyede indirildi; tam dosya SHA256`f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b` doğrulandı. Kabul edilmiş G29 tokenizer/config dosyaları ayrıca hash denetiminden geçti. Hesap, provider, GPU veya eğitim motoru kullanılmadı.
+
+Tek bağımsız F64 işi28katman durumunu ve151936logiti24,15saniyede hesapladı. Kendi Rust release kabul koşusu, snapshot/tokenizer/kabul hazırlığı dahil59,40saniyede tam altı aday işi çalıştırdı.180608hidden/logit karşılaştırmasının tamamı donmuş değer başına`absolute_error <= 0.001 + 0.0002*abs(reference)` sınırını sağladı; greedy token21806aynıydı. En büyük hidden mutlak hatası0,007344306 ve logit mutlak hatası0,000050857olarak raporlanır; bunlar değer başına bağıl sınırın yerine geçmez.
+
+| Aday | Girdi/üretilen token | Doğrulanmamış çıktı UTF8 baytı | İş birimi |
+|---|---:|---:|---:|
+| Reasoning |21/8|22|50240061792|
+| Planning |19/8|35|46645938084|
+| Specialist |23/7|9|53835117641|
+| Critic |30/8|26|66425102697|
+
+Dört gerçek çıktı özeti birbirinden farklı; türler ve makbuzlar rollerle eşleşti. Kısa açık girdiler uzman veya Türkçe görev kalitesi değil, bağlantı/smoke davranışı kanıtıdır. Altıncı iş çalışma alanı hazırlığından sonra sayısal ilerleme gözledi, iptal etti, teklif döndürmedi ve cache yeniden kullanımını reddetti. Kabul işi3317825536iş birimi tüketti; kabul dahil altı işin toplamı222263133222ile320milyarın altında kaldı. Her iş80milyarın altında kaldı. Muhafazakâr tepe mantıksal içerik1658000646bayttı. İş başına örneklenen native süreç RSS1209253888–1538179072bayt aralığındaydı; F64 gözetmeni eşlenmiş sayfalar dahil1214775296bayt örneklenmiş tepe RSS gözledi. Örnekler genel sığma/throughput veya OS yalıtımı garantisi değildir.
+
+Dört geçici gerçek-kaynak mutasyonu—iç içe GQA gruplama, yanlış yarım-dönüş işareti, eski önek anahtarları ve yok sayılan iptal—derlendi ve ilgili donmuş davranış testinde başarısız oldu. Her geri yükleme on iki CPU testini geçti; özgün kaynak ağacı tam korundu. Artifact gerektiren sıradan CI atlamaları açık kalır; yukarıdaki gerçek kabul ayrı yetkilendirilmiş yerel koşudur. Özel makbuzlar, loglar, model baytları ve referans dizileri Git dışında tutulur. GPU, eğitim ve daha büyük context yürütümü not_run kalır.

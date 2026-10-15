@@ -1,6 +1,6 @@
 # Bounded owned CPU model execution
 
-[Turkish](../tr/cpu-model.md). G30 implementation is under verification; actual pretrained-model execution, final independent review and accepted delivery remain **not_run**.
+[Turkish](../tr/cpu-model.md). G30 bounded pretrained-model acceptance passed on the named local host below; independent final-head review, current delivery CI and coordinated main acceptance remain pending.
 
 The `eylema-model::cpu` API admits only the separately identified Qwen CPU manifest. It binds the complete 311-tensor BF16 layout, immutable G28 snapshot and original G29 tokenizer parent. Every stored scalar must be finite; the physically stored `lm_head.weight` must equal the embedding bytes. The model borrows one snapshot and tokenizer; sessions copy only bounded view metadata and own fresh KV/workspace. G23 operators and generic unsupported-local assignment are unchanged.
 
@@ -13,3 +13,20 @@ F32 arithmetic uses ascending scalar reductions, full-domain RMS/softmax, per-he
 `generate` accepts separate reasoning, planning, specialist and critic request variants. Critic receives a bounded fixed-order JSON candidate/evidence object through ordinary typed user formatting. Each call starts a fresh session. Output variants and immutable receipts bind the exact role interface, CPU/tokenizer/artifact identities, numeric profile, token counts, work, logical peak and EOS/token-limit outcome. Text is an **unverified proposal**, with no calibrated verdict, score, tool action or permission. Empty, invalid UTF8 and control-sentinel output reject. Debug output contains types, counts and public identity digests, never prompt or generated text.
 
 The additive `encode_prompt_controlled`/`decode_controlled` tokenizer paths preserve legacy G29 results and propagate cancellation inside normalization, BPE and decoding. G29's4096token input bound and128token reservation stay independent of the smaller CPU prompt-plus-generation check. No truncation, fallback, model download or hidden engine is part of the library.
+
+## Actual bounded local acceptance
+
+At source`7bd5debc4745ffda9abb36a81790b1c28511d5e5`, AppleM4Pro/macOSARM64 with24GiB unified RAM, Rust1.99.0 and CPython3.14.8: one public1503300328byte artifact was downloaded in162.19seconds and whole-file SHA256`f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b` verified. The existing accepted G29 tokenizer/config were independently rehashed. No account, provider, GPU or training engine was used.
+
+One independent F64 job computed28layer states and151936logits in24.15seconds. The owned Rust release harness ran exactly six candidate jobs in59.40seconds, including snapshot/tokenizer/admission setup. All180608hidden/logit comparisons passed the frozen per-value bound`absolute_error <= 0.001 + 0.0002*abs(reference)` with identical greedy token21806. Maximum hidden absolute error0.007344306 and logit absolute error0.000050857 are reported without substituting a maximum-only test for the per-value relative bound.
+
+| Candidate | Input/generated tokens | Unverified output UTF8 bytes | Work units |
+|---|---:|---:|---:|
+| Reasoning |21/8|22|50240061792|
+| Planning |19/8|35|46645938084|
+| Specialist |23/7|9|53835117641|
+| Critic |30/8|26|66425102697|
+
+All four actual output digests differ and variants/receipts match their roles. These short public-input outputs establish plumbing/smoke behavior, not expert or Turkish task quality. The sixth job observed numerical work after workspace initialization, cancelled, returned no proposal and rejected cache reuse. Admission consumed3317825536work units; the full six-job total including admission was222263133222, below320billion. Each job stayed below80billion. Conservative peak logical content was1658000646bytes. Per-job sampled native process RSS ranged1209253888–1538179072bytes; F64 supervisor sampled peak process RSS1214775296bytes including mapped pages. Samples are not universal fit/throughput or OS isolation guarantees.
+
+Four temporary actual-source mutants—interleaved GQA grouping, wrong half-rotation sign, stale prefix keys and ignored cancellation—each compiled and failed the frozen relevant behavioral test. Every restoration passed the twelve-CPU-test suite, and the original source tree was restored exactly. Asset-dependent ordinary CI skips remain explicit; the actual acceptance above was a separate authorized local run. Private receipts, logs, model bytes and numerical reference arrays remain outside Git. GPU, training and larger context execution remain not_run.
