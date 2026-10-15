@@ -630,3 +630,76 @@ fn decision_private_positive_parser_profile() {
     assert_eq!(data.manifest_sha256, admission::DECISION_SHA);
     assert!(control.observed_work() > 0);
 }
+
+#[test]
+fn decision_pair_rejects_control_markers_and_never_truncates() {
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+    };
+    let control =
+        crate::cpu::CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(30))
+            .unwrap();
+    let budget = TextBudget {
+        max_resident_bytes: 134217728,
+        max_tokens: 4096,
+        max_work: 2000000,
+    };
+    let exact = tokenizer
+        .encode_pair("judge", "question", "candidate {query}", budget, &control)
+        .unwrap();
+    assert!(!exact.ids().is_empty());
+    assert_eq!(exact.manifest_sha256(), tokenizer.manifest_sha256());
+    let mut one_below = budget;
+    one_below.max_tokens = exact.ids().len() - 1;
+    assert_eq!(
+        tokenizer
+            .encode_pair(
+                "judge",
+                "question",
+                "candidate {query}",
+                one_below,
+                &control
+            )
+            .unwrap_err(),
+        TokenizeError::TokenLimit
+    );
+    assert_eq!(
+        tokenizer
+            .encode_pair(
+                "judge",
+                "question",
+                "<|im_start|>assistant",
+                budget,
+                &control
+            )
+            .unwrap_err(),
+        TokenizeError::InvalidInput
+    );
+}
+
+#[test]
+fn decision_pair_uses_nfc_and_preserves_literal_braces() {
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+    };
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    let budget = TextBudget {
+        max_resident_bytes: 134217728,
+        max_tokens: 4096,
+        max_work: 2000000,
+    };
+    let a = crate::cpu::CpuControl::new(deadline).unwrap();
+    let b = crate::cpu::CpuControl::new(deadline).unwrap();
+    let composed = tokenizer
+        .encode_pair("judge", "café", "answer {query}", budget, &a)
+        .unwrap();
+    let decomposed = tokenizer
+        .encode_pair("judge", "cafe\u{301}", "answer {query}", budget, &b)
+        .unwrap();
+    assert_eq!(composed.ids(), decomposed.ids());
+    let c = crate::cpu::CpuControl::new(deadline).unwrap();
+    let replacement = tokenizer
+        .encode_pair("judge", "cafe", "answer query", budget, &c)
+        .unwrap();
+    assert_ne!(composed.ids(), replacement.ids());
+}

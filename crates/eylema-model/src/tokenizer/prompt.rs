@@ -8,6 +8,15 @@ pub(super) fn encode(
     c: &mut Counters,
     limit: usize,
 ) -> Result<Vec<u32>, E> {
+    encode_profile(data, messages, c, limit, false)
+}
+pub(super) fn encode_profile(
+    data: &AdmittedData,
+    messages: &[PromptMessage<'_>],
+    c: &mut Counters,
+    limit: usize,
+    decision: bool,
+) -> Result<Vec<u32>, E> {
     if messages.len() > 8 {
         return Err(E::SizeLimit);
     }
@@ -20,7 +29,7 @@ pub(super) fn encode(
     }
     let mut size = 0usize;
     for (i, m) in messages.iter().enumerate() {
-        if m.content.len() > 8192 {
+        if m.content.len() > if decision { 32768 } else { 8192 } {
             return Err(E::SizeLimit);
         }
         size = size.checked_add(m.content.len()).ok_or(E::SizeLimit)?;
@@ -49,7 +58,11 @@ pub(super) fn encode(
         // LF terminates the fixed ASCII header, so NFC cannot compose across
         // this boundary. Normalize bounded content, then BPE the whole span.
         bpe::guard(data, m.content, c)?;
-        let normalized = unicode::normalize(m.content, c)?;
+        let normalized = if decision {
+            unicode::normalize_decision(m.content, c)?
+        } else {
+            unicode::normalize(m.content, c)?
+        };
         let mut body = Vec::new();
         let copied = role
             .len()

@@ -1,6 +1,6 @@
 # G57 kendi CPU karar yürütümü tasarımı
 
-Durum: önerilen yazılı mimari tasarım, 15 Ekim 2026. Bakımcı kapsam ve tasarım hazırlığını onayladı; bu şartname, G57 katkı profili önerisi ve sonraki uygulama planı için gerçek kararlar hâlâ gerekiyor. G57 üretim kodu, referans programı, ağırlık edinimi veya model yürütümü başlamadı. [İngilizce](../en/g57-cpu-decision-design.md).
+Durum: bakımcı yazılı tasarımı, G57’ye özel katkı profilini ve sınırlı uygulama planını onayladı. Bağımsız F64 oracle ve ortak decoder commit edildi; tipli çift puanlama uygulaması sürüyor. G57 model ağırlığı, referans yürütümü ve native model kabulü henüz çalıştırılmadı. [İngilizce](../en/g57-cpu-decision-design.md).
 
 ## Sonuç ve kanıt sınırları
 

@@ -37,6 +37,9 @@ impl CpuControl {
     pub fn observed_work(&self) -> u64 {
         self.0.work.load(Ordering::Acquire)
     }
+    pub(crate) fn same_execution(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
     #[cfg(test)]
     pub(crate) fn stop_after(&self, n: u64) {
         self.0.stop_after.store(n, Ordering::Release);
@@ -89,5 +92,20 @@ impl std::fmt::Debug for CpuControl {
         f.debug_struct("CpuControl")
             .field("work", &self.observed_work())
             .finish_non_exhaustive()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn execution_identity_is_shared_only_by_clones() {
+        let deadline = Instant::now() + Duration::from_secs(30);
+        let original = CpuControl::new(deadline).unwrap();
+        let clone = original.clone();
+        let separate = CpuControl::new(deadline).unwrap();
+        assert!(original.same_execution(&clone));
+        assert!(!original.same_execution(&separate));
     }
 }

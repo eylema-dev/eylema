@@ -229,3 +229,63 @@ impl DecisionTokenizer {
         self.inner.config_sha256()
     }
 }
+
+impl DecisionTokenizer {
+    pub fn encode_pair(
+        &self,
+        instruction: &str,
+        query: &str,
+        candidate: &str,
+        b: TextBudget,
+        control: &crate::cpu::CpuControl,
+    ) -> Result<EncodedTokens, TokenizeError> {
+        if [instruction, query, candidate]
+            .iter()
+            .any(|x| x.len() > 16384)
+            || 205 + instruction.len() + query.len() + candidate.len() > 32768
+        {
+            return Err(TokenizeError::SizeLimit);
+        }
+        let mut c = budget::Counters::text(b, self.inner.data.resident)?;
+        c.control = Some(control.clone());
+        control.check().map_err(budget::control_error)?;
+        for s in [instruction, query, candidate] {
+            bpe::guard(&self.inner.data, s, &mut c)?;
+        }
+        let mut body = Vec::new();
+        for s in [
+            "<Instruction>: ",
+            instruction,
+            "\n<Query>: ",
+            query,
+            "\n<Candidate>: ",
+            candidate,
+        ] {
+            c.charge(s.len())?;
+            c.bytes(&mut body, s.as_bytes())?;
+        }
+        let user = std::str::from_utf8(&body).map_err(|_| TokenizeError::InvalidInput)?;
+        let messages = [
+            PromptMessage {
+                role: PromptRole::System,
+                content: "Judge if candidate matches query and instruction. Return yes or no.",
+            },
+            PromptMessage {
+                role: PromptRole::User,
+                content: user,
+            },
+        ];
+        let ids = prompt::encode_profile(
+            &self.inner.data,
+            &messages,
+            &mut c,
+            b.max_tokens.min(4096),
+            true,
+        )?;
+        control.check().map_err(budget::control_error)?;
+        Ok(EncodedTokens {
+            ids,
+            manifest_sha256: self.manifest_sha256(),
+        })
+    }
+}

@@ -1,6 +1,6 @@
 # G57 owned CPU decision execution design
 
-Status: proposed written architectural design, 15 October 2026. The maintainer approved scope and design preparation; this specification, the G57 contribution-profile recommendation and the later implementation plan still require their actual decisions. No G57 production code, reference program, weight acquisition or model execution has started. [Türkçe](../tr/g57-cpu-decision-design.md).
+Status: the maintainer approved the written design, G57-only contribution profile and bounded implementation plan. The independent F64 oracle and shared decoder are committed; the typed pair-scoring implementation is in progress. G57 model weights, reference execution and native model acceptance have not run. [Türkçe](../tr/g57-cpu-decision-design.md).
 
 ## Outcome and evidence boundaries
 
