@@ -1,6 +1,6 @@
 # Pinned model contract — G27
 
-G27 adds actual owned Rust validation of declared model provenance and role interfaces. It does not load weights, run a tokenizer/template/model, verify absent large artifact bytes, train, grant authority or invoke a provider. [Model catalog](https://github.com/eyleme-dev/eylema-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) and the matching native fixture bind the selected Qwen candidate; candidate registration is separate from execution acceptance.
+G27 adds actual owned Rust validation of declared model provenance and role interfaces. It does not load weights, run a tokenizer/template/model, verify absent large artifact bytes, train, grant authority or invoke a provider. [Model catalog](https://github.com/eyleme-dev/eyleme-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) and the matching native fixture bind the selected Qwen candidate; candidate registration is separate from execution acceptance.
 
 ## Closed metadata and support
 

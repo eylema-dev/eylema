@@ -1,6 +1,6 @@
 # Sabitlenmiş model sözleşmesi — G27
 
-G27, bildirilen model kökeni ve rol arayüzleri için gerçekten çalışan kendi Rust doğrulamamızı ekler. Ağırlık yüklemez, tokenizer/şablon/model çalıştırmaz, elde olmayan büyük artifact byte'larını doğrulamaz, eğitim/yetki/provider çağrısı yapmaz. [Model kataloğu](https://github.com/eyleme-dev/eylema-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) ve eşleşen yerel fixture seçilen Qwen adayını bağlar; aday kaydı yürütme kabulünden ayrıdır.
+G27, bildirilen model kökeni ve rol arayüzleri için gerçekten çalışan kendi Rust doğrulamamızı ekler. Ağırlık yüklemez, tokenizer/şablon/model çalıştırmaz, elde olmayan büyük artifact byte'larını doğrulamaz, eğitim/yetki/provider çağrısı yapmaz. [Model kataloğu](https://github.com/eyleme-dev/eyleme-models/blob/codex/g27-model-contract/catalog/qwen3-0.6b.v1.json) ve eşleşen yerel fixture seçilen Qwen adayını bağlar; aday kaydı yürütme kabulünden ayrıdır.
 
 ## Kapalı metaveri ve destek
 

@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "d0827d100d54f5f10ddc91d22adbf14b6cee7a90dfb457fdaec3ab5a73939e49",
-      "tr_sha256": "430f23946c760956ae17384364b2c41fa37d816b3d232112087d2d029181ba30"
+      "en_sha256": "4a735561b7fad8b9233bd9187c6b283af4c5a47aa44da77c2bcaa6adf3d06337",
+      "tr_sha256": "d2a861bcb7e9e66a37312d74c896da9e6685db7e3a6ddb74be75195a97f7efea"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -101,8 +101,8 @@
     {
       "en": "docs/en/combined-gpu-measurement.md",
       "tr": "docs/tr/combined-gpu-measurement.md",
-      "en_sha256": "524fd0d39873c48d7d892c6f1d2a8362b12ad91e064b62c97fb61c68d2c521ff",
-      "tr_sha256": "481383c5a070ce7c5e0946c0e149ec7360d449f4967c758d1bdd73e81ed7c698"
+      "en_sha256": "19036ac302ca88bb3d858e7c402ba1f91983e115fe301668afa9404214a3770b",
+      "tr_sha256": "cd650e8e8d1eb550d8bcce7f9e62864450354765047393a561b12ef0ffcaebdb"
     },
     {
       "en": "docs/en/development-coordinator.md",
@@ -119,8 +119,8 @@
     {
       "en": "docs/en/platform-contracts.md",
       "tr": "docs/tr/platform-contracts.md",
-      "en_sha256": "f4c6816e378dcfa7c9e4b2a6b1d450d00244a257fee933127809c6187b3acc39",
-      "tr_sha256": "c59c96d079bc0cab15ccd2cb880abe480f6dba891a22cf0113bd2f955be4cf9a"
+      "en_sha256": "a8dfcd40b46556abf93319fe24d3982c6c2962c9df372a4e6eebd0e001fe1980",
+      "tr_sha256": "b2c93341c183a3412ab56f6084a7c600db759e2037ee1613d8652156609b8f85"
     },
     {
       "en": "docs/en/project-data.md",
@@ -161,8 +161,8 @@
     {
       "en": "docs/en/model-contract.md",
       "tr": "docs/tr/model-contract.md",
-      "en_sha256": "f37f10e99f2c4a0e18b31f9cac52a677548360cc33268962d7b4154cd6862199",
-      "tr_sha256": "7e3f85ad5ac779dc140b674c8548ec8340606c081cf9fcc05856db0f2f611010"
+      "en_sha256": "360cbc50c1972ed14e9084dc9cf6329ecd6573927ce44ccdb1494240de2ca8cc",
+      "tr_sha256": "84b8737b95bd47d2f174458c8ef01cdeab3497ad7be811ddb37d66f19000548c"
     },
     {
       "en": "docs/en/decision-model-profile.md",
@@ -215,8 +215,8 @@
     {
       "en": "docs/en/g29-tokenizer-design.md",
       "tr": "docs/tr/g29-tokenizer-design.md",
-      "en_sha256": "1d915c1a7eada220ff4ba88273c54c1eba514da7f25ca34be3cf34bcf84c57a1",
-      "tr_sha256": "82890c462ecbc3fb37c4f7ba07739165f9a375509f7be4c15696f48e8e5ab4e4"
+      "en_sha256": "b613c4eb7cbe229f411cbff2e5640ed5de57807908466fd31736be58f83c52ea",
+      "tr_sha256": "c494faa144cd18842f5aa8656847dee17bd25bb4342fdf30406e224344d6ef95"
     },
     {
       "en": "docs/en/tokenizer.md",

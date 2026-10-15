@@ -1,6 +1,6 @@
 # G46 döngü, rol ve model bağlama sözleşmeleri
 
-Taşınabilir `eylema_contracts::platform` modülü tanımlı harness metaverisini doğrular. Platform metaverisi sürümü 0.1.0'dır; mevcut görev sözleşmesi 0.1.0 ve EYL/EYLJ v1 değişmez. [Güncel aksiyon planı](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/platform-action-plan.md) ve [dokuz rol](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/architecture.md#rust-harness-model-rolleri-ve-alana-göre-seçim) açıklamaları bağlayıcıdır.
+Taşınabilir `eylema_contracts::platform` modülü tanımlı harness metaverisini doğrular. Platform metaverisi sürümü 0.1.0'dır; mevcut görev sözleşmesi 0.1.0 ve EYL/EYLJ v1 değişmez. [Güncel aksiyon planı](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/platform-action-plan.md) ve [dokuz rol](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/architecture.md#rust-harness-model-rolleri-ve-alana-göre-seçim) açıklamaları bağlayıcıdır.
 
 `RoleKind`, perception, reasoning, planning, decision, policy, world_model, specialist, critic ve representation rollerini ayırır. Döngü en az bir rol ister; dokuzunun tamamı gerekmez. Bir modelin birden çok profili olabilir; bir uyumlu profili birkaç bağ kullanabilir. STT/TTS/görüntü/metin alt profilleri platform planında ayrı tanımlanır; bu modül bunların inference yürütmesini sağlamaz.
 
