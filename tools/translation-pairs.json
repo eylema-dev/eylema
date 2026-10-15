@@ -229,6 +229,12 @@
       "tr": "docs/tr/product-family.md",
       "en_sha256": "5ecabddb8da8421e8def07363d0c692c848354406851d744efefabe441f07761",
       "tr_sha256": "58d0cc869c296b48e4f58298f48c377f6a31f37d22439678afdcf7ecc14bd241"
+    },
+    {
+      "en": "docs/en/g30-cpu-execution-design.md",
+      "tr": "docs/tr/g30-cpu-execution-design.md",
+      "en_sha256": "ecfde87f86674a8cf2372079f4fe6cb3508273c9c2ded6917ade278977191ede",
+      "tr_sha256": "fc3ca20473b3829a50ff581df67a4d934d01fb4f02c1dd6293e700ad8e9a73de"
     }
   ],
   "documents": []
