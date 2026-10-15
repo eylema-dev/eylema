@@ -441,11 +441,57 @@ fn synthetic_score_api_batches_resets_and_cancels_atomically() {
         );
     }
 
-    // Stop only after the first complete pair has published its measured work, then
-    // pass the second pair's tokenizer and 20,510-unit workspace initialization and
-    // interrupt its forward pass. The threshold is relative to observed pair-1 work.
+    // Measure the second pair's fresh-counter Unicode/tokenization work separately.
+    // encode_pair revalidates the Unicode table on every call, so a fixed threshold
+    // would cancel in the tokenizer before reaching the model.
     let first_pair = pair_score_for_test(&result, "first", "a").cumulative_work();
-    let stop_during_second_pair = first_pair + 24_576;
+    let token_probe = CpuControl::new_job(deadline, 800_000_000_000, group.clone()).unwrap();
+    let token_probe_start = token_probe.observed_work();
+    tokenizer
+        .encode_pair(
+            "judge",
+            "capital",
+            "Pacific",
+            crate::tokenizer::TextBudget {
+                max_resident_bytes: 134_217_728,
+                max_tokens: 4096,
+                max_work: 2_000_000,
+            },
+            &token_probe,
+        )
+        .unwrap();
+    let second_pair_tokenization_work = token_probe.observed_work() - token_probe_start;
+
+    // Engine::new_decision initializes these exact workspace lengths and charges one
+    // unit per element. Set the stop point after tokenization, workspace setup, token
+    // embedding, and into the first layer norm of the second pair's forward pass.
+    let cache = dimensions.cache(budget.context).unwrap();
+    let workspace_work = [
+        dimensions.h,
+        dimensions.h,
+        dimensions.qh * dimensions.w,
+        dimensions.kh * dimensions.w,
+        dimensions.kh * dimensions.w,
+        dimensions.qh * dimensions.w,
+        dimensions.h,
+        dimensions.h,
+        dimensions.inter,
+        dimensions.inter,
+        dimensions.inter,
+        dimensions.h,
+        dimensions.h,
+        2,
+        cache,
+        cache,
+        budget.context,
+        dimensions.layers * dimensions.h,
+    ]
+    .into_iter()
+    .map(|n| n as u64)
+    .sum::<u64>();
+    assert_eq!(workspace_work, 20_510);
+    let stop_during_second_pair =
+        first_pair + second_pair_tokenization_work + workspace_work + dimensions.h as u64 + 1;
     let cancelled = CpuControl::new_job(deadline, 800_000_000_000, group).unwrap();
     cancelled.stop_after(stop_during_second_pair);
     let cancelled_observer = cancelled.clone();
