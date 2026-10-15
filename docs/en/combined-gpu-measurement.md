@@ -1,6 +1,6 @@
 # Combined GPU measurement host
 
-G22 adds bounded measurement hosts to the existing Metal worker and three-object WebGPU scene. The native implementation remains first-party Rust; the browser host uses existing WebGPU/WGSL bindings. Evaluation orchestration and result analysis belong to eylema-evals. Instrumentation and fixture tests alone do not establish combined hardware acceptance.
+G22 adds bounded measurement hosts to the existing Metal worker and three-object WebGPU scene. The native implementation remains first-party Rust; the browser host uses existing WebGPU/WGSL bindings. Evaluation orchestration and result analysis belong to eyleme-evals. Instrumentation and fixture tests alone do not establish combined hardware acceptance.
 
 Run `cargo run --package eylema-runtime --example combined-gpu-proof --locked --offline -- 120` for a worker bounded to 120 seconds and 10,000 samples. Each call adds two 4,096-element integer arrays through the actual Metal path and checks every readback value against the exact CPU result. The worker owns a Metal resource lease, prints JSON lines, and checks stdin for `stop` between calls. The control reader accepts only `stop` followed by LF or CRLF using a fixed six-byte buffer; unknown, partial or oversized commands fail without allocating for the input length. Browser closure has no connection to its lifetime. An in-progress Metal call cannot be preempted by this cooperative stop. The reservation covers the three declared 16 KiB Metal buffers, not physical VRAM or all process memory.
 

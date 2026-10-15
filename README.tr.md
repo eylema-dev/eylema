@@ -25,14 +25,14 @@ G20 WebGPU sahnesi notları: [yerel WebGPU görünümü](docs/tr/local-webgpu.md
 
 G21, bildirilen Metal, görünüm ve model iş sınıfları için sınırlı, eşgüdümlü ana makine kaynak kabulü ekler: [kaynak yöneticisi](docs/tr/resource-manager.md). Bayt sınırları çağıranın bildirdiği geçici rezervasyonları kapsar; fiziksel GPU belleğini, model ağırlıklarını veya gerçek tarayıcı/model yürütümünü ölçmez.
 
-G22, sınırlı [birleşik GPU ölçüm ana makineleri](docs/tr/combined-gpu-measurement.md) ekler; tekrarlanan gerçek donanım kabulü ve ham dağılımlar eylema-evals deposunda izlenir.
+G22, sınırlı [birleşik GPU ölçüm ana makineleri](docs/tr/combined-gpu-measurement.md) ekler; tekrarlanan gerçek donanım kabulü ve ham dağılımlar eyleme-evals deposunda izlenir.
 
 G39, [kontrollü yerel geliştirme çalışma alanı](docs/tr/development-workspace.md) ekler: kabul edilmiş tabana bağlı detached worktree, sınırlı tek süreçli macOS yalıtımı, kapsamlı artifactler ve kirli çağıran işinin korunması. Yerel kanıt sentetik host yetkisi kullanır; sağlayıcı/derleyici/GitHub yürütmesi ayrıdır.
 
 
 ## Katkıda bulunma
 
-[Katkı kuralları](https://github.com/eyleme-dev/devguide/blob/main/CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](https://github.com/eyleme-dev/devguide/blob/main/AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/roadmap.md), [kalite kontrollerini](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/quality-gates.md) ve [CI araç envanterini](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.
+[Katkı kuralları](https://github.com/eyleme-dev/devguide/blob/main/CONTRIBUTING.tr.md) ve ortak [AI eylemci sözleşmesi](https://github.com/eyleme-dev/devguide/blob/main/AGENTS.md) ile başlayın. [İlk sürüm yol haritasını](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/roadmap.md), [kalite kontrollerini](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/quality-gates.md) ve [CI araç envanterini](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/tooling.md) izleyin. Issue/PR şablonları kapsam, kabul koşulları ve kanıt toplar. Bakımcı incelemesi CI’dan ayrıdır; bu dosyalar zorunlu kontrol dal kurallarını etkinleştirmez.
 
 G46 taşınabilir [döngü, rol ve model bağlama sözleşmeleri](docs/tr/platform-contracts.md) ekler: değişmez tanımlı profiller ve sınırlı döngü tanımları. Native constructor kontrolleri model, eğitim ve harness iş kabulünden ayrıdır.
 
@@ -68,31 +68,31 @@ Hız veya maliyet iyileştirilmeden önce asgari kalite karşılanır. Kernel ya
 
 | Belge | İngilizce kaynak | Türkçe karşılık |
 |---|---|---|
-| Proje yapısı 0.5.0 | [First application and component proposal](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/project-structure.md) |
-| Mimari 0.7.0 | [Architecture](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/architecture.md) |
-| API ve denetim 0.3.0 | [API reference](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/api-reference.md) |
-| Geliştirme ve işletim 0.2.0 | [Team protocols](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/development-and-operations.md) |
-| Öğrenme ve eğitim 0.2.0 | [Learning protocol](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/learning-and-training.md) |
+| Proje yapısı 0.5.0 | [First application and component proposal](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/project-structure.md) | [İlk uygulama ve bileşen önerisi](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/project-structure.md) |
+| Mimari 0.7.0 | [Architecture](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/architecture.md) | [Mimari](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/architecture.md) |
+| API ve denetim 0.3.0 | [API reference](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/api-reference.md) | [API referansı](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/api-reference.md) |
+| Geliştirme ve işletim 0.2.0 | [Team protocols](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/development-and-operations.md) | [Takım protokolleri](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/development-and-operations.md) |
+| Öğrenme ve eğitim 0.2.0 | [Learning protocol](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/learning-and-training.md) | [Öğrenme protokolü](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/learning-and-training.md) |
 
 Makinece okunabilir taslaklar: [geliştirme isteği şeması](ai-team-protocol/request.schema.json), [örnek istek](ai-team-protocol/request.example.json), [macOS model-set 0.2.0 şeması](ai-team-protocol/v0.2/model-set-release.schema.json), [sentetik aday](ai-team-protocol/v0.2/model-set-release.example.json), [korunmuş tarihsel 0.1.0 şeması](ai-team-protocol/model-set-release.schema.json). Şemaya uygunluk, yetki veya başarılı çalışma kanıtı değildir.
 
-İşlem kimlikleri, yollar, alanlar, enum değerleri ve hata kodları iki dilde aynı İngilizce tanımları kullanır. Güncel belgeler `eylema-docs-en` ve `eylema-docs-tr` depolarının `docs/` dizinlerinde eşleşen İngilizce dosya adları taşır; çeviriler kaynak sürümünü izler. Önceki Türkçe mimari sürümleri ve ilk API özeti tarihsel kayıt olarak `eylema-docs-tr/archive/` altında korunur. Düzen ve taşıma notları [proje yapısı belgesindedir](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/project-structure.md).
+İşlem kimlikleri, yollar, alanlar, enum değerleri ve hata kodları iki dilde aynı İngilizce tanımları kullanır. Güncel belgeler `eyleme-docs-en` ve `eyleme-docs-tr` depolarının `docs/` dizinlerinde eşleşen İngilizce dosya adları taşır; çeviriler kaynak sürümünü izler. Önceki Türkçe mimari sürümleri ve ilk API özeti tarihsel kayıt olarak `eyleme-docs-tr/archive/` altında korunur. Düzen ve taşıma notları [proje yapısı belgesindedir](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/project-structure.md).
 
 ## İlk kanıt
 
-Seçilen ilk çalışan uygulama bir görev konsoludur: görev oluşturma, deterministik adımları çalıştırma, ilerlemeyi inceleme, kalan işi durdurma, durumu kaydetme ve hizmet yeniden başladıktan sonra tekrar açma. Önce Rust sözleşmeleri, yürütücü ve günlük kurulur, ardından asgari web arayüzü gösterilir. [Kabul senaryoları ve önerilen bileşenler](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/project-structure.md), gösterimin neyi kanıtlaması gerektiğini tanımlar.
+Seçilen ilk çalışan uygulama bir görev konsoludur: görev oluşturma, deterministik adımları çalıştırma, ilerlemeyi inceleme, kalan işi durdurma, durumu kaydetme ve hizmet yeniden başladıktan sonra tekrar açma. Önce Rust sözleşmeleri, yürütücü ve günlük kurulur, ardından asgari web arayüzü gösterilir. [Kabul senaryoları ve önerilen bileşenler](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/project-structure.md), gösterimin neyi kanıtlaması gerektiğini tanımlar.
 
 Sonraki 3B ortam, öğrenilmiş politika/dinamik modeli, yerel dil modeli, izinli eğitim döngüsü ve geliştirme takımının PR akışı ayrı yol haritası aşamalarıdır. İlk tarayıcı gösterimi model erişimi veya GPU gerektirmez. G15 CLI ve G16 tarayıcı konsolu artık yerel görev hizmetini çalıştırıp inceler; insan olarak doğrulanmamış CLI oturumundaki durdurma isteği doğru biçimde `FORBIDDEN` döndürür.
 
 ## Organizasyon depoları
 
-[İngilizce ürün belgeleri](https://github.com/eyleme-dev/eylema-docs-en) · [Türkçe ürün belgeleri](https://github.com/eyleme-dev/eylema-docs-tr) · [Geliştirici rehberi](https://github.com/eyleme-dev/devguide) · [Depo haritası](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/repository-map.md)
+[İngilizce ürün belgeleri](https://github.com/eyleme-dev/eyleme-docs-en) · [Türkçe ürün belgeleri](https://github.com/eyleme-dev/eyleme-docs-tr) · [Geliştirici rehberi](https://github.com/eyleme-dev/devguide) · [Depo haritası](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/repository-map.md)
 
 `eylema`, mevcut Rust görev çekirdeği, servis/CLI/tarayıcı bileşenleri, platform sözleşmeleri, makine şemaları ve marka varlıklarını sahiplenir. Ürün metinleri dil depolarında, ortak katkı politikası devguide'dadır. Örnek/değerlendirme depoları kabul edilmiş consumer ve sınırlı ölçüm kanıtı içerir; model/eğitim depoları kendi yürütüm kapılarını bekler. Web sitesi [eylemadotdev](https://github.com/eyleme-dev/eylemadotdev) içinde ayrı yönetilir. Depo bölünmesi tek başına yürütüm kanıtı değildir; bileşen notları gerçek kabul kapsamını bağlar.
 
 [Taşıma kaydı](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/repository-migration.md) kaynakları, hedefleri, ilişkili PR'ları, entegrasyon kontrollerini ve geri dönüşü açıklar. Yeni belge bağlantıları eşgüdümlü birleştirme sonrası yerleşimi hedefler; öncesinde PR'lar ve sabitlenmiş depo kümesi inceleme kopyalarını sağlar.
 
-Bakımcı 12 Ekim 2026 tarihinde [ilk ürün kararları ve test envanterini](https://github.com/eyleme-dev/eylema-docs-tr/blob/main/docs/project-structure.md) kabul etti: ilk kullanıcı yerel, tek kullanıcılı eylemci uygulaması geliştiren yazılımcıdır. Kullanılabilir görev konsolu önizlemesi ve erken ihtiyaçtan PR’a kanıt, isteğe bağlı model/eğitimden önce gelir. MacBook Pro M4 Pro/24 GB birincil kalır; Mac mini M4/24 GB ve Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM kendi yürütüm kanıtını bekleyen ek test cihazlarıdır. Mevcut Rust tipleri, EYL/EYLJ biçimleri ve sınırlı platform bağları uygulama temeli olarak korunur.
+Bakımcı 12 Ekim 2026 tarihinde [ilk ürün kararları ve test envanterini](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/project-structure.md) kabul etti: ilk kullanıcı yerel, tek kullanıcılı eylemci uygulaması geliştiren yazılımcıdır. Kullanılabilir görev konsolu önizlemesi ve erken ihtiyaçtan PR’a kanıt, isteğe bağlı model/eğitimden önce gelir. MacBook Pro M4 Pro/24 GB birincil kalır; Mac mini M4/24 GB ve Linux RTX 4070 Ti Super/16 GB VRAM + 32 GB RAM kendi yürütüm kanıtını bekleyen ek test cihazlarıdır. Mevcut Rust tipleri, EYL/EYLJ biçimleri ve sınırlı platform bağları uygulama temeli olarak korunur.
 
 - [G38 geliştirme koordinatörü](docs/tr/development-coordinator.md): Projeye ait Rust ihtiyaçtan incelemeye durum akışı, host tarafından çözümlenen yetki, sonlu bütçe/iptal ve eski kanıt reddi; süreç/sağlayıcı/GitHub izolasyonu ve gerçek teslim G39–G43 adımlarıdır.
 

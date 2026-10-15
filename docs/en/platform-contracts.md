@@ -1,6 +1,6 @@
 # G46 loop, role and model-binding contracts
 
-The portable `eylema_contracts::platform` module validates declared harness metadata. Platform metadata revision is 0.1.0; existing task contract 0.1.0 and EYL/EYLJ v1 are unchanged. See the [current action plan](https://github.com/eyleme-dev/devguide/blob/main/docs/en/platform-action-plan.md) and [nine roles](https://github.com/eyleme-dev/eylema-docs-en/blob/main/docs/architecture.md#rust-harness-model-roles-and-domain-selection).
+The portable `eylema_contracts::platform` module validates declared harness metadata. Platform metadata revision is 0.1.0; existing task contract 0.1.0 and EYL/EYLJ v1 are unchanged. See the [current action plan](https://github.com/eyleme-dev/devguide/blob/main/docs/en/platform-action-plan.md) and [nine roles](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/architecture.md#rust-harness-model-roles-and-domain-selection).
 
 `RoleKind` separates perception, reasoning, planning, decision, policy, world_model, specialist, critic and representation. A loop needs at least one role, not all nine. Multiple profiles can use one model; several bindings can use a compatible profile. STT/TTS/vision/text subprofiles are declared separately in the platform plan, not implemented as inference by this module.
 
