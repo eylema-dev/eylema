@@ -116,16 +116,7 @@ pub(crate) fn scan(
     layout: &crate::WeightLayout,
     m: &mut Meter,
 ) -> Result<(), E> {
-    m.preflight(w.artifact_len().checked_mul(2).ok_or(E::WorkLimit)?)?;
-    for t in layout.tensors() {
-        let data = w.tensor_bytes(t.name()).ok_or(E::InvalidLayout)?;
-        for chunk in data.chunks(2048) {
-            m.charge((chunk.len() * 2) as u64)?;
-            for pair in chunk.as_chunks::<2>().0 {
-                bf16(u16::from_le_bytes([pair[0], pair[1]]))?;
-            }
-        }
-    }
+    scan_stored(w, layout, m)?;
     let a = w
         .tensor_bytes("model.embed_tokens.weight")
         .ok_or(E::InvalidLayout)?;
@@ -138,6 +129,24 @@ pub(crate) fn scan(
         m.charge(x.len() as u64)?;
         if x != y {
             return Err(E::InvalidLayout);
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn scan_stored(
+    w: &LoadedWeights,
+    layout: &crate::WeightLayout,
+    m: &mut Meter,
+) -> Result<(), E> {
+    m.preflight(w.artifact_len().checked_mul(2).ok_or(E::WorkLimit)?)?;
+    for t in layout.tensors() {
+        let data = w.tensor_bytes(t.name()).ok_or(E::InvalidLayout)?;
+        for chunk in data.chunks(2048) {
+            m.charge((chunk.len() * 2) as u64)?;
+            for pair in chunk.as_chunks::<2>().0 {
+                bf16(u16::from_le_bytes([pair[0], pair[1]]))?;
+            }
         }
     }
     Ok(())

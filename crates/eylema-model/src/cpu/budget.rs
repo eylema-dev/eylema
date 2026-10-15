@@ -30,6 +30,30 @@ pub(crate) struct Meter {
     pub peak: u64,
 }
 impl Meter {
+    pub(crate) fn decision(
+        b: crate::decision::DecisionBudget,
+        control: CpuControl,
+        resident: u64,
+    ) -> Result<Self, E> {
+        b.validate()?;
+        control.check()?;
+        if resident > b.max_resident_bytes {
+            return Err(E::ResidentLimit);
+        }
+        control.restrict_work(b.max_work)?;
+        Ok(Self {
+            control,
+            budget: CpuBudget {
+                context: b.context,
+                max_new_tokens: 0,
+                max_resident_bytes: b.max_resident_bytes,
+                max_work: b.max_work,
+            },
+            resident,
+            peak: resident,
+        })
+    }
+
     pub fn new(budget: CpuBudget, control: CpuControl, resident: u64) -> Result<Self, E> {
         budget.validate()?;
         control.check()?;

@@ -5,6 +5,8 @@ use std::sync::{
 };
 use std::time::{Duration, Instant};
 struct State {
+    #[cfg(test)]
+    stop_after: AtomicU64,
     cancelled: AtomicBool,
     work: AtomicU64,
     limit: AtomicU64,
@@ -22,6 +24,8 @@ impl CpuControl {
         }
         Ok(Self(Arc::new(State {
             cancelled: AtomicBool::new(false),
+            #[cfg(test)]
+            stop_after: AtomicU64::new(u64::MAX),
             work: AtomicU64::new(0),
             limit: AtomicU64::new(u64::MAX),
             deadline,
@@ -33,7 +37,16 @@ impl CpuControl {
     pub fn observed_work(&self) -> u64 {
         self.0.work.load(Ordering::Acquire)
     }
+    #[cfg(test)]
+    pub(crate) fn stop_after(&self, n: u64) {
+        self.0.stop_after.store(n, Ordering::Release);
+    }
     pub(crate) fn check(&self) -> Result<(), E> {
+        #[cfg(test)]
+        if self.observed_work() >= self.0.stop_after.load(Ordering::Acquire) {
+            self.cancel();
+        }
+
         if self.0.cancelled.load(Ordering::Acquire) {
             Err(E::Cancelled)
         } else if Instant::now() >= self.0.deadline {

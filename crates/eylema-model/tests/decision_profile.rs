@@ -61,3 +61,33 @@ fn decision_tokenizer_profile_isolation() {
         TokenizeError::UnsupportedProfile
     );
 }
+
+#[test]
+fn decision_layout_and_budget_preflight() {
+    use eylema_model::decision::{DecisionBudget, decision_layout};
+    let m = manifest();
+    let l = decision_layout(&m).unwrap();
+    assert_eq!(l.tensors().len(), 310);
+    let valid = DecisionBudget {
+        context: 4096,
+        max_resident_bytes: 2684354560,
+        max_work: 200000000000000,
+    };
+    assert!(valid.validate().is_ok());
+    for c in [0, 4097, usize::MAX] {
+        assert!(
+            DecisionBudget {
+                context: c,
+                ..valid
+            }
+            .validate()
+            .is_err()
+        );
+    }
+    assert!(
+        eylema_model::decision::decision_layout(
+            &ModelManifest::from_bytes(include_bytes!("fixtures/g30/cpu-profile.v1.eyl")).unwrap()
+        )
+        .is_err()
+    );
+}

@@ -27,7 +27,7 @@ pub(crate) struct Workspace {
     pub layers: Vec<f32>,
 }
 impl Workspace {
-    fn new(d: Dimensions, m: &mut Meter) -> Result<Self, E> {
+    fn new(d: Dimensions, m: &mut Meter, decision: bool) -> Result<Self, E> {
         d.validate()?;
         let cache = d.cache(m.budget.context)?;
         // Reserve all workspace plus every possible escaped logit result before any
@@ -46,7 +46,7 @@ impl Workspace {
             d.inter,
             d.h,
             d.h,
-            d.vocab,
+            if decision { 2 } else { d.vocab },
             cache,
             cache,
             m.budget.context,
@@ -56,7 +56,7 @@ impl Workspace {
         for n in lengths {
             total = total.checked_add(n as u64).ok_or(E::ResidentLimit)?;
         }
-        let outputs = (d.vocab as u64)
+        let outputs = (if decision { 0 } else { d.vocab } as u64)
             .checked_mul(m.budget.context as u64)
             .ok_or(E::ResidentLimit)?;
         let known = total
@@ -82,7 +82,7 @@ impl Workspace {
             hidden: m.zeros(d.inter)?,
             down: m.zeros(d.h)?,
             final_norm: m.zeros(d.h)?,
-            logits: m.zeros(d.vocab)?,
+            logits: m.zeros(if decision { 2 } else { d.vocab })?,
             keys: m.zeros(cache)?,
             values: m.zeros(cache)?,
             scores: m.zeros(m.budget.context)?,
@@ -97,6 +97,7 @@ pub(crate) struct Engine<'a> {
     pub ws: Workspace,
     pub pos: usize,
     pub valid: bool,
+    selected: Option<[usize; 2]>,
     started: bool,
 }
 impl<'a> Engine<'a> {
@@ -109,7 +110,32 @@ impl<'a> Engine<'a> {
     ) -> Result<Self, E> {
         d.validate()?;
         let mut meter = Meter::new(budget, control, base_bytes)?;
-        let ws = Workspace::new(d, &mut meter)?;
+        let ws = Workspace::new(d, &mut meter, false)?;
+        Ok(Self {
+            d,
+            weights,
+            meter,
+            ws,
+            pos: 0,
+            valid: true,
+            selected: None,
+            started: false,
+        })
+    }
+    pub(crate) fn new_decision(
+        d: Dimensions,
+        weights: BoundWeights<'a>,
+        budget: crate::decision::DecisionBudget,
+        control: CpuControl,
+        base: u64,
+        rows: [usize; 2],
+    ) -> Result<Self, E> {
+        d.validate()?;
+        if rows[0] >= d.vocab || rows[1] >= d.vocab || rows[0] == rows[1] {
+            return Err(E::InvalidLayout);
+        }
+        let mut meter = Meter::decision(budget, control, base)?;
+        let ws = Workspace::new(d, &mut meter, true)?;
         Ok(Self {
             d,
             weights,
@@ -118,7 +144,27 @@ impl<'a> Engine<'a> {
             pos: 0,
             valid: true,
             started: false,
+            selected: Some(rows),
         })
+    }
+    pub(crate) fn prefill_decision(&mut self, tokens: &[u32]) -> Result<(), E> {
+        let result = (|| {
+            if !self.valid || self.started || self.selected.is_none() {
+                return Err(E::InvalidState);
+            }
+            if tokens.is_empty()
+                || tokens.len() > self.meter.budget.context
+                || tokens.iter().any(|&v| v as usize >= self.d.vocab)
+            {
+                return Err(E::ContextLimit);
+            }
+            self.started = true;
+            for (i, &t) in tokens.iter().enumerate() {
+                self.compute_projection(t, i + 1 == tokens.len())?;
+            }
+            Ok(())
+        })();
+        self.poison(result)
     }
     fn poison<T>(&mut self, result: Result<T, E>) -> Result<T, E> {
         if result.is_err() {
@@ -167,6 +213,9 @@ impl<'a> Engine<'a> {
         self.poison(result)
     }
     fn compute(&mut self, token: u32) -> Result<(), E> {
+        self.compute_projection(token, true)
+    }
+    fn compute_projection(&mut self, token: u32, project: bool) -> Result<(), E> {
         if !self.valid {
             return Err(E::InvalidState);
         }
@@ -186,7 +235,15 @@ impl<'a> Engine<'a> {
         let matrix_values = d.layers as u64
             * ((d.qh * d.w * d.h + 2 * d.kh * d.w * d.h + d.h * d.qh * d.w + 3 * d.inter * d.h)
                 as u64)
-            + (d.vocab * d.h) as u64;
+            + (if project {
+                if self.selected.is_some() {
+                    2 * d.h
+                } else {
+                    d.vocab * d.h
+                }
+            } else {
+                0
+            }) as u64;
         m.preflight(matrix_values.checked_mul(3).ok_or(E::WorkLimit)?)?;
         m.charge(d.h as u64)?;
         for (i, v) in x.x.iter_mut().enumerate() {
@@ -249,8 +306,25 @@ impl<'a> Engine<'a> {
             m.charge(d.h as u64)?;
             x.layers[l * d.h..(l + 1) * d.h].copy_from_slice(&x.x);
         }
-        ops::norm(&x.x, w.norm, &mut x.final_norm, m)?;
-        ops::matvec(w.embedding, &x.final_norm, &mut x.logits, m)?;
+        if project {
+            ops::norm(&x.x, w.norm, &mut x.final_norm, m)?;
+            if let Some(rows) = self.selected {
+                m.preflight((d.h as u64) * 6 + 2)?;
+                for (j, row) in rows.into_iter().enumerate() {
+                    let mut sum = 0.;
+                    for (block, inputs) in x.final_norm.chunks(1024).enumerate() {
+                        m.charge((inputs.len() * 3) as u64)?;
+                        for (i, v) in inputs.iter().enumerate() {
+                            sum += w.embedding.at(row * d.h + block * 1024 + i) * v;
+                        }
+                    }
+                    m.charge(1)?;
+                    x.logits[j] = ops::finite(sum)?;
+                }
+            } else {
+                ops::matvec(w.embedding, &x.final_norm, &mut x.logits, m)?;
+            }
+        }
         m.control.check()?;
         self.pos += 1;
         Ok(())

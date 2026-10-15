@@ -28,27 +28,39 @@ pub(crate) fn apply(d: Dimensions, pos: usize, a: Attention<'_>, m: &mut Meter) 
             }
             a.scores[t] = finite(dot / (d.w as f32).sqrt())?;
         }
-        // Per position: max, subtract, exp, finite, sum, division; total finite.
-        m.charge((count * 6 + 1) as u64)?;
-        let maximum = a.scores[..count]
-            .iter()
-            .copied()
-            .fold(f32::NEG_INFINITY, f32::max);
-        let mut total = 0.;
-        for v in &mut a.scores[..count] {
-            *v = finite((*v - maximum).exp())?;
-            total += *v;
+        let mut maximum = f32::NEG_INFINITY;
+        for chunk in a.scores[..count].chunks(512) {
+            m.charge(chunk.len() as u64)?;
+            for v in chunk {
+                maximum = maximum.max(*v);
+            }
         }
+        let mut total = 0.;
+        for chunk in a.scores[..count].chunks_mut(512) {
+            m.charge((chunk.len() * 4) as u64)?;
+            for v in chunk {
+                *v = finite((*v - maximum).exp())?;
+                total += *v;
+            }
+        }
+        m.charge(1)?;
         finite(total)?;
-        for v in &mut a.scores[..count] {
-            *v /= total;
+        for chunk in a.scores[..count].chunks_mut(1024) {
+            m.charge(chunk.len() as u64)?;
+            for v in chunk {
+                *v /= total;
+            }
         }
         for j in 0..d.w {
-            m.charge((count * 2 + 1) as u64)?; // Products/additions and output finite.
             let mut sum = 0.;
-            for t in 0..count {
-                sum += a.scores[t] * a.values[t * kw + kv_head * d.w + j];
+            for start in (0..count).step_by(1024) {
+                let end = (start + 1024).min(count);
+                m.charge(((end - start) * 2) as u64)?;
+                for t in start..end {
+                    sum += a.scores[t] * a.values[t * kw + kv_head * d.w + j];
+                }
             }
+            m.charge(1)?;
             a.out[head * d.w + j] = finite(sum)?;
         }
     }
