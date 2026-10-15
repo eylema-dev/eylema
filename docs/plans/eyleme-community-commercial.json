@@ -1,0 +1,62 @@
+{
+  "task": "eyleme-community-commercial",
+  "task_revision": 1,
+  "date": "2026-10-15",
+  "base": "f919775df75f16cc2e8540d8b76e4014e9402154",
+  "authority": "Direct maintainer request in this chat to apply one Eyleme brand: public open-source Eyleme at eyleme.dev, private subscription Derleme and Onama. This record documents existing authority and grants no permission.",
+  "scope": "Current public product-family, onboarding, architecture and commercial-boundary documentation; preserve runtime behavior, technical identifiers, Apache-2.0 notices and frozen historical records.",
+  "allowed_paths": [
+    "README.md",
+    "README.tr.md",
+    "docs/en/product-family.md",
+    "docs/tr/product-family.md",
+    "docs/architecture.md",
+    "docs/project-structure.md",
+    "docs/plans/eyleme-community-commercial.json",
+    "tools/translation-pairs.json"
+  ],
+  "acceptance_mapping": {
+    "brand_and_business": "Review EN/TR public positioning, standalone OSS controls, optional paid integration and honest maturity boundaries.",
+    "compatibility": "Diff inspection: no runtime code, protocol identifiers, license text, historical evidence or paid enforcement changed.",
+    "local_checks": "Run contributor-required dependency install, gate regression suite, repository validation, PR-template and actual-body validation, git diff --check.",
+    "cross_repository": "Root updates devguide immutable member pins and bilingual integration fingerprints after member delivery.",
+    "review": "Genuine separate final-head review remains pending until recorded."
+  },
+  "budget": {
+    "active_minutes": 90,
+    "max_repair_cycles_per_gate": 3,
+    "new_spending": false
+  },
+  "roles": {
+    "implementer": "Codex delegated implement_core_docs context; inherited root configuration gpt-6-astra/ultra per root-observed metadata, supplemental implementation; serving identity unknown.",
+    "verifier": "Same context, self-verification only.",
+    "independent_reviewer": "Pending separate root-coordinated final-head review.",
+    "qualified_architect": {
+      "configured_model": "gpt-6.1-sol",
+      "reasoning_effort": "high",
+      "configuration_evidence": "Observed in the genuinely separate architecture context; raw private metadata is not published.",
+      "serving_identity": "unknown_not_exposed",
+      "qualification_profile": "sol61-high-contracts-2026-10-14",
+      "qualification_valid_through": "2026-11-13",
+      "scope": "Substantive bilingual product/community/commercial architecture and evidence requirements; not final independent review."
+    }
+  },
+  "tools": [
+    "Codex exec_command",
+    "Git",
+    "Python3",
+    "gh"
+  ],
+  "evidence_limits": "Documentation checks do not establish live domain delivery, repository privacy, billing, model execution, GPU behavior or commercial availability.",
+  "verification": {
+    "local_environment": "Darwin 27.0.0 arm64, Python 3.15.0",
+    "dependency_install": "passed; --require-hashes",
+    "regression_tests": "passed; 48 tests",
+    "repository_check": "passed",
+    "pr_template_check": "passed; actual PR body validated separately before publication",
+    "whitespace": "passed",
+    "runtime_gpu_model": "not_run; documentation-only changes, runtime behavior and source untouched",
+    "cross_repository": "pending root final immutable pins",
+    "independent_review": "pending separate final-head review"
+  }
+}

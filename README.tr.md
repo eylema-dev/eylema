@@ -7,17 +7,17 @@
 
 # Eyleme
 
-**Basit, Performanslı Eylemci Yapay Zeka Sürekli Geliştirme ve İşletme Web Platformu.**
+**Topluluğuyla geliştirilen açık kaynak eylemci görev platformu.**
 
 Kod, kimlikler, dosya adları ve katkı şablonları İngilizcedir. Dokümantasyon [İngilizce](README.md) ve Türkçe sunulur; kaynak dil İngilizcedir. Ürün adı **14 Ekim 2026** tarihinde **Eylema** yerine **Eyleme** olarak değiştirildi; yukarıdaki tanım ürünün amacını anlatır.
 
-Herkese açık çekirdek proje deposu [eyleme-dev/eyleme](https://github.com/eyleme-dev/eyleme), [eyleme-dev organizasyonundadır](https://github.com/eyleme-dev). Paket öneki ve native host CLI `eylema`; yerel servis başlatma, görev çalıştırma/inceleme, servis durdurma ve doctor komutları uygulanmıştır. Görev iptali bağımsız olarak host tarafından doğrulanmış insan oturumu gerektirir. Proje sahibi 11 Ekim 2026 tarihinde **`eylema.dev` alan adını GoDaddy üzerinden kaydettiğini** bildirdi. Kendi kaynak kodumuz ve belgelerimiz [Apache-2.0](LICENSE) lisanslıdır. Ayrı belirtilen üçüncü taraf içerikleri, model ağırlıkları ve veri kümeleri kendi koşullarını korur.
+Herkese açık çekirdek proje deposu [eyleme-dev/eyleme](https://github.com/eyleme-dev/eyleme), [eyleme-dev organizasyonundadır](https://github.com/eyleme-dev). Paket öneki ve native host CLI `eylema`; yerel servis başlatma, görev çalıştırma/inceleme, servis durdurma ve doctor komutları uygulanmıştır. Görev iptali bağımsız olarak host tarafından doğrulanmış insan oturumu gerektirir. Proje sahibi ortak topluluk ve ürün sitesi olarak **[eyleme.dev](https://eyleme.dev)** alan adını kaydettiğini bildirdi. Kendi kaynak kodumuz ve belgelerimiz [Apache-2.0](LICENSE) lisanslıdır. Ayrı belirtilen üçüncü taraf içerikleri, model ağırlıkları ve veri kümeleri kendi koşullarını korur.
 
-Organizasyon ve bu public depo 11 Ekim 2026 tarihinde önceki adlarıyla oluşturuldu; güncel adları `eyleme-dev` ve `eyleme`dir. [İsim ve uygunluk kaydı](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/name-availability.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Ana alan adı `eylema.dev`; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez.
+Organizasyon ve bu public depo 11 Ekim 2026 tarihinde önceki adlarıyla oluşturuldu; güncel adları `eyleme-dev` ve `eyleme`dir. [İsim ve uygunluk kaydı](https://github.com/eyleme-dev/devguide/blob/main/docs/tr/name-availability.md), organizasyon oluşturulmadan önceki kontrolleri ve sonraki alan adı güncellemesini korur. Güncel public hedef **[eyleme.dev](https://eyleme.dev)** adresidir; alan adı kaydı, platformun yayımlandığı veya kabul edildiği anlamına gelmez. Önceki `eylema.dev` kaydı tarihçe olarak korunur.
 
 Marka dosyaları: [SVG / PNG logolar ve kullanım kılavuzu](assets/eylema-logo/README.tr.md), [önizleme](assets/eylema-logo/brand-preview.png), [logo paketini indir](assets/eylema-logo.zip).
 
-**Ad geçişi:** Güncel ürün adı Eyleme’dir; Derlema’nın adı **Derleme** olmuştur ve **Onama** adı korunur. GitHub organizasyonu ve ana depo artık `eyleme-dev/eyleme` adresindedir. Uyumluluk için mevcut `eylema` komutları, crate/paket adları, `EYLEMA_DATA_DIR`, `~/Library/Application Support/Eylema`, protokol kimlikleri ve `eylema.dev` alan adı korunur. Bu ad değişikliği kayıtlı verileri taşımaz veya EYL/EYLJ baytlarını değiştirmez. Tarihsel kayıtlar ve telif atıfları özgün adlarını korur.
+**Ad geçişi:** Güncel ürün adı Eyleme’dir; Derlema’nın adı **Derleme** olmuştur ve **Onama** adı korunur. GitHub organizasyonu ve ana depo artık `eyleme-dev/eyleme` adresindedir. Uyumluluk için mevcut `eylema` komutları, crate/paket adları, `EYLEMA_DATA_DIR`, `~/Library/Application Support/Eylema` ve protokol kimlikleri korunur. Bu ad değişikliği kayıtlı verileri taşımaz veya EYL/EYLJ baytlarını değiştirmez. Tarihsel kayıtlar ve telif atıfları özgün adlarını korur.
 
 **Durum: birinci taraf Rust görev çekirdeği, kalıcı kurtarma, kapsamlı native loopback HTTP servisi, native görev CLI’ı ve yerel tarayıcı görev konsolu.** [G16 tarayıcı konsolu notları](docs/tr/local-browser.md) aynı kaynaklı arayüzü, yenileme sonrası kurtarmayı ve doğru durdurma yetkisini açıklar. [G14 yerel HTTP kanıtı](docs/tr/local-http.md), gerçek soket/dosya davranışını, oturum/Host/Origin/CSRF kontrollerini ve sınırlı girdi/süre reddini kapsar. [G13 kurtarma kanıtı](docs/tr/runtime-recovery.md), korunan kimlik/sonuç/idempotency ile gerçek alt süreç kesintilerini, doğru belirsizlik sonucunu ve yeni kaydı kapsar. [G12 günlük kanıtı](docs/tr/local-journal.md), kanonik depolama, açık hatalar ve gerçek macOS senkronizasyon/kapat/yeniden aç akışını kapsar; anlamsal runtime yeniden başlatma kurtarması G13 ile kapsanır. [G11 denetim kanıtı](docs/tr/human-oversight.md), native davranışı ve açık simüle edilmiş insan host sınırını kaydeder. [G10 yürütücü kanıtı](docs/tr/deterministic-runtime.md) sınırlı native kabul/adım/olay ve gerçek sahipli durumu; [G09 codec/platform kanıtı](docs/tr/codec-platform.md) gerçek native/Node içinde Wasm karşılaştırmasını kapsar. [G07 workspace kanıtı](docs/tr/rust-workspace.md) gerçek native derleme/süreç testlerini ve seçilen taşınabilir kütüphanenin Wasm derlemesini kapsar. [G15 yerel CLI kanıtı](docs/tr/local-cli.md), alt süreç CLI/servis kimliği, hata, iptal yetkisi, kapanış ve günlük yeniden açma davranışını kapsar. Gerçek kişi doğrulaması/tarayıcı denetimi, model yürütümü, otonom geliştirme ve performans kabulü sonraki Goal’lerde kalır.
 
@@ -29,6 +29,19 @@ G22, sınırlı [birleşik GPU ölçüm ana makineleri](docs/tr/combined-gpu-mea
 
 G39, [kontrollü yerel geliştirme çalışma alanı](docs/tr/development-workspace.md) ekler: kabul edilmiş tabana bağlı detached worktree, sınırlı tek süreçli macOS yalıtımı, kapsamlı artifactler ve kirli çağıran işinin korunması. Yerel kanıt sentetik host yetkisi kullanır; sağlayıcı/derleyici/GitHub yürütmesi ayrıdır.
 
+
+## Tek Eyleme markası
+
+**Eyleme**, public, bağımsız kullanılabilen Apache-2.0 topluluk ürünü olarak kalır. **Eyleme Derleme** ve **Eyleme Onama**, ayrı geliştirilen private kaynaklı ve ücretli abonelik modelindeki ürünlerdir. Birlikte kullanım anlatımı **Derleme → Onama → Eyleme** sırasındadır; abonelik örtük yürütme veya veri erişim yetkisi vermez. Desteklenen bağımsız çekirdek akışları temel erişim ve güvenlik kontrollerini korur ve iki ücretli ürüne de ihtiyaç duymaz.
+
+Public arayüzler, private uygulama sınırları ve lisans için [ürün ailesi sözleşmesini](docs/tr/product-family.md) okuyun. Ticari konumlandırma, çalışan faturalama veya abonelik hizmetinin kanıtı değildir. [Sitenin ürün tanıtımı](https://eyleme.dev/#products), private kaynağa erişim gerektirmeden aileyi açıklar.
+
+## Topluluğa katılın
+
+- [Yerel CLI rehberi](docs/tr/local-cli.md) ve [tarayıcı konsolu rehberiyle](docs/tr/local-browser.md) başlayın; görevleri çalıştırmadan önce desteklenen kapsamı ve yetki sınırlarını okuyun.
+- [Public örnekleri](https://github.com/eyleme-dev/eyleme-examples) ve [Türkçe ürün belgelerini](https://github.com/eyleme-dev/eyleme-docs-tr) inceleyin.
+- [Discussions](https://github.com/eyleme-dev/eyleme/discussions) üzerinden soru sorun ve fikir paylaşın; [public issue formlarıyla](https://github.com/eyleme-dev/eyleme/issues/new/choose) tekrarlanabilir hataları bildirin. Kimlik bilgilerini, private müşteri verilerini veya istismar edilebilir güvenlik açığı ayrıntılarını public yayımlamayın.
+- Belge, örnek ve uyumlu uzantıları geliştirmek için [yol haritasını](https://github.com/eyleme-dev/eyleme-docs-tr/blob/main/docs/roadmap.md) ve katkı akışını izleyin.
 
 ## Katkıda bulunma
 
