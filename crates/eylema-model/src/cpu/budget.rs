@@ -39,6 +39,7 @@ impl Meter {
         if control.observed_work() > budget.max_work {
             return Err(E::WorkLimit);
         }
+        control.restrict_work(budget.max_work)?;
         Ok(Self {
             control,
             budget,
@@ -61,7 +62,7 @@ impl Meter {
     }
     pub fn charge(&mut self, n: u64) -> Result<(), E> {
         self.preflight(n)?;
-        self.control.charge(n)
+        self.control.charge_limited(n, self.budget.max_work)
     }
     pub fn hold(&mut self, n: u64) -> Result<(), E> {
         self.control.check()?;

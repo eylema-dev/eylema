@@ -10,6 +10,15 @@ EXPECTED_SHA256 = "38a4986871276927cd60eab39773d394f238d83edf1f98d92e028c992d943
 PROTOCOL_SHA256 = "2824b75b5e24a47427d41ead074bc29981eb355b02f705f032eb11d41d45c747"
 
 class G30ReferenceTests(unittest.TestCase):
+    def test_reference_descriptor_detects_changed_file(self):
+        import tempfile
+        with tempfile.TemporaryFile('w+b') as source:
+            source.write(b'x'); source.flush()
+            identity = g30_reference.file_identity(source)
+            g30_reference.require_unchanged(source, identity)
+            source.write(b'y'); source.flush()
+            with self.assertRaises(ValueError):
+                g30_reference.require_unchanged(source, identity)
     def test_independent_f64_bf16_rows_and_nonfinite_rejection(self):
         import struct
         row = struct.pack('<HHH', 0x3f80, 0xc000, 0x3f00)

@@ -98,7 +98,6 @@ pub(crate) fn add(a: &mut [f32], b: &[f32], m: &mut Meter) -> Result<(), E> {
     }
     Ok(())
 }
-#[cfg(test)]
 pub(crate) fn greedy(x: &[f32]) -> Result<u32, E> {
     if x.is_empty() {
         return Err(E::InvalidOutput);

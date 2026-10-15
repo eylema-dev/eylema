@@ -1,6 +1,6 @@
 # G30 owned CPU execution design
 
-Status: proposed written specification, awaiting actual maintainer review. Only scope/design preparation and a private synthetic numerical qualification trial were authorized. No production implementation, numerical contribution admission, weight acquisition or pretrained-model execution is authorized by this document. [Türkçe](../tr/g30-cpu-execution-design.md).
+Status: written design, G30-specific numerical qualification and the concrete bounded acquisition/execution plan were explicitly approved by the maintainer on15October2026. Implementation is under verification; actual pretrained-model acceptance and final independent review remain not_run. Recorded extensions retain all past consumption:270total active minutes,9targeted repairs and900total review seconds (675remaining before final review). This document itself grants no authority. [Türkçe](../tr/g30-cpu-execution-design.md).
 
 ## Intent and fixed obligations
 

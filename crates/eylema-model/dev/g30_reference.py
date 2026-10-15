@@ -106,6 +106,15 @@ def f64_dot(row, vector):
         raise ValueError('nonfinite reduction')
     return result
 
+def file_identity(source):
+    import os
+    st = os.fstat(source.fileno())
+    return (st.st_dev, st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
+
+def require_unchanged(source, identity):
+    if file_identity(source) != identity:
+        raise ValueError('reference artifact changed')
+
 def pretrained_reference(weight_path, output_path):
     import mmap, os, resource, sys
     if sys.byteorder != 'little':
@@ -117,12 +126,14 @@ def pretrained_reference(weight_path, output_path):
     expected_sha = 'f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b'
     digest = hashlib.sha256()
     with open(weight_path, 'rb') as source:
+        identity = file_identity(source)
         if os.fstat(source.fileno()).st_size != 1503300328:
             raise ValueError('artifact size')
         while block := source.read(65536):
             digest.update(block); checkpoint()
         if digest.hexdigest() != expected_sha:
             raise ValueError('artifact hash')
+        require_unchanged(source, identity)
         with mmap.mmap(source.fileno(), 0, access=mmap.ACCESS_READ) as mapped:
             header_size = struct.unpack_from('<Q', mapped)[0]
             if not 0 < header_size <= 262144:
@@ -204,6 +215,7 @@ def pretrained_reference(weight_path, output_path):
                 'logical_reference_limit_bytes':268435456,'mapped_pages_excluded_from_logical_limit':True}
             raw=(json.dumps(result,allow_nan=False)+'\n').encode()
             if len(raw)>16*1024*1024: raise ValueError('reference output limit')
+            require_unchanged(source, identity)
             fd=os.open(output_path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
             with os.fdopen(fd,'wb') as output: output.write(raw)
     return {'greedy':result['greedy'],'layers':len(layers),'logits':len(logits)}

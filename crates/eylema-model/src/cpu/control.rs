@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 struct State {
     cancelled: AtomicBool,
     work: AtomicU64,
+    limit: AtomicU64,
     deadline: Instant,
 }
 #[derive(Clone)]
@@ -22,6 +23,7 @@ impl CpuControl {
         Ok(Self(Arc::new(State {
             cancelled: AtomicBool::new(false),
             work: AtomicU64::new(0),
+            limit: AtomicU64::new(u64::MAX),
             deadline,
         })))
     }
@@ -40,7 +42,19 @@ impl CpuControl {
             Ok(())
         }
     }
-    pub(crate) fn charge(&self, mut n: u64) -> Result<(), E> {
+    pub(crate) fn restrict_work(&self, limit: u64) -> Result<(), E> {
+        self.check()?;
+        self.0.limit.fetch_min(limit, Ordering::AcqRel);
+        if self.observed_work() > limit {
+            Err(E::WorkLimit)
+        } else {
+            Ok(())
+        }
+    }
+    pub(crate) fn charge(&self, n: u64) -> Result<(), E> {
+        self.charge_limited(n, self.0.limit.load(Ordering::Acquire))
+    }
+    pub(crate) fn charge_limited(&self, mut n: u64, limit: u64) -> Result<(), E> {
         self.check()?;
         while n > 0 {
             self.check()?;
@@ -49,6 +63,7 @@ impl CpuControl {
                 .work
                 .try_update(Ordering::AcqRel, Ordering::Acquire, |x| {
                     x.checked_add(block)
+                        .filter(|&v| v <= limit.min(self.0.limit.load(Ordering::Acquire)))
                 })
                 .map_err(|_| E::WorkLimit)?;
             n -= block;

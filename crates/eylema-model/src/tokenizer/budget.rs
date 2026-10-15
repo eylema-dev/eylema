@@ -14,6 +14,7 @@ pub struct TextBudget {
     pub max_work: u64,
 }
 pub(super) struct Counters {
+    pub control: Option<crate::cpu::CpuControl>,
     pub resident: usize,
     pub peak: usize,
     pub max_resident: usize,
@@ -39,6 +40,7 @@ impl Counters {
             return Err(E::InvalidInput);
         }
         Ok(Self {
+            control: None,
             resident: 0,
             peak: 0,
             max_resident: b.max_resident_bytes,
@@ -72,14 +74,20 @@ impl Counters {
         Ok(c)
     }
     pub fn charge(&mut self, n: usize) -> Result<(), E> {
-        self.work = self.work.checked_add(n as u64).ok_or(E::WorkLimit)?;
-        if self.work > self.max_work {
-            Err(E::WorkLimit)
-        } else {
-            Ok(())
+        let next = self.work.checked_add(n as u64).ok_or(E::WorkLimit)?;
+        if next > self.max_work {
+            return Err(E::WorkLimit);
         }
+        if let Some(control) = &self.control {
+            control.charge(n as u64).map_err(control_error)?;
+        }
+        self.work = next;
+        Ok(())
     }
     pub fn hold(&mut self, n: usize) -> Result<(), E> {
+        if let Some(control) = &self.control {
+            control.check().map_err(control_error)?;
+        }
         let next = self.resident.checked_add(n).ok_or(E::ResidentLimit)?;
         if next > self.max_resident {
             return Err(E::ResidentLimit);
@@ -172,4 +180,12 @@ where
         sift(v, 0, end, c, &mut cmp)?
     }
     Ok(())
+}
+
+pub(super) fn control_error(e: crate::cpu::CpuError) -> E {
+    match e {
+        crate::cpu::CpuError::Cancelled => E::Cancelled,
+        crate::cpu::CpuError::Deadline => E::Deadline,
+        _ => E::WorkLimit,
+    }
 }

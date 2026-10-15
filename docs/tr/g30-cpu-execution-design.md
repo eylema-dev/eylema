@@ -1,6 +1,6 @@
 # G30 kendi CPU yürütüm tasarımımız
 
-Durum: bakımcının gerçek incelemesini bekleyen yazılı tasarım önerisi. Yalnız kapsam/tasarım hazırlığı ve özel sentetik sayısal yeterlilik denemesi yetkilendirildi. Bu belge üretim uygulamasını, sayısal katkı kabulünü, ağırlık edinimini veya önceden eğitilmiş model yürütümünü yetkilendirmez. [English](../en/g30-cpu-execution-design.md).
+Durum: yazılı tasarım, G30’a özel sayısal yeterlilik ve somut sınırlı edinim/yürütme planı bakımcı tarafından15Ekim2026’da açıkça onaylandı. Uygulama doğrulanıyor; gerçek önceden eğitilmiş model kabulü ve son ayrı inceleme not_run kalır. Kayıtlı uzatmalar önceki tüketimi korur:toplam270aktif dakika,9hedefli onarım ve900toplam inceleme saniyesi (son inceleme öncesi675kalan). Bu belge kendisi yetki vermez. [English](../en/g30-cpu-execution-design.md).
 
 ## Amaç ve sabit yükümlülükler
 

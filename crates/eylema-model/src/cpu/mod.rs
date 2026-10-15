@@ -5,7 +5,9 @@ mod control;
 mod error;
 mod ops;
 mod profile;
+mod roles;
 mod session;
+pub use roles::{CpuProposal, CpuReceipt, CpuRoleOutput, CpuRoleRequest, StopReason};
 mod weights;
 use crate::{
     LoadedWeights,
@@ -67,6 +69,7 @@ impl<'a> CpuModel<'a> {
             .checked_add(134_217_728 + 4_194_304 + 131_072)
             .ok_or(CpuError::ResidentLimit)?;
         let mut meter = Meter::new(budget, control.clone(), base_bytes)?;
+        meter.preflight(131_072)?;
         let layout = qwen_layout(manifest)?;
         if weights.manifest_sha256() != profile::CPU_SHA
             || weights.layout_sha256() != layout.layout_sha256()

@@ -60,6 +60,16 @@ impl Dimensions {
         }
         Ok(())
     }
+    pub fn minimum_forward_work(&self) -> Result<u64, E> {
+        self.validate()?;
+        let weights = self.layers as u64
+            * (self.qh * self.w * self.h
+                + 2 * self.kh * self.w * self.h
+                + self.h * self.qh * self.w
+                + 3 * self.inter * self.h) as u64
+            + (self.vocab * self.h) as u64;
+        weights.checked_mul(3).ok_or(E::WorkLimit)
+    }
     pub fn cache(&self, context: usize) -> Result<usize, E> {
         self.layers
             .checked_mul(context)
