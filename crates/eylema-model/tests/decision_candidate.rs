@@ -14,7 +14,8 @@ use std::{
     fs::{self, File},
     io::{Read, Write},
     path::Path,
-    process::{Command, Stdio},
+    process::{Child, Command, Stdio},
+    sync::mpsc,
     thread,
     time::{Duration, Instant},
 };
@@ -193,6 +194,10 @@ fn assert_job_work(control: &CpuControl, start: u64) {
         "candidate job exceeded its approved work cap"
     );
 }
+fn job_control(group: &eylema_model::cpu::CpuWorkGroup, task_deadline: Instant) -> CpuControl {
+    let deadline = (Instant::now() + Duration::from_secs(600)).min(task_deadline);
+    CpuControl::new_job(deadline, 800_000_000_000, group.clone()).expect("candidate job admission")
+}
 fn rss_sample_bytes() -> u64 {
     let pid = std::process::id().to_string();
     let output = Command::new("/bin/ps")
@@ -221,9 +226,28 @@ fn write_tokens(path: &Path, tokens: &[Vec<u32>]) -> std::io::Result<()> {
     }
     file.sync_all()
 }
+struct ChildGuard(Option<Child>);
+impl Drop for ChildGuard {
+    fn drop(&mut self) {
+        if let Some(mut child) = self.0.take() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+    }
+}
 fn run_reference(assets: &Path, tokens_path: &Path, output_path: &Path) -> Result<String, String> {
+    let deadline = Instant::now() + Duration::from_secs(600);
     let oracle = std::env::var_os("G57_ORACLE").ok_or("G57_ORACLE is required")?;
-    let mut child = Command::new(oracle)
+    let source = File::open(assets.join("model.safetensors")).map_err(|_| "weight open failed")?;
+    if source
+        .metadata()
+        .map_err(|_| "weight metadata failed")?
+        .len()
+        != MODEL_BYTES
+    {
+        return Err("pinned weight length mismatch".into());
+    }
+    let child = Command::new(oracle)
         .args(["--weights-stdin", "--tokens"])
         .arg(tokens_path)
         .arg("--output")
@@ -233,53 +257,89 @@ fn run_reference(assets: &Path, tokens_path: &Path, output_path: &Path) -> Resul
         .stderr(Stdio::null())
         .spawn()
         .map_err(|_| "oracle spawn failed")?;
-    let mut input = child.stdin.take().ok_or("oracle stdin unavailable")?;
-    let mut source =
-        File::open(assets.join("model.safetensors")).map_err(|_| "weight open failed")?;
-    let mut digest = eylema_platform::sha256_stream::Sha256Stream::new(MODEL_BYTES)
-        .map_err(|_| "hash init failed")?;
-    let mut buffer = [0u8; 65536];
-    let mut total = 0u64;
-    loop {
-        let count = source.read(&mut buffer).map_err(|_| "weight read failed")?;
-        if count == 0 {
-            break;
-        }
-        total = total
-            .checked_add(count as u64)
-            .ok_or("weight length overflow")?;
-        if total > MODEL_BYTES {
-            return Err("weight exceeds pinned size".into());
-        }
-        digest
-            .update(&buffer[..count])
-            .map_err(|_| "hash update failed")?;
-        input
-            .write_all(&buffer[..count])
-            .map_err(|_| "oracle write failed")?;
-    }
-    drop(input);
-    if total != MODEL_BYTES || hex(&digest.finish().map_err(|_| "hash finish failed")?) != MODEL_SHA
-    {
-        return Err("transmitted weight identity mismatch".into());
-    }
-    let wait_start = Instant::now();
-    loop {
-        if let Some(status) = child.try_wait().map_err(|_| "oracle wait failed")? {
-            if !status.success() {
-                return Err("reference process failed".into());
+    let mut child = ChildGuard(Some(child));
+    let input = child
+        .0
+        .as_mut()
+        .and_then(|c| c.stdin.take())
+        .ok_or("oracle stdin unavailable")?;
+    let (send, receive) = mpsc::channel();
+    let writer = thread::spawn(move || {
+        let result = (|| -> Result<(u64, String), &'static str> {
+            let mut input = input;
+            let mut source = source;
+            let mut digest = eylema_platform::sha256_stream::Sha256Stream::new(MODEL_BYTES)
+                .map_err(|_| "hash init failed")?;
+            let mut buffer = [0u8; 65536];
+            let mut total = 0u64;
+            loop {
+                let count = source.read(&mut buffer).map_err(|_| "weight read failed")?;
+                if count == 0 {
+                    break;
+                }
+                total = total
+                    .checked_add(count as u64)
+                    .ok_or("weight length overflow")?;
+                if total > MODEL_BYTES {
+                    return Err("weight exceeds pinned size");
+                }
+                digest
+                    .update(&buffer[..count])
+                    .map_err(|_| "hash update failed")?;
+                input
+                    .write_all(&buffer[..count])
+                    .map_err(|_| "oracle write failed")?;
             }
-            break;
-        }
-        if wait_start.elapsed() >= Duration::from_secs(600) {
-            let _ = child.kill();
-            let _ = child.wait();
+            drop(input);
+            Ok((
+                total,
+                hex(&digest.finish().map_err(|_| "hash finish failed")?),
+            ))
+        })();
+        let _ = send.send(result);
+    });
+    let mut transfer = None;
+    let mut status = None;
+    loop {
+        if Instant::now() >= deadline {
             return Err("reference process deadline".into());
         }
-        thread::sleep(Duration::from_millis(50));
+        if transfer.is_none()
+            && let Ok(value) = receive.try_recv()
+        {
+            transfer = Some(Ok(value?));
+        }
+        if status.is_none() {
+            status = child
+                .0
+                .as_mut()
+                .ok_or("oracle missing")?
+                .try_wait()
+                .map_err(|_| "oracle wait failed")?;
+            if status.is_some_and(|s| !s.success()) {
+                return Err("reference process failed".into());
+            }
+        }
+        if transfer.is_some() && status.is_some() {
+            break;
+        }
+        thread::sleep(Duration::from_millis(20));
+    }
+    let identity = transfer.unwrap().map_err(str::to_owned)?;
+    writer.join().map_err(|_| "oracle writer panicked")?;
+    if identity.0 != MODEL_BYTES || identity.1 != MODEL_SHA {
+        return Err("transmitted weight identity mismatch".into());
+    }
+    child.0.take();
+    if fs::metadata(output_path)
+        .map_err(|_| "reference output metadata failed")?
+        .len()
+        > 16 * 1024 * 1024
+    {
+        return Err("reference output bound".into());
     }
     let text = fs::read_to_string(output_path).map_err(|_| "reference read failed")?;
-    if text.len() > 16 * 1024 * 1024 || !text.contains("\"format\":\"g57.f64-reference.v1\"") {
+    if !text.contains("\"format\":\"g57.f64-reference.v1\"") {
         return Err("reference format mismatch".into());
     }
     Ok(text)
@@ -296,6 +356,46 @@ fn compare(actual: &[f32], expected: &[f64]) -> f64 {
         maximum = maximum.max(error);
     }
     maximum
+}
+fn reference_probability(head: [f64; 2]) -> (f64, u32) {
+    let delta = head[0] - head[1];
+    let p = if delta >= 0.0 {
+        1.0 / (1.0 + (-delta).exp())
+    } else {
+        let e = delta.exp();
+        e / (1.0 + e)
+    };
+    (p, (p * 1_000_000.0).round_ties_even() as u32)
+}
+fn reference_reason(scores: &[u32]) -> DecisionReason {
+    let mut sorted = scores.to_vec();
+    sorted.sort_unstable_by(|a, b| b.cmp(a));
+    if sorted.len() > 1 && sorted[0] == sorted[1] {
+        DecisionReason::Tie
+    } else if sorted[0] < 750_000 {
+        DecisionReason::BelowFloor
+    } else if sorted.len() > 1 && sorted[0] - sorted[1] < 100_000 {
+        DecisionReason::InsufficientMargin
+    } else {
+        DecisionReason::Chosen
+    }
+}
+#[test]
+fn independent_reference_scoring_vectors_cover_rounding_and_abstention_rules() {
+    assert_eq!(
+        reference_probability([2.0, 0.0]),
+        (1.0 / (1.0 + (-2.0f64).exp()), 880_797)
+    );
+    assert_eq!(
+        reference_reason(&[750_000, 650_000]),
+        DecisionReason::Chosen
+    );
+    assert_eq!(
+        reference_reason(&[750_000, 650_001]),
+        DecisionReason::InsufficientMargin
+    );
+    assert_eq!(reference_reason(&[749_999, 0]), DecisionReason::BelowFloor);
+    assert_eq!(reference_reason(&[880_797, 880_797]), DecisionReason::Tie);
 }
 fn pair_score<'a>(
     result: &'a eylema_model::decision::DecisionResult,
@@ -321,7 +421,14 @@ fn actual_pinned_reranker() {
     let g29 = Path::new(&g29_dir);
     let manifest = manifest();
     let start = Instant::now();
-    let control = CpuControl::new(Instant::now() + Duration::from_secs(600)).unwrap();
+    let task_deadline = start + Duration::from_secs(1200);
+    let group = eylema_model::cpu::CpuWorkGroup::new(2_500_000_000_000).unwrap();
+    let control = CpuControl::new_job(
+        start + Duration::from_secs(600),
+        2_500_000_000_000,
+        group.clone(),
+    )
+    .unwrap();
     let tokenizer = DecisionTokenizer::load(
         &mut File::open(g29.join("tokenizer.json")).unwrap(),
         &mut File::open(assets.join("tokenizer_config.json")).unwrap(),
@@ -372,11 +479,14 @@ fn actual_pinned_reranker() {
         .unwrap();
 
     // Candidate job 1: all final-position per-layer states and yes/no head match the independent oracle.
+    let job1 = job_control(&group, task_deadline);
     let first_start = Instant::now();
-    let first_work = control.observed_work();
+    let first_work = job1.observed_work();
     let diagnostic = model
-        .diagnose(&encoded_first, budget(128), control.clone())
+        .diagnose(&encoded_first, budget(128), job1.clone())
         .unwrap();
+    let job1_seconds = first_start.elapsed().as_secs_f64();
+    let job1_work = job1.observed_work() - first_work;
     let layer_error = compare(
         diagnostic.layers(),
         &float_array(&reference, "layers", 0, 28 * 1024).unwrap(),
@@ -385,15 +495,16 @@ fn actual_pinned_reranker() {
         &diagnostic.head(),
         &float_array(&reference, "head", 0, 2).unwrap(),
     );
-    let job1_seconds = first_start.elapsed().as_secs_f64();
-    let job1_work = control.observed_work() - first_work;
     assert!(job1_seconds < 600.0);
-    assert_job_work(&control, first_work);
+    assert_job_work(&job1, first_work);
 
     // Candidate job 2: complete bilingual two-question/four-pair batch and fixed choice rules.
+    let job2 = job_control(&group, task_deadline);
     let batch_start = Instant::now();
-    let score_start_work = control.observed_work();
-    let result = model.score(&batch, budget(128), control.clone()).unwrap();
+    let score_start_work = job2.observed_work();
+    let result = model.score(&batch, budget(128), job2.clone()).unwrap();
+    let job2_seconds = batch_start.elapsed().as_secs_f64();
+    let job2_work = job2.observed_work() - score_start_work;
     assert_eq!(result.questions().len(), 2);
     assert_eq!(result.questions()[0].question_id(), "en");
     assert_eq!(result.questions()[1].question_id(), "tr");
@@ -401,6 +512,7 @@ fn actual_pinned_reranker() {
         assert_eq!(question.choice(), Some("positive"));
         assert_eq!(question.reason(), DecisionReason::Chosen);
     }
+    let mut oracle_micros = Vec::new();
     for index in 0..4 {
         let hidden = float_array(&reference, "layers", index, 28 * 1024).unwrap();
         let head = float_array(&reference, "head", index, 2).unwrap();
@@ -412,9 +524,40 @@ fn actual_pinned_reranker() {
         ][index];
         assert!(!hidden.is_empty());
         compare(&pair_score(&result, question, option).logits(), &head);
+        let pair = pair_score(&result, question, option);
+        let (probability, micros) = reference_probability([head[0], head[1]]);
+        assert!(
+            (pair.probability() - probability).abs() <= 1.0e-7,
+            "probability differs from independent reference"
+        );
+        assert_eq!(
+            pair.score_micros(),
+            micros,
+            "rounded score differs from independent reference"
+        );
+        oracle_micros.push(micros);
     }
-    assert!(batch_start.elapsed() < Duration::from_secs(600));
-    assert_job_work(&control, score_start_work);
+    for (question_index, question) in result.questions().iter().enumerate() {
+        let expected = reference_reason(&oracle_micros[question_index * 2..question_index * 2 + 2]);
+        assert_eq!(
+            question.reason(),
+            expected,
+            "choice floor/margin differs from independent reference"
+        );
+        if expected == DecisionReason::Chosen {
+            let expected_option =
+                if oracle_micros[question_index * 2] >= oracle_micros[question_index * 2 + 1] {
+                    "positive"
+                } else {
+                    "negative"
+                };
+            assert_eq!(question.choice(), Some(expected_option));
+        } else {
+            assert_eq!(question.choice(), None);
+        }
+    }
+    assert!(job2_seconds < 600.0);
+    assert_job_work(&job2, score_start_work);
     let forward = result;
 
     // Candidate job 3: reverse question and option order; keyed pair scores prove per-pair reset.
@@ -453,12 +596,16 @@ fn actual_pinned_reranker() {
         },
     ];
     let reverse_batch = DecisionBatch::new(&reverse_questions).unwrap();
+    let job3 = job_control(&group, task_deadline);
     let reverse_start = Instant::now();
-    let reverse_start_work = control.observed_work();
+    let reverse_start_work = job3.observed_work();
     let reverse = model
-        .score(&reverse_batch, budget(128), control.clone())
+        .score(&reverse_batch, budget(128), job3.clone())
         .unwrap();
-    assert_job_work(&control, reverse_start_work);
+    let job3_seconds = reverse_start.elapsed().as_secs_f64();
+    let job3_work = job3.observed_work() - reverse_start_work;
+    assert!(job3_seconds < 600.0);
+    assert_job_work(&job3, reverse_start_work);
     for (question, option) in [
         ("en", "positive"),
         ("en", "negative"),
@@ -478,7 +625,8 @@ fn actual_pinned_reranker() {
     assert_eq!(reverse.questions()[1].choice(), Some("positive"));
 
     // Candidate job 5: negative preflight cases do no backbone work and publish no batch result.
-    let before_resident = control.observed_work();
+    let job5 = job_control(&group, task_deadline);
+    let before_resident = job5.observed_work();
     assert!(matches!(
         model.score(
             &batch,
@@ -486,14 +634,14 @@ fn actual_pinned_reranker() {
                 max_resident_bytes: 1,
                 ..budget(128)
             },
-            control.clone()
+            job5.clone()
         ),
         Err(eylema_model::cpu::CpuError::ResidentLimit)
     ));
-    assert_eq!(control.observed_work(), before_resident);
-    assert_job_work(&control, before_resident);
+    assert_eq!(job5.observed_work(), before_resident);
+    assert_job_work(&job5, before_resident);
     assert!(DecisionBatch::new(&[]).is_err());
-    let before_work = control.observed_work();
+    let before_work = job5.observed_work();
     assert!(matches!(
         model.score(
             &batch,
@@ -501,12 +649,12 @@ fn actual_pinned_reranker() {
                 max_work: 200_000_000_000_001,
                 ..budget(128)
             },
-            control.clone()
+            job5.clone()
         ),
         Err(eylema_model::cpu::CpuError::WorkLimit)
     ));
-    assert_eq!(control.observed_work(), before_work);
-    let job5_work = control.observed_work() - before_resident;
+    assert_eq!(job5.observed_work(), before_work);
+    let job5_work = job5.observed_work() - before_resident;
 
     // Candidate job 6: exact token context succeeds; one below fails before a decoder forward.
     let exact = encoded_first.ids().len();
@@ -517,40 +665,42 @@ fn actual_pinned_reranker() {
         options: &EN_OPTIONS[..1],
     }];
     let exact_batch = DecisionBatch::new(&exact_q).unwrap();
-    let exact_start_work = control.observed_work();
+    let job6 = job_control(&group, task_deadline);
+    let exact_start_work = job6.observed_work();
     let exact_start = Instant::now();
     assert_eq!(
         model
-            .score(&exact_batch, budget(exact), control.clone())
+            .score(&exact_batch, budget(exact), job6.clone())
             .unwrap()
             .questions()
             .len(),
         1
     );
-    assert_job_work(&control, exact_start_work);
+    assert_job_work(&job6, exact_start_work);
     let exact_seconds = exact_start.elapsed().as_secs_f64();
-    let below_start = control.observed_work();
-    let below = model.score(&exact_batch, budget(exact - 1), control.clone());
+    let below_start = job6.observed_work();
+    let below = model.score(&exact_batch, budget(exact - 1), job6.clone());
     assert!(matches!(
         below,
         Err(eylema_model::cpu::CpuError::ContextLimit)
     ));
     assert!(
-        control.observed_work() - below_start < 1_000_000_000,
+        job6.observed_work() - below_start < 1_000_000_000,
         "one-below context unexpectedly reached decoder work"
     );
-    assert_job_work(&control, below_start);
-    let below_work = control.observed_work() - below_start;
+    assert_job_work(&job6, below_start);
+    let below_work = job6.observed_work() - below_start;
     // Candidate job 4 runs last because cancellation invalidates the one shared execution identity.
     let first_pair_delta = pair_score(&forward, "en", "positive")
         .cumulative_work()
         .saturating_sub(score_start_work);
-    let before_cancel = control.observed_work();
+    let job4 = job_control(&group, task_deadline);
+    let before_cancel = job4.observed_work();
     let cancel_start_work = before_cancel;
     let threshold = before_cancel
         .saturating_add(first_pair_delta)
         .saturating_add(4096);
-    let watcher_control = control.clone();
+    let watcher_control = job4.clone();
     let cancel_start = Instant::now();
     let watcher = thread::spawn(move || {
         let until = Instant::now() + Duration::from_secs(600);
@@ -563,18 +713,23 @@ fn actual_pinned_reranker() {
         }
         false
     });
-    let cancelled = model.score(&batch, budget(128), control.clone());
+    let cancelled = model.score(&batch, budget(128), job4.clone());
     let observed_cancel = watcher.join().unwrap();
     assert!(observed_cancel, "cancellation threshold was not observed");
     assert!(matches!(
         cancelled,
         Err(eylema_model::cpu::CpuError::Cancelled)
     ));
-    assert!(control.observed_work() >= threshold);
-    assert_job_work(&control, cancel_start_work);
+    assert!(job4.observed_work() >= threshold);
+    assert_job_work(&job4, cancel_start_work);
     let job4_seconds = cancel_start.elapsed().as_secs_f64();
-    let job4_work = control.observed_work() - cancel_start_work;
-    assert!(start.elapsed() < Duration::from_secs(600));
+    let job4_work = job4.observed_work() - cancel_start_work;
+    assert!(job4_seconds < 600.0);
+    assert!(start.elapsed() < Duration::from_secs(1200));
+    assert!(
+        group.observed_work() <= 2_500_000_000_000,
+        "aggregate acceptance work cap exceeded"
+    );
 
     let evidence = format!(
         "{{\"format\":\"g57.native-acceptance.v1\",\"artifact_sha256\":\"{}\",\"reference_sha256\":\"{}\",\"token_ids_sha256\":\"{}\",\"source_commit\":\"{}\",\"token_rows\":4,\"context_limit\":128,\"layer_max_abs_error\":{},\"head_max_abs_error\":{},\"reference_seconds\":{},\"job1_seconds\":{},\"job1_work\":{},\"job2_seconds\":{},\"job2_work\":{},\"job3_seconds\":{},\"job3_work\":{},\"job4_seconds\":{},\"job4_work\":{},\"job5_work\":{},\"job6_exact_seconds\":{},\"job6_below_work\":{},\"batch_questions\":2,\"batch_pairs\":4,\"english_choice\":\"positive\",\"turkish_choice\":\"positive\",\"reversed_order_match\":true,\"cancel_threshold_work\":{},\"cancel_no_result\":true,\"final_work\":{},\"peak_logical_bytes\":{},\"sampled_rss_bytes\":{},\"elapsed_seconds\":{}}}\n",
@@ -587,17 +742,17 @@ fn actual_pinned_reranker() {
         reference_seconds,
         job1_seconds,
         job1_work,
-        batch_start.elapsed().as_secs_f64(),
-        control.observed_work() - score_start_work,
-        reverse_start.elapsed().as_secs_f64(),
-        control.observed_work() - reverse_start_work,
+        job2_seconds,
+        job2_work,
+        job3_seconds,
+        job3_work,
         job4_seconds,
         job4_work,
         job5_work,
         exact_seconds,
         below_work,
         threshold,
-        control.observed_work(),
+        group.observed_work(),
         forward.receipt().peak_logical_bytes(),
         rss_sample_bytes(),
         start.elapsed().as_secs_f64()

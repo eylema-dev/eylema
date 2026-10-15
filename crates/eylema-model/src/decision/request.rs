@@ -95,20 +95,24 @@ pub(crate) fn output_reservation(batch: &DecisionBatch<'_>) -> Result<u64, E> {
     Ok(bytes)
 }
 
-pub(crate) fn workspace_reservation(context: usize) -> Result<(u64, u64), E> {
-    crate::decision::profile::workspace_reservation(context)
+pub(crate) fn workspace_reservation(
+    dimensions: crate::cpu::profile::Dimensions,
+    context: usize,
+) -> Result<(u64, u64), E> {
+    crate::decision::profile::workspace_reservation(dimensions, context)
 }
 
 pub(crate) fn preflight(
     batch: &DecisionBatch<'_>,
     base: u64,
+    dimensions: crate::cpu::profile::Dimensions,
     context: usize,
     max_resident: u64,
     max_work: u64,
     observed_work: u64,
 ) -> Result<u64, E> {
     let output = output_reservation(batch)?;
-    let (workspace_bytes, workspace_work) = workspace_reservation(context)?;
+    let (workspace_bytes, workspace_work) = workspace_reservation(dimensions, context)?;
     let resident = base
         .checked_add(output)
         .and_then(|n| n.checked_add(workspace_bytes))

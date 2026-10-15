@@ -270,18 +270,172 @@ fn full_decision_workspace_is_known_before_frontend_admission() {
         options: &options,
     }];
     let batch = DecisionBatch::new(&questions).unwrap();
-    let (bytes, work) = request::workspace_reservation(4).unwrap();
+    let dimensions = crate::decision::profile::dimensions();
+    let (bytes, work) = request::workspace_reservation(dimensions, 4).unwrap();
     let base = 128u64;
     let output = request::output_reservation(&batch).unwrap();
     let exact = base + output + bytes;
     let work_limit = work + output;
-    assert!(request::preflight(&batch, base, 4, exact, work_limit, 0).is_ok());
+    assert!(request::preflight(&batch, base, dimensions, 4, exact, work_limit, 0).is_ok());
     assert_eq!(
-        request::preflight(&batch, base, 4, exact - 1, work_limit, 0),
+        request::preflight(&batch, base, dimensions, 4, exact - 1, work_limit, 0),
         Err(crate::cpu::CpuError::ResidentLimit)
     );
     assert_eq!(
-        request::preflight(&batch, base, 4, exact, work_limit - 1, 0),
+        request::preflight(&batch, base, dimensions, 4, exact, work_limit - 1, 0),
         Err(crate::cpu::CpuError::WorkLimit)
     );
+}
+
+#[test]
+fn synthetic_score_api_batches_resets_and_cancels_atomically() {
+    use crate::cpu::{CpuControl, CpuWorkGroup, profile::Dimensions, weights::BoundWeights};
+    use std::{
+        collections::BTreeMap,
+        time::{Duration, Instant},
+    };
+
+    let dimensions = Dimensions {
+        h: 2,
+        inter: 2,
+        qh: 1,
+        kh: 1,
+        w: 2,
+        layers: 1,
+        vocab: 151669,
+    };
+    let mut tensors = BTreeMap::<String, Vec<f32>>::new();
+    tensors.insert(
+        "model.embed_tokens.weight".into(),
+        vec![0.0; dimensions.vocab * dimensions.h],
+    );
+    tensors.insert("model.norm.weight".into(), vec![1.0; dimensions.h]);
+    for (name, len) in [
+        ("input_layernorm.weight", dimensions.h),
+        ("post_attention_layernorm.weight", dimensions.h),
+        (
+            "self_attn.q_proj.weight",
+            dimensions.qh * dimensions.w * dimensions.h,
+        ),
+        (
+            "self_attn.k_proj.weight",
+            dimensions.kh * dimensions.w * dimensions.h,
+        ),
+        (
+            "self_attn.v_proj.weight",
+            dimensions.kh * dimensions.w * dimensions.h,
+        ),
+        (
+            "self_attn.o_proj.weight",
+            dimensions.h * dimensions.qh * dimensions.w,
+        ),
+        ("self_attn.q_norm.weight", dimensions.w),
+        ("self_attn.k_norm.weight", dimensions.w),
+        ("mlp.gate_proj.weight", dimensions.inter * dimensions.h),
+        ("mlp.up_proj.weight", dimensions.inter * dimensions.h),
+        ("mlp.down_proj.weight", dimensions.h * dimensions.inter),
+    ] {
+        tensors.insert(crate::cpu::profile::name(0, name).unwrap(), vec![0.0; len]);
+    }
+    let weights = BoundWeights::synthetic(dimensions, &tensors).unwrap();
+    let manifest = ModelManifest::from_bytes(include_bytes!(
+        "../../tests/fixtures/g57/cpu-profile.v1.eyl"
+    ))
+    .unwrap();
+    let group = CpuWorkGroup::new(2_500_000_000_000).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(30);
+    let bound = CpuControl::new_job(deadline, 800_000_000_000, group.clone()).unwrap();
+    let tokenizer = crate::tokenizer::DecisionTokenizer {
+        inner: crate::tokenizer::Tokenizer::test_synthetic(),
+        control: bound.clone(),
+    };
+    let model = DecisionModel {
+        weights,
+        manifest: &manifest,
+        tokenizer: &tokenizer,
+        base: 1_000_000,
+        admission_work: 0,
+        control: bound.clone(),
+        dimensions,
+    };
+    let options_a = [
+        DecisionOption {
+            id: "a",
+            candidate: "Paris",
+        },
+        DecisionOption {
+            id: "b",
+            candidate: "Pacific",
+        },
+    ];
+    let options_b = [
+        DecisionOption {
+            id: "b",
+            candidate: "Pacific",
+        },
+        DecisionOption {
+            id: "a",
+            candidate: "Paris",
+        },
+    ];
+    let questions = [
+        DecisionQuestion {
+            id: "first",
+            instruction: "judge",
+            query: "capital",
+            options: &options_a,
+        },
+        DecisionQuestion {
+            id: "second",
+            instruction: "judge",
+            query: "city",
+            options: &options_b,
+        },
+    ];
+    let batch = DecisionBatch::new(&questions).unwrap();
+    let budget = DecisionBudget {
+        context: 4096,
+        max_resident_bytes: 32_000_000,
+        max_work: 2_000_000_000,
+    };
+    let result = model.score(&batch, budget, bound.clone()).unwrap();
+    assert_eq!(result.questions().len(), 2);
+    assert_eq!(result.questions()[0].question_id(), "first");
+    assert_eq!(result.questions()[1].question_id(), "second");
+    for q in result.questions() {
+        assert_eq!(q.choice(), None);
+        assert_eq!(q.reason(), DecisionReason::Tie);
+        assert_eq!(q.scores().len(), 2);
+        assert!(q.scores().iter().all(|s| s.score_micros() == 500_000));
+    }
+    for (qid, oid) in [
+        ("first", "a"),
+        ("first", "b"),
+        ("second", "a"),
+        ("second", "b"),
+    ] {
+        assert_eq!(pair_score_for_test(&result, qid, oid).logits(), [0.0, 0.0]);
+    }
+    let cancelled = CpuControl::new_job(deadline, 800_000_000_000, group).unwrap();
+    cancelled.stop_after(1_000);
+    assert!(matches!(
+        model.score(&batch, budget, cancelled),
+        Err(crate::cpu::CpuError::Cancelled)
+    ));
+}
+
+fn pair_score_for_test<'a>(
+    result: &'a DecisionResult,
+    question: &str,
+    option: &str,
+) -> &'a OptionScore {
+    result
+        .questions()
+        .iter()
+        .find(|q| q.question_id() == question)
+        .unwrap()
+        .scores()
+        .iter()
+        .find(|s| s.option_id() == option)
+        .unwrap()
 }

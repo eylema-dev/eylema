@@ -15,7 +15,7 @@ use crate::{
 };
 pub use budget::CpuBudget;
 use budget::Meter;
-pub use control::CpuControl;
+pub use control::{CpuControl, CpuWorkGroup};
 pub use error::CpuError;
 use eylema_contracts::model_contract::ModelManifest;
 pub use profile::qwen_layout;

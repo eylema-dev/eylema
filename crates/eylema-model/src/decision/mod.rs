@@ -6,6 +6,7 @@ pub use request::{DecisionBatch, DecisionOption, DecisionQuestion};
 pub use score::{DecisionReason, DecisionReceipt, DecisionResult, OptionScore, QuestionScores};
 #[cfg(test)]
 mod tests;
+use crate::cpu::profile::Dimensions;
 use crate::{
     LoadedWeights,
     cpu::{CpuControl, CpuError as E, budget::Meter, weights::BoundWeights},
@@ -40,6 +41,7 @@ pub struct DecisionModel<'a> {
     pub(crate) base: u64,
     pub(crate) admission_work: u64,
     pub(crate) control: CpuControl,
+    pub(crate) dimensions: Dimensions,
 }
 impl<'a> DecisionModel<'a> {
     /// Bounded numerical diagnostics, never a role proposal or effect authority.
@@ -61,7 +63,7 @@ impl<'a> DecisionModel<'a> {
             .checked_add(diagnostic_bytes)
             .ok_or(E::ResidentLimit)?;
         let mut engine = crate::cpu::session::Engine::new_decision(
-            profile::dimensions(),
+            self.dimensions,
             self.weights,
             budget,
             control,
@@ -149,6 +151,7 @@ impl<'a> DecisionModel<'a> {
             base,
             admission_work: control.observed_work(),
             control: control.clone(),
+            dimensions: profile::dimensions(),
         })
     }
     pub fn admission_work(&self) -> u64 {
@@ -203,6 +206,7 @@ impl DecisionModel<'_> {
         let output_reservation = request::preflight(
             batch,
             self.base,
+            self.dimensions,
             budget.context,
             budget.max_resident_bytes,
             budget.max_work,
@@ -270,7 +274,7 @@ impl DecisionModel<'_> {
                     )
                     .map_err(token_error)?;
                 let mut engine = crate::cpu::session::Engine::new_decision(
-                    profile::dimensions(),
+                    self.dimensions,
                     self.weights,
                     budget,
                     control.clone(),

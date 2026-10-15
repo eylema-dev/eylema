@@ -20,8 +20,10 @@ pub(crate) fn dimensions() -> Dimensions {
     }
 }
 
-pub(crate) fn workspace_reservation(context: usize) -> Result<(u64, u64), E> {
-    let d = dimensions();
+pub(crate) fn workspace_reservation(
+    d: crate::cpu::profile::Dimensions,
+    context: usize,
+) -> Result<(u64, u64), E> {
     d.validate()?;
     let cache = d.cache(context)?;
     let lengths = [
