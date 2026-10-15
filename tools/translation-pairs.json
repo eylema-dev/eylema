@@ -5,8 +5,8 @@
     {
       "en": "README.md",
       "tr": "README.tr.md",
-      "en_sha256": "4a735561b7fad8b9233bd9187c6b283af4c5a47aa44da77c2bcaa6adf3d06337",
-      "tr_sha256": "d2a861bcb7e9e66a37312d74c896da9e6685db7e3a6ddb74be75195a97f7efea"
+      "en_sha256": "2f7791f910081a8ed44de6003aaee166188c73942c3d3a8ebf1785d8873edc10",
+      "tr_sha256": "b578939bb734763460e44efecc620a7e39301a3e9145da9e8e9ed6b049c30e84"
     },
     {
       "en": "CONTRIBUTING.md",
@@ -223,6 +223,12 @@
       "tr": "docs/tr/tokenizer.md",
       "en_sha256": "adb4ecfb75bceb30bacbfd4830451a23064e6bff635fe163a1b274797781dc3f",
       "tr_sha256": "1687c39f8f2074157e06dd1574a4594295d810b85090964cafbda687d43d5700"
+    },
+    {
+      "en": "docs/en/product-family.md",
+      "tr": "docs/tr/product-family.md",
+      "en_sha256": "5ecabddb8da8421e8def07363d0c692c848354406851d744efefabe441f07761",
+      "tr_sha256": "58d0cc869c296b48e4f58298f48c377f6a31f37d22439678afdcf7ecc14bd241"
     }
   ],
   "documents": []

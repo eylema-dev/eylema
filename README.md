@@ -7,15 +7,15 @@
 
 # Eyleme
 
-**A Simple, High-Performance Agentic AI Web Platform for Continuous Development and Operations.**
+**An open-source agentic task platform, built with its community.**
 
 Code, identifiers, file names and contribution templates use English. Documentation is available in English and [Turkish](README.tr.md), with English as the canonical source. The product name changed from **Eylema** to **Eyleme** on **14 October 2026**; the description above states its intended purpose.
 
-Core project repository: [eyleme-dev/eyleme](https://github.com/eyleme-dev/eyleme), under the [eyleme-dev organization](https://github.com/eyleme-dev). The package prefix and native host CLI are `eylema`; local service start, task run/inspect, service stop and doctor commands are implemented. Task cancellation still requires an independently host-verified human session. The project owner reported registering **`eylema.dev` through GoDaddy** on 11 October 2026. First-party source and documentation are licensed under [Apache-2.0](LICENSE). Separately identified third-party material, model weights and datasets retain their own terms.
+Core project repository: [eyleme-dev/eyleme](https://github.com/eyleme-dev/eyleme), under the [eyleme-dev organization](https://github.com/eyleme-dev). The package prefix and native host CLI are `eylema`; local service start, task run/inspect, service stop and doctor commands are implemented. Task cancellation still requires an independently host-verified human session. The project owner reports registering **[eyleme.dev](https://eyleme.dev)** as the common community and product site. First-party source and documentation are licensed under [Apache-2.0](LICENSE). Separately identified third-party material, model weights and datasets retain their own terms.
 
-The [name and availability record](https://github.com/eyleme-dev/devguide/blob/main/docs/en/name-availability.md) preserves the checks made before organization creation and the subsequent registration update. The organization and this public repository were established under their former names on 11 October 2026; their current names are `eyleme-dev` and `eyleme`. The primary domain is `eylema.dev`; domain registration does not imply an accepted platform deployment.
+The [name and availability record](https://github.com/eyleme-dev/devguide/blob/main/docs/en/name-availability.md) preserves the checks made before organization creation and the subsequent registration update. The organization and this public repository were established under their former names on 11 October 2026; their current names are `eyleme-dev` and `eyleme`. The current public destination is **[eyleme.dev](https://eyleme.dev)**; domain registration does not imply an accepted platform deployment. The earlier `eylema.dev` registration remains a historical record.
 
-**Name transition:** Eyleme is the current product name; Derlema is now **Derleme**, and **Onama** keeps its name. The GitHub organization and core repository are now `eyleme-dev/eyleme`. Existing `eylema` commands, crate/package names, `EYLEMA_DATA_DIR`, `~/Library/Application Support/Eylema`, protocol identifiers and the `eylema.dev` domain are retained for compatibility. This rename does not migrate stored data or change EYL/EYLJ bytes. Historical records and copyright attribution preserve their original names.
+**Name transition:** Eyleme is the current product name; Derlema is now **Derleme**, and **Onama** keeps its name. The GitHub organization and core repository are now `eyleme-dev/eyleme`. Existing `eylema` commands, crate/package names, `EYLEMA_DATA_DIR`, `~/Library/Application Support/Eylema` and protocol identifiers are retained for compatibility. This rename does not migrate stored data or change EYL/EYLJ bytes. Historical records and copyright attribution preserve their original names.
 
 Brand assets: [SVG / PNG logos and usage guide](assets/eylema-logo/README.md), [preview](assets/eylema-logo/brand-preview.png), [download the logo pack](assets/eylema-logo.zip).
 
@@ -28,6 +28,19 @@ G21 adds bounded, cooperative host-resource admission for declared Metal, view a
 G22 adds bounded [combined GPU measurement hosts](docs/en/combined-gpu-measurement.md); repeated real hardware acceptance and raw distributions are tracked in eyleme-evals.
 
 G39 adds a [controlled native development workspace](docs/en/development-workspace.md): detached accepted-base worktrees, bounded single-process macOS isolation, scoped artifacts and preservation of dirty caller work. Its native proof uses synthetic host authority; provider/compiler/GitHub execution remains separate.
+
+## One Eyleme brand
+
+**Eyleme** remains the public, independently usable Apache-2.0 community product. **Eyleme Derleme** and **Eyleme Onama** are separately developed private-source products with a paid subscription model. Their combined story is **Derleme → Onama → Eyleme**; subscriptions never grant implicit execution or data access. Supported standalone core workflows keep their basic access and safety controls and require neither paid product.
+
+Read the [product-family contract](docs/en/product-family.md) for public interfaces, private implementation boundaries and licensing. Commercial positioning is not evidence of released billing or subscription services. The [website product overview](https://eyleme.dev/#products) describes the family without requiring access to private source.
+
+## Join the community
+
+- Start with the [local CLI guide](docs/en/local-cli.md) and [browser-console guide](docs/en/local-browser.md); read their supported scope and authorization limits before running tasks.
+- Explore [public examples](https://github.com/eyleme-dev/eyleme-examples) and the [English product documentation](https://github.com/eyleme-dev/eyleme-docs-en).
+- Ask questions and share ideas in [Discussions](https://github.com/eyleme-dev/eyleme/discussions); report reproducible issues through the [public issue forms](https://github.com/eyleme-dev/eyleme/issues/new/choose). Never post credentials, private customer data or exploitable vulnerability details in public.
+- Follow the [roadmap](https://github.com/eyleme-dev/eyleme-docs-en/blob/main/docs/roadmap.md) and contribution workflow to improve documentation, examples and compatible extensions.
 
 ## Contribute
 
