@@ -1,0 +1,211 @@
+{
+  "evidence": {
+    "authority": "none; model execution remains not_run until separately demonstrated",
+    "cpu_acceptance": "not_run",
+    "parent_manifest_sha256": "c087a033d4d193acd9912d0f555c99f14f9b968c9f308aca8acb52b07af85af2",
+    "weights_downloaded": false
+  },
+  "manifest": {
+    "architecture": "qwen3-dense.v1",
+    "artifact_format": "safetensors.v1",
+    "components": [
+      {
+        "digest_source": "audit_measured_small_bytes",
+        "name": "LICENSE",
+        "sha256": "832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+        "size": 11343
+      },
+      {
+        "digest_source": "audit_measured_small_bytes",
+        "name": "config.json",
+        "sha256": "660db3b73d788119c04535e48cf9be5f55bc3100841a718637ae695b442f27dd",
+        "size": 726
+      },
+      {
+        "digest_source": "publisher_advertised",
+        "name": "model.safetensors",
+        "sha256": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
+        "size": 1503300328
+      },
+      {
+        "digest_source": "audit_measured_small_bytes",
+        "name": "qwen3-cpu-roles.v1.json",
+        "sha256": "e3b2cf097b0fe4f3be4311c4484a9b4033a0b06e8b4f72c96963235011f0d379",
+        "size": 1963
+      },
+      {
+        "digest_source": "audit_measured_small_bytes",
+        "name": "qwen3-operators.v1.json",
+        "sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06",
+        "size": 3781
+      },
+      {
+        "digest_source": "audit_measured_small_bytes",
+        "name": "role-interfaces.v1.json",
+        "sha256": "db77f67eff4ba660c3e3bdb739fabf8788129612e0d87c54736d5f1c7eee9aa1",
+        "size": 4717
+      },
+      {
+        "digest_source": "publisher_advertised",
+        "name": "tokenizer.json",
+        "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+        "size": 11422654
+      },
+      {
+        "digest_source": "audit_measured_small_bytes",
+        "name": "tokenizer_config.json",
+        "sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+        "size": 9732
+      }
+    ],
+    "configuration": {
+      "batch_size": 1,
+      "config_component": "config.json",
+      "context_limit": 4096,
+      "dimensions": {
+        "attention_heads": 16,
+        "context_capacity": 40960,
+        "head_dim": 128,
+        "hidden_size": 1024,
+        "intermediate_size": 3072,
+        "kv_heads": 8,
+        "layers": 28,
+        "vocab_size": 151936
+      },
+      "max_new_tokens": 128,
+      "operators_component": "qwen3-operators.v1.json",
+      "preprocessing_component": "qwen3-cpu-roles.v1.json",
+      "template_sha256": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+      "tokenizer_component": "tokenizer.json",
+      "tokenizer_config_component": "tokenizer_config.json",
+      "weights_component": "model.safetensors"
+    },
+    "format": "model-profile.v1",
+    "id": "qwen3-0.6b.cpu",
+    "numeric_format": "bfloat16",
+    "operators": [
+      {
+        "id": "qwen3.embedding_gather.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.linear_no_bias.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.rmsnorm_fp32.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.silu.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.swiglu.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.residual_add.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.rope_default.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.reshape_transpose.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.grouped_kv_repeat.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.causal_mask.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.scaled_attention.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.softmax_fp32.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.kv_cache_append.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.tied_logits.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.greedy_bounded.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      },
+      {
+        "id": "qwen3.dtype_and_layout.v1",
+        "spec_sha256": "acbbf68755dee5ca2b9d25bdcd3aa4206ce7156e032c38518a1fc66d7819fb06"
+      }
+    ],
+    "profiles": [
+      {
+        "action_semantics": "proposal-only.v1",
+        "input_schema": "text.messages.v1",
+        "input_units": "utf8.v1",
+        "output_schema": "reasoning.summary.v1",
+        "output_units": "utf8.v1",
+        "preprocessing": "qwen3.template.v1",
+        "role": "reasoning",
+        "state_reset": "reset-between-steps.v1",
+        "version": 1
+      },
+      {
+        "action_semantics": "proposal-only.v1",
+        "input_schema": "text.messages.v1",
+        "input_units": "utf8.v1",
+        "output_schema": "plan.proposal.v1",
+        "output_units": "utf8.v1",
+        "preprocessing": "qwen3.template.v1",
+        "role": "planning",
+        "state_reset": "reset-between-steps.v1",
+        "version": 1
+      },
+      {
+        "action_semantics": "proposal-only.v1",
+        "input_schema": "text.messages.v1",
+        "input_units": "utf8.v1",
+        "output_schema": "domain.result.v1",
+        "output_units": "schema-defined.v1",
+        "preprocessing": "qwen3.template.v1",
+        "role": "specialist",
+        "state_reset": "reset-between-steps.v1",
+        "version": 1
+      },
+      {
+        "action_semantics": "proposal-only.v1",
+        "input_schema": "candidate.evidence.v1",
+        "input_units": "declared-units.v1",
+        "output_schema": "evaluation.proposal.v1",
+        "output_units": "declared-units.v1",
+        "preprocessing": "qwen3.critic-evidence.v1",
+        "role": "critic",
+        "state_reset": "reset-between-steps.v1",
+        "version": 1
+      }
+    ],
+    "quantization": "none",
+    "revision": 2,
+    "rights": {
+      "license_component": "LICENSE",
+      "license_id": "Apache-2.0",
+      "publisher": "Qwen",
+      "source_commit": "c1899de289a04d12100db370d81485cdf75e47ca",
+      "source_repository": "https://huggingface.co/Qwen/Qwen3-0.6B",
+      "status": "publisher_terms_pinned"
+    },
+    "source_commit": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "source_repository": "https://huggingface.co/Qwen/Qwen3-0.6B"
+  }
+}

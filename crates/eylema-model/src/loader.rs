@@ -49,6 +49,16 @@ impl LoadedWeights {
     pub fn tensor_spec(&self, name: &str) -> Option<&TensorSpec> {
         self.range(name).map(|r| &r.spec)
     }
+    /// Conservative live content including retained capacities, not physical RSS.
+    pub(crate) fn resident_content_bytes(&self) -> u64 {
+        (self.data.capacity()
+            + self.ranges.capacity() * std::mem::size_of::<TensorRange>()
+            + self
+                .ranges
+                .iter()
+                .map(|r| r.spec.content_bytes())
+                .sum::<usize>()) as u64
+    }
     pub fn artifact_len(&self) -> u64 {
         self.data.len() as u64
     }

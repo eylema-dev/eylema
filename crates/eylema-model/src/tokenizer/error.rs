@@ -1,6 +1,8 @@
 use eylema_platform::PlatformError;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TokenizeError {
+    Cancelled,
+    Deadline,
     UnsupportedProfile,
     InvalidProfile,
     HashMismatch,

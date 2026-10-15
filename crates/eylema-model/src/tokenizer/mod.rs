@@ -119,3 +119,54 @@ impl std::fmt::Debug for PromptMessage<'_> {
             .finish()
     }
 }
+
+impl Tokenizer {
+    pub fn encode_prompt_controlled(
+        &self,
+        messages: &[PromptMessage<'_>],
+        budget: TextBudget,
+        control: &crate::cpu::CpuControl,
+    ) -> Result<EncodedTokens, TokenizeError> {
+        control.check().map_err(budget::control_error)?;
+        let mut c = budget::Counters::text(budget, self.data.resident)?;
+        c.control = Some(control.clone());
+        let ids = prompt::encode(
+            &self.data,
+            messages,
+            &mut c,
+            budget.max_tokens.min(self.data.context_limit),
+        )?;
+        control.check().map_err(budget::control_error)?;
+        Ok(EncodedTokens { ids })
+    }
+    pub fn decode_controlled(
+        &self,
+        ids: &[u32],
+        budget: TextBudget,
+        control: &crate::cpu::CpuControl,
+    ) -> Result<String, TokenizeError> {
+        control.check().map_err(budget::control_error)?;
+        let mut c = budget::Counters::text(budget, self.data.resident)?;
+        c.control = Some(control.clone());
+        let text = bpe::decode(&self.data, ids, &mut c, budget.max_tokens)?;
+        control.check().map_err(budget::control_error)?;
+        Ok(text)
+    }
+    #[cfg(test)]
+    pub(crate) fn test_synthetic() -> Self {
+        let budget = AdmissionBudget {
+            max_resident_bytes: 134217728,
+            max_read_calls: 1024,
+            max_interruptions: 16,
+            max_work_per_artifact: 134217728,
+        };
+        Self {
+            data: admission::test_load(
+                include_bytes!("../../tests/fixtures/g29/synthetic-tokenizer.json"),
+                include_bytes!("../../tests/fixtures/g29/pinned-config.json"),
+                budget,
+            )
+            .unwrap(),
+        }
+    }
+}

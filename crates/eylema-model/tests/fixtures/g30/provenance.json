@@ -1,0 +1,26 @@
+{
+  "format": "g30.cpu-provenance.v1",
+  "source_model_catalog": "eyleme-dev/eylema-models",
+  "source_model_manifest": "qwen3-0.6b.v1",
+  "source_model_manifest_wire_sha256": "c087a033d4d193acd9912d0f555c99f14f9b968c9f308aca8acb52b07af85af2",
+  "source_weight_sha256_publisher_advertised": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
+  "tokenizer_json_sha256_publisher_advertised": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+  "tokenizer_config_sha256_measured": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101",
+  "template_sha256_measured": "a55ee1b1660128b7098723e0abcd92caa0788061051c62d51cbe87d9cf1974d8",
+  "role_contract_sha256": "e3b2cf097b0fe4f3be4311c4484a9b4033a0b06e8b4f72c96963235011f0d379",
+  "catalog_profile_sha256": "3dd7a97907286ac085543c9695ca57e82f5675e2f60e32583884017b40921c72",
+  "manifest_sha256": "abc9669adb66de6ca55e86f5a6793e6b6f2a694eee260f63dcc7120794b7fcc5",
+  "manifest_bytes": 5120,
+  "reference_sha256": "38a4986871276927cd60eab39773d394f238d83edf1f98d92e028c992d9436a7",
+  "reference_protocol_sha256": "2824b75b5e24a47427d41ead074bc29981eb355b02f705f032eb11d41d45c747",
+  "role_count": 4,
+  "roles": [
+    "reasoning",
+    "planning",
+    "specialist",
+    "critic"
+  ],
+  "grants_execution_authority": false,
+  "weights_downloaded": false,
+  "model_execution": "not_run"
+}
