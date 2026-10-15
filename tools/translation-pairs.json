@@ -241,6 +241,18 @@
       "tr": "docs/tr/cpu-model.md",
       "en_sha256": "6e80cc05a2be2b8d9088a3278ce2f3215bd53c57bc133eb94fa5cd7da000b35e",
       "tr_sha256": "cdbe0d32ef2c51f0c60e4020e919c4fb551bf8e2a636b620a40732ab72554214"
+    },
+    {
+      "en": "docs/en/g57-cpu-decision-design.md",
+      "tr": "docs/tr/g57-cpu-decision-design.md",
+      "en_sha256": "d48a0d967e61ad89e4ac0af234d337bea24040c428f2771056e047662bf883d4",
+      "tr_sha256": "0aaa8e697acb625b29222deba696b74aa98bc6cdf032dd37455491b9eb013c5c"
+    },
+    {
+      "en": "docs/en/cpu-decision.md",
+      "tr": "docs/tr/cpu-decision.md",
+      "en_sha256": "e299b4436f0917fc021266f7ebe2df81538cc1baa22d22c3a7aa9e45de5840a0",
+      "tr_sha256": "e7bb5904436de83cd1967a03db39a6768d666011780a902bdd26bf8f7c4dd1e7"
     }
   ],
   "documents": []

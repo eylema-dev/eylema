@@ -69,6 +69,120 @@ fn expected() -> Vec<Vec<f32>> {
         .collect()
 }
 #[test]
+fn selected_head_equals_full_rows() {
+    let d = profile::Dimensions {
+        h: 3,
+        inter: 7,
+        qh: 4,
+        kh: 2,
+        w: 4,
+        layers: 2,
+        vocab: 7,
+    };
+    let storage = synthetic(d);
+    let w = weights::BoundWeights::synthetic(d, &storage).unwrap();
+    let mut full = session::Engine::new(d, w, budget(), control(), 0).unwrap();
+    full.prefill_ids(&[0, 1, 2]).unwrap();
+    let db = crate::decision::DecisionBudget {
+        context: 8,
+        max_resident_bytes: 32 * 1024 * 1024,
+        max_work: 20_000_000,
+    };
+    let mut selected = session::Engine::new_decision(d, w, db, control(), 0, [0, 6]).unwrap();
+    selected.prefill_decision(&[0, 1, 2]).unwrap();
+    assert_eq!(selected.ws.logits, [full.ws.logits[0], full.ws.logits[6]]);
+    assert_eq!(selected.ws.layers, full.ws.layers);
+    assert_eq!(selected.ws.logits.len(), 2);
+}
+#[test]
+fn aggregate_work_not_reset_and_generation_caps() {
+    let c = control();
+    let b = crate::decision::DecisionBudget {
+        context: 8,
+        max_resident_bytes: 100000,
+        max_work: 1000,
+    };
+    let mut first = budget::Meter::decision(b, c.clone(), 0).unwrap();
+    first.charge(500).unwrap();
+    let mut second = budget::Meter::decision(b, c.clone(), 0).unwrap();
+    assert_eq!(second.charge(501), Err(CpuError::WorkLimit));
+    assert_eq!(c.observed_work(), 500);
+    let mut old = budget();
+    old.context = 65;
+    assert_eq!(old.validate(), Err(CpuError::ContextLimit));
+    assert_eq!(profile::QWEN.cache(4096).unwrap() * 8, 939524096);
+}
+#[test]
+fn long_attention_global_normalization_and_stop() {
+    let d = profile::Dimensions {
+        h: 3,
+        inter: 5,
+        qh: 2,
+        kh: 1,
+        w: 2,
+        layers: 1,
+        vocab: 7,
+    };
+    let keys: Vec<f32> = (0..8192).map(|i| val(i, 3)).collect();
+    let values: Vec<f32> = (0..8192).map(|i| val(i, 7)).collect();
+    let q = [0.3, -0.2, 0.4, 0.1];
+    let mut scores = vec![0.; 4096];
+    let mut out = [0.; 4];
+    let db = crate::decision::DecisionBudget {
+        context: 4096,
+        max_resident_bytes: 32 * 1024 * 1024,
+        max_work: 20_000_000,
+    };
+    let mut m = budget::Meter::decision(db, control(), 0).unwrap();
+    attention::apply(
+        d,
+        4095,
+        attention::Attention {
+            q: &q,
+            keys: &keys,
+            values: &values,
+            scores: &mut scores,
+            out: &mut out,
+        },
+        &mut m,
+    )
+    .unwrap();
+    for a in 0..2 {
+        let x: Vec<f64> = (0..4096)
+            .map(|t| {
+                ((q[2 * a] as f64) * (keys[2 * t] as f64)
+                    + (q[2 * a + 1] as f64) * (keys[2 * t + 1] as f64))
+                    / 2f64.sqrt()
+            })
+            .collect();
+        let z: f64 = x.iter().map(|x| x.exp()).sum();
+        for j in 0..2 {
+            let e: f64 = (0..4096)
+                .map(|t| x[t].exp() / z * values[2 * t + j] as f64)
+                .sum();
+            assert!((out[a * 2 + j] as f64 - e).abs() < 1e-5);
+        }
+    }
+    let c = control();
+    c.stop_after(5000);
+    let mut m = budget::Meter::decision(db, c, 0).unwrap();
+    assert_eq!(
+        attention::apply(
+            d,
+            4095,
+            attention::Attention {
+                q: &q,
+                keys: &keys,
+                values: &values,
+                scores: &mut scores,
+                out: &mut out
+            },
+            &mut m
+        ),
+        Err(CpuError::Cancelled)
+    );
+}
+#[test]
 fn qwidth_gqa_rope_reference_and_prefix_cache() {
     let fixtures = expected();
     for (case, (h, inter, qh, kh, w, layers, tokens)) in [

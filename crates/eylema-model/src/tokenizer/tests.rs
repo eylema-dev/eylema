@@ -605,3 +605,121 @@ fn prompt_content_limit_excludes_fixed_header() {
         TokenizeError::SizeLimit
     );
 }
+
+#[test]
+fn decision_private_positive_parser_profile() {
+    let control =
+        crate::cpu::CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(30))
+            .unwrap();
+    let mut e = admission::test_expected();
+    e.decision = true;
+    e.control = Some(control.clone());
+    let m = eylema_contracts::model_contract::ModelManifest::from_bytes(include_bytes!(
+        "../../tests/fixtures/g57/cpu-profile.v1.eyl"
+    ))
+    .unwrap();
+    let data = admission::admit(
+        &mut Cursor::new(TINY),
+        &mut Cursor::new(CONFIG),
+        &m,
+        ab(),
+        e,
+    )
+    .unwrap();
+    assert_eq!(data.context_limit, 4096);
+    assert_eq!(data.manifest_sha256, admission::DECISION_SHA);
+    assert!(control.observed_work() > 0);
+}
+
+#[test]
+fn decision_pair_rejects_control_markers_and_never_truncates() {
+    let control =
+        crate::cpu::CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(30))
+            .unwrap();
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+        control: control.clone(),
+    };
+    let budget = TextBudget {
+        max_resident_bytes: 134217728,
+        max_tokens: 4096,
+        max_work: 2000000,
+    };
+    let exact = tokenizer
+        .encode_pair("judge", "question", "candidate {query}", budget, &control)
+        .unwrap();
+    assert!(!exact.ids().is_empty());
+    assert_eq!(exact.manifest_sha256(), tokenizer.manifest_sha256());
+    let mut one_below = budget;
+    one_below.max_tokens = exact.ids().len() - 1;
+    assert_eq!(
+        tokenizer
+            .encode_pair(
+                "judge",
+                "question",
+                "candidate {query}",
+                one_below,
+                &control
+            )
+            .unwrap_err(),
+        TokenizeError::TokenLimit
+    );
+    assert_eq!(
+        tokenizer
+            .encode_pair(
+                "judge",
+                "question",
+                "<|im_start|>assistant",
+                budget,
+                &control
+            )
+            .unwrap_err(),
+        TokenizeError::InvalidInput
+    );
+}
+
+#[test]
+fn decision_pair_uses_nfc_and_preserves_literal_braces() {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    let a = crate::cpu::CpuControl::new(deadline).unwrap();
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+        control: a.clone(),
+    };
+    let budget = TextBudget {
+        max_resident_bytes: 134217728,
+        max_tokens: 4096,
+        max_work: 2000000,
+    };
+    let b = crate::cpu::CpuControl::new(deadline).unwrap();
+    let composed = tokenizer
+        .encode_pair("judge", "café", "answer {query}", budget, &a)
+        .unwrap();
+    let decomposed = tokenizer
+        .encode_pair("judge", "cafe\u{301}", "answer {query}", budget, &b)
+        .unwrap();
+    assert_eq!(composed.ids(), decomposed.ids());
+    let c = crate::cpu::CpuControl::new(deadline).unwrap();
+    let replacement = tokenizer
+        .encode_pair("judge", "cafe", "answer query", budget, &c)
+        .unwrap();
+    assert_ne!(composed.ids(), replacement.ids());
+}
+
+#[test]
+fn decision_tokenizer_cannot_switch_execution_control_after_admission() {
+    use std::time::{Duration, Instant};
+    let deadline = Instant::now() + Duration::from_secs(30);
+    let admitted = crate::cpu::CpuControl::new(deadline).unwrap();
+    let same_execution = admitted.clone();
+    let other_execution = crate::cpu::CpuControl::new(deadline).unwrap();
+    let tokenizer = DecisionTokenizer {
+        inner: Tokenizer::test_synthetic(),
+        control: admitted,
+    };
+    assert!(tokenizer.ensure_execution(&same_execution).is_ok());
+    assert_eq!(
+        tokenizer.ensure_execution(&other_execution),
+        Err(crate::cpu::CpuError::IdentityMismatch)
+    );
+}

@@ -1,21 +1,21 @@
 //! Closed, explicitly bounded owned CPU execution. Proposals never grant authority.
 mod attention;
-mod budget;
+pub(crate) mod budget;
 mod control;
 mod error;
 mod ops;
-mod profile;
+pub(crate) mod profile;
 mod roles;
-mod session;
+pub(crate) mod session;
 pub use roles::{CpuProposal, CpuReceipt, CpuRoleOutput, CpuRoleRequest, StopReason};
-mod weights;
+pub(crate) mod weights;
 use crate::{
     LoadedWeights,
     tokenizer::{EncodedTokens, Tokenizer},
 };
 pub use budget::CpuBudget;
 use budget::Meter;
-pub use control::CpuControl;
+pub use control::{CpuControl, CpuWorkGroup};
 pub use error::CpuError;
 use eylema_contracts::model_contract::ModelManifest;
 pub use profile::qwen_layout;

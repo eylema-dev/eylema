@@ -196,14 +196,23 @@ fn compose(a: u32, b: u32, c: &mut Counters) -> Result<Option<u32>, E> {
     )
 }
 pub(super) fn normalize(s: &str, c: &mut Counters) -> Result<String, E> {
-    if s.len() > 8192 {
+    normalize_profile(s, c, false)
+}
+pub(super) fn normalize_decision(s: &str, c: &mut Counters) -> Result<String, E> {
+    normalize_profile(s, c, true)
+}
+fn normalize_profile(s: &str, c: &mut Counters, decision: bool) -> Result<String, E> {
+    if s.len() > if decision { 32768 } else { 8192 } {
         return Err(E::SizeLimit);
     }
     ensure(c)?;
     let outer = c.max_resident;
-    let scratch = c.resident.checked_add(65536).ok_or(E::SizeLimit)?;
+    let scratch = c
+        .resident
+        .checked_add(if decision { 1048576 } else { 65536 })
+        .ok_or(E::SizeLimit)?;
     c.max_resident = outer.min(scratch);
-    let result = normalize_bounded(s, c);
+    let result = normalize_bounded(s, c, decision);
     c.max_resident = outer;
     result.map_err(|e| {
         if e == E::ResidentLimit && scratch < outer {
@@ -213,15 +222,15 @@ pub(super) fn normalize(s: &str, c: &mut Counters) -> Result<String, E> {
         }
     })
 }
-fn normalize_bounded(s: &str, c: &mut Counters) -> Result<String, E> {
-    if s.len() > 8192 {
+fn normalize_bounded(s: &str, c: &mut Counters, decision: bool) -> Result<String, E> {
+    if s.len() > if decision { 32768 } else { 8192 } {
         return Err(E::SizeLimit);
     }
     ensure(c)?;
     let mut decomposed = Vec::new();
     for ch in s.chars() {
         decompose(ch as u32, &mut decomposed, 0, c)?;
-        if decomposed.len() * 4 > 65536 {
+        if decomposed.len() * 4 > if decision { 262144 } else { 65536 } {
             return Err(E::SizeLimit);
         }
     }

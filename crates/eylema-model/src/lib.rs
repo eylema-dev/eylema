@@ -14,3 +14,5 @@ mod header_tests;
 pub use loader::{LoadBudget, LoadedWeights, load};
 pub mod cpu;
 pub mod tokenizer;
+
+pub mod decision;
