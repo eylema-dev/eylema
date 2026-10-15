@@ -65,7 +65,7 @@ def generate(tokenizer,config):
         cases.append({'name':'text_%02d'%i,'input_hex':s.encode().hex(),'normalized_hex':norm.encode().hex(),'pieces_hex':[p.encode().hex() for p in pieces],'ids':ids,'decoded_hex':norm.encode().hex()})
     assert cases[1]['ids']==[9707,1879], 'Published Qwen Hello-world anchor mismatch'
     prompts=[]
-    for i,messages in enumerate([[('user','Hi')],[('system','Be precise.'),('user','İstanbul?')],[('user','One'),('assistant','Two'),('user','Three')],[('system','Be precise.'),('user','One'),('assistant','Two'),('user','Three')]]):
+    for i,messages in enumerate([[('user','Hi')],[('system','Be precise.'),('user','İstanbul?')],[('user','One'),('assistant','Two'),('user','Three')],[('system','Be precise.'),('user','One'),('assistant','Two'),('user','Three')], [('user','')], [('user','\n')], [('user','\r\n')], [('user',' \n')], [('user','\t')], [('user','\nİstanbul')], [('user','\u0327')], [('system','\n'),('user','\r\n')], [('user','One'),('assistant','\nTwo'),('user','\nThree')], [('user',' \r\n')]]):
         rendered=render(messages);ids=[];at=0
         # Independent segmentation of explicitly rendered structure into added-token literals.
         tokens=sorted(added,key=len,reverse=True)

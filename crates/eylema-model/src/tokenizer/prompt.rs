@@ -1,5 +1,6 @@
 use super::{
     PromptMessage, PromptRole, TokenizeError as E, admission::AdmittedData, bpe, budget::Counters,
+    unicode,
 };
 pub(super) fn encode(
     data: &AdmittedData,
@@ -45,8 +46,29 @@ pub(super) fn encode(
             PromptRole::User => "user\n",
             PromptRole::Assistant => "assistant\n",
         };
-        bpe::encode_text(data, role, c, &mut out, limit)?;
-        bpe::encode_text(data, m.content, c, &mut out, limit)?;
+        // LF terminates the fixed ASCII header, so NFC cannot compose across
+        // this boundary. Normalize bounded content, then BPE the whole span.
+        bpe::guard(data, m.content, c)?;
+        let normalized = unicode::normalize(m.content, c)?;
+        let mut body = Vec::new();
+        let copied = role
+            .len()
+            .checked_add(normalized.len())
+            .ok_or(E::SizeLimit)?;
+        c.charge(copied)?;
+        c.bytes(&mut body, role.as_bytes())?;
+        c.bytes(&mut body, normalized.as_bytes())?;
+        bpe::encode_normalized(
+            data,
+            std::str::from_utf8(&body).map_err(|_| E::InvalidInput)?,
+            c,
+            &mut out,
+            limit,
+        )?;
+        c.drop_vec(body);
+        let capacity = normalized.capacity();
+        drop(normalized);
+        c.release(capacity);
         bpe::emit(&mut out, 151645, c, limit)?;
         bpe::encode_text(data, "\n", c, &mut out, limit)?;
     }

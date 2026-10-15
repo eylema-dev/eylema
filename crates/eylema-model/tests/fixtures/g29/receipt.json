@@ -12,8 +12,10 @@
       "sha256": "d5d09f07b48c3086c508b30d1c9114bd1189145b74e982a265350c923acd8101"
     },
     "candidate-reference.json": {
-      "bytes": 15694,
-      "sha256": "01c8a64e4142175690a15282b6913f53508e9b9e9d66cd0ac8c84c7b6c577ff5"
+      "bytes": 21647,
+      "sha256": "25aeb28c02f5be76b5f2e9ee491e95ffa988835128d6d9eb226c2e477c8d0865"
     }
-  }
+  },
+  "prior_reference_sha256": "01c8a64e4142175690a15282b6913f53508e9b9e9d66cd0ac8c84c7b6c577ff5",
+  "reference_extension": "Owner-approved R5: original13text/fourprompt records unchanged; ten independently rendered contiguous-span prompt boundary cases added before production repair."
 }

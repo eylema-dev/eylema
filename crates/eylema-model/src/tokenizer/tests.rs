@@ -551,3 +551,57 @@ fn normalization_scratch_is_an_aggregate_bound() {
         Err(TokenizeError::SizeLimit)
     );
 }
+
+#[test]
+fn contiguous_prompt_header_content_merge() {
+    let text = std::str::from_utf8(TINY).unwrap();
+    let changed = text
+        .replacen("\"merges\":[", "\"merges\":[[\"Ċ\",\"Ċ\"],", 1)
+        .replacen("\"vocab\":{", "\"vocab\":{\"ĊĊ\":259,", 1);
+    let t = Tokenizer {
+        data: admission::test_load_reidentified(changed.as_bytes(), CONFIG, ab()).unwrap(),
+    };
+    let messages = [PromptMessage {
+        role: PromptRole::User,
+        content: "\n",
+    }];
+    let got = t.encode_prompt(&messages, tb()).unwrap();
+    assert_eq!(&got.ids()[..7], &[151644, 117, 115, 101, 114, 259, 151645]);
+    let mut budget = tb();
+    budget.max_tokens = got.ids().len();
+    assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), got.ids());
+    budget.max_tokens -= 1;
+    assert_eq!(
+        t.encode_prompt(&messages, budget).unwrap_err(),
+        TokenizeError::TokenLimit
+    );
+}
+
+#[test]
+fn prompt_content_limit_excludes_fixed_header() {
+    let t = synthetic();
+    let content = "a".repeat(8192);
+    assert_eq!(
+        t.encode_prompt(
+            &[PromptMessage {
+                role: PromptRole::User,
+                content: &content
+            }],
+            tb()
+        )
+        .unwrap_err(),
+        TokenizeError::TokenLimit
+    );
+    let content = "a".repeat(8193);
+    assert_eq!(
+        t.encode_prompt(
+            &[PromptMessage {
+                role: PromptRole::User,
+                content: &content
+            }],
+            tb()
+        )
+        .unwrap_err(),
+        TokenizeError::SizeLimit
+    );
+}

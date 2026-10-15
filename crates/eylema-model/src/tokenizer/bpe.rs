@@ -111,15 +111,27 @@ pub(super) fn encode_text(
     }
     guard(data, input, c)?;
     let normalized = unicode::normalize(input, c)?;
-    guard(data, &normalized, c)?;
-    let ranges = split::pieces(&normalized, c)?;
+    encode_normalized(data, &normalized, c, out, limit)?;
+    let n = normalized.capacity();
+    drop(normalized);
+    c.release(n);
+    Ok(())
+}
+// Only internal callers supply NFC text; typed prompts retain the public
+// per-content input limit while including the fixed ASCII header in one span.
+pub(super) fn encode_normalized(
+    data: &AdmittedData,
+    normalized: &str,
+    c: &mut Counters,
+    out: &mut Vec<u32>,
+    limit: usize,
+) -> Result<(), E> {
+    guard(data, normalized, c)?;
+    let ranges = split::pieces(normalized, c)?;
     for range in &ranges {
         encode_piece(data, &normalized[range.clone()], c, out, limit)?;
     }
     c.drop_vec(ranges);
-    let n = normalized.capacity();
-    drop(normalized);
-    c.release(n);
     Ok(())
 }
 pub(super) fn byte(ch: char, c: &mut Counters) -> Result<u8, E> {

@@ -32,6 +32,7 @@ fn candidate_vectors_on_native() {
         },
     )
     .unwrap();
+    prompt_boundary_vectors(&t);
     let got = t.encode_text("", tb()).unwrap();
     assert_eq!(got.ids(), &[], "text_00");
     assert_eq!(t.decode(got.ids(), tb()).unwrap(), "");
@@ -190,4 +191,266 @@ fn candidate_vectors_on_native() {
         .unwrap(),
         AssignmentStatus::UnsupportedLocal(_)
     ));
+}
+
+fn prompt_boundary_vectors(t: &Tokenizer) {
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: "",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 198, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_04");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: "\n",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 271, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_05");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n\n<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: "\r\n",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 198, 319, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_06");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n\r\n<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: " \n",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 26809, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_07");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n \n<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: "\t",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 198, 197, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_08");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n\t<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: "\nİstanbul",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 271, 47780, 45116, 151645, 198, 151644, 77091, 198, 151667, 271, 151668,
+            271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_09");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n\nİstanbul<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: "̧",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 198, 136, 100, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_10");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\ņ<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [
+            PromptMessage {
+                role: PromptRole::System,
+                content: "\n",
+            },
+            PromptMessage {
+                role: PromptRole::User,
+                content: "\r\n",
+            },
+        ];
+        let expected: &[u32] = &[
+            151644, 8948, 271, 151645, 198, 151644, 872, 198, 319, 151645, 198, 151644, 77091, 198,
+            151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_11");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>system\n\n<|im_end|>\n<|im_start|>user\n\r\n<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [
+            PromptMessage {
+                role: PromptRole::User,
+                content: "One",
+            },
+            PromptMessage {
+                role: PromptRole::Assistant,
+                content: "\nTwo",
+            },
+            PromptMessage {
+                role: PromptRole::User,
+                content: "\nThree",
+            },
+        ];
+        let expected: &[u32] = &[
+            151644, 872, 198, 3966, 151645, 198, 151644, 77091, 271, 11613, 151645, 198, 151644,
+            872, 271, 19641, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_12");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\nOne<|im_end|>\n<|im_start|>assistant\n\nTwo<|im_end|>\n<|im_start|>user\n\nThree<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
+    {
+        let messages = [PromptMessage {
+            role: PromptRole::User,
+            content: " \r\n",
+        }];
+        let expected: &[u32] = &[
+            151644, 872, 198, 2529, 151645, 198, 151644, 77091, 198, 151667, 271, 151668, 271,
+        ];
+        let mut budget = tb();
+        budget.max_tokens = 4096;
+        let got = t.encode_prompt(&messages, budget).unwrap();
+        assert_eq!(got.ids(), expected, "prompt_13");
+        assert_eq!(
+            t.decode(got.ids(), tb()).unwrap(),
+            "<|im_start|>user\n \r\n<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        );
+        budget.max_tokens = expected.len();
+        assert_eq!(t.encode_prompt(&messages, budget).unwrap().ids(), expected);
+        budget.max_tokens -= 1;
+        assert_eq!(
+            t.encode_prompt(&messages, budget).unwrap_err(),
+            eylema_model::tokenizer::TokenizeError::TokenLimit
+        );
+    }
 }
