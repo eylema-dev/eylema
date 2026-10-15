@@ -605,3 +605,28 @@ fn prompt_content_limit_excludes_fixed_header() {
         TokenizeError::SizeLimit
     );
 }
+
+#[test]
+fn decision_private_positive_parser_profile() {
+    let control =
+        crate::cpu::CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(30))
+            .unwrap();
+    let mut e = admission::test_expected();
+    e.decision = true;
+    e.control = Some(control.clone());
+    let m = eylema_contracts::model_contract::ModelManifest::from_bytes(include_bytes!(
+        "../../tests/fixtures/g57/cpu-profile.v1.eyl"
+    ))
+    .unwrap();
+    let data = admission::admit(
+        &mut Cursor::new(TINY),
+        &mut Cursor::new(CONFIG),
+        &m,
+        ab(),
+        e,
+    )
+    .unwrap();
+    assert_eq!(data.context_limit, 4096);
+    assert_eq!(data.manifest_sha256, admission::DECISION_SHA);
+    assert!(control.observed_work() > 0);
+}

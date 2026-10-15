@@ -33,14 +33,30 @@ pub(super) struct ExpectedProfile {
     pub config_size: usize,
     pub tokenizer_sha256: [u8; 32],
     pub config_sha256: [u8; 32],
+    pub decision: bool,
+    pub control: Option<crate::cpu::CpuControl>,
 }
+pub(super) const DECISION_SHA: [u8; 32] =
+    hex(b"c47cc3f8008e4735ab43acfde124b884cab99f9206913cbecfc79ab06e2d0cdc");
 impl ExpectedProfile {
+    pub fn decision(control: &crate::cpu::CpuControl) -> Self {
+        Self {
+            tokenizer_size: 11422654,
+            config_size: 9706,
+            tokenizer_sha256: TOKEN_SHA,
+            config_sha256: hex(b"253153d0738ceb4c668d2eff957714dd2bea0b56de772a9fdccd96cbf517e6a0"),
+            decision: true,
+            control: Some(control.clone()),
+        }
+    }
     pub fn qwen() -> Self {
         Self {
             tokenizer_size: 11422654,
             config_size: 9732,
             tokenizer_sha256: TOKEN_SHA,
             config_sha256: CONFIG_SHA,
+            decision: false,
+            control: None,
         }
     }
 }
@@ -69,6 +85,7 @@ pub(super) struct AdmittedData {
     pub config_sha256: [u8; 32],
     pub resident: usize,
     pub context_limit: usize,
+    pub manifest_sha256: [u8; 32],
 }
 impl std::fmt::Debug for AdmittedData {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -230,6 +247,10 @@ pub(super) fn admit<T: Read, C: Read>(
     e: ExpectedProfile,
 ) -> Result<AdmittedData, E> {
     let mut c = Counters::admission(budget)?;
+    c.control = e.control;
+    if let Some(control) = &c.control {
+        control.check().map_err(super::budget::control_error)?;
+    }
     if e.tokenizer_size == 0
         || e.tokenizer_size > 16777216
         || e.config_size == 0
@@ -262,7 +283,12 @@ pub(super) fn admit<T: Read, C: Read>(
     }
     c.hold(65536 + 32768)?;
     let m = manifest.to_bytes().map_err(|_| E::InvalidProfile)?;
-    if digest(&m)? != MANIFEST_SHA {
+    let expected_manifest = if e.decision {
+        DECISION_SHA
+    } else {
+        MANIFEST_SHA
+    };
+    if digest(&m)? != expected_manifest {
         return Err(E::UnsupportedProfile);
     }
     drop(m);
@@ -307,7 +333,7 @@ pub(super) fn admit<T: Read, C: Read>(
     let vc = vf.capacity() * std::mem::size_of::<(String, json::Span)>();
     for (name, r) in vf {
         let id = json::uint(&vd[r])?;
-        if id >= 151936 {
+        if id >= if e.decision { 151669 } else { 151936 } {
             return Err(E::InvalidVocabulary);
         }
         vocab.push(Token { text: name, id });
@@ -471,11 +497,11 @@ pub(super) fn admit<T: Read, C: Read>(
     c.work = 0;
     let rawcfg = read(cfg, e.config_size, e.config_sha256, &mut c)?;
     let f = Parser::new(&rawcfg, &mut c, 8192)?.object()?;
-    if f.len() != 14 {
+    if (!e.decision && f.len() != 14) || f.len() > 32 {
         return Err(E::InvalidConfig);
     }
     let template = text(json::get(&rawcfg, &f, "chat_template")?, &mut c, 8192)?;
-    if digest(template.as_bytes())? != TEMPLATE_SHA {
+    if !e.decision && digest(template.as_bytes())? != TEMPLATE_SHA {
         return Err(E::InvalidConfig);
     }
     let size = template.capacity();
@@ -488,7 +514,11 @@ pub(super) fn admit<T: Read, C: Read>(
         .fields()
         .configuration
         .context_limit
-        .checked_sub(manifest.fields().configuration.max_new_tokens)
+        .checked_sub(if e.decision {
+            0
+        } else {
+            manifest.fields().configuration.max_new_tokens
+        })
         .ok_or(E::InvalidProfile)? as usize;
     Ok(AdmittedData {
         vocab,
@@ -500,6 +530,7 @@ pub(super) fn admit<T: Read, C: Read>(
         config_sha256: e.config_sha256,
         resident: c.resident,
         context_limit: context.min(4096),
+        manifest_sha256: expected_manifest,
     })
 }
 
@@ -539,6 +570,8 @@ pub(super) fn test_expected() -> ExpectedProfile {
         config_size: 9732,
         tokenizer_sha256: hex(b"248499cd3f9f391e68fb812053ba81c62a69e1cd8d244671df71ee7a37ecfb37"),
         config_sha256: CONFIG_SHA,
+        decision: false,
+        control: None,
     }
 }
 #[cfg(test)]

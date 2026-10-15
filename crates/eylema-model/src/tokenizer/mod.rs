@@ -40,7 +40,7 @@ impl Tokenizer {
         })
     }
     pub fn manifest_sha256(&self) -> [u8; 32] {
-        admission::MANIFEST_SHA
+        self.data.manifest_sha256
     }
     pub fn tokenizer_sha256(&self) -> [u8; 32] {
         self.data.tokenizer_sha256
@@ -62,6 +62,7 @@ pub struct PromptMessage<'a> {
 }
 pub struct EncodedTokens {
     ids: Vec<u32>,
+    manifest_sha256: [u8; 32],
 }
 impl std::fmt::Debug for EncodedTokens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -75,7 +76,7 @@ impl EncodedTokens {
         &self.ids
     }
     pub fn manifest_sha256(&self) -> [u8; 32] {
-        admission::MANIFEST_SHA
+        self.manifest_sha256
     }
 }
 impl Tokenizer {
@@ -90,7 +91,10 @@ impl Tokenizer {
         let mut c = budget::Counters::text(budget, self.data.resident)?;
         let mut ids = Vec::new();
         bpe::encode_text(&self.data, text, &mut c, &mut ids, budget.max_tokens)?;
-        Ok(EncodedTokens { ids })
+        Ok(EncodedTokens {
+            ids,
+            manifest_sha256: self.data.manifest_sha256,
+        })
     }
     pub fn encode_prompt(
         &self,
@@ -104,7 +108,10 @@ impl Tokenizer {
             &mut c,
             budget.max_tokens.min(self.data.context_limit),
         )?;
-        Ok(EncodedTokens { ids })
+        Ok(EncodedTokens {
+            ids,
+            manifest_sha256: self.data.manifest_sha256,
+        })
     }
     pub fn decode(&self, ids: &[u32], budget: TextBudget) -> Result<String, TokenizeError> {
         let mut c = budget::Counters::text(budget, self.data.resident)?;
@@ -137,7 +144,10 @@ impl Tokenizer {
             budget.max_tokens.min(self.data.context_limit),
         )?;
         control.check().map_err(budget::control_error)?;
-        Ok(EncodedTokens { ids })
+        Ok(EncodedTokens {
+            ids,
+            manifest_sha256: self.data.manifest_sha256,
+        })
     }
     pub fn decode_controlled(
         &self,
@@ -168,5 +178,54 @@ impl Tokenizer {
             )
             .unwrap(),
         }
+    }
+}
+
+/// Separately admitted reranker frontend; no inference or authority.
+#[derive(Debug)]
+pub struct DecisionTokenizer {
+    pub(crate) inner: Tokenizer,
+}
+impl DecisionTokenizer {
+    pub fn load<T: std::io::Read, C: std::io::Read>(
+        tokenizer: &mut T,
+        config: &mut C,
+        manifest: &eylema_contracts::model_contract::ModelManifest,
+        budget: AdmissionBudget,
+        control: &crate::cpu::CpuControl,
+    ) -> Result<Self, TokenizeError> {
+        let inner = Tokenizer {
+            data: admission::admit(
+                tokenizer,
+                config,
+                manifest,
+                budget,
+                admission::ExpectedProfile::decision(control),
+            )?,
+        };
+        for (id, want) in [(9693, "yes"), (2152, "no")] {
+            let text = inner.decode_controlled(
+                &[id],
+                TextBudget {
+                    max_resident_bytes: 134217728,
+                    max_tokens: 1,
+                    max_work: 2000000,
+                },
+                control,
+            )?;
+            if text != want {
+                return Err(TokenizeError::InvalidVocabulary);
+            }
+        }
+        Ok(Self { inner })
+    }
+    pub fn manifest_sha256(&self) -> [u8; 32] {
+        self.inner.manifest_sha256()
+    }
+    pub fn tokenizer_sha256(&self) -> [u8; 32] {
+        self.inner.tokenizer_sha256()
+    }
+    pub fn config_sha256(&self) -> [u8; 32] {
+        self.inner.config_sha256()
     }
 }
