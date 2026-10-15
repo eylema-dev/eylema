@@ -239,8 +239,8 @@
     {
       "en": "docs/en/cpu-model.md",
       "tr": "docs/tr/cpu-model.md",
-      "en_sha256": "f7ca6e80cc7fd2cd3a1356653279e37848c2f37fd6bd49ab03ebb86147aa0ff4",
-      "tr_sha256": "db48b3eae5457b119c7045cc3a7ed8bd7ae6dd0d375ce4656ac14ad63c0118c9"
+      "en_sha256": "6e80cc05a2be2b8d9088a3278ce2f3215bd53c57bc133eb94fa5cd7da000b35e",
+      "tr_sha256": "cdbe0d32ef2c51f0c60e4020e919c4fb551bf8e2a636b620a40732ab72554214"
     }
   ],
   "documents": []

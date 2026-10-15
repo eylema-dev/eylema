@@ -1,6 +1,6 @@
 # Sınırlı kendi CPU model yürütmemiz
 
-[English](../en/cpu-model.md). Özgün G30 sınırlı önceden eğitilmiş model koşusu aşağıdaki cihazda sayısal/üretim/durdurma kontrollerini geçti. Ayrı inceleme sonrasında skaler iş sayımının eksik olduğu bulundu; düzeltilmiş kaynağın gerçek kabulü, son inceleme, güncel CI ve koordineli main kabulü bekliyor.
+[English](../en/cpu-model.md). Ayrı incelemeli skaler iş sayımı düzeltmesinden sonra düzeltilmiş kaynakta G30 sınırlı önceden eğitilmiş model kabulü aşağıdaki cihazda geçti. Son kanıt incelemesi, güncel teslim CI’ı ve koordineli main kabulü bekliyor.
 
 `eylema-model::cpu` API'si yalnız ayrı kimlikli Qwen CPU manifestini kabul eder. Tam311tensor BF16 düzenini, değişmez G28 snapshot'ını ve özgün G29 tokenizer ebeveynini bağlar. Saklanan her skaler sonlu olmalıdır; fiziksel `lm_head.weight` embedding baytlarıyla eşit olmalıdır. Model tek snapshot ve tokenizer'ı ödünç alır; oturumlar yalnız sınırlı görünüm metaverisini kopyalar ve yeni KV/çalışma alanı tutar. G23 operatörleri ve genel unsupported-local ataması değişmez.
 
@@ -34,3 +34,20 @@ Tek bağımsız F64 işi28katman durumunu ve151936logiti24,15saniyede hesapladı
 Dört gerçek çıktı özeti birbirinden farklı; türler ve makbuzlar rollerle eşleşti. Kısa açık girdiler uzman veya Türkçe görev kalitesi değil, bağlantı/smoke davranışı kanıtıdır. Altıncı iş çalışma alanı hazırlığından sonra sayısal ilerleme gözledi, iptal etti, teklif döndürmedi ve cache yeniden kullanımını reddetti. Kabul işi3317825536iş birimi tüketti; kabul dahil altı işin toplamı222263133222ile320milyarın altında kaldı. Her iş80milyarın altında kaldı. Muhafazakâr tepe mantıksal içerik1658000646bayttı. İş başına örneklenen native süreç RSS1209253888–1538179072bayt aralığındaydı; F64 gözetmeni eşlenmiş sayfalar dahil1214775296bayt örneklenmiş tepe RSS gözledi. Örnekler genel sığma/throughput veya OS yalıtımı garantisi değildir.
 
 Dört geçici gerçek-kaynak mutasyonu—iç içe GQA gruplama, yanlış yarım-dönüş işareti, eski önek anahtarları ve yok sayılan iptal—derlendi ve ilgili donmuş davranış testinde başarısız oldu. Her geri yükleme on iki CPU testini geçti; özgün kaynak ağacı tam korundu. Artifact gerektiren sıradan CI atlamaları açık kalır; yukarıdaki gerçek kabul ayrı yetkilendirilmiş yerel koşudur. Özel makbuzlar, loglar, model baytları ve referans dizileri Git dışında tutulur. GPU, eğitim ve daha büyük context yürütümü not_run kalır.
+
+## Düzeltilmiş kaynağın gerçek kabulü
+
+Bakımcı, skaler iş sayımı düzeltmesinden sonra altı ek yerel Rust işini açıkça onayladı; toplam12Rust aday işi, tek artifact indirme ve tek F64 referans işi kullanıldı. Kaynak`93bed57af6cbc8a33e619475e1bcedc88a06a0bd`, aynı altı işlik kabul programını bir kez çalıştırdı; yerelde hash’i yeniden doğrulanan artifact/tokenizer ve değişmemiş saklı F64 referans kullanıldı. Yeni referans hesabı, indirme veya provider/eğitim çağrısı yapılmadı. Geçmiş makbuzlar/loglar bayt düzeyinde korundu. Gözetmen kendi süreç grubunu,1200saniye son süreyi ve1MiB log sınırını kullandı; sonlandırma gerekmedi.
+
+180608değer başına hidden/logit karşılaştırmasının tamamı özgün donmuş sınırı geçti; en büyük hatalar ve greedy21806yukarıdakiyle aynıydı. Dört rol çıktısının özeti geçmiş koşuyla aynı, birbirinden farklı; token/bayt sayıları da aynı kaldı. Düzeltilmiş iş makbuzları:
+
+| Aday | İş birimi |
+|---|---:|
+| Sayısal |1795363620|
+| Reasoning |50248076316|
+| Planning |46653333550|
+| Specialist |53843758391|
+| Critic |66435991686|
+| Etkili durdurma |3950042|
+
+Kabul hazırlığı3317825536birim olarak kaldı. Düzeltilmiş toplam222298299141ile320milyarın; her iş80milyarın altında kaldı. Etkili durdurma sayısal ilerlemeyi gözledi, teklif döndürmedi ve cache yeniden kullanımını reddetti. Native kabul programı60,69saniye (gözetilen süreç61,24saniye) sürdü; örneklenmiş native RSS1206648832–1538965504bayt ile muhafazakâr mantıksal tepe1658000646bayt ayrı ölçümlerdir. Kullanılabilir bellek ön denetimi boş/inaktif/spekülatif OS sayfalarından4031856640bayt tahmin etti; bu kesin rezervasyon veya genel sığma garantisi değildir. Kanıt yalnız sabit küçük CPU sayısal/üretim/kontrol yoludur; model yararlılığı, kalibrasyon, büyük context, başka mimariler, GPU ve eğitim kanıtlanmış değildir.

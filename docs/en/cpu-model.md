@@ -1,6 +1,6 @@
 # Bounded owned CPU model execution
 
-[Turkish](../tr/cpu-model.md). The original G30 bounded pretrained-model run passed its numerical/generation/stop checks on the named host below. Independent review then found incomplete scalar-work accounting; corrected-source actual acceptance, final review, current CI and coordinated main acceptance remain pending.
+[Turkish](../tr/cpu-model.md). Corrected-source G30 bounded pretrained-model acceptance passed on the named host below after the independently reviewed scalar-work repair. Final evidence review, current delivery CI and coordinated main acceptance remain pending.
 
 The `eylema-model::cpu` API admits only the separately identified Qwen CPU manifest. It binds the complete 311-tensor BF16 layout, immutable G28 snapshot and original G29 tokenizer parent. Every stored scalar must be finite; the physically stored `lm_head.weight` must equal the embedding bytes. The model borrows one snapshot and tokenizer; sessions copy only bounded view metadata and own fresh KV/workspace. G23 operators and generic unsupported-local assignment are unchanged.
 
@@ -34,3 +34,20 @@ One independent F64 job computed28layer states and151936logits in24.15seconds. T
 All four actual output digests differ and variants/receipts match their roles. These short public-input outputs establish plumbing/smoke behavior, not expert or Turkish task quality. The sixth job observed numerical work after workspace initialization, cancelled, returned no proposal and rejected cache reuse. Admission consumed3317825536work units; the full six-job total including admission was222263133222, below320billion. Each job stayed below80billion. Conservative peak logical content was1658000646bytes. Per-job sampled native process RSS ranged1209253888–1538179072bytes; F64 supervisor sampled peak process RSS1214775296bytes including mapped pages. Samples are not universal fit/throughput or OS isolation guarantees.
 
 Four temporary actual-source mutants—interleaved GQA grouping, wrong half-rotation sign, stale prefix keys and ignored cancellation—each compiled and failed the frozen relevant behavioral test. Every restoration passed the twelve-CPU-test suite, and the original source tree was restored exactly. Asset-dependent ordinary CI skips remain explicit; the actual acceptance above was a separate authorized local run. Private receipts, logs, model bytes and numerical reference arrays remain outside Git. GPU, training and larger context execution remain not_run.
+
+## Corrected-source actual acceptance
+
+The maintainer explicitly authorized six additional local Rust jobs after the scalar-work repair; the lifetime total is12Rust candidate jobs, one artifact download and one F64 reference. Source`93bed57af6cbc8a33e619475e1bcedc88a06a0bd` ran the same six-job harness once, reusing the locally rehashed artifact/tokenizer and unchanged stored F64 reference. No new reference computation, download or provider/training call occurred. Historical receipts/logs were preserved byte-for-byte. The supervisor used its own process group, a1200second deadline and1MiB log cap; no termination occurred.
+
+All180608per-value hidden/logit comparisons passed the original frozen bound, with identical maximum errors and greedy21806above. All four role output digests are unchanged from the historical run, remain distinct and have the same token/byte counts. Corrected work receipts are:
+
+| Candidate | Work units |
+|---|---:|
+| Numerical |1795363620|
+| Reasoning |50248076316|
+| Planning |46653333550|
+| Specialist |53843758391|
+| Critic |66435991686|
+| Effective stop |3950042|
+
+Admission remains3317825536units. Corrected aggregate work222298299141is below320billion, and every job stays below80billion. Effective stop observed numerical progress, returned no proposal and poisoned cache reuse. Native harness elapsed60.69seconds (supervised process61.24seconds); sampled native RSS1206648832–1538965504bytes and conservative logical peak1658000646bytes are separate measurements. Available-memory preflight estimated4031856640bytes from free/inactive/speculative OS pages, not a hard reservation or universal fit guarantee. This proves the fixed small CPU numerical/generation/control path only; model usefulness, calibration, larger contexts, other architectures, GPU and training remain unproved.
