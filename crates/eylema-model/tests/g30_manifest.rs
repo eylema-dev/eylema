@@ -9,5 +9,10 @@ fn native_cpu_profile_roundtrips_exactly() {
     assert_eq!(fields.revision.get(), 2);
     assert_eq!(fields.profiles.len(), 4);
     assert_eq!(manifest.to_bytes().expect("canonical encode"), bytes);
-    assert!(fields.profiles.iter().all(|profile| profile.action_semantics.as_str() == "proposal-only.v1"));
+    assert!(
+        fields
+            .profiles
+            .iter()
+            .all(|profile| profile.action_semantics.as_str() == "proposal-only.v1")
+    );
 }
