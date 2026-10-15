@@ -45,10 +45,12 @@ pub(crate) fn norm(input: &[f32], w: Tensor<'_>, out: &mut [f32], m: &mut Meter)
             sum += x * x;
         }
     }
-    m.charge(3)?;
+    // Division, epsilon addition, square root and finite predicate.
+    m.charge(4)?;
     let scale = finite((sum / input.len() as f32 + 1e-6).sqrt())?;
     for (block, (xs, ys)) in input.chunks(1024).zip(out.chunks_mut(1024)).enumerate() {
-        m.charge((xs.len() * 3) as u64)?;
+        // Division, weight read conversion, multiplication and finite predicate.
+        m.charge((xs.len() * 4) as u64)?;
         for (j, (x, y)) in xs.iter().zip(ys).enumerate() {
             *y = finite(x / scale * w.at(block * 1024 + j))?;
         }
@@ -59,7 +61,8 @@ pub(crate) fn norm_head(x: &mut [f32], w: Tensor<'_>, m: &mut Meter) -> Result<(
     if x.is_empty() || x.len() != w.len() || x.len() > 128 {
         return Err(E::InvalidLayout);
     }
-    m.charge((x.len() * 5 + 3) as u64)?;
+    // Two reduction operations, four output operations and four scale operations.
+    m.charge((x.len() * 6 + 4) as u64)?;
     let mut sum = 0.;
     for v in x.iter() {
         sum += v * v;
@@ -91,7 +94,7 @@ pub(crate) fn add(a: &mut [f32], b: &[f32], m: &mut Meter) -> Result<(), E> {
         return Err(E::InvalidLayout);
     }
     for (xs, ys) in a.chunks_mut(1024).zip(b.chunks(1024)) {
-        m.charge(xs.len() as u64)?;
+        m.charge((xs.len() * 2) as u64)?; // Addition and finite predicate.
         for (x, y) in xs.iter_mut().zip(ys) {
             *x = finite(*x + y)?;
         }

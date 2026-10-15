@@ -130,6 +130,9 @@ impl CpuSession<'_, '_> {
         self.engine.prefill_ids(tokens.ids())?;
         self.engine.output()
     }
+    /// Append numerical input under context/work/deadline bounds. This diagnostic
+    /// API does not sample or return generated text; `generate` enforces the
+    /// separate `max_new_tokens` proposal limit.
     pub fn decode(&mut self, token: u32) -> Result<CpuLogits, CpuError> {
         self.engine.decode_id(token)?;
         self.engine.output()

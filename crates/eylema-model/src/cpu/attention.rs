@@ -20,14 +20,16 @@ pub(crate) fn apply(d: Dimensions, pos: usize, a: Attention<'_>, m: &mut Meter) 
     for head in 0..d.qh {
         let kv_head = head / (d.qh / d.kh);
         for t in 0..count {
-            m.charge((d.w * 2 + 1) as u64)?;
+            // Dot products/additions, square root, division and finite predicate.
+            m.charge((d.w * 2 + 3) as u64)?;
             let mut dot = 0.;
             for j in 0..d.w {
                 dot += a.q[head * d.w + j] * a.keys[t * kw + kv_head * d.w + j];
             }
             a.scores[t] = finite(dot / (d.w as f32).sqrt())?;
         }
-        m.charge((count * 4) as u64)?;
+        // Per position: max, subtract, exp, finite, sum, division; total finite.
+        m.charge((count * 6 + 1) as u64)?;
         let maximum = a.scores[..count]
             .iter()
             .copied()
@@ -42,7 +44,7 @@ pub(crate) fn apply(d: Dimensions, pos: usize, a: Attention<'_>, m: &mut Meter) 
             *v /= total;
         }
         for j in 0..d.w {
-            m.charge((count * 2) as u64)?;
+            m.charge((count * 2 + 1) as u64)?; // Products/additions and output finite.
             let mut sum = 0.;
             for t in 0..count {
                 sum += a.scores[t] * a.values[t * kw + kv_head * d.w + j];

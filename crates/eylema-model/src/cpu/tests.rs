@@ -195,6 +195,121 @@ fn global_budget_boundaries_and_cancellation() {
     assert_eq!(m.zeros(1), Err(CpuError::ResidentLimit));
     assert!(CpuControl::new(Instant::now() - Duration::from_secs(1)).is_err());
 }
+fn kernel_meter(work: u64) -> budget::Meter {
+    budget::Meter::new(
+        CpuBudget {
+            max_work: work,
+            ..budget()
+        },
+        control(),
+        0,
+    )
+    .unwrap()
+}
+fn kernel_dimensions() -> profile::Dimensions {
+    profile::Dimensions {
+        h: 3,
+        inter: 7,
+        qh: 4,
+        kh: 2,
+        w: 4,
+        layers: 2,
+        vocab: 7,
+    }
+}
+#[test]
+fn norm_work_exact_and_one_below() {
+    let d = kernel_dimensions();
+    let storage = synthetic(d);
+    let w = weights::BoundWeights::synthetic(d, &storage).unwrap();
+    // 2n reduction + 4 scale (divide/add/sqrt/finite) + 4n output
+    // (divide/multiply/read conversion/finite), including synthetic read credits.
+    let required = 22;
+    let mut out = [-99.; 3];
+    let mut low = kernel_meter(required - 1);
+    assert_eq!(
+        ops::norm(&[1., 2., 3.], w.norm, &mut out, &mut low),
+        Err(CpuError::WorkLimit)
+    );
+    assert_eq!(out, [-99.; 3]);
+    let mut exact = kernel_meter(required);
+    ops::norm(&[1., 2., 3.], w.norm, &mut out, &mut exact).unwrap();
+    assert_eq!(exact.control.observed_work(), required);
+    assert!(out.iter().all(|x| x.is_finite()));
+}
+#[test]
+fn head_norm_work_exact_and_one_below() {
+    let d = kernel_dimensions();
+    let storage = synthetic(d);
+    let w = weights::BoundWeights::synthetic(d, &storage)
+        .unwrap()
+        .layers[0]
+        .unwrap();
+    // Same 6n + 4 complete scalar metric, n=4.
+    let required = 28;
+    let input = [1., 2., 3., 4.];
+    let mut out = input;
+    let mut low = kernel_meter(required - 1);
+    assert_eq!(
+        ops::norm_head(&mut out, w.qnorm, &mut low),
+        Err(CpuError::WorkLimit)
+    );
+    assert_eq!(out, input);
+    assert_eq!(low.control.observed_work(), 0);
+    let mut exact = kernel_meter(required);
+    ops::norm_head(&mut out, w.qnorm, &mut exact).unwrap();
+    assert_eq!(exact.control.observed_work(), required);
+    assert!(out.iter().all(|x| x.is_finite()));
+}
+#[test]
+fn residual_work_exact_and_one_below() {
+    // Three additions and three finite predicates; charge before the block.
+    let input = [1., 2., 3.];
+    let mut out = input;
+    let mut low = kernel_meter(5);
+    assert_eq!(
+        ops::add(&mut out, &[1.; 3], &mut low),
+        Err(CpuError::WorkLimit)
+    );
+    assert_eq!(out, input);
+    assert_eq!(low.control.observed_work(), 0);
+    let mut exact = kernel_meter(6);
+    ops::add(&mut out, &[1.; 3], &mut exact).unwrap();
+    assert_eq!(out, [2., 3., 4.]);
+    assert_eq!(exact.control.observed_work(), 6);
+}
+#[test]
+fn attention_work_exact_and_one_below() {
+    let d = kernel_dimensions();
+    // Four heads, prefix2, width4: per head 2*(2*4+3) score units,
+    // 6*2+1 softmax units and 4*(2*2+1) weighted-output units = 55.
+    let required = 220;
+    let run = |m: &mut budget::Meter| {
+        let mut scores = [0.; 2];
+        let mut out = [0.; 16];
+        let result = attention::apply(
+            d,
+            1,
+            attention::Attention {
+                q: &[1.; 16],
+                keys: &[1.; 16],
+                values: &[1.; 16],
+                scores: &mut scores,
+                out: &mut out,
+            },
+            m,
+        );
+        (result, out)
+    };
+    let mut low = kernel_meter(required - 1);
+    assert_eq!(run(&mut low).0, Err(CpuError::WorkLimit));
+    assert!(low.control.observed_work() < required);
+    let mut exact = kernel_meter(required);
+    let (result, out) = run(&mut exact);
+    result.unwrap();
+    assert_eq!(out, [1.; 16]);
+    assert_eq!(exact.control.observed_work(), required);
+}
 #[test]
 fn complete_layout_has_exact_q_width_and_tied_head() {
     let manifest = eylema_contracts::model_contract::ModelManifest::from_bytes(include_bytes!(
