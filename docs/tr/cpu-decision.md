@@ -10,7 +10,7 @@ Geliştirme amaçlı F64 oracle, bağımsız olarak Rust ile yazıldı ve sabit 
 
 ## Native sonuçlar
 
-Tam bir yetkili kabul komutu çevrimdışı, kilitli ve release kipinde çalıştı. Bir yok sayılmış gerçek-varlık testi 487,46 saniyede geçti. Bağlam sınırı 128 olan dört sabit token satırı karşılaştırıldı. Katman gizil durumundaki en yüksek mutlak fark `0,0005589494`; yes/no head logitlerindeki en yüksek mutlak fark `0,0000113805` idi. İkisi de donmuş değer başına `0,001 + 0,0002 * abs(reference)` sınırının içindeydi.
+İlk yetkili kabul denemesi, aday işlerine başlamadan 600 saniyelik sınırı aştı. Kullanıcı bir sınırlı devam çağrısını onayladıktan sonra bu çevrimdışı, kilitli release komutu çalıştı ve yok sayılmış gerçek-varlık testini 487,46 saniyede geçti. Bağlam sınırı 128 olan dört sabit token satırı karşılaştırıldı. Katman gizil durumundaki en yüksek mutlak fark `0,0005589494`; yes/no head logitlerindeki en yüksek mutlak fark `0,0000113805` idi. İkisi de donmuş değer başına `0,001 + 0,0002 * abs(reference)` sınırının içindeydi.
 
 İki sorulu/dört çiftli batch, sabit İngilizce ve Türkçe smoke sorularında önceden belirlenen pozitif seçeneği döndürdü. Soru/seçenek sırası ters çevrildiğinde eşleşen çift sonuçları değişmedi. İptal işi hesaplama sırasında durdu, tamamlanmış batch sonucu vermedi ve kısmi öneri yayımlamadı. Tam bağlam sınırı başarılı; bir alt sınırdaki preflight ise ileri hesaplamadan reddedildi. Bozuk girdi ve sınırlı kaynak negatif kontrolleri geçti.
 

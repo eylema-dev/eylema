@@ -10,7 +10,7 @@ The development-only F64 oracle was independently implemented in Rust and checke
 
 ## Native results
 
-Exactly one authorized acceptance command ran offline, locked and in release mode. It passed one ignored real-asset test in 487.46 seconds. Four frozen token rows were compared at context limit 128. Maximum per-layer hidden-state absolute difference was `0.0005589494`; maximum yes/no head-logit absolute difference was `0.0000113805`. Both were within the frozen per-value bound `0.001 + 0.0002 * abs(reference)`.
+The first authorized acceptance attempt exceeded its 600-second cap before candidate jobs. After the user authorized one bounded follow-up invocation, that offline, locked release command passed one ignored real-asset test in 487.46 seconds. Four frozen token rows were compared at context limit 128. Maximum per-layer hidden-state absolute difference was `0.0005589494`; maximum yes/no head-logit absolute difference was `0.0000113805`. Both were within the frozen per-value bound `0.001 + 0.0002 * abs(reference)`.
 
 The two-question/four-pair batch returned the predeclared positive option for each fixed English and Turkish smoke question. Reversed question/option order reproduced the matching pair results. The cancellation job stopped during computation, reported no completed batch result and did not publish a partial proposal. The exact-context boundary succeeded; the one-below preflight rejected before forward work. Malformed and bounded-resource negative cases passed.
 
