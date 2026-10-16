@@ -18,7 +18,7 @@ pub fn unit_norm(v: &[f32], d: usize, c: &mut Control) -> R<f64> {
     }
     Ok(n)
 }
-pub fn vector_micro(a: &[f32], b: &[f32], d: usize, c: &mut Control) -> R<i64> {
+fn raw_dot(a: &[f32], b: &[f32], d: usize, c: &mut Control) -> R<f64> {
     unit_norm(a, d, c)?;
     unit_norm(b, d, c)?;
     c.charge(d * 2)?;
@@ -30,6 +30,10 @@ pub fn vector_micro(a: &[f32], b: &[f32], d: usize, c: &mut Control) -> R<i64> {
     if !sum.is_finite() || sum.abs() > 1.00003 {
         return Err(E::InvalidVector);
     }
+    Ok(sum)
+}
+pub fn vector_micro(a: &[f32], b: &[f32], d: usize, c: &mut Control) -> R<i64> {
+    let sum = raw_dot(a, b, d, c)?;
     Ok((sum.clamp(-1., 1.) * 1_000_000.).round_ties_even() as i64)
 }
 fn ratio(n: i128, d: i128) -> R<i64> {
@@ -69,4 +73,43 @@ pub fn hybrid_micro(v: i64, l: i64, w: u32) -> R<i64> {
         i128::from(w) * i128::from(v) + (1_000_000 - i128::from(w)) * i128::from(l),
         1_000_000,
     )
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{CancelToken, RetrievalBudget};
+    use std::time::{Duration, Instant};
+    // Independent literal F32 rational references from the approved plan.
+    // Rounding a wrong dot to the same micro score must not hide scalar error.
+    #[test]
+    fn raw_dot_matches_frozen_scalar_references() {
+        for d in [2, 1024, 4096] {
+            for (a, b, want) in [
+                (0x3f800000, 0, 1.),
+                (0, 0x3f800000, 0.),
+                (0xbf800000, 0, -1.),
+                (0x3f19999a, 0x3f4ccccd, 0.6000000238418579),
+                (0x3c000000, 0x3f7ffe00, 0.0078125),
+                (0x3cc00000, 0x3f7fedff, 0.0234375),
+                (0xbc000000, 0x3f7ffe00, -0.0078125),
+                (0xbcc00000, 0x3f7fedff, -0.0234375),
+            ] {
+                let mut q = vec![0.; d];
+                q[0] = 1.;
+                let mut v = vec![0.; d];
+                v[0] = f32::from_bits(a);
+                v[1] = f32::from_bits(b);
+                let mut c = Control::new(
+                    RetrievalBudget {
+                        max_work: 100_000_000,
+                        max_live_bytes: 64 * 1024 * 1024,
+                        deadline: Instant::now() + Duration::from_secs(30),
+                    },
+                    CancelToken::new(),
+                )
+                .unwrap();
+                assert!((raw_dot(&q, &v, d, &mut c).unwrap() - want).abs() <= 2e-12);
+            }
+        }
+    }
 }

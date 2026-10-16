@@ -20,6 +20,11 @@ pub struct Mem(
     pub Rc<Cell<bool>>,
     pub Option<Rc<Cell<u64>>>,
 );
+impl Default for Mem {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Mem {
     pub fn new() -> Self {
         Self(
@@ -52,10 +57,10 @@ impl Storage for Mem {
         Ok(self.0.borrow().get_ref().len() as u64)
     }
     fn synchronize(&mut self) -> io::Result<()> {
-        if self.1.replace(false) {
-            if let Some(clock) = &self.2 {
-                clock.set(20000);
-            }
+        if self.1.replace(false)
+            && let Some(clock) = &self.2
+        {
+            clock.set(20000);
         }
         Ok(())
     }
@@ -466,9 +471,10 @@ fn impossible_vector_extent_rejects_before_source_clock_or_read() {
         "known vector layout must be rejected before source IO"
     );
 }
+type SyncHook = Rc<RefCell<Option<Box<dyn FnMut()>>>>;
 struct Hook {
     inner: Mem,
-    hook: Rc<RefCell<Option<Box<dyn FnMut()>>>>,
+    hook: SyncHook,
 }
 impl Read for Hook {
     fn read(&mut self, b: &mut [u8]) -> io::Result<usize> {
