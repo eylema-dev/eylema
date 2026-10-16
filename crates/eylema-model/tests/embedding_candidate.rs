@@ -422,7 +422,7 @@ fn actual_pinned_embeddings() {
     );
     assert_eq!(
         model
-            .embed_document(&"a ".repeat(4200), b, preflight)
+            .embed_document(&over_context_input(), b, preflight)
             .unwrap_err(),
         CpuError::ContextLimit
     );
@@ -474,4 +474,23 @@ fn stop_threshold_exceeds_complete_workspace_and_tokenizer_work() {
     let other_buffers = 54_272u64;
     let tokenizer_ceiling = 2_100_000u64;
     assert!(forward_stop_floor() > cache + other_buffers + tokenizer_ceiling);
+}
+
+fn over_context_input() -> String {
+    "a ".repeat(4096)
+}
+#[test]
+#[ignore = "authorized native tokenizer-only context fixture verification; no model forward"]
+fn pinned_embedding_context_rejection() {
+    let root = std::env::var_os("G68_ASSETS").unwrap();
+    let tokenizer = tokenizer(Path::new(&root));
+    let control = CpuControl::new(Instant::now() + Duration::from_secs(60)).unwrap();
+    let input = over_context_input();
+    assert_eq!(
+        tokenizer
+            .encode_document(&input, text_budget(), &control)
+            .unwrap_err(),
+        eylema_model::tokenizer::TokenizeError::TokenLimit
+    );
+    assert!(input.len() <= 8192);
 }
