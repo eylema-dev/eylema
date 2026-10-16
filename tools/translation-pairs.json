@@ -263,8 +263,14 @@
     {
       "en": "docs/en/g70-retrieval-design.md",
       "tr": "docs/tr/g70-retrieval-design.md",
-      "en_sha256": "29400dd4e284350129e81de5c235279646530e0a0995ee72faceecbb0989662c",
-      "tr_sha256": "2003fdedc2df9a563ea476cb28104ce03d0a7eb14f951be8524cc07326cede75"
+      "en_sha256": "36eef3f14fc2ce052f9f91e6dee07c495f2d754b9488b2049bb1bceacbb58bdb",
+      "tr_sha256": "50f2b35adfa528fcf80301ce62ac04aa35cb3b49170aa6c963afd3457f9473c6"
+    },
+    {
+      "en": "docs/en/retrieval.md",
+      "tr": "docs/tr/retrieval.md",
+      "en_sha256": "68b9f9b79d49cbbc1d4cf1c4cb231ba5ad5c65dac8597a80f637c563bdae5967",
+      "tr_sha256": "4871eb0c85db1c132132d32a19975dce2bb916889806776b21a7a39813c44b5b"
     }
   ],
   "documents": []

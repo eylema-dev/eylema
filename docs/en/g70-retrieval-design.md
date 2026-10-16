@@ -1,6 +1,6 @@
 # G70 project-scoped retrieval design
 
-Status: written specification for owner review; no retrieval production code or numerical trial has been written. This is an architectural task under issue [77](https://github.com/eyleme-dev/eyleme/issues/77), proposed G70/r3. [Turkish companion](../tr/g70-retrieval-design.md).
+Status: owner-approved specification; bounded Rust implementation and native synthetic acceptance are recorded in [retrieval evidence](retrieval.md). Current CI and separate final-head review remain independent delivery gates. This is an architectural task under issue [77](https://github.com/eyleme-dev/eyleme/issues/77), proposed G70/r3. [Turkish companion](../tr/g70-retrieval-design.md).
 
 ## 1. Intent, base and scope
 

@@ -1,6 +1,6 @@
 # G70 projeye bağlı erişim tasarımı
 
-Durum: insan incelemesi için yazılı belirtim; erişim üretim kodu veya sayısal deneme yazılmadı. Bu mimari çalışma [77](https://github.com/eyleme-dev/eyleme/issues/77) numaralı issue ve önerilen G70/r3 kapsamındadır. [İngilizce kanonik kaynak](../en/g70-retrieval-design.md).
+Durum: sahip tarafından kabul edilmiş belirtim; sınırlı Rust uygulaması ve yerel sentetik kabul [erişim kanıtında](retrieval.md) kayıtlıdır. Güncel CI ve ayrı final-head incelemesi bağımsız teslim kapılarıdır. Bu mimari çalışma [77](https://github.com/eyleme-dev/eyleme/issues/77) numaralı issue ve önerilen G70/r3 kapsamındadır. [İngilizce kanonik kaynak](../en/g70-retrieval-design.md).
 
 ## 1. Amaç, taban ve kapsam
 
