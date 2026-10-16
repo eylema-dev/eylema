@@ -295,6 +295,12 @@
       "tr": "docs/tr/memory-store.md",
       "en_sha256": "57086865e12cc7560f6e3bbda1f3a3bb5746e815afd83b493965da56a0389a9b",
       "tr_sha256": "c9aa88b1f805bb35ce78858564ac415b1cf081c62d1302c9a90b96cd1c0ef27e"
+    },
+    {
+      "en": "docs/en/g72-local-report-design.md",
+      "tr": "docs/tr/g72-local-report-design.md",
+      "en_sha256": "0ade90864a1ea094d1de6ade56a152538cdb700b6c9ec4aed66ec6d7e11a97ab",
+      "tr_sha256": "5f299f8aac342c28c6906f10980913cb5cb44e3ccc68f0f78037baa9bdb61af7"
     }
   ],
   "documents": []
