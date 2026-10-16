@@ -83,6 +83,9 @@ impl Control {
     pub fn release(&mut self, n: usize) {
         self.live = self.live.saturating_sub(n)
     }
+    pub(crate) fn read_guard(&self) -> (Instant, CancelToken) {
+        (self.budget.deadline, self.token.clone())
+    }
     pub fn check(&self) -> R<()> {
         if self.token.cancelled() {
             Err(E::Cancelled)
