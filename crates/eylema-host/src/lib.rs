@@ -14,6 +14,7 @@ mod encoding;
 pub mod human;
 pub use human::{DeviceOwnerHuman, HumanEnrollment};
 pub mod memory;
+pub mod memory_store;
 pub mod native;
 pub mod project_data;
 mod services;
