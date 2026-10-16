@@ -136,48 +136,109 @@ fn low_budget_is_rejected_without_history_read() {
     ));
 }
 #[test]
-fn checksummed_semantic_mutation_does_not_fall_back() {
+fn checksummed_semantic_mutation_matrix_does_not_fall_back() {
     use eylema_contracts::codec::Value;
     use eylema_journal::{Journal, Limits};
-    let m = Mem(Rc::new(RefCell::new(Cursor::new(vec![]))));
-    let mut j = Journal::create_new(
-        m.clone(),
-        f::Hash,
-        Limits {
-            records: 4,
-            payload_bytes: 1024 * 1024,
-            file_bytes: 5 * 1024 * 1024,
-        },
-    )
-    .unwrap();
-    let s = Snapshot::build(
-        f::p(),
-        f::binding(),
-        1,
-        f::docs(),
-        &mut f::Hash,
-        &mut f::c(),
-    )
-    .unwrap();
-    j.append(&s.encode(&mut f::c()).unwrap()).unwrap();
-    let mut bad = s.encode(&mut f::c()).unwrap();
-    let Value::List(e) = &mut bad else { panic!() };
-    e[4] = Value::Unsigned(2);
-    let Value::List(d) = &mut e[5] else { panic!() };
-    let Value::List(d) = &mut d[0] else { panic!() };
-    let Value::List(chunks) = &mut d[3] else {
-        panic!()
-    };
-    let Value::List(ch) = &mut chunks[0] else {
-        panic!()
-    };
-    ch[0] = Value::Unsigned(1);
-    j.append(&bad).unwrap();
-    drop(j);
-    assert!(matches!(
-        IndexStore::open(m, f::Hash, f::Hash, &f::p(), &f::binding(), &mut f::c()),
-        Err(RetrievalError::CorruptSnapshot)
-    ));
+    for case in [
+        "missing",
+        "extra",
+        "tag",
+        "version",
+        "project",
+        "binding",
+        "duplicate",
+        "order",
+        "range",
+        "terms",
+        "vector_bytes",
+        "vector_nan",
+        "text_hash",
+        "generation",
+    ] {
+        let m = Mem(Rc::new(RefCell::new(Cursor::new(vec![]))));
+        let mut j = Journal::create_new(
+            m.clone(),
+            f::Hash,
+            Limits {
+                records: 4,
+                payload_bytes: 1024 * 1024,
+                file_bytes: 5 * 1024 * 1024,
+            },
+        )
+        .unwrap();
+        let s = Snapshot::build(
+            f::p(),
+            f::binding(),
+            1,
+            f::docs(),
+            &mut f::Hash,
+            &mut f::c(),
+        )
+        .unwrap();
+        j.append(&s.encode(&mut f::c()).unwrap()).unwrap();
+        let mut bad = s.encode(&mut f::c()).unwrap();
+        let Value::List(e) = &mut bad else { panic!() };
+        e[4] = Value::Unsigned(2);
+        match case {
+            "missing" => {
+                e.pop();
+            }
+            "extra" => e.push(Value::Null),
+            "tag" => e[0] = Value::Text("unknown-snapshot".into()),
+            "version" => e[1] = Value::Unsigned(2),
+            "project" => e[2] = Value::Text("project:b".into()),
+            "binding" => {
+                let Value::List(b) = &mut e[3] else { panic!() };
+                b[6] = Value::Bytes(vec![9; 32]);
+            }
+            "generation" => e[4] = Value::Unsigned(3),
+            _ => {
+                let Value::List(documents) = &mut e[5] else {
+                    panic!()
+                };
+                if case == "duplicate" {
+                    let duplicate = documents[0].clone();
+                    documents.push(duplicate);
+                } else if case == "order" {
+                    documents.swap(0, 1);
+                } else {
+                    let Value::List(document) = &mut documents[0] else {
+                        panic!()
+                    };
+                    let Value::List(chunks) = &mut document[3] else {
+                        panic!()
+                    };
+                    let Value::List(chunk) = &mut chunks[0] else {
+                        panic!()
+                    };
+                    match case {
+                        "range" => chunk[0] = Value::Unsigned(1),
+                        "terms" => chunk[4] = Value::List(vec![Value::Text("wrong".into())]),
+                        "vector_bytes" => chunk[5] = Value::Bytes(vec![0]),
+                        "vector_nan" => {
+                            let Value::Bytes(b) = &mut chunk[5] else {
+                                panic!()
+                            };
+                            b[..4].copy_from_slice(&f32::NAN.to_le_bytes());
+                        }
+                        "text_hash" => chunk[2] = Value::Bytes(vec![9; 32]),
+                        _ => panic!("unknown fixed case"),
+                    }
+                }
+            }
+        }
+        // The owned journal recomputes a valid checksum over the malformed last
+        // generation. Reopen must reject it; returning generation1 is a failure.
+        j.append(&bad).unwrap();
+        drop(j);
+        let result = IndexStore::open(m, f::Hash, f::Hash, &f::p(), &f::binding(), &mut f::c());
+        let expected = if case == "binding" {
+            RetrievalError::IncompatibleBinding
+        } else {
+            RetrievalError::CorruptSnapshot
+        };
+        assert!(matches!(result,Err(e)if e==expected), "case={case}");
+    }
 }
 #[derive(Clone)]
 struct Fault {
