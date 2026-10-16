@@ -79,14 +79,7 @@ impl EmbeddingTokenizer {
         control: &CpuControl,
     ) -> Result<EncodedTokens, E> {
         control.check().map_err(budget::control_error)?;
-        if text.is_empty()
-            || text.contains("<|")
-            || text.contains("<tool_call>")
-            || text.contains("</tool_call>")
-            || text
-                .chars()
-                .any(|c| c.is_control() && c != '\n' && c != '\t')
-        {
+        if text.is_empty() {
             return Err(E::InvalidInput);
         }
         let prefix = if query {
@@ -95,24 +88,35 @@ impl EmbeddingTokenizer {
             ""
         };
         let rendered_len = prefix.len().checked_add(text.len()).ok_or(E::SizeLimit)?;
-        if rendered_len == 0 || rendered_len > MAX_RENDERED_BYTES {
+        if rendered_len > MAX_RENDERED_BYTES {
             return Err(E::SizeLimit);
         }
-        if budget.max_tokens == 0 || budget.max_tokens > 4096 {
+        let mut counters = Counters::text(budget, self.0.data.resident)?;
+        counters.control = Some(control.clone());
+        // Cover the three marker scans and the bounded Unicode-control scan.
+        counters.charge(rendered_len.checked_mul(4).ok_or(E::WorkLimit)?)?;
+        if text.contains("<|")
+            || text.contains("<tool_call>")
+            || text.contains("</tool_call>")
+            || text
+                .chars()
+                .any(|c| c.is_control() && c != '\n' && c != '\t')
+        {
             return Err(E::InvalidInput);
         }
+        control.check().map_err(budget::control_error)?;
+        counters.charge(rendered_len)?;
+        counters.hold(rendered_len)?;
         let mut rendered = String::new();
         rendered
             .try_reserve_exact(rendered_len)
             .map_err(|_| E::AllocationFailed)?;
-        control
-            .charge(rendered_len as u64)
-            .map_err(budget::control_error)?;
+        if rendered.capacity() > rendered_len {
+            counters.hold(rendered.capacity() - rendered_len)?;
+        }
         rendered.push_str(prefix);
         rendered.push_str(text);
 
-        let mut counters = Counters::text(budget, self.0.data.resident)?;
-        counters.control = Some(control.clone());
         let mut ids = Vec::new();
         let limit = budget.max_tokens.min(self.0.data.context_limit);
         let content_limit = limit.checked_sub(1).ok_or(E::TokenLimit)?;
@@ -129,5 +133,41 @@ impl EmbeddingTokenizer {
             ids,
             manifest_sha256: self.0.data.manifest_sha256,
         })
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn test_fixture() -> EmbeddingTokenizer {
+    EmbeddingTokenizer(Tokenizer::test_synthetic())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{Duration, Instant};
+    #[test]
+    fn oversized_input_rejects_by_extent_before_inspecting_tail() {
+        let tokenizer = test_fixture();
+        let text = "a".repeat(1_000_000) + "<|";
+        let control = CpuControl::new(Instant::now() + Duration::from_secs(60)).unwrap();
+        let budget = TextBudget {
+            max_resident_bytes: 134_217_728,
+            max_tokens: 4096,
+            max_work: 1,
+        };
+        assert_eq!(
+            tokenizer
+                .encode_document(&text, budget, &control)
+                .unwrap_err(),
+            E::SizeLimit
+        );
+        assert_eq!(control.observed_work(), 0);
+        control.cancel();
+        assert_eq!(
+            tokenizer
+                .encode_document(&text, budget, &control)
+                .unwrap_err(),
+            E::Cancelled
+        );
     }
 }

@@ -221,6 +221,7 @@ impl<'a> EmbeddingCpuModel<'a> {
     ) -> Result<EmbeddingCpuOutput, CpuError> {
         let budget = budget.validate()?;
         control.check()?;
+        control.restrict_work(budget.max_work)?;
         let start_work = control.observed_work();
         let text_budget = TextBudget {
             max_resident_bytes: TOKENIZER_WORKSPACE_RESERVATION as usize,

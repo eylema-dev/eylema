@@ -426,12 +426,12 @@ fn actual_pinned_embeddings() {
             .unwrap_err(),
         CpuError::ContextLimit
     );
-    // Job 5: cancellation is triggered only after >50M charged work, inside decoder forward.
+    // Job 5: cancellation is triggered only beyond complete workspace initialization and tokenizer work, inside decoder forward.
     let stop = job();
     let observer = stop.clone();
     let stopper = std::thread::spawn(move || {
         let timeout = Instant::now() + Duration::from_secs(590);
-        while observer.observed_work() <= 50_000_000 && Instant::now() < timeout {
+        while observer.observed_work() <= forward_stop_floor() && Instant::now() < timeout {
             std::thread::yield_now();
         }
         let work = observer.observed_work();
@@ -439,11 +439,11 @@ fn actual_pinned_embeddings() {
         work
     });
     let cancelled = model.embed_document(PAIRS[0].1, b, stop).unwrap_err();
-    assert!(stopper.join().unwrap() > 50_000_000);
+    assert!(stopper.join().unwrap() > forward_stop_floor());
     assert_eq!(cancelled, CpuError::Cancelled);
     // Job 6: deadline after tokenization; no partial vector can be returned.
     let deadline = CpuControl::new_job(
-        Instant::now() + Duration::from_secs(1),
+        Instant::now() + Duration::from_secs(5),
         2_500_000_000_000,
         group.clone(),
     )
@@ -454,7 +454,7 @@ fn actual_pinned_embeddings() {
             .unwrap_err(),
         CpuError::Deadline
     );
-    assert!(deadline.observed_work() > 2_000_000);
+    assert!(deadline.observed_work() > forward_stop_floor());
     assert!(start.elapsed() < Duration::from_secs(1200));
     assert!(peak <= 2_684_354_560);
     eprintln!(
@@ -463,4 +463,15 @@ fn actual_pinned_embeddings() {
         start.elapsed().as_secs_f64(),
         hex(&eylema_platform::sha256(&reference_bytes).unwrap())
     );
+}
+
+fn forward_stop_floor() -> u64 {
+    28u64 * 4096 * 8 * 128 * 2 + 54_272 + 2_100_000 + 1_000_000
+}
+#[test]
+fn stop_threshold_exceeds_complete_workspace_and_tokenizer_work() {
+    let cache = 28u64 * 4096 * 8 * 128 * 2;
+    let other_buffers = 54_272u64;
+    let tokenizer_ceiling = 2_100_000u64;
+    assert!(forward_stop_floor() > cache + other_buffers + tokenizer_ceiling);
 }

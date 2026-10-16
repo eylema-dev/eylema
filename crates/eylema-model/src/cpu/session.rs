@@ -32,6 +32,13 @@ impl Workspace {
         let cache = d.cache(m.budget.context)?;
         // Reserve all workspace plus every possible escaped logit result before any
         // allocation. Returned logits can outlive the session; they are never refunded.
+        let logits_len = if decision {
+            2
+        } else if embedding {
+            0
+        } else {
+            d.vocab
+        };
         let lengths = [
             d.h,
             d.h,
@@ -46,13 +53,7 @@ impl Workspace {
             d.inter,
             d.h,
             d.h,
-            if decision {
-                2
-            } else if embedding {
-                0
-            } else {
-                d.vocab
-            },
+            logits_len,
             cache,
             cache,
             m.budget.context,
@@ -88,7 +89,7 @@ impl Workspace {
             hidden: m.zeros(d.inter)?,
             down: m.zeros(d.h)?,
             final_norm: m.zeros(d.h)?,
-            logits: m.zeros(if decision { 2 } else { d.vocab })?,
+            logits: m.zeros(logits_len)?,
             keys: m.zeros(cache)?,
             values: m.zeros(cache)?,
             scores: m.zeros(m.budget.context)?,

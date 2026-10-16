@@ -307,3 +307,6 @@ impl DecisionTokenizer {
         })
     }
 }
+
+#[cfg(test)]
+pub(crate) use embedding::test_fixture as embedding_test_fixture;

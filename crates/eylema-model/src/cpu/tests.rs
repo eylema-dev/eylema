@@ -789,3 +789,38 @@ fn known_generation_limits_reject_before_frontend_work() {
     );
     assert_eq!(c.observed_work(), 0);
 }
+
+#[test]
+fn embedding_workspace_has_no_vocabulary_buffer_and_stops_after_initialization() {
+    let d = profile::Dimensions {
+        h: 4,
+        inter: 8,
+        qh: 2,
+        kh: 1,
+        w: 2,
+        layers: 1,
+        vocab: 9,
+    };
+    let tensors = synthetic(d);
+    let weights = weights::BoundWeights::synthetic(d, &tensors).unwrap();
+    let c = control();
+    let mut engine =
+        session::Engine::new_embedding(d, weights, 8, 32 * 1024 * 1024, 20_000_000, c.clone(), 0)
+            .unwrap();
+    assert!(engine.ws.logits.is_empty());
+    let initialized = c.observed_work();
+    c.stop_after(initialized + 1);
+    assert_eq!(
+        engine.prefill_embedding(&[0, 1, 2]),
+        Err(CpuError::Cancelled)
+    );
+    assert!(c.observed_work() > initialized);
+    assert_eq!(
+        engine.normalized_embedding().unwrap_err(),
+        CpuError::InvalidState
+    );
+    assert_eq!(
+        engine.prefill_embedding(&[0]).unwrap_err(),
+        CpuError::InvalidState
+    );
+}

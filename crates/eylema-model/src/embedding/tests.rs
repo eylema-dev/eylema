@@ -205,3 +205,57 @@ fn headless_embedding_header_rejects_foreign_names_shapes_and_extra_head() {
         assert!(crate::header::validate_header(bad.as_bytes(), end, &layout).is_err());
     }
 }
+
+#[test]
+fn request_work_cap_is_bound_before_tokenization() {
+    let tokenizer = crate::tokenizer::embedding_test_fixture();
+    let d = crate::cpu::profile::Dimensions {
+        h: 2,
+        inter: 2,
+        qh: 1,
+        kh: 1,
+        w: 2,
+        layers: 1,
+        vocab: 256,
+    };
+    let mut map = std::collections::BTreeMap::new();
+    map.insert("model.embed_tokens.weight".to_owned(), vec![1.; 512]);
+    map.insert("model.norm.weight".to_owned(), vec![1.; 2]);
+    for (suffix, n) in [
+        ("input_layernorm.weight", 2),
+        ("post_attention_layernorm.weight", 2),
+        ("self_attn.q_proj.weight", 4),
+        ("self_attn.k_proj.weight", 4),
+        ("self_attn.v_proj.weight", 4),
+        ("self_attn.o_proj.weight", 4),
+        ("self_attn.q_norm.weight", 2),
+        ("self_attn.k_norm.weight", 2),
+        ("mlp.gate_proj.weight", 4),
+        ("mlp.up_proj.weight", 4),
+        ("mlp.down_proj.weight", 4),
+    ] {
+        map.insert(format!("model.layers.0.{suffix}"), vec![1.; n]);
+    }
+    let model = EmbeddingCpuModel {
+        weights: crate::cpu::weights::BoundWeights::synthetic(d, &map).unwrap(),
+        manifest_sha256: tokenizer.manifest_sha256(),
+        tokenizer: &tokenizer,
+        artifact_sha256: [0; 32],
+        base_bytes: 0,
+        admission_work: 0,
+    };
+    let control =
+        CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(60)).unwrap();
+    let budget = EmbeddingBudget {
+        context: 4096,
+        max_resident_bytes: MAX_RESIDENT_BYTES,
+        max_work: 1,
+    };
+    assert_eq!(
+        model
+            .embed_document("a", budget, control.clone())
+            .unwrap_err(),
+        CpuError::WorkLimit
+    );
+    assert!(control.observed_work() <= 1);
+}
