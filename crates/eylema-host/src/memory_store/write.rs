@@ -35,19 +35,22 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
         {
             return Err(MemoryStoreError::InvalidRequest);
         }
-        if let Some(TypedObject::Entity(id)) = &d.object {
-            if !entity(id) {
-                return Err(MemoryStoreError::InvalidRequest);
-            }
+        if let Some(TypedObject::Entity(id)) = &d.object
+            && !entity(id)
+        {
+            return Err(MemoryStoreError::InvalidRequest);
         }
         Ok(())
     }
-    fn state_capacity(&self, s: &Stored, c: &mut MemoryControl) -> MemoryResult<()> {
-        c.inner.charge(
-            (self.records.len() + 1)
-                .checked_mul(32768)
-                .ok_or(MemoryStoreError::Limit)?,
-        )?;
+    fn state_capacity(&self, s: &Stored, c: &mut MemoryControl, prepaid: bool) -> MemoryResult<()> {
+        if !prepaid {
+            c.inner.charge(
+                (self.records.len() + 1)
+                    .checked_mul(32768)
+                    .ok_or(MemoryStoreError::Limit)?,
+            )?;
+        }
+        c.inner.check()?;
         let mut active = usize::from(!s.deleted);
         let mut entities = usize::from(!s.deleted && s.record.draft.kind == RecordKind::Entity);
         let mut bytes = 0usize;
@@ -79,7 +82,12 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
         }
         Ok(())
     }
-    pub(super) fn apply(&mut self, v: &Value, c: &mut MemoryControl) -> MemoryResult<()> {
+    pub(super) fn apply(
+        &mut self,
+        v: &Value,
+        c: &mut MemoryControl,
+        validated_live_write: bool,
+    ) -> MemoryResult<()> {
         let a = wire::array(v, 8)?;
         if wire::string(&a[0])? != "memory.event"
             || wire::uint(&a[1])? != 1
@@ -142,17 +150,14 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
                 "observe"
                     if s.record.admission == Admission::VerifiedOutcome
                         && s.record.draft.origin == Origin::Observation
-                        && s.record.draft.kind == RecordKind::Episode =>
-                {
-                    ()
-                }
+                        && s.record.draft.kind == RecordKind::Episode => {}
                 _ => return Err(MemoryStoreError::InvalidRequest),
             };
             self.joins(&s.record.draft)?;
-            if let Some(vector) = &s.vector {
+            if !validated_live_write && let Some(vector) = &s.vector {
                 eylema_retrieval::score::unit_norm(vector, 1024, c.inner_mut())?;
             }
-            self.state_capacity(&s, c)?;
+            self.state_capacity(&s, c, validated_live_write)?;
             self.records.insert(id, s);
         }
         self.generation += 1;
@@ -236,7 +241,7 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
             vector: vector.map(|v| v.to_vec()),
             deleted: false,
         };
-        self.state_capacity(&s, c)?;
+        self.state_capacity(&s, c, false)?;
         let next = self
             .generation
             .checked_add(1)
@@ -253,6 +258,13 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
         guard::PayloadGuard::validate(&encoded)?;
         self.journal.check_append_capacity(&[encoded.len()])?;
         c.prepay_calls(s.record.draft.sources.len() * 2 + 3)?;
+        // Reserve the second state scan before either projection or event IO.
+        // Vector admission above is retained unchanged for this live write.
+        c.inner.charge(
+            (self.records.len() + 1)
+                .checked_mul(32768)
+                .ok_or(MemoryStoreError::Limit)?,
+        )?;
         let reserved = self.gate.begin(Mode::Append, c)?;
         let result = (|| -> MemoryResult<MemoryReceipt> {
             let now = c.call(|| data.trusted_time())?;
@@ -303,7 +315,7 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
                     return Err(MemoryStoreError::WriteOutcomeUnknown);
                 }
             };
-            if self.apply(&event, c).is_err() {
+            if self.apply(&event, c, true).is_err() {
                 self.poisoned = true;
                 return Err(MemoryStoreError::WriteOutcomeUnknown);
             }
@@ -435,7 +447,7 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
                     return Err(MemoryStoreError::WriteOutcomeUnknown);
                 }
             };
-            if self.apply(&event, c).is_err() {
+            if self.apply(&event, c, true).is_err() {
                 self.poisoned = true;
                 return Err(MemoryStoreError::WriteOutcomeUnknown);
             }

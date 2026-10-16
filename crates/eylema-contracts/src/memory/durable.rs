@@ -138,10 +138,10 @@ impl RecordDraft {
             return Err(RecordError::Invalid);
         }
         unique(self.sources.iter().map(|s| s.reference.id.as_str()))?;
-        if let Some(predicate) = &self.predicate {
-            if !p.predicates.iter().any(|x| &x.id == predicate) {
-                return Err(RecordError::Incompatible);
-            }
+        if let Some(predicate) = &self.predicate
+            && !p.predicates.iter().any(|x| &x.id == predicate)
+        {
+            return Err(RecordError::Incompatible);
         }
         let valid = match self.kind {
             RecordKind::Entity => {

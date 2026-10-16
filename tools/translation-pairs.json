@@ -287,8 +287,14 @@
     {
       "en": "docs/en/g88-memory-design.md",
       "tr": "docs/tr/g88-memory-design.md",
-      "en_sha256": "69034e5a77bf2a07486dd1ea422f28d304fd2c4100bc2d2850decd3373e404f6",
-      "tr_sha256": "6f5a26bf97704a6bd3db84267d65937fe56820cb5e182411e981c578fb38ddda"
+      "en_sha256": "34440a4ba9a740cc0b17e10997ab280f31bd750770ca157cbb316766c592a3bf",
+      "tr_sha256": "d9163c81abfba4a07a57335945782f43668b3bcf315cb97f8020224ac43ed61c"
+    },
+    {
+      "en": "docs/en/memory-store.md",
+      "tr": "docs/tr/memory-store.md",
+      "en_sha256": "cf663bad6940122c718508d562dcbcccbd3b6ffb481ab6d5a9d123c2890cb268",
+      "tr_sha256": "3834eabe63b7c35dc144a3d7cf26927417577214f9e0e8070ca7a3924eadb06f"
     }
   ],
   "documents": []

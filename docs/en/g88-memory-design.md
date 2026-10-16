@@ -1,6 +1,6 @@
 # G88 durable episodic, semantic and graph memory design
 
-Status: written specification for owner review, not implemented or accepted G88 behavior. [Issue 94](https://github.com/eyleme-dev/eyleme/issues/94), proposed card revision 4. [Türkçe](../tr/g88-memory-design.md).
+Status: owner-approved specification; implementation and native acceptance are under verification. See [current behavior and evidence](memory-store.md). [Issue 94](https://github.com/eyleme-dev/eyleme/issues/94), proposed card revision 4. [Türkçe](../tr/g88-memory-design.md).
 
 ## 1. Intent, scope and existing evidence
 

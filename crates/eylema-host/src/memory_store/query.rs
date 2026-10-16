@@ -113,6 +113,7 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
             .and_then(|m| m.as_ref())
             .is_some_and(|m| m.digest == p.put_digest))
     }
+    #[allow(clippy::too_many_arguments)]
     fn eligible<D: Storage, F: Sha256, C: DataClock>(
         &self,
         data: &ProjectStore<D, F, C>,
@@ -292,13 +293,19 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
             if !self.eligible(data, session, s, q, now, &mut auth, c)? {
                 continue;
             }
-            if let Some(subject) = &d.subject {
-                if d.kind != RecordKind::Entity {
-                    if !self.entity_eligible(data, session, subject, q, now, &mut auth, c)? {
-                        continue;
-                    }
-                    structural.insert(subject.clone());
+            if let Some(subject) = &d.subject
+                && d.kind != RecordKind::Entity
+            {
+                if !self.entity_eligible(data, session, subject, q, now, &mut auth, c)? {
+                    continue;
                 }
+                structural.insert(subject.clone());
+            }
+            if let Some(TypedObject::Entity(target)) = &d.object {
+                if !self.entity_eligible(data, session, target, q, now, &mut auth, c)? {
+                    continue;
+                }
+                structural.insert(target.clone());
             }
             hits.push((id.clone(), depth));
             if hits.len() > 128 {

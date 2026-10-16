@@ -243,3 +243,41 @@ fn only_live_tool_witness_promotes_episode() {
     assert!(body.contains("value=2"));
     assert!(!body.contains("caller cannot dictate"));
 }
+#[test]
+fn known_postcommit_work_shortfall_rejects_before_any_write() {
+    let (mut d, o, ds, _) = data();
+    let m = Mem::default();
+    let (mut store, owner) =
+        MemoryStore::create_new(m.clone(), NativeHash, &mut d, &o, profile(), &mut c()).unwrap();
+    let session = store.enroll(&owner, &mut d, &ds, &mut c()).unwrap();
+    let draft = entity(pin(&mut d, &ds, "source"));
+    // Five opaque calls + append + both capacity validations + draft work, less one.
+    let mut control = MemoryControl::new(
+        MemoryBudget {
+            max_work: 21_146_607,
+            max_live_bytes: 64 * 1024 * 1024,
+            deadline: std::time::Instant::now() + std::time::Duration::from_secs(5),
+        },
+        MemoryCancel::new(),
+    )
+    .unwrap();
+    let writes = m.writes.get();
+    assert_eq!(
+        store
+            .propose(
+                &mut d,
+                &session,
+                0,
+                None,
+                draft,
+                None,
+                r("entity:1"),
+                &mut control
+            )
+            .err(),
+        Some(MemoryStoreError::Limit)
+    );
+    assert_eq!(m.writes.get(), writes);
+    assert!(d.inspect(&o, &r("entity:1")).is_err());
+    assert_eq!(store.generation(), 0);
+}

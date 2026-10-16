@@ -199,8 +199,10 @@ pub(super) fn decode(v: &Value, p: &StoreProfile) -> R<Stored> {
     };
     let vector = parse_optional(&a[19], |v| match v {
         Value::Bytes(b) if b.len() == 4096 => Ok(b
-            .chunks_exact(4)
-            .map(|x| f32::from_le_bytes(x.try_into().expect("four bytes")))
+            .as_chunks::<4>()
+            .0
+            .iter()
+            .map(|x| f32::from_le_bytes(*x))
             .collect::<Vec<_>>()),
         _ => Err(E::InvalidRequest),
     })?;

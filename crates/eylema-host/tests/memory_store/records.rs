@@ -73,10 +73,35 @@ impl Storage for Mem {
         }
     }
 }
+#[derive(Default)]
+pub struct ClockHooks {
+    pub calls: usize,
+    pub cancel: Option<(usize, MemoryCancel)>,
+    pub delay: Option<(usize, Duration)>,
+}
 #[derive(Clone)]
-pub struct Clock(pub Rc<Cell<u64>>);
+pub struct Clock(pub Rc<Cell<u64>>, pub Rc<RefCell<ClockHooks>>);
+impl Clock {
+    pub fn new(now: u64) -> Self {
+        Self(
+            Rc::new(Cell::new(now)),
+            Rc::new(RefCell::new(ClockHooks::default())),
+        )
+    }
+}
 impl DataClock for Clock {
     fn now(&mut self) -> DataResult<u64> {
+        let mut hooks = self.1.borrow_mut();
+        hooks.calls += 1;
+        let calls = hooks.calls;
+        if hooks.cancel.as_ref().is_some_and(|(n, _)| *n == calls) {
+            let (_, token) = hooks.cancel.take().unwrap();
+            token.cancel()
+        }
+        if hooks.delay.as_ref().is_some_and(|(n, _)| *n == calls) {
+            let (_, duration) = hooks.delay.take().unwrap();
+            std::thread::sleep(duration)
+        }
         Ok(self.0.get())
     }
 }
@@ -130,7 +155,7 @@ pub fn c() -> MemoryControl {
     .unwrap()
 }
 pub fn data() -> (Data, Owner, DataSession, Clock) {
-    let clock = Clock(Rc::new(Cell::new(1)));
+    let clock = Clock::new(1);
     let j = Journal::create_new(Mem::default(), NativeHash, project_journal_limits()).unwrap();
     let (mut d, o) = ProjectStore::create_new(j, r("x").project, clock.clone()).unwrap();
     let session = d

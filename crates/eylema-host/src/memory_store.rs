@@ -298,7 +298,7 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
                     return Err(MemoryStoreError::IncompatibleProfile);
                 }
                 for event in events.into_iter().skip(1) {
-                    s.apply(&event.payload, c)?;
+                    s.apply(&event.payload, c, false)?;
                 }
             }
             c.inner.check()?;

@@ -187,3 +187,42 @@ fn final_sweep_returns_no_partial_context() {
         Some(MemoryStoreError::Cancelled)
     );
 }
+#[test]
+fn final_handoff_cancellation_and_deadline_happen_after_positive_work() {
+    for cancelled in [true, false] {
+        let (mut data, _, _, clock, memory, _, session, _) = seed();
+        let token = MemoryCancel::new();
+        let before = clock.1.borrow().calls;
+        if cancelled {
+            clock.1.borrow_mut().cancel = Some((before + 2, token.clone()))
+        } else {
+            clock.1.borrow_mut().delay = Some((before + 2, std::time::Duration::from_millis(30)))
+        }
+        let mut control = MemoryControl::new(
+            MemoryBudget {
+                max_work: 100000000,
+                max_live_bytes: 64 * 1024 * 1024,
+                deadline: std::time::Instant::now()
+                    + std::time::Duration::from_millis(if cancelled { 1000 } else { 20 }),
+            },
+            token,
+        )
+        .unwrap();
+        let result = memory.query(
+            &mut data,
+            &session,
+            &Query::new(q(memory.generation())).unwrap(),
+            &mut control,
+        );
+        assert_eq!(
+            result.err(),
+            Some(if cancelled {
+                MemoryStoreError::Cancelled
+            } else {
+                MemoryStoreError::Deadline
+            })
+        );
+        assert!(control.work_used() > 20_000_000);
+        assert_eq!(clock.1.borrow().calls, before + 2);
+    }
+}

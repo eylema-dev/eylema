@@ -1,6 +1,6 @@
 # G88 kalıcı deneyim, anlamsal ve graf belleği tasarımı
 
-Durum: bakımcı incelemesi için yazılı tasarım; uygulanmış veya kabul edilmiş G88 davranışı değildir. [Issue 94](https://github.com/eyleme-dev/eyleme/issues/94), önerilen kart revizyonu 4. [English canonical](../en/g88-memory-design.md).
+Durum: bakımcının onayladığı tasarım; uygulama ve native kabul doğrulama aşamasındadır. [Güncel davranış ve kanıt](memory-store.md). [Issue 94](https://github.com/eyleme-dev/eyleme/issues/94), önerilen kart revizyonu 4. [English canonical](../en/g88-memory-design.md).
 
 ## 1. Amaç, kapsam ve mevcut kanıt
 
