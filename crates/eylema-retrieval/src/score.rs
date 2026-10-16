@@ -44,17 +44,17 @@ fn ratio(n: i128, d: i128) -> R<i64> {
     i64::try_from(if n < 0 { -v } else { v }).map_err(|_| E::LimitExceeded)
 }
 pub fn jaccard_micro(a: &[String], b: &[String], c: &mut Control) -> R<i64> {
-    if a.is_empty()
-        || b.is_empty()
-        || a.len() > 128
-        || b.len() > 128
-        || a.iter().chain(b).any(|s| s.is_empty() || s.len() > 64)
+    c.check()?;
+    if a.is_empty() || b.is_empty() || a.len() > 128 || b.len() > 128 {
+        return Err(E::InvalidInput);
+    }
+    c.charge((a.len() + b.len()) * 128 + a.len() * b.len() * 64)?;
+    if a.iter().chain(b).any(|s| s.is_empty() || s.len() > 64)
         || a.windows(2).any(|w| w[0] >= w[1])
         || b.windows(2).any(|w| w[0] >= w[1])
     {
         return Err(E::InvalidInput);
     }
-    c.charge((a.len() + b.len()) * 64 + a.len() * b.len() * 64)?;
     let i = a.iter().filter(|x| b.contains(x)).count();
     ratio(i as i128 * 1_000_000, (a.len() + b.len() - i) as i128)
 }

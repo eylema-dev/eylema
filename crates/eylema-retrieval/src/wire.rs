@@ -56,8 +56,10 @@ pub(crate) fn preflight(b: &[u8]) -> R<()> {
     }
     Ok(())
 }
-pub(crate) fn extent(v: &Value) -> R<usize> {
-    fn inner(v: &Value, depth: usize, nodes: &mut usize) -> R<usize> {
+pub(crate) fn extent(v: &Value, c: &mut Control) -> R<usize> {
+    c.check()?;
+    fn inner(v: &Value, depth: usize, nodes: &mut usize, c: &mut Control) -> R<usize> {
+        c.charge(1)?;
         if depth > 8 || *nodes >= 32768 {
             return Err(E::CorruptSnapshot);
         }
@@ -84,7 +86,7 @@ pub(crate) fn extent(v: &Value) -> R<usize> {
                 let mut size = 5usize;
                 for v in l {
                     size = size
-                        .checked_add(inner(v, depth + 1, nodes)?)
+                        .checked_add(inner(v, depth + 1, nodes, c)?)
                         .ok_or(E::LimitExceeded)?;
                 }
                 Ok(size)
@@ -92,7 +94,7 @@ pub(crate) fn extent(v: &Value) -> R<usize> {
             _ => Err(E::CorruptSnapshot),
         }
     }
-    let n = inner(v, 0, &mut 0)?
+    let n = inner(v, 0, &mut 0, c)?
         .checked_add(codec::HEADER.len())
         .ok_or(E::LimitExceeded)?;
     if n > MAX_SNAPSHOT {
@@ -101,7 +103,7 @@ pub(crate) fn extent(v: &Value) -> R<usize> {
     Ok(n)
 }
 pub(crate) fn encoded(v: &Value, max: usize, c: &mut Control) -> R<Vec<u8>> {
-    let n = extent(v)?;
+    let n = extent(v, c)?;
     if n > max {
         return Err(E::LimitExceeded);
     }

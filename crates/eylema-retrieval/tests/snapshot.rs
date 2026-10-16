@@ -164,3 +164,26 @@ fn complete_large_cutoff_tie_cannot_choose_a_winner() {
         Err(RetrievalError::TieLimit)
     ));
 }
+#[test]
+fn cancelled_decode_and_lexical_validation_do_no_traversal() {
+    let token = CancelToken::new();
+    let mut c = Control::new(
+        RetrievalBudget {
+            max_work: 100_000_000,
+            max_live_bytes: 64 * 1024 * 1024,
+            deadline: std::time::Instant::now() + std::time::Duration::from_secs(1),
+        },
+        token.clone(),
+    )
+    .unwrap();
+    token.cancel();
+    assert!(matches!(
+        Snapshot::decode(&Value::Map(vec![]), &mut f::Hash, &mut c),
+        Err(RetrievalError::Cancelled)
+    ));
+    assert_eq!(
+        eylema_retrieval::score::jaccard_micro(&["b".into(), "a".into()], &["a".into()], &mut c),
+        Err(RetrievalError::Cancelled)
+    );
+    assert_eq!(c.work_used(), 0);
+}

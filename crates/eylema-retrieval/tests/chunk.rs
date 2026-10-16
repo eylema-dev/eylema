@@ -50,3 +50,15 @@ fn ninth_utf8_window_is_in_residency() {
     assert!(c.peak_live_bytes() >= 9 * std::mem::size_of::<std::ops::Range<usize>>());
     assert_eq!(rs.iter().map(|r| &s[r.clone()]).collect::<String>(), s);
 }
+#[test]
+fn normalized_limit_allows_shrinking_original_terms() {
+    assert_eq!(
+        terms(&"K".repeat(22), 32, &mut c()).unwrap(),
+        vec!["k".repeat(22)]
+    );
+    assert_eq!(
+        terms(&"ẞ".repeat(32), 32, &mut c()).unwrap(),
+        vec!["ß".repeat(32)]
+    );
+    assert!(terms(&"ẞ".repeat(33), 32, &mut c()).is_err());
+}

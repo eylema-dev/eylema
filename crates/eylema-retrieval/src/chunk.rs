@@ -28,16 +28,13 @@ pub fn terms(s: &str, max_unique: usize, c: &mut Control) -> R<Vec<String>> {
     if s.len() > 2048 || max_unique == 0 || max_unique > 128 {
         return Err(E::LimitExceeded);
     }
-    c.charge(s.len() * 12 + max_unique * max_unique * 64)?;
+    c.charge(s.len() * 12 + max_unique * 64)?;
     c.reserve(max_unique * (64 + std::mem::size_of::<String>()))?;
     let mut out = Vec::with_capacity(max_unique);
     for word in s
         .split(|x: char| !x.is_alphanumeric())
         .filter(|x| !x.is_empty())
     {
-        if word.len() > 64 {
-            return Err(E::LimitExceeded);
-        }
         let n = word
             .chars()
             .flat_map(char::to_lowercase)
@@ -47,6 +44,7 @@ pub fn terms(s: &str, max_unique: usize, c: &mut Control) -> R<Vec<String>> {
             return Err(E::LimitExceeded);
         }
         let word = word.to_lowercase();
+        c.charge(out.len() * 64)?;
         if !out.contains(&word) {
             if out.len() == max_unique {
                 return Err(E::LimitExceeded);
@@ -57,6 +55,7 @@ pub fn terms(s: &str, max_unique: usize, c: &mut Control) -> R<Vec<String>> {
     if out.is_empty() {
         return Err(E::InvalidInput);
     }
+    c.charge(out.len() * out.len() * 64)?;
     out.sort();
     Ok(out)
 }

@@ -61,7 +61,7 @@ impl<T: Storage, H: Sha256> IndexStore<T, H> {
         }
         c.reserve(initial.retained_bytes())?;
         let v = initial.encode(c)?;
-        let n = wire::extent(&v)?;
+        let n = wire::extent(&v, c)?;
         c.charge(n * 8)?;
         c.reserve(n * 6)?;
         let (deadline, token) = c.read_guard();
@@ -70,6 +70,7 @@ impl<T: Storage, H: Sha256> IndexStore<T, H> {
         c.check()?;
         let mut journal =
             Journal::create_new(guard, journal_hash, limits()).map_err(|e| error(e, &err))?;
+        c.check()?;
         journal.append(&v).map_err(|e| error(e, &err))?;
         c.check()?;
         Ok(Self {
@@ -157,7 +158,7 @@ impl<T: Storage, H: Sha256> IndexStore<T, H> {
         }
         c.reserve(self.current.retained_bytes() + next.retained_bytes())?;
         let v = next.encode(c)?;
-        let n = wire::extent(&v)?;
+        let n = wire::extent(&v, c)?;
         self.journal.check_append_capacity(&[n])?;
         c.reserve(n * 6)?;
         c.charge(n * 8)?;

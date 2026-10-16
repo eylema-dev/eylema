@@ -97,11 +97,40 @@ fn documents<DT: Storage, DH: Sha256, C: DataClock>(
     data: &mut ProjectStore<DT, DH, C>,
     s: &DataSession,
     sources: Vec<SourceVectors>,
+    dimensions: usize,
     c: &mut Control,
 ) -> R<Vec<DocumentInput>> {
     if sources.len() > 16 {
         return Err(RetrievalError::LimitExceeded.into());
     }
+    c.check()?;
+    c.charge(16 * 128)?;
+    let mut count = 0usize;
+    for source in &sources {
+        if source.vectors.len() > 128 {
+            return Err(RetrievalError::LimitExceeded.into());
+        }
+        count = count
+            .checked_add(source.vectors.len())
+            .ok_or(RetrievalError::LimitExceeded)?;
+        if count > 128 {
+            return Err(RetrievalError::LimitExceeded.into());
+        }
+        for vector in &source.vectors {
+            if vector.len() != dimensions {
+                return Err(RetrievalError::InvalidVector.into());
+            }
+        }
+    }
+    let vector_bytes = count
+        .checked_mul(dimensions)
+        .and_then(|n| n.checked_mul(4))
+        .ok_or(RetrievalError::LimitExceeded)?;
+    if vector_bytes > 1024 * 1024 {
+        return Err(RetrievalError::LimitExceeded.into());
+    }
+    c.reserve(vector_bytes + count * std::mem::size_of::<Vec<f32>>())?;
+    c.charge(vector_bytes)?;
     c.reserve(16 * 512)?;
     c.charge(16 * 16 * 128)?;
     let mut out = Vec::with_capacity(sources.len());
@@ -159,7 +188,13 @@ impl<T: Storage, H: Sha256> RetrievalHost<T, H> {
         let project = project.clone();
         let data_identity = id.clone();
         binding.validate()?;
-        let docs = documents(data, collect_session, sources, c)?;
+        let docs = documents(
+            data,
+            collect_session,
+            sources,
+            usize::from(binding.space.dimensions),
+            c,
+        )?;
         let snapshot = Snapshot::build(
             project.clone(),
             binding.clone(),
@@ -264,7 +299,13 @@ impl<T: Storage, H: Sha256> RetrievalHost<T, H> {
         if self.index.current().binding() != binding {
             return Err(RetrievalError::IncompatibleBinding.into());
         }
-        let docs = documents(data, collect_session, sources, c)?;
+        let docs = documents(
+            data,
+            collect_session,
+            sources,
+            usize::from(binding.space.dimensions),
+            c,
+        )?;
         let generation = expected_generation
             .checked_add(1)
             .ok_or(RetrievalError::StaleGeneration)?;

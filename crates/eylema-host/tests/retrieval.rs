@@ -439,3 +439,158 @@ fn denial_precedes_index_status_and_no_partial_results() {
         Err(HostRetrievalError::Core(RetrievalError::LimitExceeded))
     ));
 }
+#[test]
+fn impossible_vector_extent_rejects_before_source_clock_or_read() {
+    let (mut d, o, s, clock, _) = fixture();
+    clock.1.set(1);
+    let before = clock.0.get();
+    let mut src = sources();
+    src[0].vectors[0] = vec![0.; 4097];
+    assert!(
+        RetrievalHost::create(
+            Mem::new(),
+            NativeHash,
+            NativeHash,
+            &mut d,
+            &o,
+            &s,
+            &binding(),
+            src,
+            &mut c()
+        )
+        .is_err()
+    );
+    assert_eq!(
+        clock.0.get(),
+        before,
+        "known vector layout must be rejected before source IO"
+    );
+}
+struct Hook {
+    inner: Mem,
+    hook: Rc<RefCell<Option<Box<dyn FnMut()>>>>,
+}
+impl Read for Hook {
+    fn read(&mut self, b: &mut [u8]) -> io::Result<usize> {
+        self.inner.read(b)
+    }
+}
+impl Write for Hook {
+    fn write(&mut self, b: &[u8]) -> io::Result<usize> {
+        self.inner.write(b)
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        self.inner.flush()
+    }
+}
+impl Seek for Hook {
+    fn seek(&mut self, p: SeekFrom) -> io::Result<u64> {
+        self.inner.seek(p)
+    }
+}
+impl Storage for Hook {
+    fn byte_len(&mut self) -> io::Result<u64> {
+        self.inner.byte_len()
+    }
+    fn synchronize(&mut self) -> io::Result<()> {
+        self.inner.synchronize()?;
+        if let Some(mut hook) = self.hook.borrow_mut().take() {
+            hook();
+        }
+        Ok(())
+    }
+}
+#[test]
+fn cancellation_during_header_sync_prevents_first_payload_append() {
+    let (mut d, o, s, _, _) = fixture();
+    let m = Mem::new();
+    let token = CancelToken::new();
+    let cancel = token.clone();
+    let hook = Rc::new(RefCell::new(Some(
+        Box::new(move || cancel.cancel()) as Box<dyn FnMut()>
+    )));
+    let mut control = Control::new(
+        RetrievalBudget {
+            max_work: 100_000_000,
+            max_live_bytes: 64 * 1024 * 1024,
+            deadline: Instant::now() + Duration::from_secs(30),
+        },
+        token,
+    )
+    .unwrap();
+    assert!(matches!(
+        RetrievalHost::create(
+            Hook {
+                inner: m.clone(),
+                hook
+            },
+            NativeHash,
+            NativeHash,
+            &mut d,
+            &o,
+            &s,
+            &binding(),
+            sources(),
+            &mut control
+        ),
+        Err(HostRetrievalError::Core(RetrievalError::Cancelled))
+    ));
+    assert_eq!(
+        m.0.borrow().get_ref().len(),
+        8,
+        "cancel after header sync must prevent initial snapshot append"
+    );
+}
+#[test]
+fn synchronized_cancel_or_deadline_poisons_write_without_ack() {
+    for cancel in [true, false] {
+        let (mut d, o, s, _, _) = fixture();
+        let hook = Rc::new(RefCell::new(None));
+        let (mut h, owner) = RetrievalHost::create(
+            Hook {
+                inner: Mem::new(),
+                hook: hook.clone(),
+            },
+            NativeHash,
+            NativeHash,
+            &mut d,
+            &o,
+            &s,
+            &binding(),
+            sources(),
+            &mut c(),
+        )
+        .unwrap();
+        let token = CancelToken::new();
+        let t = token.clone();
+        *hook.borrow_mut() = Some(Box::new(move || {
+            if cancel {
+                t.cancel()
+            } else {
+                std::thread::sleep(Duration::from_millis(350))
+            }
+        }));
+        let mut control = Control::new(
+            RetrievalBudget {
+                max_work: 100_000_000,
+                max_live_bytes: 64 * 1024 * 1024,
+                deadline: Instant::now()
+                    + if cancel {
+                        Duration::from_secs(30)
+                    } else {
+                        Duration::from_millis(200)
+                    },
+            },
+            token,
+        )
+        .unwrap();
+        assert!(
+            matches!(h.replace(&mut d,&o,&owner,&s,1,&binding(),vec![],&mut control),Err(HostRetrievalError::Core(e))if e==if cancel{RetrievalError::Cancelled}else{RetrievalError::Deadline})
+        );
+        assert!(control.work_used() > 0);
+        assert!(matches!(
+            h.search(&mut d, &s, &q(), &mut c()),
+            Err(HostRetrievalError::Core(RetrievalError::NeedsReopen))
+        ));
+    }
+}

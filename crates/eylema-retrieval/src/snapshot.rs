@@ -257,11 +257,11 @@ impl Snapshot {
                     .collect(),
             ),
         ]);
-        wire::extent(&v)?;
+        wire::extent(&v, c)?;
         Ok(v)
     }
     pub fn decode(v: &Value, hash: &mut impl Sha256, c: &mut Control) -> RetrievalResult<Self> {
-        let n = wire::extent(v)?;
+        let n = wire::extent(v, c)?;
         c.reserve(n * 4 + 32768 * std::mem::size_of::<Value>())?;
         c.charge(n * 4)?;
         let e = list(v, 6)?;
@@ -307,8 +307,10 @@ impl Snapshot {
                     return Err(E::CorruptSnapshot);
                 }
                 vectors.push(
-                    b.chunks_exact(4)
-                        .map(|b| f32::from_le_bytes(b.try_into().expect("four bytes")))
+                    b.as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|b| f32::from_le_bytes(*b))
                         .collect(),
                 );
             }
