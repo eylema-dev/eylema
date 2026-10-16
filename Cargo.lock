@@ -41,6 +41,7 @@ dependencies = [
  "eylema-contracts",
  "eylema-journal",
  "eylema-platform",
+ "eylema-retrieval",
  "eylema-runtime",
 ]
 

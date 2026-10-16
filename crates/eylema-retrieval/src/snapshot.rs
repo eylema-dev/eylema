@@ -107,7 +107,11 @@ impl Snapshot {
                 return Err(E::InvalidVector);
             }
         }
-        if total > 128 {
+        if total > 128
+            || total
+                .checked_mul(d * 4)
+                .is_none_or(|n| n > wire::MAX_SNAPSHOT)
+        {
             return Err(E::LimitExceeded);
         }
         c.reserve(retained)?;
@@ -162,9 +166,58 @@ impl Snapshot {
         s.encode(c)?;
         Ok(s)
     }
+    fn encoded_size(&self) -> RetrievalResult<usize> {
+        let b = &self.binding;
+        let binding = 5
+            + 3 * 5
+            + b.space.id.as_str().len()
+            + b.space.model.as_str().len()
+            + b.space.preprocessing.as_str().len()
+            + 18
+            + 4 * 37
+            + 3 * 5
+            + b.chunk_profile.len()
+            + b.lexical_profile.len()
+            + b.score_profile.len();
+        let mut n = 7
+            + 5
+            + 5
+            + "retrieval-snapshot".len()
+            + 9
+            + 5
+            + self.project.as_str().len()
+            + binding
+            + 9
+            + 5;
+        for d in &self.documents {
+            n += 5
+                + 5
+                + d.reference.project.as_str().len()
+                + 5
+                + d.reference.id.as_str().len()
+                + 37
+                + 5;
+            for x in &d.chunks {
+                n += 5
+                    + 18
+                    + 37
+                    + 5
+                    + x.text.len()
+                    + 5
+                    + x.terms.iter().map(|s| 5 + s.len()).sum::<usize>()
+                    + 5
+                    + x.vector.len() * 4;
+            }
+        }
+        if n > wire::MAX_SNAPSHOT {
+            return Err(E::LimitExceeded);
+        }
+        Ok(n)
+    }
     pub fn encode(&self, c: &mut Control) -> RetrievalResult<Value> {
+        let n = self.encoded_size()?;
+        c.charge(n)?;
         c.reserve(self.retained)?;
-        c.charge(self.retained)?;
         let v = Value::List(vec![
             text("retrieval-snapshot"),
             Value::Unsigned(1),

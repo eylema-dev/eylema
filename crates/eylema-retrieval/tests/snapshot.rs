@@ -115,3 +115,52 @@ fn mutation_and_binding_rejected() {
         Err(RetrievalError::NotIndexed)
     ));
 }
+#[test]
+fn impossible_snapshot_rejects_before_content_hash() {
+    struct NoHash;
+    impl eylema_journal::Sha256 for NoHash {
+        fn digest(&mut self, _: &[u8]) -> eylema_journal::Result<[u8; 32]> {
+            panic!("known impossible snapshot reached hash")
+        }
+    }
+    let mut binding = f::binding();
+    binding.space.dimensions = 4096;
+    let mut docs = vec![];
+    for id in 0..16 {
+        let mut v = vec![0.; 4096];
+        v[0] = 1.;
+        docs.push(DocumentInput {
+            reference: f::r(&format!("s{id:02}")),
+            put_digest: [1; 32],
+            body: b"a ".repeat(4096),
+            vectors: vec![v; 8],
+        });
+    }
+    assert!(matches!(
+        Snapshot::build(f::p(), binding, 1, docs, &mut NoHash, &mut f::c()),
+        Err(RetrievalError::LimitExceeded)
+    ));
+}
+#[test]
+fn complete_large_cutoff_tie_cannot_choose_a_winner() {
+    let mut inputs = vec![];
+    for id in 0..16 {
+        let mut v = vec![0.; 1024];
+        v[0] = 1.;
+        inputs.push(DocumentInput {
+            reference: f::r(&format!("s{id:02}")),
+            put_digest: [1; 32],
+            body: b"a ".repeat(4096),
+            vectors: vec![v; 8],
+        });
+    }
+    let s = Snapshot::build(f::p(), f::binding(), 1, inputs, &mut f::Hash, &mut f::c()).unwrap();
+    let mut q = f::q();
+    q.sources = (0..16).map(|i| f::r(&format!("s{i:02}"))).collect();
+    q.top_k = 16;
+    q.max_hits = 32;
+    assert!(matches!(
+        s.search(&q, &mut f::c()),
+        Err(RetrievalError::TieLimit)
+    ));
+}

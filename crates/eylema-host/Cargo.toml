@@ -11,3 +11,4 @@ eylema-contracts.workspace = true
 eylema-runtime = { path = "../eylema-runtime" }
 eylema-journal = { path = "../eylema-journal" }
 eylema-platform = { path = "../eylema-platform" }
+eylema-retrieval = { path = "../eylema-retrieval" }

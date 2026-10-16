@@ -628,3 +628,5 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
 }
 
 pub mod tool;
+
+pub mod retrieval;

@@ -5,14 +5,14 @@ pub fn ranges(body: &[u8], c: &mut Control) -> R<Vec<Range<usize>>> {
         return Err(E::LimitExceeded);
     }
     c.charge(body.len() * 2)?;
-    c.reserve(8 * std::mem::size_of::<Range<usize>>())?;
+    c.reserve(9 * std::mem::size_of::<Range<usize>>())?;
     let s = std::str::from_utf8(body).map_err(|_| E::InvalidInput)?;
     if s.chars()
         .any(|x| x.is_control() && !['\t', '\r', '\n'].contains(&x))
     {
         return Err(E::InvalidInput);
     }
-    let mut out = Vec::with_capacity(8);
+    let mut out = Vec::with_capacity(9);
     let mut start = 0;
     while start < s.len() {
         let mut end = (start + 1024).min(s.len());

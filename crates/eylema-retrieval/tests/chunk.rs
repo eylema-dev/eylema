@@ -41,3 +41,12 @@ fn lexical_expansion_and_caps() {
     assert!(terms(&q, 32, &mut c()).is_err());
     assert!(terms("", 32, &mut c()).is_err());
 }
+#[test]
+fn ninth_utf8_window_is_in_residency() {
+    let s = "€".repeat(2730);
+    let mut c = c();
+    let rs = ranges(s.as_bytes(), &mut c).unwrap();
+    assert_eq!(rs.len(), 9);
+    assert!(c.peak_live_bytes() >= 9 * std::mem::size_of::<std::ops::Range<usize>>());
+    assert_eq!(rs.iter().map(|r| &s[r.clone()]).collect::<String>(), s);
+}

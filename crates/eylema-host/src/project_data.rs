@@ -492,6 +492,10 @@ impl<T: Storage, H: Sha256, C: DataClock> ProjectStore<T, H, C> {
         self.permitted(&r.id, purpose, now)
     }
     /// Host-only live binding for composed registries; no request serialization.
+    pub(crate) fn retrieval_binding(&self, owner: &Owner) -> DataResult<(&ProjectId, &Arc<()>)> {
+        self.owner(owner)?;
+        Ok((&self.project, &self.identity))
+    }
     pub(crate) fn memory_binding(&self) -> (&ProjectId, &Arc<()>) {
         (&self.project, &self.identity)
     }
