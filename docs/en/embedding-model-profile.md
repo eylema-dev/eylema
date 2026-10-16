@@ -29,3 +29,5 @@ Model/core fixture is byte-identical: 5003bytes, SHA256ca3cde459437692c9ae877b66
 ## Platform and data direction
 
 Eyleme targets a resource-aware cooperative local open-weight specialist ecosystem under controlled qualified frontier-LLM source development. Owned Rust harness/memory/RAG/model-specific training and recipes evolve through measured outcomes and human corrections. Private project/institution records and derivatives remain scoped; only separately authorized rights/provenance/anonymity-reviewed candidates may enter the ecosystem. This goal uses public metadata and own synthetic vectors/text; no user data collection, anonymization, training or export.
+
+G68 implementation and pending local numerical acceptance: [bounded CPU embeddings](g68-cpu-embeddings.md). This follow-up does not rewrite G67 evidence.

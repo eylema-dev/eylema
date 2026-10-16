@@ -101,6 +101,33 @@ pub(crate) fn add(a: &mut [f32], b: &[f32], m: &mut Meter) -> Result<(), E> {
     }
     Ok(())
 }
+
+pub(crate) fn l2_normalize(input: &[f32], output: &mut [f32], m: &mut Meter) -> Result<(), E> {
+    if input.is_empty() || input.len() != output.len() {
+        return Err(E::InvalidLayout);
+    }
+    let mut sum = 0.0f32;
+    for values in input.chunks(1024) {
+        m.charge((values.len() * 2) as u64)?;
+        for &value in values {
+            if !value.is_finite() {
+                return Err(E::NonFinite);
+            }
+            sum += value * value;
+        }
+    }
+    m.charge(1)?;
+    let norm = finite(sum.sqrt())?;
+    if norm <= 1e-12 {
+        return Err(E::InvalidOutput);
+    }
+    for (values, results) in input.iter().zip(output.iter_mut()) {
+        m.charge(2)?;
+        *results = finite(*values / norm)?;
+    }
+    Ok(())
+}
+
 pub(crate) fn greedy(x: &[f32]) -> Result<u32, E> {
     if x.is_empty() {
         return Err(E::InvalidOutput);

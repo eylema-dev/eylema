@@ -78,6 +78,54 @@ impl Dimensions {
             .ok_or(E::ResidentLimit)
     }
 }
+
+/// Exact charged-work estimate for one G68-style causal backbone pass with no
+/// vocabulary projection, plus final hidden-state L2 normalization. It mirrors
+/// the bounded scalar operations in `session::Engine`; it is a preflight bound,
+/// not a latency estimate.
+pub(crate) fn embedding_work_bound(d: Dimensions, tokens: usize) -> Result<u64, super::CpuError> {
+    d.validate()?;
+    if tokens == 0 || tokens > 4096 {
+        return Err(super::CpuError::ContextLimit);
+    }
+    let h = d.h as u128;
+    let inter = d.inter as u128;
+    let q = (d.qh * d.w) as u128;
+    let kv = (d.kh * d.w) as u128;
+    let w = d.w as u128;
+    let mut total = 0u128;
+    for pos in 0..tokens {
+        total = total.checked_add(h).ok_or(super::CpuError::WorkLimit)?; // embedding gather
+        for _ in 0..d.layers {
+            // Two RMSNorms, seven dense projections and their row sums.
+            total = total
+                .checked_add(2 * (6 * h + 4))
+                .and_then(|x| x.checked_add(q * h * 3 + q))
+                .and_then(|x| x.checked_add(2 * (kv * h * 3 + kv)))
+                .and_then(|x| x.checked_add(q * h * 3 + h))
+                .and_then(|x| x.checked_add(2 * (inter * h * 3 + inter)))
+                .and_then(|x| x.checked_add(h * inter * 3 + h))
+                .and_then(|x| x.checked_add((d.qh + d.kh) as u128 * (6 * w + 4)))
+                .and_then(|x| x.checked_add((d.qh + d.kh) as u128 * 9 * w))
+                .and_then(|x| x.checked_add(2 * kv)) // append K and V cache
+                .and_then(|x| {
+                    let count = (pos + 1) as u128;
+                    let per_head = count * (4 * w + 9) + w + 1;
+                    x.checked_add(d.qh as u128 * per_head)
+                })
+                .and_then(|x| x.checked_add(4 * h)) // two residual additions
+                .and_then(|x| x.checked_add(7 * inter)) // SwiGLU
+                .and_then(|x| x.checked_add(h)) // diagnostic hidden-state copy
+                .ok_or(super::CpuError::WorkLimit)?;
+        }
+    }
+    // Final RMSNorm plus embedding-vector L2 normalization.
+    total = total
+        .checked_add(6 * h + 4)
+        .and_then(|x| x.checked_add(5 * h + 1))
+        .ok_or(super::CpuError::WorkLimit)?;
+    u64::try_from(total).map_err(|_| super::CpuError::WorkLimit)
+}
 pub(crate) fn name(layer: usize, suffix: &str) -> Result<String, E> {
     let mut s = String::new();
     s.try_reserve_exact(128).map_err(|_| E::AllocationFailed)?;

@@ -27,7 +27,7 @@ pub(crate) struct Workspace {
     pub layers: Vec<f32>,
 }
 impl Workspace {
-    fn new(d: Dimensions, m: &mut Meter, decision: bool) -> Result<Self, E> {
+    fn new(d: Dimensions, m: &mut Meter, decision: bool, embedding: bool) -> Result<Self, E> {
         d.validate()?;
         let cache = d.cache(m.budget.context)?;
         // Reserve all workspace plus every possible escaped logit result before any
@@ -46,7 +46,13 @@ impl Workspace {
             d.inter,
             d.h,
             d.h,
-            if decision { 2 } else { d.vocab },
+            if decision {
+                2
+            } else if embedding {
+                0
+            } else {
+                d.vocab
+            },
             cache,
             cache,
             m.budget.context,
@@ -56,7 +62,7 @@ impl Workspace {
         for n in lengths {
             total = total.checked_add(n as u64).ok_or(E::ResidentLimit)?;
         }
-        let outputs = (if decision { 0 } else { d.vocab } as u64)
+        let outputs = (if decision || embedding { 0 } else { d.vocab } as u64)
             .checked_mul(m.budget.context as u64)
             .ok_or(E::ResidentLimit)?;
         let known = total
@@ -98,6 +104,7 @@ pub(crate) struct Engine<'a> {
     pub pos: usize,
     pub valid: bool,
     selected: Option<[usize; 2]>,
+    embedding: bool,
     started: bool,
 }
 impl<'a> Engine<'a> {
@@ -110,7 +117,7 @@ impl<'a> Engine<'a> {
     ) -> Result<Self, E> {
         d.validate()?;
         let mut meter = Meter::new(budget, control, base_bytes)?;
-        let ws = Workspace::new(d, &mut meter, false)?;
+        let ws = Workspace::new(d, &mut meter, false, false)?;
         Ok(Self {
             d,
             weights,
@@ -119,6 +126,7 @@ impl<'a> Engine<'a> {
             pos: 0,
             valid: true,
             selected: None,
+            embedding: false,
             started: false,
         })
     }
@@ -135,7 +143,7 @@ impl<'a> Engine<'a> {
             return Err(E::InvalidLayout);
         }
         let mut meter = Meter::decision(budget, control, base)?;
-        let ws = Workspace::new(d, &mut meter, true)?;
+        let ws = Workspace::new(d, &mut meter, true, false)?;
         Ok(Self {
             d,
             weights,
@@ -145,6 +153,32 @@ impl<'a> Engine<'a> {
             valid: true,
             started: false,
             selected: Some(rows),
+            embedding: false,
+        })
+    }
+    pub(crate) fn new_embedding(
+        d: Dimensions,
+        weights: BoundWeights<'a>,
+        context: usize,
+        max_resident_bytes: u64,
+        max_work: u64,
+        control: CpuControl,
+        base_bytes: u64,
+    ) -> Result<Self, E> {
+        d.validate()?;
+        let mut meter =
+            Meter::embedding(context, max_resident_bytes, max_work, control, base_bytes)?;
+        let ws = Workspace::new(d, &mut meter, false, true)?;
+        Ok(Self {
+            d,
+            weights,
+            meter,
+            ws,
+            pos: 0,
+            valid: true,
+            selected: None,
+            embedding: true,
+            started: false,
         })
     }
     pub(crate) fn prefill_decision(&mut self, tokens: &[u32]) -> Result<(), E> {
@@ -163,6 +197,45 @@ impl<'a> Engine<'a> {
                 self.compute_projection(t, i + 1 == tokens.len())?;
             }
             Ok(())
+        })();
+        self.poison(result)
+    }
+    pub(crate) fn prefill_embedding(&mut self, tokens: &[u32]) -> Result<(), E> {
+        let result = (|| {
+            if !self.embedding || !self.valid || self.started || self.pos != 0 {
+                return Err(E::InvalidState);
+            }
+            if tokens.is_empty()
+                || tokens.len() > self.meter.budget.context
+                || tokens.iter().any(|&v| v as usize >= self.d.vocab)
+            {
+                return Err(E::ContextLimit);
+            }
+            let required = super::profile::embedding_work_bound(self.d, tokens.len())?;
+            self.meter.preflight(required)?;
+            self.started = true;
+            for (i, &token) in tokens.iter().enumerate() {
+                self.compute_projection(token, i + 1 == tokens.len())?;
+            }
+            Ok(())
+        })();
+        self.poison(result)
+    }
+
+    pub(crate) fn normalized_embedding(&mut self) -> Result<Vec<f32>, E> {
+        let result = (|| {
+            if !self.embedding || !self.valid || self.pos == 0 {
+                return Err(E::InvalidState);
+            }
+            self.meter.control.check()?;
+            let values = &self.ws.final_norm;
+            if values.len() != self.d.h {
+                return Err(E::InvalidLayout);
+            }
+            let mut output = self.meter.zeros(values.len())?;
+            ops::l2_normalize(values, &mut output, &mut self.meter)?;
+            self.meter.control.check()?;
+            Ok(std::mem::take(&mut output))
         })();
         self.poison(result)
     }
@@ -321,7 +394,7 @@ impl<'a> Engine<'a> {
                     m.charge(1)?;
                     x.logits[j] = ops::finite(sum)?;
                 }
-            } else {
+            } else if !self.embedding {
                 ops::matvec(w.embedding, &x.final_norm, &mut x.logits, m)?;
             }
         }
@@ -331,6 +404,9 @@ impl<'a> Engine<'a> {
     }
     pub fn output(&mut self) -> Result<super::CpuLogits, E> {
         let result = (|| {
+            if self.embedding {
+                return Err(E::UnsupportedProfile);
+            }
             if !self.valid || self.pos == 0 {
                 return Err(E::InvalidState);
             }

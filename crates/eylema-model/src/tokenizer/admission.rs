@@ -33,11 +33,21 @@ pub(super) struct ExpectedProfile {
     pub config_size: usize,
     pub tokenizer_sha256: [u8; 32],
     pub config_sha256: [u8; 32],
-    pub decision: bool,
+    pub kind: ExpectedKind,
     pub control: Option<crate::cpu::CpuControl>,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum ExpectedKind {
+    Qwen,
+    Decision,
+    Embedding,
+    #[allow(dead_code)]
+    Test,
 }
 pub(super) const DECISION_SHA: [u8; 32] =
     hex(b"c47cc3f8008e4735ab43acfde124b884cab99f9206913cbecfc79ab06e2d0cdc");
+pub(super) const EMBEDDING_SHA: [u8; 32] =
+    hex(b"ca3cde459437692c9ae877b66cf4d15bab58c0852ec2f0fc7dc08e7003fdc71f");
 impl ExpectedProfile {
     pub fn decision(control: &crate::cpu::CpuControl) -> Self {
         Self {
@@ -45,7 +55,7 @@ impl ExpectedProfile {
             config_size: 9706,
             tokenizer_sha256: TOKEN_SHA,
             config_sha256: hex(b"253153d0738ceb4c668d2eff957714dd2bea0b56de772a9fdccd96cbf517e6a0"),
-            decision: true,
+            kind: ExpectedKind::Decision,
             control: Some(control.clone()),
         }
     }
@@ -55,7 +65,19 @@ impl ExpectedProfile {
             config_size: 9732,
             tokenizer_sha256: TOKEN_SHA,
             config_sha256: CONFIG_SHA,
-            decision: false,
+            kind: ExpectedKind::Qwen,
+            control: None,
+        }
+    }
+    pub fn embedding() -> Self {
+        Self {
+            tokenizer_size: 11423705,
+            config_size: 9706,
+            tokenizer_sha256: hex(
+                b"def76fb086971c7867b829c23a26261e38d9d74e02139253b38aeb9df8b4b50a",
+            ),
+            config_sha256: hex(b"253153d0738ceb4c668d2eff957714dd2bea0b56de772a9fdccd96cbf517e6a0"),
+            kind: ExpectedKind::Embedding,
             control: None,
         }
     }
@@ -283,10 +305,10 @@ pub(super) fn admit<T: Read, C: Read>(
     }
     c.hold(65536 + 32768)?;
     let m = manifest.to_bytes().map_err(|_| E::InvalidProfile)?;
-    let expected_manifest = if e.decision {
-        DECISION_SHA
-    } else {
-        MANIFEST_SHA
+    let expected_manifest = match e.kind {
+        ExpectedKind::Qwen | ExpectedKind::Test => MANIFEST_SHA,
+        ExpectedKind::Decision => DECISION_SHA,
+        ExpectedKind::Embedding => EMBEDDING_SHA,
     };
     if digest(&m)? != expected_manifest {
         return Err(E::UnsupportedProfile);
@@ -298,7 +320,28 @@ pub(super) fn admit<T: Read, C: Read>(
     if fields.len() != 9 {
         return Err(E::InvalidConfig);
     }
-    for(k,val)in [("version",b"\"1.0\"".as_slice()),("truncation",b"null"),("padding",b"null"),("normalizer",br#"{"type":"NFC"}"#),("post_processor",br#"{"type":"ByteLevel","add_prefix_space":false,"trim_offsets":false,"use_regex":false}"#),("decoder",br#"{"type":"ByteLevel","add_prefix_space":false,"trim_offsets":false,"use_regex":false}"#)]{semantic(json::get(&raw,&fields,k)?,val,&mut c)?;}
+    for (k, val) in [
+        ("version", b"\"1.0\"".as_slice()),
+        ("truncation", b"null"),
+        ("padding", b"null"),
+        ("normalizer", br#"{"type":"NFC"}"#),
+        (
+            "decoder",
+            br#"{"type":"ByteLevel","add_prefix_space":false,"trim_offsets":false,"use_regex":false}"#,
+        ),
+    ] {
+        semantic(json::get(&raw, &fields, k)?, val, &mut c)?;
+    }
+    let post_processor = json::get(&raw, &fields, "post_processor")?;
+    if matches!(e.kind, ExpectedKind::Embedding) {
+        semantic(post_processor, EMBEDDING_POST_PROCESSOR, &mut c)?;
+    } else {
+        semantic(
+            post_processor,
+            br#"{"type":"ByteLevel","add_prefix_space":false,"trim_offsets":false,"use_regex":false}"#,
+            &mut c,
+        )?;
+    }
     semantic(
         json::get(&raw, &fields, "pre_tokenizer")?,
         PRETOKENIZER,
@@ -333,7 +376,13 @@ pub(super) fn admit<T: Read, C: Read>(
     let vc = vf.capacity() * std::mem::size_of::<(String, json::Span)>();
     for (name, r) in vf {
         let id = json::uint(&vd[r])?;
-        if id >= if e.decision { 151669 } else { 151936 } {
+        if id
+            >= if matches!(e.kind, ExpectedKind::Decision | ExpectedKind::Embedding) {
+                151669
+            } else {
+                151936
+            }
+        {
             return Err(E::InvalidVocabulary);
         }
         vocab.push(Token { text: name, id });
@@ -497,16 +546,18 @@ pub(super) fn admit<T: Read, C: Read>(
     c.work = 0;
     let rawcfg = read(cfg, e.config_size, e.config_sha256, &mut c)?;
     let f = Parser::new(&rawcfg, &mut c, 8192)?.object()?;
-    if (!e.decision && f.len() != 14) || f.len() > 32 {
+    if (matches!(e.kind, ExpectedKind::Qwen) && f.len() != 14) || f.len() > 32 {
         return Err(E::InvalidConfig);
     }
-    let template = text(json::get(&rawcfg, &f, "chat_template")?, &mut c, 8192)?;
-    if !e.decision && digest(template.as_bytes())? != TEMPLATE_SHA {
-        return Err(E::InvalidConfig);
+    if matches!(e.kind, ExpectedKind::Qwen) {
+        let template = text(json::get(&rawcfg, &f, "chat_template")?, &mut c, 8192)?;
+        if digest(template.as_bytes())? != TEMPLATE_SHA {
+            return Err(E::InvalidConfig);
+        }
+        let size = template.capacity();
+        drop(template);
+        c.release(size);
     }
-    let size = template.capacity();
-    drop(template);
-    c.release(size);
     json::free_fields(&mut c, f);
     c.drop_vec(rawcfg);
     c.release(65536);
@@ -514,11 +565,13 @@ pub(super) fn admit<T: Read, C: Read>(
         .fields()
         .configuration
         .context_limit
-        .checked_sub(if e.decision {
-            0
-        } else {
-            manifest.fields().configuration.max_new_tokens
-        })
+        .checked_sub(
+            if matches!(e.kind, ExpectedKind::Qwen | ExpectedKind::Test) {
+                manifest.fields().configuration.max_new_tokens
+            } else {
+                0
+            },
+        )
         .ok_or(E::InvalidProfile)? as usize;
     Ok(AdmittedData {
         vocab,
@@ -535,6 +588,7 @@ pub(super) fn admit<T: Read, C: Read>(
 }
 
 const PRETOKENIZER:&[u8]=br#"{"type":"Sequence","pretokenizers":[{"type":"Split","pattern":{"Regex":"(?i:'s|'t|'re|'ve|'m|'ll|'d)|[^\\r\\n\\p{L}\\p{N}]?\\p{L}+|\\p{N}| ?[^\\s\\p{L}\\p{N}]+[\\r\\n]*|\\s*[\\r\\n]+|\\s+(?!\\S)|\\s+"},"behavior":"Isolated","invert":false},{"type":"ByteLevel","add_prefix_space":false,"trim_offsets":false,"use_regex":false}]}"#;
+const EMBEDDING_POST_PROCESSOR: &[u8] = br#"{"type":"Sequence","processors":[{"type":"ByteLevel","add_prefix_space":false,"trim_offsets":false,"use_regex":false},{"type":"TemplateProcessing","single":[{"Sequence":{"id":"A","type_id":0}},{"SpecialToken":{"id":"<|endoftext|>","type_id":0}}],"pair":[{"Sequence":{"id":"A","type_id":0}},{"Sequence":{"id":"B","type_id":0}},{"SpecialToken":{"id":"<|endoftext|>","type_id":0}}],"special_tokens":{"<|endoftext|>":{"id":"<|endoftext|>","ids":[151643],"tokens":["<|endoftext|>"]}}}]}"#;
 pub(super) const ADDED: [&str; 26] = [
     "<|endoftext|>",
     "<|im_start|>",
@@ -570,7 +624,7 @@ pub(super) fn test_expected() -> ExpectedProfile {
         config_size: 9732,
         tokenizer_sha256: hex(b"248499cd3f9f391e68fb812053ba81c62a69e1cd8d244671df71ee7a37ecfb37"),
         config_sha256: CONFIG_SHA,
-        decision: false,
+        kind: ExpectedKind::Test,
         control: None,
     }
 }

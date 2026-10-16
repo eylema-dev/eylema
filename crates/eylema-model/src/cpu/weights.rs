@@ -97,6 +97,18 @@ impl<'a> BoundWeights<'a> {
             Ok(Tensor(Storage::Bf16(b)))
         })
     }
+    // Only the separately admitted G68 backbone uses unprefixed tensor names.
+    // No fallback or output-head alias is permitted.
+    pub(crate) fn loaded_embedding(d: Dimensions, w: &'a LoadedWeights) -> Result<Self, E> {
+        Self::bind(d, |name, n| {
+            let name = name.strip_prefix("model.").ok_or(E::InvalidLayout)?;
+            let b = w.tensor_bytes(name).ok_or(E::InvalidLayout)?;
+            if b.len() != 2 * n {
+                return Err(E::InvalidLayout);
+            }
+            Ok(Tensor(Storage::Bf16(b)))
+        })
+    }
     #[cfg(test)]
     pub fn synthetic(
         d: Dimensions,
