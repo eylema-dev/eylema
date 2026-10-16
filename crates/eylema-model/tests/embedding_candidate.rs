@@ -235,6 +235,26 @@ fn pinned_embedding_artifact_structure() {
     )
     .expect("bounded exact-profile admission without forward");
     assert!(model.admission_work() <= 2_500_000_000_000);
+    let preflight = CpuControl::new_job(
+        Instant::now() + Duration::from_secs(60),
+        2_500_000_000_000,
+        CpuWorkGroup::new(2_500_000_000_000).unwrap(),
+    )
+    .unwrap();
+    let observer = preflight.clone();
+    assert_context_rejections(
+        &model,
+        &tokenizer,
+        EmbeddingBudget {
+            context: 4096,
+            max_resident_bytes: 2_684_354_560,
+            max_work: 2_500_000_000_000,
+        },
+        preflight,
+    );
+    // Only tokenizer/admission work is charged: the 4096-token forward cannot fit.
+    assert!(observer.observed_work() > 26_000_000);
+    assert!(observer.observed_work() < 100_000_000);
 }
 
 fn hex(bytes: &[u8]) -> String {
@@ -392,40 +412,7 @@ fn actual_pinned_embeddings() {
         model.embed_document(PAIRS[0].1, b, job()).unwrap().vector(),
         results[1]
     );
-    // Job 4: exact 4096-token admission/preflight and rejection without a forward.
-    let preflight = job();
-    let mut boundary = None;
-    for n in 4080..4100 {
-        let text = "a ".repeat(n);
-        if tokenizer
-            .encode_document(&text, text_budget(), &preflight)
-            .is_ok_and(|t| t.ids().len() == 4096)
-        {
-            boundary = Some(text);
-            break;
-        }
-    }
-    let boundary = boundary.expect("exact native 4096-token boundary");
-    let low = EmbeddingBudget {
-        max_work: 1_000_000,
-        ..b
-    };
-    assert_eq!(
-        model
-            .embed_document(&boundary, low, preflight.clone())
-            .unwrap_err(),
-        CpuError::WorkLimit
-    );
-    assert_eq!(
-        model.embed_document("", b, preflight.clone()).unwrap_err(),
-        CpuError::InvalidInput
-    );
-    assert_eq!(
-        model
-            .embed_document(&over_context_input(), b, preflight)
-            .unwrap_err(),
-        CpuError::ContextLimit
-    );
+    assert_context_rejections(&model, &tokenizer, b, job());
     // Job 5: cancellation is triggered only beyond complete workspace initialization and tokenizer work, inside decoder forward.
     let stop = job();
     let observer = stop.clone();
@@ -462,6 +449,46 @@ fn actual_pinned_embeddings() {
         group.observed_work(),
         start.elapsed().as_secs_f64(),
         hex(&eylema_platform::sha256(&reference_bytes).unwrap())
+    );
+}
+
+fn assert_context_rejections(
+    model: &EmbeddingCpuModel<'_>,
+    tokenizer: &EmbeddingTokenizer,
+    b: EmbeddingBudget,
+    preflight: CpuControl,
+) {
+    use eylema_model::cpu::CpuError;
+    // Job 4: exact 4096-token admission/preflight and rejection without a forward.
+    let mut boundary = None;
+    for n in 4080..4100 {
+        let text = "a ".repeat(n);
+        if tokenizer
+            .encode_document(&text, text_budget(), &preflight)
+            .is_ok_and(|t| t.ids().len() == 4096)
+        {
+            boundary = Some(text);
+            break;
+        }
+    }
+    let boundary = boundary.expect("exact native 4096-token boundary");
+    // Keep the shared control above its boundary-search cost. The fixed
+    // 4096-token forward estimate already exceeds this 2.5e12 work ceiling.
+    assert_eq!(
+        model
+            .embed_document(&boundary, b, preflight.clone())
+            .unwrap_err(),
+        CpuError::WorkLimit
+    );
+    assert_eq!(
+        model.embed_document("", b, preflight.clone()).unwrap_err(),
+        CpuError::InvalidInput
+    );
+    assert_eq!(
+        model
+            .embed_document(&over_context_input(), b, preflight)
+            .unwrap_err(),
+        CpuError::ContextLimit
     );
 }
 
