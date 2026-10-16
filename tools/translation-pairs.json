@@ -259,6 +259,18 @@
       "tr": "docs/tr/g68-cpu-embeddings.md",
       "en_sha256": "34ca85df81e79f6bed1a57337e3ccf54f9a6e6b2cd51aaa6b828aefb8523078e",
       "tr_sha256": "bdf306a5b96bc32b1923e59e11d5ebd8453a3071d7fafa3fcada60087ae07c82"
+    },
+    {
+      "en": "docs/en/g70-retrieval-design.md",
+      "tr": "docs/tr/g70-retrieval-design.md",
+      "en_sha256": "36eef3f14fc2ce052f9f91e6dee07c495f2d754b9488b2049bb1bceacbb58bdb",
+      "tr_sha256": "50f2b35adfa528fcf80301ce62ac04aa35cb3b49170aa6c963afd3457f9473c6"
+    },
+    {
+      "en": "docs/en/retrieval.md",
+      "tr": "docs/tr/retrieval.md",
+      "en_sha256": "cec94ede4ed394fbfc3cc932520b8aa49d2c9815cc71da10d3bdf0542dc9a9de",
+      "tr_sha256": "63e03bbcf06a58621bca1f3492aa83cc96f320164b464a6c19afe177b055f7a8"
     }
   ],
   "documents": []
