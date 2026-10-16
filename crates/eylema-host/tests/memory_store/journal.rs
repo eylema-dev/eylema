@@ -70,4 +70,32 @@ fn fragmented_io_is_finite() {
     assert!(MemoryStore::open(m.clone(), NativeHash, &mut d, &o, profile(), &mut c()).is_err());
     assert!(m.reads.get() <= 4096);
 }
-#[test]fn fragmented_append_stops_before_1025th_write(){let(mut d,o,ds,_)=data();let m=Mem::default();let(mut s,owner)=MemoryStore::create_new(m.clone(),NativeHash,&mut d,&o,profile(),&mut c()).unwrap();let session=s.enroll(&owner,&mut d,&ds,&mut c()).unwrap();let source=pin(&mut d,&ds,"source");let mut vector=vec![0.;1024];vector[0]=1.;m.fragment.set(true);let before=m.writes.get();assert_eq!(s.propose(&mut d,&session,0,None,entity(source),Some(&vector),r("entity:1"),&mut c()).err(),Some(MemoryStoreError::WriteOutcomeUnknown));assert_eq!(m.writes.get()-before,1024);assert_eq!(s.generation(),0);}
+#[test]
+fn fragmented_append_stops_before_1025th_write() {
+    let (mut d, o, ds, _) = data();
+    let m = Mem::default();
+    let (mut s, owner) =
+        MemoryStore::create_new(m.clone(), NativeHash, &mut d, &o, profile(), &mut c()).unwrap();
+    let session = s.enroll(&owner, &mut d, &ds, &mut c()).unwrap();
+    let source = pin(&mut d, &ds, "source");
+    let mut vector = vec![0.; 1024];
+    vector[0] = 1.;
+    m.fragment.set(true);
+    let before = m.writes.get();
+    assert_eq!(
+        s.propose(
+            &mut d,
+            &session,
+            0,
+            None,
+            entity(source),
+            Some(&vector),
+            r("entity:1"),
+            &mut c()
+        )
+        .err(),
+        Some(MemoryStoreError::WriteOutcomeUnknown)
+    );
+    assert_eq!(m.writes.get() - before, 1024);
+    assert_eq!(s.generation(), 0);
+}

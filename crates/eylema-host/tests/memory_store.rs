@@ -2,6 +2,8 @@
 mod frozen;
 #[path = "memory_store/journal.rs"]
 mod journal;
+#[path = "memory_store/recall.rs"]
+mod recall;
 #[path = "memory_store/records.rs"]
 mod records;
 #[path = "../../eylema-runtime/tests/support/mod.rs"]

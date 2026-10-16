@@ -21,9 +21,11 @@ use std::{
     time::{Duration, Instant},
 };
 mod guard;
+mod query;
 mod wire;
 mod write;
 use guard::{Gate, GuardedStorage, Mode};
+pub use query::{MemoryCachedQuery, MemoryCitation, MemoryContext, MemoryStatus};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MemoryStoreError {
     InvalidRequest,
@@ -50,8 +52,15 @@ impl From<RecordError> for MemoryStoreError {
     }
 }
 impl From<DataError> for MemoryStoreError {
-    fn from(_: DataError) -> Self {
-        Self::Forbidden
+    fn from(e: DataError) -> Self {
+        match e {
+            DataError::Forbidden
+            | DataError::Expired
+            | DataError::WrongProject
+            | DataError::NotFound => Self::Forbidden,
+            DataError::BudgetExceeded => Self::Limit,
+            _ => Self::Backend,
+        }
     }
 }
 impl From<RetrievalError> for MemoryStoreError {
