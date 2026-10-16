@@ -2,12 +2,14 @@
 mod admission;
 mod bpe;
 mod budget;
+mod embedding;
 mod error;
 mod json;
 mod prompt;
 mod split;
 mod unicode;
 pub use budget::{AdmissionBudget, TextBudget};
+pub use embedding::EmbeddingTokenizer;
 pub use error::TokenizeError;
 #[cfg(test)]
 mod tests;
@@ -305,3 +307,6 @@ impl DecisionTokenizer {
         })
     }
 }
+
+#[cfg(test)]
+pub(crate) use embedding::test_fixture as embedding_test_fixture;

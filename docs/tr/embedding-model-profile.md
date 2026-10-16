@@ -29,3 +29,5 @@ Model/core fixture’ı bayt eşittir: 5003bayt, SHA256ca3cde459437692c9ae877b66
 ## Platform ve veri yönü
 
 Eyleme, uygunluğu onaylanmış frontier LLM kaynak geliştirmesi altında kaynaklara uyumlu işbirlikçi yerel açık ağırlık uzman ekosistemini hedefler. Kendi Rust harness/memory/RAG/modele özel eğitim ve reçetelerimiz ölçülmüş sonuçlar ve insan düzeltmeleriyle gelişir. Özel proje/kurum kayıtları ve türevleri kapsamda kalır; yalnız ayrıca yetkilendirilmiş hak/köken/anonimlik incelemesinden geçmiş adaylar ekosisteme girebilir. Bu Goal kamuya açık metaveri ve kendi sentetik vektör/metinlerimizi kullanır; kullanıcı verisi toplama, anonimleştirme, eğitim veya dışa aktarma yoktur.
+
+G68 uygulaması ve bekleyen yerel sayısal kabul: [sınırlı CPU embedding](g68-cpu-embeddings.md). Bu devam G67 kanıtını yeniden yazmaz.

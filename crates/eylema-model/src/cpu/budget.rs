@@ -30,6 +30,43 @@ pub(crate) struct Meter {
     pub peak: u64,
 }
 impl Meter {
+    pub(crate) fn embedding(
+        context: usize,
+        max_resident_bytes: u64,
+        max_work: u64,
+        control: CpuControl,
+        resident: u64,
+    ) -> Result<Self, E> {
+        if !(1..=4096).contains(&context) {
+            return Err(E::ContextLimit);
+        }
+        if max_resident_bytes == 0 || max_resident_bytes > 2_684_354_560 {
+            return Err(E::ResidentLimit);
+        }
+        if max_work == 0 || max_work > 2_500_000_000_000 {
+            return Err(E::WorkLimit);
+        }
+        control.check()?;
+        if resident > max_resident_bytes {
+            return Err(E::ResidentLimit);
+        }
+        if control.observed_work() > max_work {
+            return Err(E::WorkLimit);
+        }
+        control.restrict_work(max_work)?;
+        Ok(Self {
+            control,
+            budget: CpuBudget {
+                context,
+                max_new_tokens: 0,
+                max_resident_bytes,
+                max_work,
+            },
+            resident,
+            peak: resident,
+        })
+    }
+
     pub(crate) fn decision(
         b: crate::decision::DecisionBudget,
         control: CpuControl,

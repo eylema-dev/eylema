@@ -16,3 +16,4 @@ pub mod cpu;
 pub mod tokenizer;
 
 pub mod decision;
+pub mod embedding;

@@ -112,6 +112,54 @@ fn aggregate_work_not_reset_and_generation_caps() {
     assert_eq!(old.validate(), Err(CpuError::ContextLimit));
     assert_eq!(profile::QWEN.cache(4096).unwrap() * 8, 939524096);
 }
+
+#[test]
+fn embedding_l2_normalization_is_finite_bounded_and_rejects_zero() {
+    let db = crate::decision::DecisionBudget {
+        context: 8,
+        max_resident_bytes: 1024,
+        max_work: 1024,
+    };
+    let mut meter = budget::Meter::decision(db, control(), 0).unwrap();
+    let mut normalized = [0.0; 3];
+    ops::l2_normalize(&[3.0, 4.0, 0.0], &mut normalized, &mut meter).unwrap();
+    assert_eq!(normalized, [0.6, 0.8, 0.0]);
+
+    let mut meter = budget::Meter::decision(db, control(), 0).unwrap();
+    assert_eq!(
+        ops::l2_normalize(&[0.0; 3], &mut normalized, &mut meter),
+        Err(CpuError::InvalidOutput)
+    );
+    let mut meter = budget::Meter::decision(db, control(), 0).unwrap();
+    assert_eq!(
+        ops::l2_normalize(&[f32::NAN, 1.0, 0.0], &mut normalized, &mut meter),
+        Err(CpuError::NonFinite)
+    );
+}
+
+#[test]
+fn embedding_work_preflight_tracks_context_and_rejects_oversize() {
+    let d = profile::Dimensions {
+        h: 4,
+        inter: 8,
+        qh: 2,
+        kh: 1,
+        w: 2,
+        layers: 1,
+        vocab: 9,
+    };
+    let one = profile::embedding_work_bound(d, 1).unwrap();
+    let two = profile::embedding_work_bound(d, 2).unwrap();
+    assert!(two > one);
+    assert_eq!(
+        profile::embedding_work_bound(d, 0),
+        Err(CpuError::ContextLimit)
+    );
+    assert_eq!(
+        profile::embedding_work_bound(d, 4097),
+        Err(CpuError::ContextLimit)
+    );
+}
 #[test]
 fn long_attention_global_normalization_and_stop() {
     let d = profile::Dimensions {
@@ -740,4 +788,39 @@ fn known_generation_limits_reject_before_frontend_work() {
         CpuError::WorkLimit
     );
     assert_eq!(c.observed_work(), 0);
+}
+
+#[test]
+fn embedding_workspace_has_no_vocabulary_buffer_and_stops_after_initialization() {
+    let d = profile::Dimensions {
+        h: 4,
+        inter: 8,
+        qh: 2,
+        kh: 1,
+        w: 2,
+        layers: 1,
+        vocab: 9,
+    };
+    let tensors = synthetic(d);
+    let weights = weights::BoundWeights::synthetic(d, &tensors).unwrap();
+    let c = control();
+    let mut engine =
+        session::Engine::new_embedding(d, weights, 8, 32 * 1024 * 1024, 20_000_000, c.clone(), 0)
+            .unwrap();
+    assert!(engine.ws.logits.is_empty());
+    let initialized = c.observed_work();
+    c.stop_after(initialized + 1);
+    assert_eq!(
+        engine.prefill_embedding(&[0, 1, 2]),
+        Err(CpuError::Cancelled)
+    );
+    assert!(c.observed_work() > initialized);
+    assert_eq!(
+        engine.normalized_embedding().unwrap_err(),
+        CpuError::InvalidState
+    );
+    assert_eq!(
+        engine.prefill_embedding(&[0]).unwrap_err(),
+        CpuError::InvalidState
+    );
 }

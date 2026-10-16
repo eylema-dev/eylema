@@ -173,8 +173,8 @@
     {
       "en": "docs/en/embedding-model-profile.md",
       "tr": "docs/tr/embedding-model-profile.md",
-      "en_sha256": "41d870e697cdca1b597469be6b9754a40f787d149e4f0fbe955180fdf11305ff",
-      "tr_sha256": "4a19eb9ff0d9c4601866cf1556e0cb5f51d0f0e26ffcf0105fa095ad3d60c99d"
+      "en_sha256": "76f1975a21c2543a4d18c42b29c0b5b0a8e43a2c074ad0358966aed4f52001be",
+      "tr_sha256": "548f0e8e43145e0449947228ae8d1d681d78b28cb98339e8d82cbfe57c788a12"
     },
     {
       "en": "docs/en/g80-resource-estimator-design.md",
@@ -253,6 +253,12 @@
       "tr": "docs/tr/cpu-decision.md",
       "en_sha256": "e299b4436f0917fc021266f7ebe2df81538cc1baa22d22c3a7aa9e45de5840a0",
       "tr_sha256": "e7bb5904436de83cd1967a03db39a6768d666011780a902bdd26bf8f7c4dd1e7"
+    },
+    {
+      "en": "docs/en/g68-cpu-embeddings.md",
+      "tr": "docs/tr/g68-cpu-embeddings.md",
+      "en_sha256": "34ca85df81e79f6bed1a57337e3ccf54f9a6e6b2cd51aaa6b828aefb8523078e",
+      "tr_sha256": "bdf306a5b96bc32b1923e59e11d5ebd8453a3071d7fafa3fcada60087ae07c82"
     }
   ],
   "documents": []

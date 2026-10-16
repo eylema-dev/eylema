@@ -612,7 +612,7 @@ fn decision_private_positive_parser_profile() {
         crate::cpu::CpuControl::new(std::time::Instant::now() + std::time::Duration::from_secs(30))
             .unwrap();
     let mut e = admission::test_expected();
-    e.decision = true;
+    e.kind = admission::ExpectedKind::Decision;
     e.control = Some(control.clone());
     let m = eylema_contracts::model_contract::ModelManifest::from_bytes(include_bytes!(
         "../../tests/fixtures/g57/cpu-profile.v1.eyl"
