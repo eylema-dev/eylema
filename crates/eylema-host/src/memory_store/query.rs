@@ -313,8 +313,15 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
             }
         }
         hits.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)));
+        let conflict_candidates: Vec<_> = hits
+            .iter()
+            .map(|(id, _)| id.clone())
+            .chain(links.iter().cloned())
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect();
         let mut conflict_groups = Vec::<BTreeSet<RecordId>>::new();
-        for (i, (id, _)) in hits.iter().enumerate() {
+        for (i, id) in conflict_candidates.iter().enumerate() {
             let a = &self.records[id].record.draft;
             if a.predicate.as_ref().is_none_or(|p| {
                 !self
@@ -326,7 +333,7 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
                 continue;
             }
             let mut group = BTreeSet::new();
-            for (other, _) in hits.iter().skip(i + 1) {
+            for other in conflict_candidates.iter().skip(i + 1) {
                 let b = &self.records[other].record.draft;
                 if a.subject == b.subject
                     && a.predicate == b.predicate
@@ -433,27 +440,6 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
             }
             hits = order;
         }
-        let selected_ids: BTreeSet<_> = hits
-            .iter()
-            .take(q.max_hits)
-            .map(|(id, _)| id.clone())
-            .collect();
-        let mut conflicts = BTreeSet::new();
-        for group in conflict_groups {
-            if group.iter().any(|id| selected_ids.contains(id)) {
-                conflicts.extend(group)
-            }
-        }
-        if !conflicts.is_subset(&selected_ids) {
-            return Err(MemoryStoreError::IncompleteConflict);
-        }
-        if hits.len() > q.max_hits {
-            return Err(if conflicts.is_empty() {
-                MemoryStoreError::Limit
-            } else {
-                MemoryStoreError::IncompleteConflict
-            });
-        }
         let has_evidence = !hits.is_empty();
         if has_evidence {
             for id in links {
@@ -475,8 +461,26 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
         if matches!(q.rank, RankMode::Graph) {
             hits.sort_by(|a, b| a.1.cmp(&b.1).then(a.0.cmp(&b.0)))
         }
+        let selected_ids: BTreeSet<_> = hits
+            .iter()
+            .take(q.max_hits)
+            .map(|(id, _)| id.clone())
+            .collect();
+        let mut conflicts = BTreeSet::new();
+        for group in conflict_groups {
+            if group.iter().any(|id| selected_ids.contains(id)) {
+                conflicts.extend(group)
+            }
+        }
+        if !conflicts.is_subset(&selected_ids) {
+            return Err(MemoryStoreError::IncompleteConflict);
+        }
         if hits.len() > q.max_hits {
-            return Err(MemoryStoreError::Limit);
+            return Err(if conflicts.is_empty() {
+                MemoryStoreError::Limit
+            } else {
+                MemoryStoreError::IncompleteConflict
+            });
         }
         let mut all_pins = BTreeMap::<DataRef, SourcePin>::new();
         let mut citations = BTreeMap::<DataRef, MemoryCitation>::new();

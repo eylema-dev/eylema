@@ -29,6 +29,16 @@ mod matrix {
         backing: Mem,
     }
     fn fixture() -> Fixture {
+        fixture_with_edges(Cardinality::SetValue)
+    }
+    fn fixture_with_edges(cardinality: Cardinality) -> Fixture {
+        let mut profile = corpus_profile();
+        profile
+            .predicates
+            .iter_mut()
+            .find(|p| p.id.as_str() == "contains")
+            .unwrap()
+            .cardinality = cardinality;
         let clock = Clock::new(1);
         let (mut data, owner) = ProjectStore::create_new(
             Journal::create_new(Mem::default(), NativeHash, project_journal_limits()).unwrap(),
@@ -43,7 +53,7 @@ mod matrix {
             NativeHash,
             &mut data,
             &owner,
-            corpus_profile(),
+            profile,
             &mut c(),
         )
         .unwrap();
@@ -428,5 +438,82 @@ mod matrix {
             .unwrap();
         assert_eq!(result.record_count(), 1);
         assert_eq!(result.records()[0].draft.id.as_str(), "en-check");
+    }
+    #[test]
+    fn path_conflicts_include_links_outside_result_predicates() {
+        use eylema_contracts::{memory::durable::*, platform::SemanticProfileId};
+        use eylema_host::memory_store::*;
+
+        for cardinality in [Cardinality::SingleValue, Cardinality::SetValue] {
+            let mut f = fixture_with_edges(cardinality);
+            let mut draft = claim(pin(&mut f.data, &f.ds, "en-site"));
+            draft.id = id("second-link");
+            draft.kind = RecordKind::Relation;
+            draft.subject = Some(id("north"));
+            draft.predicate = Some(SemanticProfileId::new("contains").unwrap());
+            draft.object = Some(TypedObject::Entity(id("north")));
+            add(&mut f, 0, draft);
+            for mode in 0..4 {
+                let mut query = super::briefs::job_query(3, false, mode, f.memory.generation())
+                    .fields()
+                    .clone();
+                query.result_predicates = vec![SemanticProfileId::new("owner").unwrap()];
+                let context = f
+                    .memory
+                    .query(
+                        &mut f.data,
+                        &f.session,
+                        &Query::new(query.clone()).unwrap(),
+                        &mut c(),
+                    )
+                    .unwrap();
+                assert_eq!(
+                    context.status(),
+                    if cardinality == Cardinality::SingleValue {
+                        MemoryStatus::Conflict
+                    } else {
+                        MemoryStatus::Evidence
+                    }
+                );
+                let ids: std::collections::BTreeSet<_> = context
+                    .records()
+                    .iter()
+                    .map(|r| r.draft.id.as_str())
+                    .collect();
+                assert_eq!(
+                    ids,
+                    ["en-link", "second-link", "en-owner"].into_iter().collect()
+                );
+                query.max_hits = 2;
+                assert_eq!(
+                    f.memory
+                        .query(
+                            &mut f.data,
+                            &f.session,
+                            &Query::new(query.clone()).unwrap(),
+                            &mut c()
+                        )
+                        .err(),
+                    Some(if cardinality == Cardinality::SingleValue {
+                        MemoryStoreError::IncompleteConflict
+                    } else {
+                        MemoryStoreError::Limit
+                    })
+                );
+                query.max_hits = 16;
+                query.max_bytes = 32;
+                assert!(matches!(
+                    f.memory
+                        .query(
+                            &mut f.data,
+                            &f.session,
+                            &Query::new(query).unwrap(),
+                            &mut c()
+                        )
+                        .err(),
+                    Some(MemoryStoreError::IncompleteConflict | MemoryStoreError::Limit)
+                ));
+            }
+        }
     }
 }

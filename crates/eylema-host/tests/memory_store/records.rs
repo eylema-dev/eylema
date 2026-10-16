@@ -20,10 +20,21 @@ pub struct Mem {
     pub fragment: Rc<Cell<bool>>,
     pub fail: Rc<Cell<u8>>,
     pub sync_clock: Rc<RefCell<Option<Rc<Cell<u64>>>>>,
+    pub read_cancel: Rc<RefCell<Option<MemoryCancel>>>,
+    pub read_delay: Rc<Cell<Option<Duration>>>,
 }
 impl Read for Mem {
     fn read(&mut self, b: &mut [u8]) -> io::Result<usize> {
         self.reads.set(self.reads.get() + 1);
+        if let Some(token) = self.read_cancel.borrow_mut().take() {
+            token.cancel();
+        }
+        if let Some(delay) = self.read_delay.take() {
+            std::thread::sleep(delay);
+        }
+        if self.fail.get() == 4 {
+            return Err(io::ErrorKind::Other.into());
+        }
         let n = if self.fragment.get() {
             b.len().min(1)
         } else {

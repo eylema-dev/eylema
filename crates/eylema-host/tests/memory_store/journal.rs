@@ -99,3 +99,59 @@ fn fragmented_append_stops_before_1025th_write() {
     assert_eq!(m.writes.get() - before, 1024);
     assert_eq!(s.generation(), 0);
 }
+
+#[test]
+fn replay_control_failures_preserve_their_categories_after_physical_read() {
+    for mode in 0..3 {
+        let (mut data, owner, _, _) = data();
+        let storage = Mem::default();
+        let (memory, _) = MemoryStore::create_new(
+            storage.clone(),
+            NativeHash,
+            &mut data,
+            &owner,
+            profile(),
+            &mut c(),
+        )
+        .unwrap();
+        memory.close();
+        let reads = storage.reads.get();
+        let token = MemoryCancel::new();
+        let mut control = MemoryControl::new(
+            MemoryBudget {
+                max_work: 100_000_000,
+                max_live_bytes: 64 * 1024 * 1024,
+                deadline: Instant::now() + Duration::from_millis(if mode == 1 { 20 } else { 5000 }),
+            },
+            token.clone(),
+        )
+        .unwrap();
+        if mode == 0 {
+            *storage.read_cancel.borrow_mut() = Some(token);
+        }
+        if mode == 1 {
+            storage.read_delay.set(Some(Duration::from_millis(30)));
+        }
+        if mode == 2 {
+            storage.fail.set(4);
+        }
+        assert_eq!(
+            MemoryStore::open(
+                storage.clone(),
+                NativeHash,
+                &mut data,
+                &owner,
+                profile(),
+                &mut control
+            )
+            .err(),
+            Some(match mode {
+                0 => MemoryStoreError::Cancelled,
+                1 => MemoryStoreError::Deadline,
+                _ => MemoryStoreError::Backend,
+            })
+        );
+        assert!(storage.reads.get() > reads);
+        assert!(control.work_used() > 50_000_000);
+    }
+}

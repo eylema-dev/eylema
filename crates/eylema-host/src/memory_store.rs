@@ -274,6 +274,9 @@ impl<T: Storage, H: Sha256> MemoryStore<T, H> {
             Ok(v) => v,
             Err(e) => {
                 gate.end(n, c);
+                if reopen {
+                    c.inner.check()?;
+                }
                 return Err(e);
             }
         };
