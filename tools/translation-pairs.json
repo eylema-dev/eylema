@@ -257,8 +257,8 @@
     {
       "en": "docs/en/g68-cpu-embeddings.md",
       "tr": "docs/tr/g68-cpu-embeddings.md",
-      "en_sha256": "5952a1b52043f9d1de4a9b0295075fae696fa6861685e51429f48d1694a17b45",
-      "tr_sha256": "bb2b503e9ee64ed4b76e62b0078428fadde7c9129e9340e5a86f2110dbbc5d55"
+      "en_sha256": "34ca85df81e79f6bed1a57337e3ccf54f9a6e6b2cd51aaa6b828aefb8523078e",
+      "tr_sha256": "bdf306a5b96bc32b1923e59e11d5ebd8453a3071d7fafa3fcada60087ae07c82"
     }
   ],
   "documents": []
