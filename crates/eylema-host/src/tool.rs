@@ -89,6 +89,23 @@ pub struct ToolHost<T: Storage, H: Sha256, S: HostServices> {
     data_identity: Option<Arc<()>>,
     measurement_identity: Arc<()>,
 }
+/// Sealed crate-local observation from a live authorized report, never caller input.
+pub(crate) struct MemoryObservation {
+    status: ToolStatus,
+    controls: Vec<eylema_contracts::project_data::DataRef>,
+    text: String,
+}
+impl MemoryObservation {
+    pub(crate) fn status(&self) -> ToolStatus {
+        self.status
+    }
+    pub(crate) fn controls(&self) -> &[eylema_contracts::project_data::DataRef] {
+        &self.controls
+    }
+    pub(crate) fn text(&self) -> &str {
+        &self.text
+    }
+}
 impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
     /// Fresh host only: importing recovered tasks without durable tool lineage
     /// would allow a replay to relabel a private source-backed input as literal.
@@ -489,6 +506,65 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         }
         row.decision = Some(declaration);
         Ok(())
+    }
+    pub(crate) fn memory_observation<D: Storage, F: Sha256, C: DataClock>(
+        &self,
+        data: &mut ProjectStore<D, F, C>,
+        session: &DurableSession,
+        id: &ExecutionId,
+    ) -> std::result::Result<MemoryObservation, ToolError> {
+        let row = self
+            .records
+            .get(id)
+            .ok_or(ToolError::ProvenanceUnavailable)?;
+        let task = &row.plan.task().fields().task_id;
+        let mut refs = std::collections::BTreeSet::new();
+        for prior in self
+            .records
+            .values()
+            .filter(|p| &p.plan.task().fields().task_id == task)
+        {
+            for source in prior
+                .plan
+                .bindings()
+                .iter()
+                .filter_map(|b| b.source.as_ref())
+                .chain(prior.skill.iter().flat_map(|s| s.controls.iter()))
+            {
+                if source.id.as_str().len() > 128 || source.project.as_str().len() > 128 {
+                    return Err(ToolError::InvalidEvidence);
+                }
+                refs.insert(source);
+                if refs.len() > 8 {
+                    return Err(ToolError::InvalidEvidence);
+                }
+            }
+        }
+        if row.plan.bindings().len() > 8 {
+            return Err(ToolError::InvalidEvidence);
+        }
+        let report = self.report(data, session, id)?;
+        let status = match report.status {
+            ToolStatus::Pending => "pending",
+            ToolStatus::Completed => "completed",
+            ToolStatus::Failed => "failed",
+            ToolStatus::Stopped => "stopped",
+            ToolStatus::Partial => "partial",
+            ToolStatus::Unknown => "unknown",
+        };
+        let value = match report.outputs.last().map(|o| codec::decode(&o.bytes)) {
+            Some(Ok(Value::Unsigned(v))) => v.to_string(),
+            _ => "unavailable".into(),
+        };
+        let text = format!("execution={}; status={status}; value={value}", id.as_str());
+        if text.len() > 256 {
+            return Err(ToolError::InvalidEvidence);
+        }
+        Ok(MemoryObservation {
+            status: report.status,
+            controls: refs.into_iter().cloned().collect(),
+            text,
+        })
     }
     pub fn decision_evidence<D: Storage, F: Sha256, C: DataClock>(
         &self,
