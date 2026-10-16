@@ -1,4 +1,5 @@
 //! Declared memory/query semantics. Confidence and metadata are never authority.
+pub mod durable;
 use crate::{
     Revision, ValidationError,
     codec::Value,
