@@ -14,7 +14,10 @@ use eylema_journal::{Sha256, Storage};
 use eylema_runtime::routing::*;
 use std::sync::Arc;
 mod discovery;
+mod dispatch;
 mod guard;
+mod wire;
+pub use dispatch::{CallPayload, DispatchReceipt, Selection, SelectionTicket};
 pub use guard::RouteControl;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RouteError {
@@ -346,4 +349,14 @@ fn entry_value(e: &Entry) -> Value {
         text(e.input_schema.as_str()),
         text(e.output_schema.as_str()),
     ])
+}
+
+impl From<crate::retrieval::HostRetrievalError> for RouteError {
+    fn from(e: crate::retrieval::HostRetrievalError) -> Self {
+        match e {
+            crate::retrieval::HostRetrievalError::Forbidden
+            | crate::retrieval::HostRetrievalError::Data(_) => Self::Forbidden,
+            crate::retrieval::HostRetrievalError::Core(e) => e.into(),
+        }
+    }
 }

@@ -1,6 +1,6 @@
 # G74 bounded routing and deferred discovery design
 
-Status: proposed written specification awaiting owner review; no G74 production implementation or routing acceptance. Architectural task [G74, issue 81](https://github.com/eyleme-dev/eyleme/issues/81), proposed revision 5. [Türkçe](../tr/g74-routing-design.md).
+Status: owner-approved specification; candidate implementation is recorded in [routing evidence](routing.md), with final gates and acceptance still pending. Architectural task [G74, issue 81](https://github.com/eyleme-dev/eyleme/issues/81), proposed revision 5. [Türkçe](../tr/g74-routing-design.md).
 
 ## 1. Purpose, baseline and scope
 

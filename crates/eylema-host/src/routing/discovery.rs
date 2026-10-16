@@ -12,7 +12,7 @@ fn skill_body(bytes: &[u8]) -> Result<(), RouteError> {
         match tag {
             0..=2 => {}
             3 | 4 => *i = i.checked_add(8).ok_or(RouteError::Limit)?,
-            5 | 6 | 7 => {
+            5..=7 => {
                 let end = i.checked_add(4).ok_or(RouteError::Limit)?;
                 let len = u32::from_be_bytes(
                     b.get(*i..end)

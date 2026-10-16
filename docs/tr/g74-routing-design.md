@@ -1,6 +1,6 @@
 # G74 sınırlı yönlendirme ve ertelenmiş keşif tasarımı
 
-Durum: bakımcı incelemesini bekleyen yazılı tasarım önerisi; G74 üretim uygulaması veya yönlendirme kabulü yapılmadı. Mimari görev [G74, issue 81](https://github.com/eyleme-dev/eyleme/issues/81), önerilen revizyon5. [English canonical](../en/g74-routing-design.md).
+Durum: bakımcı onaylı tasarım; uygulama adayı [yönlendirme kanıtında](routing.md) kayıtlıdır, son kapılar ve kabul bekleniyor. Mimari görev [G74, issue 81](https://github.com/eyleme-dev/eyleme/issues/81), önerilen revizyon5. [English canonical](../en/g74-routing-design.md).
 
 ## 1. Amaç, temel ve kapsam
 

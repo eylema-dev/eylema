@@ -275,8 +275,14 @@
     {
       "en": "docs/en/g74-routing-design.md",
       "tr": "docs/tr/g74-routing-design.md",
-      "en_sha256": "dd285cdddfb5b653b05d93a918d904344df1e676a4af4db21a8f6ef1a09ca5aa",
-      "tr_sha256": "a06a71efa72d1079b7dae6cfc746e48133212e623d1211e3fb7f454b014ff8d8"
+      "en_sha256": "2f141689658c3d3c34e9d00aaeb031fbe0cc034d7fe07a914fdbbe6022960022",
+      "tr_sha256": "197b49a128908131e66293f892a226254e428ae765f08be83b8ba71ea08d6ace"
+    },
+    {
+      "en": "docs/en/routing.md",
+      "tr": "docs/tr/routing.md",
+      "en_sha256": "5b4f0ad584b9bd0501bd1e657df9a3a2b7570fd766d1b9ffbc92da5afc603281",
+      "tr_sha256": "71d988ded8f05027154de1942e0d53026d8f88ced43dee6a1b4d390d439f5b56"
     }
   ],
   "documents": []

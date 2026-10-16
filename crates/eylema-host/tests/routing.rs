@@ -226,3 +226,78 @@ fn collect_only_and_cancelled_operations_cannot_discover() {
         Err(RouteError::Cancelled)
     ));
 }
+
+#[path = "routing/dispatch.rs"]
+mod dispatch;
+#[test]
+fn eight_unique_description_sources_fit_and_nine_reject_without_partial_result() {
+    use eylema_contracts::project_data::*;
+    use eylema_runtime::routing::SourcePin;
+    let (mut data, owner, _, _, source) = fixture(b"hello".to_vec());
+    let ids: Vec<_> = (0..8).map(|n| reference(&format!("extra:{n}"))).collect();
+    let session = data
+        .enroll(
+            &owner,
+            DataGrant {
+                permissions: DataPermissions::new(vec![DataUse::Collect, DataUse::Execute])
+                    .unwrap(),
+                scope: ids
+                    .iter()
+                    .map(|r| r.id.clone())
+                    .chain(std::iter::once(source.reference.id.clone()))
+                    .collect(),
+                expires_at: 10000,
+            },
+        )
+        .unwrap();
+    let mut pins = vec![source];
+    for r in ids {
+        let m = data
+            .collect(
+                &session,
+                DataDraft {
+                    reference: r.clone(),
+                    kind: DataKind::Artifact,
+                    parents: vec![],
+                    payload: b"hello".to_vec(),
+                    expires_at: 5000,
+                },
+            )
+            .unwrap();
+        data.set_policy(
+            &owner,
+            &r,
+            m.revision,
+            DataPermissions::new(vec![DataUse::Execute]).unwrap(),
+            false,
+        )
+        .unwrap();
+        pins.push(SourcePin {
+            reference: r,
+            digest: m.digest,
+        });
+    }
+    let mut cfg = config(pins[0].clone());
+    cfg.entries[0].sources = pins[..8].to_vec();
+    let mut second = cfg.entries[0].clone();
+    second.id = id("route:b");
+    second.sources = vec![pins[8].clone()];
+    cfg.entries.push(second);
+    let (router, _) = Router::register(&mut data, &owner, &session, cfg, &mut control()).unwrap();
+    assert_eq!(
+        router
+            .describe(&mut data, &session, &[id("route:a")], &mut control())
+            .unwrap()
+            .source_count(),
+        8
+    );
+    assert!(matches!(
+        router.describe(
+            &mut data,
+            &session,
+            &[id("route:a"), id("route:b")],
+            &mut control()
+        ),
+        Err(RouteError::Limit)
+    ));
+}

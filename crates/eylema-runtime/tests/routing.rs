@@ -102,38 +102,75 @@ fn invalid_and_unsupported_routes_never_select() {
     };
     e.grounding = SourceStatus::Contradictory;
     assert_eq!(
-        select(&[e.clone()], &r, &[a.clone()], &[ad.clone()]).unwrap(),
+        select(
+            std::slice::from_ref(&e),
+            &r,
+            std::slice::from_ref(&a),
+            std::slice::from_ref(&ad)
+        )
+        .unwrap(),
         Choice::Abstain
     );
     e.grounding = SourceStatus::Unknown;
     assert_eq!(
-        select(&[e.clone()], &r, &[a.clone()], &[ad.clone()]).unwrap(),
+        select(
+            std::slice::from_ref(&e),
+            &r,
+            std::slice::from_ref(&a),
+            std::slice::from_ref(&ad)
+        )
+        .unwrap(),
         Choice::Abstain
     );
     e.grounding = SourceStatus::DeclaredConsistent;
     e.backend = RouteBackend::Unsupported;
     assert_eq!(
-        select(&[e.clone()], &r, &[a.clone()], &[ad.clone()]).unwrap(),
+        select(
+            std::slice::from_ref(&e),
+            &r,
+            std::slice::from_ref(&a),
+            std::slice::from_ref(&ad)
+        )
+        .unwrap(),
         Choice::Unavailable
     );
     e.backend = RouteBackend::Retrieval;
     r.context = 4096;
     r.response = 1;
     assert_eq!(
-        select(&[e.clone()], &r, &[a.clone()], &[ad.clone()]).unwrap(),
+        select(
+            std::slice::from_ref(&e),
+            &r,
+            std::slice::from_ref(&a),
+            std::slice::from_ref(&ad)
+        )
+        .unwrap(),
         Choice::Unavailable
     );
     r.context = 4;
     r.response = 0;
     r.verified_tokens_required = true;
     assert_eq!(
-        select(&[e.clone()], &r, &[a.clone()], &[ad.clone()]),
+        select(
+            std::slice::from_ref(&e),
+            &r,
+            std::slice::from_ref(&a),
+            std::slice::from_ref(&ad)
+        ),
         Err(RoutingError::TokenCounterUnavailable)
     );
     r.verified_tokens_required = false;
     let mut bad = a.clone();
     bad.utility = 1000001;
-    assert!(select(&[e.clone()], &r, &[bad], &[ad.clone()]).is_err());
+    assert!(
+        select(
+            std::slice::from_ref(&e),
+            &r,
+            &[bad],
+            std::slice::from_ref(&ad)
+        )
+        .is_err()
+    );
     r.candidates.push(e.id.clone());
     assert!(select(&[e], &r, &[a], &[ad]).is_err());
 }
@@ -265,6 +302,42 @@ fn resource_identity_context_and_overlap_literals() {
         })
     );
     assert_eq!(check_resources(&view, &e, &r, 1000), Ok(()));
+    let mut modeled = e.clone();
+    modeled.models = vec![ModelBinding {
+        role: eylema_contracts::platform::RoleKind::Representation,
+        profile: eylema_contracts::platform::ModelProfileId::new("model:a").unwrap(),
+        revision: Revision::new(1).unwrap(),
+        manifest: [2; 32],
+        artifact: [1; 32],
+        tokenizer: [3; 32],
+        preprocessing: [4; 32],
+        context_limit: 4096,
+        resident_parameters: 1000,
+        active_parameters: 1000,
+        resident: "resident:a".into(),
+        invocation: "invoke:a".into(),
+        backend: "cpu".into(),
+    }];
+    assert_eq!(check_resources(&view, &modeled, &r, 1000), Ok(()));
+    modeled.models[0].artifact = [9; 32];
+    assert_eq!(
+        check_resources(&view, &modeled, &r, 1000),
+        Err(RoutingError::Stale)
+    );
+    modeled.models[0].artifact = [1; 32];
+    modeled.models[0].resident_parameters = 1001;
+    assert_eq!(
+        check_resources(&view, &modeled, &r, 1000),
+        Err(RoutingError::Unavailable)
+    );
+    modeled.models[0].resident_parameters = 1000;
+    let mut bigger = r.clone();
+    bigger.context = 5;
+    assert_eq!(
+        check_resources(&view, &modeled, &bigger, 1000),
+        Err(RoutingError::ContextLimit)
+    );
+
     assert!(check_resources(&view, &e, &r, 2001).is_err());
     e.resource.revision = Revision::new(2).unwrap();
     assert!(check_resources(&view, &e, &r, 1000).is_err());
