@@ -521,6 +521,24 @@ impl<T: Storage, H: Sha256, C: DataClock> ProjectStore<T, H, C> {
             .metadata
             .clone())
     }
+    /// Authorized no-copy length for bounded composed host reads.
+    pub(crate) fn authorized_payload_len(
+        &mut self,
+        s: &DataSession,
+        r: &DataRef,
+        purpose: DataUse,
+    ) -> DataResult<usize> {
+        if purpose.is_egress() {
+            return Err(DataError::Forbidden);
+        }
+        self.authorize(s, r, purpose)?;
+        Ok(self
+            .items
+            .get(&r.id)
+            .expect("authorized item")
+            .payload
+            .len())
+    }
     /// Composed handoff check against the latest persisted observation, without
     /// advancing time between sources. Callers must first observe trusted time.
     pub(crate) fn authorized_metadata_at_observed_time(
