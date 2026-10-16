@@ -69,6 +69,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "eylema-retrieval"
+version = "0.1.0"
+dependencies = [
+ "eylema-contracts",
+ "eylema-journal",
+]
+
+[[package]]
 name = "eylema-runtime"
 version = "0.1.0"
 dependencies = [
