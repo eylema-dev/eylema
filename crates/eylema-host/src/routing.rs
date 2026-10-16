@@ -137,6 +137,12 @@ impl<'a> Router<'a> {
         let project = project.clone();
         let data_identity = identity.clone();
         c.reserve(4 * 1024 * 1024)?;
+        // At most 16 views; each bounded shape has fewer than 512 O(1)
+        // length/count checks. No borrowed string equality precedes this pass.
+        c.charge(config.resources.len() * 512)?;
+        for v in &config.resources {
+            validate_resource_extents(v)?;
+        }
         c.charge(16 * 8 * 128)?;
         for (n, e) in config.entries.iter().enumerate() {
             e.validate()?;

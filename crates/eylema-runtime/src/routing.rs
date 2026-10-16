@@ -257,13 +257,10 @@ fn formula_supported(c: Claim<'_, Formula<'_>>) -> bool {
         ),
     }
 }
-pub fn check_resources(
-    v: &ResourceView<'_>,
-    e: &Entry,
-    r: &Request,
-    now: u64,
-) -> Result<(), RoutingError> {
-    e.validate()?;
+/// Bound borrowed resource shapes and string extents without copying or scanning
+/// their contents. Call before identity comparison or estimator admission.
+/// G80 retains semantic identity/formula validation, including unknown evidence.
+pub fn validate_resource_extents(v: &ResourceView<'_>) -> Result<(), RoutingError> {
     let s = v.snapshot;
     if s.pools.len() > 2
         || s.residents.len() > 4
@@ -276,6 +273,89 @@ pub fn check_resources(
     {
         return Err(RoutingError::ResourceLimit);
     }
+    fn extent(s: &str) -> Result<(), RoutingError> {
+        if s.len() > 128 {
+            Err(RoutingError::ResourceLimit)
+        } else {
+            Ok(())
+        }
+    }
+    fn claim<T>(c: Claim<'_, T>) -> Result<(), RoutingError> {
+        extent(match c {
+            Claim::Known { evidence, .. } => evidence.source,
+            Claim::Unknown { source, .. } => source,
+        })
+    }
+    fn formula(c: Claim<'_, Formula<'_>>) -> Result<(), RoutingError> {
+        claim(c)?;
+        if let Claim::Known { value, .. } = c {
+            match value {
+                Formula::Weights { metadata, .. } => claim(metadata)?,
+                Formula::Bytes(_)
+                | Formula::Kv { .. }
+                | Formula::Recurrent { .. }
+                | Formula::RagVectors { .. }
+                | Formula::NotApplicable => {}
+                // In particular, never traverse a borrowed LoRA target slice.
+                _ => return Err(RoutingError::Unavailable),
+            }
+        }
+        Ok(())
+    }
+    extent(s.id)?;
+    extent(s.expected_id)?;
+    for id in v.required_invocations.iter().chain(v.required_auxiliary) {
+        extent(id)?;
+    }
+    for p in s.pools {
+        extent(p.id)?;
+        extent(p.physical_id)?;
+        claim(p.capacity)?;
+        claim(p.available)?;
+        claim(p.reserve)?;
+    }
+    for r in s.residents {
+        extent(r.id)?;
+        for k in [r.key, r.expected_key] {
+            for id in [k.profile, k.backend, k.owner, k.pool] {
+                extent(id)?;
+            }
+        }
+        formula(r.weights)?;
+    }
+    for i in s.invocations {
+        for id in [i.id, i.resident, i.pool] {
+            extent(id)?;
+        }
+        formula(i.state)?;
+        formula(i.workspace)?;
+    }
+    for a in s.auxiliary {
+        extent(a.id)?;
+        extent(a.pool)?;
+        formula(a.size)?;
+    }
+    if let Some(groups) = s.overlaps {
+        for g in groups {
+            extent(g.id)?;
+            for m in g.members {
+                extent(match m {
+                    sizing::Member::Invocation(id) | sizing::Member::Auxiliary(id) => id,
+                })?;
+            }
+        }
+    }
+    Ok(())
+}
+pub fn check_resources(
+    v: &ResourceView<'_>,
+    e: &Entry,
+    r: &Request,
+    now: u64,
+) -> Result<(), RoutingError> {
+    e.validate()?;
+    validate_resource_extents(v)?;
+    let s = v.snapshot;
     if now < v.valid_from
         || now > v.valid_until
         || !e.quality.fresh(now)

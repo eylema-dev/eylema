@@ -77,11 +77,11 @@ impl DataClock for Clock {
                 std::thread::sleep(delay);
             }
         }
-        if let Some((target, time)) = self.3.get() {
-            if call == target {
-                self.0.set(time);
-                self.3.set(None);
-            }
+        if let Some((target, time)) = self.3.get()
+            && call == target
+        {
+            self.0.set(time);
+            self.3.set(None);
         }
         let n = self.0.get();
         self.0.set(n + self.1.get());

@@ -301,3 +301,66 @@ fn eight_unique_description_sources_fit_and_nine_reject_without_partial_result()
         Err(RouteError::Limit)
     ));
 }
+
+// Removing registration preflight must admit the malformed borrowed snapshots.
+#[test]
+fn resource_registration_bounds_equal_ids_before_comparison() {
+    use eylema_runtime::{resource_estimate::Snapshot, routing::ResourceView};
+    for (length, admitted) in [(128, true), (129, false), (8 * 1024 * 1024, false)] {
+        let (mut data, owner, session, _, source) = fixture(b"hello".to_vec());
+        let mut cfg = config(source);
+        let first = "x".repeat(length);
+        let second = first.clone();
+        let base = *cfg.resources[0].snapshot;
+        let snapshots: Vec<Snapshot<'_>> = (0..16)
+            .map(|n| Snapshot {
+                id: if n % 2 == 0 { &first } else { &second },
+                revision: n + 1,
+                ..base
+            })
+            .collect();
+        cfg.resources = snapshots
+            .iter()
+            .map(|snapshot| ResourceView {
+                snapshot,
+                required_invocations: &[],
+                required_auxiliary: &["aux:a"],
+                valid_from: 500,
+                valid_until: 5000,
+            })
+            .collect();
+        let mut c = control();
+        let result = Router::register(&mut data, &owner, &session, cfg, &mut c);
+        assert_eq!(result.is_ok(), admitted, "snapshot ID bytes={length}");
+        if !admitted {
+            assert!(matches!(result, Err(RouteError::Limit)));
+            assert!(
+                c.work_used() <= 16_384,
+                "must reject before source observation or comparisons"
+            );
+        }
+    }
+}
+
+#[test]
+fn resource_registration_bounds_required_map_before_source_observation() {
+    use eylema_runtime::routing::ResourceView;
+    let (mut data, owner, session, clock, source) = fixture(b"hello".to_vec());
+    let mut cfg = config(source);
+    let snapshot = cfg.resources[0].snapshot;
+    let long = "x".repeat(129);
+    let required = [long.as_str()];
+    cfg.resources = vec![ResourceView {
+        snapshot,
+        required_invocations: &required,
+        required_auxiliary: &[],
+        valid_from: 500,
+        valid_until: 5000,
+    }];
+    let observed = clock.2.get();
+    assert!(matches!(
+        Router::register(&mut data, &owner, &session, cfg, &mut control()),
+        Err(RouteError::Limit)
+    ));
+    assert_eq!(clock.2.get(), observed);
+}
