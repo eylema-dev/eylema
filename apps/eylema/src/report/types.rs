@@ -17,6 +17,28 @@ pub enum ReportError {
     OutcomeUnknown,
     Partial,
 }
+impl ReportError {
+    /// Closed public vocabulary; never formats source, model or OS error data.
+    pub(crate) fn cli_code(self) -> &'static str {
+        match self {
+            Self::InvalidInput => "REPORT_INVALID_INPUT",
+            Self::Limit => "REPORT_LIMIT",
+            Self::Forbidden => "REPORT_FORBIDDEN",
+            Self::Unsupported => "REPORT_UNSUPPORTED",
+            Self::NeedsSourceReview => "REPORT_NEEDS_SOURCE_REVIEW",
+            Self::NoEvidence => "REPORT_NO_EVIDENCE",
+            Self::Abstained => "REPORT_ABSTAINED",
+            Self::Conflict => "REPORT_CONFLICT",
+            Self::RevisionConflict => "REPORT_REVISION_CONFLICT",
+            Self::InvalidWitness => "REPORT_INVALID_WITNESS",
+            Self::Stopped => "REPORT_STOPPED",
+            Self::Deadline => "REPORT_DEADLINE",
+            Self::WorkerFailed => "REPORT_WORKER_FAILED",
+            Self::OutcomeUnknown => "REPORT_OUTCOME_UNKNOWN",
+            Self::Partial => "REPORT_PARTIAL",
+        }
+    }
+}
 pub type Result<T> = std::result::Result<T, ReportError>;
 #[derive(Clone, Eq, PartialEq)]
 pub struct SourceDocument {
@@ -125,5 +147,36 @@ impl JobLedger {
         }
         self.repairs = 1;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod error_vocabulary_tests {
+    use super::ReportError;
+
+    #[test]
+    fn all_report_error_categories_are_distinct_static_literals() {
+        let cases = [
+            (ReportError::InvalidInput, "REPORT_INVALID_INPUT"),
+            (ReportError::Limit, "REPORT_LIMIT"),
+            (ReportError::Forbidden, "REPORT_FORBIDDEN"),
+            (ReportError::Unsupported, "REPORT_UNSUPPORTED"),
+            (ReportError::NeedsSourceReview, "REPORT_NEEDS_SOURCE_REVIEW"),
+            (ReportError::NoEvidence, "REPORT_NO_EVIDENCE"),
+            (ReportError::Abstained, "REPORT_ABSTAINED"),
+            (ReportError::Conflict, "REPORT_CONFLICT"),
+            (ReportError::RevisionConflict, "REPORT_REVISION_CONFLICT"),
+            (ReportError::InvalidWitness, "REPORT_INVALID_WITNESS"),
+            (ReportError::Stopped, "REPORT_STOPPED"),
+            (ReportError::Deadline, "REPORT_DEADLINE"),
+            (ReportError::WorkerFailed, "REPORT_WORKER_FAILED"),
+            (ReportError::OutcomeUnknown, "REPORT_OUTCOME_UNKNOWN"),
+            (ReportError::Partial, "REPORT_PARTIAL"),
+        ];
+        let mut seen = std::collections::BTreeSet::new();
+        for (error, expected) in cases {
+            assert_eq!(error.cli_code(), expected);
+            assert!(seen.insert(error.cli_code()));
+        }
     }
 }
