@@ -312,3 +312,322 @@ fn reopened_record_and_citations_reauthorize() {
     d.data.close();
     std::fs::remove_dir_all(root).unwrap();
 }
+
+#[cfg(target_os = "macos")]
+mod reopen_regressions {
+    use super::super::*;
+    struct Fixture {
+        root: std::path::PathBuf,
+        config: Config,
+    }
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.root);
+        }
+    }
+    fn fixture() -> Fixture {
+        let root = std::env::temp_dir().join(format!(
+            "g72-reopen-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        new_directory(&root).unwrap();
+        let config = Config {
+            project: ProjectId::new("project:reopen").unwrap(),
+            task: "task:report".into(),
+            sections: vec![
+                Section {
+                    language: "en".into(),
+                    site: "North".into(),
+                    entity: "north".into(),
+                    query: "owner".into(),
+                    prompt: "source".into(),
+                },
+                Section {
+                    language: "tr".into(),
+                    site: "Güney".into(),
+                    entity: "south".into(),
+                    query: "owner".into(),
+                    prompt: "source".into(),
+                },
+            ],
+            rows: vec![
+                SourceRow {
+                    id: "en-main".into(),
+                    entity: "north".into(),
+                    body: b"language=en;site=North;owner=Mira;checklist=C7\n".to_vec(),
+                },
+                SourceRow {
+                    id: "tr-main".into(),
+                    entity: "south".into(),
+                    body: "language=tr;site=Güney;owner=Ece;checklist=C9\n"
+                        .as_bytes()
+                        .to_vec(),
+                },
+            ],
+            assets: AssetPaths::from_value(&Value::List(vec![Value::Text("unused".into()); 9]))
+                .unwrap(),
+            value: Value::Text("synthetic-config".into()),
+        };
+        let mut d = JobData::create(&root, config.project.clone(), &config.rows).unwrap();
+        let need = report_need(&config, &mut d.data, &d.session, false).unwrap();
+        let parent = d.sources[0].pin.reference.clone();
+        let review = d
+            .put("review", vec![1], vec![parent], DataKind::Derived)
+            .unwrap();
+        // Two genuine memory journal events; structural fixture, no model/checkpoint acceptance.
+        let draft = d.draft(0, None).unwrap();
+        d.store_reviewed(draft, None, storage::pin(&review))
+            .unwrap();
+        assert_eq!(d.memory.generation(), 2);
+        let pins = storage::verify_pins(
+            &mut d.data,
+            &d.session,
+            &d.sources.iter().map(|s| s.pin.clone()).collect::<Vec<_>>(),
+        )
+        .unwrap();
+        let facts = vec![
+            SelectedFacts {
+                language: "en".into(),
+                site: "North".into(),
+                owner: "Mira".into(),
+                checklist: "C7".into(),
+            },
+            SelectedFacts {
+                language: "tr".into(),
+                site: "Güney".into(),
+                owner: "Ece".into(),
+                checklist: "C9".into(),
+            },
+        ];
+        let report = verify::prepare_report(
+            &need,
+            &d.sources
+                .iter()
+                .map(|s| s.document.clone())
+                .collect::<Vec<_>>(),
+            &facts,
+            [1; 32],
+            [2; 32],
+            true,
+        )
+        .unwrap()
+        .bind_citations(&pins)
+        .unwrap()
+        .bind_generation(1)
+        .unwrap();
+        d.put(
+            "need",
+            encoded(&Value::Bytes(need.digest().unwrap().to_vec())).unwrap(),
+            pins.references(),
+            DataKind::Derived,
+        )
+        .unwrap();
+        let prepared = d
+            .put(
+                "prepared",
+                report.bytes().to_vec(),
+                pins.references(),
+                DataKind::Derived,
+            )
+            .unwrap();
+        let final_record = d
+            .put(
+                "final",
+                report.bytes().to_vec(),
+                vec![prepared.reference],
+                DataKind::Derived,
+            )
+            .unwrap();
+        d.put(
+            "outcome",
+            encoded(&Value::List(vec![
+                Value::Text("completed".into()),
+                Value::Bytes(report.digest().unwrap().to_vec()),
+            ]))
+            .unwrap(),
+            vec![final_record.reference],
+            DataKind::Derived,
+        )
+        .unwrap();
+        d.memory.close();
+        d.data.close();
+        Fixture { root, config }
+    }
+    #[test]
+    fn normal_inspection_is_repeatable_and_does_not_mutate_journals() {
+        let f = fixture();
+        let before = [
+            std::fs::read(f.root.join("data.eylj")).unwrap(),
+            std::fs::read(f.root.join("memory.eylj")).unwrap(),
+        ];
+        inspect_report(&f.config, &f.root).unwrap();
+        inspect_report(&f.config, &f.root).unwrap();
+        assert_eq!(
+            before,
+            [
+                std::fs::read(f.root.join("data.eylj")).unwrap(),
+                std::fs::read(f.root.join("memory.eylj")).unwrap()
+            ]
+        );
+    }
+    #[test]
+    fn fresh_inspection_rejects_changed_need_and_source_revision() {
+        let mut f = fixture();
+        f.config.sections[0].site = "Other".into();
+        assert!(inspect_report(&f.config, &f.root).is_err());
+        f.config.sections[0].site = "North".into();
+        let (mut data, owner, _) =
+            storage::reopen_data(&f.root, f.config.project.clone(), &f.config.rows).unwrap();
+        let r = DataRef {
+            project: f.config.project.clone(),
+            id: storage::id("en-main").unwrap(),
+        };
+        let m = data.inspect(&owner, &r).unwrap();
+        data.set_policy(&owner, &r, m.revision, storage::permissions(), false)
+            .unwrap();
+        data.close();
+        assert_eq!(
+            inspect_report(&f.config, &f.root).err(),
+            Some(ReportError::RevisionConflict)
+        );
+    }
+    #[test]
+    fn fresh_inspection_rejects_genuine_memory_generation_change() {
+        let f = fixture();
+        let (mut data, owner, session) =
+            storage::reopen_data(&f.root, f.config.project.clone(), &f.config.rows).unwrap();
+        let mut c = storage::memory_control().unwrap();
+        let (mut memory, mo) = Memory::open(
+            NativeStorage::open_existing(&f.root.join("memory.eylj"), storage::sync).unwrap(),
+            NativeHash,
+            &mut data,
+            &owner,
+            storage::profile(f.config.project.clone()).unwrap(),
+            &mut c,
+        )
+        .unwrap();
+        let ms = memory.enroll(&mo, &mut data, &session, &mut c).unwrap();
+        let now = data.trusted_time().unwrap();
+        let r = DataRef {
+            project: f.config.project.clone(),
+            id: storage::id("en-main").unwrap(),
+        };
+        let pin = storage::pin(&data.inspect(&owner, &r).unwrap());
+        let draft = RecordDraft {
+            project: f.config.project.clone(),
+            id: storage::id("south").unwrap(),
+            revision: rev(1),
+            profile: semantic("report-memory:v1").unwrap(),
+            schema: semantic("report-records:v1").unwrap(),
+            kind: RecordKind::Entity,
+            origin: Origin::DocumentClaim,
+            observed_at: now,
+            valid_from: now,
+            expires_at: now + 60000,
+            confidence_bps: None,
+            subject: Some(storage::id("south").unwrap()),
+            predicate: None,
+            object: None,
+            episode_status: None,
+            episode_text: None,
+            sources: vec![pin],
+        };
+        let projection = DataRef {
+            project: f.config.project.clone(),
+            id: storage::id("m:south:1").unwrap(),
+        };
+        memory
+            .propose(&mut data, &ms, 2, None, draft, None, projection, &mut c)
+            .unwrap();
+        memory.close();
+        data.close();
+        assert_eq!(
+            inspect_report(&f.config, &f.root).err(),
+            Some(ReportError::RevisionConflict)
+        );
+    }
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn checkpoint_commit_gap_is_not_retryable() {
+    use super::*;
+    for failure in [
+        ReportError::Stopped,
+        ReportError::Deadline,
+        ReportError::Forbidden,
+        ReportError::OutcomeUnknown,
+    ] {
+        let root = std::env::temp_dir().join(format!(
+            "g72-release-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        new_directory(&root).unwrap();
+        let rows = vec![SourceRow {
+            id: "source".into(),
+            entity: "north".into(),
+            body: b"language=en;site=North;owner=Mira;checklist=C7\n".to_vec(),
+        }];
+        let mut d = JobData::create(
+            &root,
+            ProjectId::new("project:release-test").unwrap(),
+            &rows,
+        )
+        .unwrap();
+        let source = d.sources[0].pin.reference.clone();
+        let final_record = d
+            .put(
+                "final",
+                b"synced private output".to_vec(),
+                vec![source],
+                DataKind::Derived,
+            )
+            .unwrap();
+        let r = final_record.reference;
+        assert_eq!(
+            finalize_report(&mut d, r.clone(), [8; 32], |data| {
+                // Fault injected only after the real final collect and policy sync.
+                assert_eq!(
+                    data.data.read(&data.session, &r, DataUse::Execute).unwrap(),
+                    b"synced private output"
+                );
+                Err(failure)
+            })
+            .err(),
+            Some(if failure == ReportError::OutcomeUnknown {
+                failure
+            } else {
+                ReportError::Partial
+            })
+        );
+        d.memory.close();
+        d.data.close();
+        let (mut reopened, _, session) = storage::reopen_data(
+            &root,
+            ProjectId::new("project:release-test").unwrap(),
+            &rows,
+        )
+        .unwrap();
+        let outcome = DataRef {
+            project: ProjectId::new("project:release-test").unwrap(),
+            id: storage::id("outcome").unwrap(),
+        };
+        assert_eq!(
+            codec::decode(&reopened.read(&session, &outcome, DataUse::Execute).unwrap()).unwrap(),
+            Value::List(vec![
+                Value::Text("partial".into()),
+                Value::Bytes(vec![8; 32])
+            ])
+        );
+        reopened.close();
+        std::fs::remove_dir_all(root).unwrap();
+    }
+}

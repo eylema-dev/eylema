@@ -33,6 +33,18 @@ impl PreparedReport {
         Ok(self)
     }
 
+    pub fn bind_generation(mut self, selected: u64) -> Result<Self> {
+        let mut rows = match codec::decode(&self.bytes).map_err(|_| ReportError::InvalidInput)? {
+            Value::List(v) if v.len() == 7 => v,
+            _ => return Err(ReportError::InvalidInput),
+        };
+        rows.push(Value::List(vec![
+            Value::Unsigned(selected),
+            Value::Unsigned(selected.checked_add(1).ok_or(ReportError::Limit)?),
+        ]));
+        self.bytes = codec::encode(&Value::List(rows)).map_err(|_| ReportError::Limit)?;
+        Ok(self)
+    }
     pub fn digest(&self) -> Result<[u8; 32]> {
         eylema_platform::sha256(&self.bytes).map_err(|_| ReportError::Unsupported)
     }

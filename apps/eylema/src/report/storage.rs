@@ -500,6 +500,49 @@ pub struct VerifiedPins {
     rows: Vec<(SourcePin, Revision)>,
 }
 impl VerifiedPins {
+    pub fn from_value(data: &mut Data, session: &DataSession, value: &Value) -> Result<Self> {
+        let rows = super::wire::list(value)?;
+        if rows.is_empty() || rows.len() > 16 {
+            return Err(ReportError::Limit);
+        }
+        let mut parsed = vec![];
+        for row in rows {
+            let v = super::wire::list(row)?;
+            if v.len() != 4 {
+                return Err(ReportError::InvalidWitness);
+            }
+            let reference = DataRef {
+                project: ProjectId::new(super::wire::text(&v[0])?)
+                    .map_err(|_| ReportError::InvalidInput)?,
+                id: id(super::wire::text(&v[1])?)?,
+            };
+            let Value::Bytes(b) = &v[2] else {
+                return Err(ReportError::InvalidWitness);
+            };
+            let put_digest = b
+                .as_slice()
+                .try_into()
+                .map_err(|_| ReportError::InvalidWitness)?;
+            let revision = Revision::new(super::wire::number(&v[3])?)
+                .map_err(|_| ReportError::InvalidWitness)?;
+            if parsed
+                .last()
+                .is_some_and(|(p, _): &(SourcePin, Revision)| p.reference >= reference)
+            {
+                return Err(ReportError::InvalidWitness);
+            }
+            parsed.push((
+                SourcePin {
+                    reference,
+                    put_digest,
+                },
+                revision,
+            ));
+        }
+        let pins = Self { rows: parsed };
+        pins.recheck(data, session)?;
+        Ok(pins)
+    }
     pub fn value(&self) -> Value {
         Value::List(
             self.rows

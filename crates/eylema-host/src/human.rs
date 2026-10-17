@@ -752,7 +752,7 @@ mod tests {
 
     #[test]
     fn foreign_controller_and_worker_text_cannot_approve() {
-        use crate::tool::{ToolHost, report_control::ReportController};
+        use crate::tool::ToolHost;
         use eylema_contracts::{
             platform::SemanticProfileId,
             tool::{OwnedTool, ToolProfile},

@@ -354,7 +354,9 @@ fn vector(reply: &ModelReply) -> Result<Vec<f32>> {
         return Err(ReportError::InvalidWitness);
     }
     let v: Vec<f32> = bytes
-        .chunks_exact(4)
+        .as_chunks::<4>()
+        .0
+        .iter()
         .map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]]))
         .collect();
     if v.iter().any(|x| !x.is_finite()) {
@@ -449,9 +451,34 @@ fn selected(
         checklist: field("checklist")?,
     })
 }
-fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: bool) -> Result<()> {
-    new_directory(dir)?;
-    let mut data = JobData::create(dir, config.project.clone(), &config.rows)?;
+fn report_need(
+    config: &Config,
+    data: &mut storage::Data,
+    session: &eylema_host::project_data::DataSession,
+    stopped: bool,
+) -> Result<ReportNeed> {
+    let mut rows = vec![];
+    for row in &config.rows {
+        let r = DataRef {
+            project: config.project.clone(),
+            id: storage::id(&row.id)?,
+        };
+        let meta = data
+            .authorized_metadata(session, &r, DataUse::Execute)
+            .map_err(storage::data_error)?;
+        if data
+            .read(session, &r, DataUse::Execute)
+            .map_err(storage::data_error)?
+            != row.body
+        {
+            return Err(ReportError::RevisionConflict);
+        }
+        rows.push(Value::List(vec![
+            Value::Text(row.id.clone()),
+            Value::Bytes(meta.digest.to_vec()),
+            Value::Unsigned(meta.revision.get()),
+        ]));
+    }
     let mut need = ReportNeed::new(
         config.project.as_str(),
         &if stopped {
@@ -466,12 +493,17 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
             .map(|s| (s.language.clone(), s.site.clone()))
             .collect(),
     )?;
-    let source_hash = data.source_digest()?;
     need.bind_sources(digest(&Value::List(vec![
         config.value.clone(),
-        Value::Bytes(source_hash.to_vec()),
+        Value::Bytes(digest(&Value::List(rows))?.to_vec()),
         Value::Bool(stopped),
     ]))?)?;
+    Ok(need)
+}
+fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: bool) -> Result<()> {
+    new_directory(dir)?;
+    let mut data = JobData::create(dir, config.project.clone(), &config.rows)?;
+    let need = report_need(config, &mut data.data, &data.session, stopped)?;
     let need_hash = need.digest()?;
     let need_record = data.put(
         "need",
@@ -789,7 +821,8 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
         digest(&receipts(&decisions))?,
         true,
     )?
-    .bind_citations(&verified_pins)?;
+    .bind_citations(&verified_pins)?
+    .bind_generation(selection_generation)?;
     // The actual model path has completed; pure verification is the only repairable phase.
     let mut synthetic = facts.clone();
     synthetic[0].owner.clear();
@@ -814,7 +847,8 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
         digest(&receipts(&decisions))?,
         true,
     )?
-    .bind_citations(&verified_pins)?;
+    .bind_citations(&verified_pins)?
+    .bind_generation(selection_generation)?;
     if prepared.bytes() != expected.bytes() {
         return Err(ReportError::InvalidWitness);
     }
@@ -1017,11 +1051,12 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
             count: pin(&count),
             digest: prepared.digest()?,
         };
-        permit.commit(data, prepared)?;
-        check(tools, person, need, data, terminal, deadline)?;
-        pins.recheck(&mut data.data, &data.session)?;
-        tools.revoke_report_controller(person).map_err(invalid)?;
-        Ok(())
+        let final_record = permit.commit(data, prepared)?;
+        finalize_report(data, final_record, prepared.digest()?, |data| {
+            check(tools, person, need, data, terminal, deadline)?;
+            pins.recheck(&mut data.data, &data.session)?;
+            tools.revoke_report_controller(person).map_err(invalid)
+        })
     })();
     commit.map_err(|e| {
         if e == ReportError::OutcomeUnknown {
@@ -1039,7 +1074,7 @@ struct ReportPermit {
     digest: [u8; 32],
 }
 impl ReportPermit {
-    fn commit(self, data: &mut JobData, report: &PreparedReport) -> Result<()> {
+    fn commit(self, data: &mut JobData, report: &PreparedReport) -> Result<DataRef> {
         if report.digest() != Ok(self.digest) {
             return Err(ReportError::InvalidWitness);
         }
@@ -1064,17 +1099,43 @@ impl ReportPermit {
         if released != report.bytes() {
             return Err(ReportError::OutcomeUnknown);
         }
-        data.put(
-            "outcome",
-            encoded(&Value::List(vec![
-                Value::Text("completed".into()),
-                Value::Bytes(self.digest.to_vec()),
-            ]))?,
-            vec![final_record.reference],
-            DataKind::Derived,
-        )?;
-        Ok(())
+        Ok(final_record.reference)
     }
+}
+/// The final bytes are synchronized before this authority check. A completion
+/// marker is a receipt of that release decision, never a speculative success.
+/// Its synchronization failure is OutcomeUnknown; there is no later check that
+/// could return Partial while retaining a completed receipt. Stop after the
+/// release decision cannot roll back the already confirmed checkpoint/report.
+fn finalize_report(
+    data: &mut JobData,
+    final_record: DataRef,
+    hash: [u8; 32],
+    after_sync: impl FnOnce(&mut JobData) -> Result<()>,
+) -> Result<()> {
+    let result = after_sync(data);
+    let status = if result.is_ok() {
+        "completed"
+    } else {
+        "partial"
+    };
+    data.put(
+        "outcome",
+        encoded(&Value::List(vec![
+            Value::Text(status.into()),
+            Value::Bytes(hash.to_vec()),
+        ]))?,
+        vec![final_record],
+        DataKind::Derived,
+    )
+    .map_err(|_| ReportError::OutcomeUnknown)?;
+    result.map_err(|e| {
+        if e == ReportError::OutcomeUnknown {
+            e
+        } else {
+            ReportError::Partial
+        }
+    })
 }
 
 pub(crate) fn command(args: &[std::ffi::OsString]) -> Result<()> {
@@ -1102,6 +1163,10 @@ pub(crate) fn command(args: &[std::ffi::OsString]) -> Result<()> {
         }
         Some("inspect") => {
             let config = Config::load(Path::new(&args[1]))?;
+            inspect_report(&config, Path::new(&args[2]))
+        }
+        Some("proof-inspect") => {
+            let config = Config::load(Path::new(&args[1]))?;
             inspect_proof(&config, Path::new(&args[2]))
         }
         _ => Err(ReportError::InvalidInput),
@@ -1112,7 +1177,7 @@ fn fresh_reader(config: &Path, root: &Path) -> Result<()> {
     let mut child = Command::new(std::env::current_exe().map_err(invalid)?)
         .args([
             std::ffi::OsStr::new("report"),
-            std::ffi::OsStr::new("inspect"),
+            std::ffi::OsStr::new("proof-inspect"),
             config.as_os_str(),
             root.as_os_str(),
         ])
@@ -1155,6 +1220,120 @@ fn fresh_reader(config: &Path, root: &Path) -> Result<()> {
     println!("G72 fresh inspection passed");
     Ok(())
 }
+fn inspect_report(config: &Config, dir: &Path) -> Result<()> {
+    let (mut data, owner, session) =
+        storage::reopen_data(dir, config.project.clone(), &config.rows)?;
+    let reference = |name: &str| -> Result<DataRef> {
+        Ok(DataRef {
+            project: config.project.clone(),
+            id: storage::id(name)?,
+        })
+    };
+    let bytes = data
+        .read(&session, &reference("final")?, DataUse::Execute)
+        .map_err(storage::data_error)?;
+    let value = wire::decode_closed(&bytes)?;
+    let fields = wire::list(&value)?;
+    if fields.len() != 8 || wire::text(&fields[0])? != "report:v1" {
+        return Err(ReportError::InvalidWitness);
+    }
+    let need = report_need(config, &mut data, &session, false)?;
+    let need_value = Value::Bytes(need.digest()?.to_vec());
+    if fields[1] != need_value
+        || wire::decode_closed(
+            &data
+                .read(&session, &reference("need")?, DataUse::Execute)
+                .map_err(storage::data_error)?,
+        )? != need_value
+    {
+        return Err(ReportError::RevisionConflict);
+    }
+    let generations = wire::list(&fields[7])?;
+    if generations.len() != 2 {
+        return Err(ReportError::InvalidWitness);
+    }
+    let selected_generation = wire::number(&generations[0])?;
+    let committed_generation = wire::number(&generations[1])?;
+    if selected_generation.checked_add(1) != Some(committed_generation) {
+        return Err(ReportError::InvalidWitness);
+    }
+    let mut c = storage::memory_control()?;
+    let (memory, _) = Memory::open(
+        NativeStorage::open_existing(&dir.join("memory.eylj"), storage::sync).map_err(invalid)?,
+        NativeHash,
+        &mut data,
+        &owner,
+        storage::profile(config.project.clone())?,
+        &mut c,
+    )
+    .map_err(|_| ReportError::OutcomeUnknown)?;
+    if memory.generation() != committed_generation {
+        return Err(ReportError::RevisionConflict);
+    }
+    memory.close();
+    let pins = storage::VerifiedPins::from_value(&mut data, &session, &fields[6])?;
+    let facts = wire::list(&fields[2])?
+        .iter()
+        .map(|row| {
+            let r = wire::list(row)?;
+            if r.len() != 4 {
+                return Err(ReportError::InvalidWitness);
+            }
+            Ok(SelectedFacts {
+                language: wire::text(&r[0])?.into(),
+                site: wire::text(&r[1])?.into(),
+                owner: wire::text(&r[2])?.into(),
+                checklist: wire::text(&r[3])?.into(),
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let sources = config
+        .rows
+        .iter()
+        .map(|r| source::parse_document(&r.body))
+        .collect::<Result<Vec<_>>>()?;
+    let hash = |v: &Value| -> Result<[u8; 32]> {
+        if let Value::Bytes(b) = v {
+            b.as_slice().try_into().map_err(invalid)
+        } else {
+            Err(ReportError::InvalidWitness)
+        }
+    };
+    let expected = verify::prepare_report(
+        &need,
+        &sources,
+        &facts,
+        hash(&fields[4])?,
+        hash(&fields[5])?,
+        true,
+    )?
+    .bind_citations(&pins)?
+    .bind_generation(selected_generation)?;
+    if expected.bytes() != bytes
+        || data
+            .read(&session, &reference("prepared")?, DataUse::Execute)
+            .map_err(storage::data_error)?
+            != bytes
+    {
+        return Err(ReportError::InvalidWitness);
+    }
+    let outcome = wire::decode_closed(
+        &data
+            .read(&session, &reference("outcome")?, DataUse::Execute)
+            .map_err(storage::data_error)?,
+    )?;
+    if outcome
+        != Value::List(vec![
+            Value::Text("completed".into()),
+            Value::Bytes(expected.digest()?.to_vec()),
+        ])
+    {
+        return Err(ReportError::Partial);
+    }
+    pins.recheck(&mut data, &session)?;
+    data.close();
+    Ok(())
+}
 fn inspect_proof(config: &Config, root: &Path) -> Result<()> {
     let deadline = Instant::now() + Duration::from_secs(10);
     let dir = root.join("positive");
@@ -1167,36 +1346,7 @@ fn inspect_proof(config: &Config, root: &Path) -> Result<()> {
         })
     };
     let final_ref = reference("final")?;
-    let bytes = data
-        .read(&session, &final_ref, DataUse::Execute)
-        .map_err(storage::data_error)?;
-    let fields = wire::decode_closed(&bytes)?;
-    let fields = wire::list(&fields)?;
-    if fields.len() != 7
-        || wire::text(&fields[0])? != "report:v1"
-        || wire::list(&fields[2])?.len() != 2
-        || wire::list(&fields[6])?.is_empty()
-    {
-        return Err(ReportError::InvalidWitness);
-    }
-    let prepared = data
-        .read(&session, &reference("prepared")?, DataUse::Execute)
-        .map_err(storage::data_error)?;
-    if prepared != bytes {
-        return Err(ReportError::InvalidWitness);
-    }
-    let actual = digest(&wire::decode_closed(&bytes)?)?;
-    let outcome = data
-        .read(&session, &reference("outcome")?, DataUse::Execute)
-        .map_err(storage::data_error)?;
-    if codec::decode(&outcome).map_err(invalid)?
-        != Value::List(vec![
-            Value::Text("completed".into()),
-            Value::Bytes(actual.to_vec()),
-        ])
-    {
-        return Err(ReportError::InvalidWitness);
-    }
+    inspect_report(config, &dir)?;
     let withdrawn = reference(&config.rows[0].id)?;
     let revision = data
         .inspect(&owner, &withdrawn)
