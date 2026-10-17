@@ -1361,16 +1361,20 @@ fn inspect_proof(config: &Config, root: &Path) -> Result<()> {
     let expiry = now.checked_add(1000).ok_or(ReportError::Limit)?;
     let expired_source = reference("expire:source")?;
     let expired_output = reference("expire:output")?;
-    for (r, parents) in [
-        (expired_source.clone(), vec![]),
-        (expired_output.clone(), vec![expired_source]),
+    for (r, kind, parents) in [
+        (expired_source.clone(), DataKind::Artifact, vec![]),
+        (
+            expired_output.clone(),
+            DataKind::Derived,
+            vec![expired_source],
+        ),
     ] {
         let meta = data
             .collect(
                 &session,
                 DataDraft {
                     reference: r.clone(),
-                    kind: DataKind::Derived,
+                    kind,
                     parents,
                     payload: vec![1],
                     expires_at: expiry,
