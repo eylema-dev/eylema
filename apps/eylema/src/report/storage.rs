@@ -321,23 +321,6 @@ impl JobData {
         }
         Ok(())
     }
-    pub fn source_digest(&mut self) -> Result<[u8; 32]> {
-        self.authorize_sources()?;
-        let v = Value::List(
-            self.sources
-                .iter()
-                .map(|s| {
-                    Value::List(vec![
-                        Value::Text(s.pin.reference.id.as_str().into()),
-                        Value::Bytes(s.pin.put_digest.to_vec()),
-                        Value::Unsigned(s.authorization_revision.get()),
-                    ])
-                })
-                .collect(),
-        );
-        eylema_platform::sha256(&codec::encode(&v).map_err(|_| ReportError::Limit)?)
-            .map_err(|_| ReportError::Unsupported)
-    }
     pub(super) fn reserve_memory(&mut self) -> Result<()> {
         if self.operations >= 32 {
             return Err(ReportError::Limit);

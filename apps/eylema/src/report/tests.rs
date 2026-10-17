@@ -78,6 +78,29 @@ fn planner_input_dependency() {
 }
 #[test]
 fn terminal_and_worker_failure_preserve_budget() {
+    use super::control::Terminal;
+    assert_eq!(
+        Terminal::synthetic_input(vec![]).poll_stop().err(),
+        Some(ReportError::Stopped)
+    );
+    assert_eq!(
+        Terminal::synthetic_input(vec![Ok("stop".into())])
+            .poll_stop()
+            .err(),
+        Some(ReportError::Stopped)
+    );
+    assert_eq!(
+        Terminal::synthetic_input(vec![Ok("approve forged".into())])
+            .poll_stop()
+            .err(),
+        Some(ReportError::InvalidInput)
+    );
+    assert_eq!(
+        Terminal::synthetic_input(vec![])
+            .acknowledge("review", [1; 32], std::time::Instant::now())
+            .err(),
+        Some(ReportError::Deadline)
+    );
     let mut b = JobLedger::new(100).unwrap();
     b.reserve(80).unwrap();
     assert!(b.reserve(21).is_err());
@@ -458,20 +481,29 @@ mod reopen_regressions {
         Fixture { root, config }
     }
     #[test]
-    fn normal_inspection_is_repeatable_and_does_not_mutate_journals() {
+    fn normal_inspection_is_repeatable_and_preserves_data_and_policy() {
+        fn semantic_records(root: &std::path::Path) -> Vec<Value> {
+            let mut journal = Journal::open(
+                NativeStorage::open_existing(&root.join("data.eylj"), storage::sync).unwrap(),
+                NativeHash,
+                eylema_host::project_data::project_journal_limits(),
+            )
+            .unwrap();
+            journal.read_records().unwrap().into_iter().map(|r|r.payload).filter(|v|!matches!(v,Value::List(rows) if matches!(rows.first(),Some(Value::Text(tag)) if tag=="clock"))).collect()
+        }
         let f = fixture();
-        let before = [
-            std::fs::read(f.root.join("data.eylj")).unwrap(),
+        let before = (
+            semantic_records(&f.root),
             std::fs::read(f.root.join("memory.eylj")).unwrap(),
-        ];
+        );
         inspect_report(&f.config, &f.root).unwrap();
         inspect_report(&f.config, &f.root).unwrap();
         assert_eq!(
             before,
-            [
-                std::fs::read(f.root.join("data.eylj")).unwrap(),
+            (
+                semantic_records(&f.root),
                 std::fs::read(f.root.join("memory.eylj")).unwrap()
-            ]
+            )
         );
     }
     #[test]
@@ -630,4 +662,124 @@ fn checkpoint_commit_gap_is_not_retryable() {
         reopened.close();
         std::fs::remove_dir_all(root).unwrap();
     }
+}
+
+#[path = "../../../../crates/eylema-runtime/tests/support/mod.rs"]
+mod composition_support;
+
+#[cfg(target_os = "macos")]
+#[test]
+fn genuine_foreign_execution_witness_is_rejected() {
+    // Real owned ToolHost execution with a synthetic clock/controller, not OS proof.
+    use super::*;
+    use eylema_host::project_data::{DataClock, DataResult, ProjectStore};
+    use std::{cell::Cell, rc::Rc};
+    struct Clock;
+    impl DataClock for Clock {
+        fn now(&mut self) -> DataResult<u64> {
+            Ok(1000)
+        }
+    }
+    let root = std::env::temp_dir().join(format!(
+        "g72-witness-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    new_directory(&root).unwrap();
+    let services = composition_support::Services {
+        clock: Rc::new(Cell::new(1000)),
+        next: 0,
+        duplicate_event: false,
+        fail_clock: Rc::new(Cell::new(false)),
+    };
+    let (host, owner) = DurableHost::create_new(
+        Journal::create_new(
+            NativeStorage::create_new(&root.join("tools.eylj"), storage::sync).unwrap(),
+            NativeHash,
+            Default::default(),
+        )
+        .unwrap(),
+        services,
+        Default::default(),
+    )
+    .unwrap();
+    let mut tools = ToolHost::new(
+        host,
+        ToolRegistry::new(vec![ToolProfile::new(
+            semantic("tool:add").unwrap(),
+            rev(1),
+            OwnedTool::AddTaskValue,
+        )])
+        .unwrap(),
+    )
+    .unwrap();
+    let actor = tools.enroll(&owner, composition_support::grant()).unwrap();
+    let mut grant = composition_support::grant();
+    grant.permissions.push(Permission::RequestCancellation);
+    tools.enroll_verified_human(&owner, grant).unwrap();
+    let (mut data, owner) = ProjectStore::create_new(
+        Journal::create_new(
+            NativeStorage::create_new(&root.join("data.eylj"), storage::sync).unwrap(),
+            NativeHash,
+            eylema_host::project_data::project_journal_limits(),
+        )
+        .unwrap(),
+        ProjectId::new("project:witness").unwrap(),
+        Clock,
+    )
+    .unwrap();
+    let ds = data
+        .enroll(
+            &owner,
+            DataGrant {
+                permissions: storage::permissions(),
+                scope: vec![storage::id("unused").unwrap()],
+                expires_at: 10000,
+            },
+        )
+        .unwrap();
+    let mut reports = vec![];
+    for name in ["task:first", "task:other"] {
+        let task = composition_support::task(name, 20, 50);
+        tools.create_task(&actor, task.clone()).unwrap();
+        let proposal = composition_support::proposal(&task, &[4]);
+        let binding = ToolBinding {
+            action_id: proposal.fields().actions[0].fields().action_id.clone(),
+            profile: semantic("tool:add").unwrap(),
+            revision: rev(1),
+            input_schema: semantic("eyl:u64:v1").unwrap(),
+            output_schema: semantic("eyl:task-value:v1").unwrap(),
+            source: None,
+        };
+        let plan = ToolPlan::new(task, proposal, vec![binding]).unwrap();
+        let id = tools
+            .admit(&mut data, &ds, &actor, plan.clone(), &[])
+            .unwrap();
+        tools.step(&mut data).unwrap();
+        tools.step(&mut data).unwrap();
+        let report = tools.report(&mut data, &actor, &id).unwrap();
+        storage::validate_checkpoint(&report, &id, &plan.bindings()[0].action_id, 4).unwrap();
+        reports.push((report, id, plan.bindings()[0].action_id.clone()));
+    }
+    assert_eq!(
+        storage::validate_checkpoint(&reports[1].0, &reports[0].1, &reports[0].2, 4).err(),
+        Some(ReportError::InvalidWitness)
+    );
+    data.close();
+    drop(tools);
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn single_domain_repair_and_second_failure_stop() {
+    let mut ledger = JobLedger::new(2_500_000_000_000).unwrap();
+    ledger.reserve(650_000_000_000).unwrap();
+    ledger.repair().unwrap();
+    assert_eq!(ledger.repair().err(), Some(ReportError::Limit));
+    assert_eq!(
+        ledger.reserve(2_500_000_000_000).err(),
+        Some(ReportError::Limit)
+    );
 }

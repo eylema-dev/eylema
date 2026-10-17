@@ -82,6 +82,15 @@ impl Terminal {
         });
         Self { input: rx }
     }
+    #[cfg(test)]
+    pub(crate) fn synthetic_input(lines: Vec<Result<String>>) -> Self {
+        let (tx, rx) = mpsc::sync_channel(32);
+        for line in lines {
+            tx.send(line).expect("bounded synthetic terminal input");
+        }
+        drop(tx);
+        Self { input: rx }
+    }
     pub fn poll_stop(&self) -> Result<()> {
         match self.input.try_recv() {
             Ok(Ok(line)) if line == "stop" => Err(ReportError::Stopped),

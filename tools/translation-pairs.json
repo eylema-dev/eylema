@@ -301,6 +301,12 @@
       "tr": "docs/tr/g72-local-report-design.md",
       "en_sha256": "0ade90864a1ea094d1de6ade56a152538cdb700b6c9ec4aed66ec6d7e11a97ab",
       "tr_sha256": "5f299f8aac342c28c6906f10980913cb5cb44e3ccc68f0f78037baa9bdb61af7"
+    },
+    {
+      "en": "docs/en/local-report.md",
+      "tr": "docs/tr/local-report.md",
+      "en_sha256": "7dc930158d194b0201962b9635c9701c2bf20b666b2ea91d64cd18f75088d7f7",
+      "tr_sha256": "285671bc98573b71c6a04dce9ebf3bd7c07854e638639079cfa2187d4fdd554b"
     }
   ],
   "documents": []
