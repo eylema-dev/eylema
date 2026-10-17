@@ -5,6 +5,15 @@ use eylema_contracts::{
     project_data::{DataDraft, DataId, DataKind},
 };
 impl<T: Storage, H: Sha256> MemoryStore<T, H> {
+    /// Render exact canonical projection bytes without granting authority or mutating storage.
+    pub fn preview_projection(
+        profile: &StoreProfile,
+        draft: &RecordDraft,
+    ) -> MemoryResult<Vec<u8>> {
+        profile.validate()?;
+        draft.validate(profile)?;
+        wire::projection(draft)
+    }
     fn cas(
         &self,
         generation: u64,

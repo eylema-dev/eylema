@@ -11,6 +11,7 @@ use eylema_contracts::{project_data::DataUse, tool::ToolPlan};
 use eylema_runtime::tool::ToolRegistry;
 use std::time::Instant;
 use std::{collections::BTreeMap, sync::Arc};
+pub mod report_control;
 pub const MAX_TOOL_EXECUTIONS: usize = 128;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ToolError {
