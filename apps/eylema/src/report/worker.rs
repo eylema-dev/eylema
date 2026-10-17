@@ -85,7 +85,7 @@ impl Worker {
             frames: FrameBudget::default(),
             nonce,
             sequence: 0,
-            deadline: Instant::now() + remaining,
+            deadline: (Instant::now() + remaining).min(root_deadline),
             poisoned: false,
             traffic: 0,
             messages: 0,
@@ -121,6 +121,7 @@ impl Worker {
         request: &ModelRequest,
         ledger: &mut JobLedger,
         allocation: u64,
+        mut check: impl FnMut() -> Result<()>,
     ) -> Result<Vec<ModelReply>> {
         if self.poisoned || Instant::now() >= self.deadline {
             return Err(ReportError::Deadline);
@@ -136,10 +137,21 @@ impl Worker {
         ]))?;
         let mut replies = Vec::new();
         for _ in 0..request.count() {
-            let v = self
-                .output
-                .recv_timeout(self.deadline.saturating_duration_since(Instant::now()))
-                .map_err(|_| ReportError::Deadline)??;
+            let v = loop {
+                check()?;
+                let remaining = self.deadline.saturating_duration_since(Instant::now());
+                if remaining.is_zero() {
+                    return Err(ReportError::Deadline);
+                }
+                match self
+                    .output
+                    .recv_timeout(remaining.min(Duration::from_millis(50)))
+                {
+                    Ok(v) => break v?,
+                    Err(mpsc::RecvTimeoutError::Timeout) => continue,
+                    Err(_) => return Err(ReportError::WorkerFailed),
+                }
+            };
             self.account(encoded(&v)?.len())?;
             let fields = wire::list(validate_envelope(&v, self.nonce, self.sequence)?)?;
             if fields.len() != 2 {

@@ -163,3 +163,29 @@ impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
         }
     }
 }
+impl<T: Storage, H: Sha256, S: HostServices> ToolHost<T, H, S> {
+    pub fn create_report_task(
+        &mut self,
+        owner: &Owner,
+        actor: &DurableSession,
+        controller: &ReportController,
+        need: [u8; 32],
+        task: TaskSpec,
+    ) -> std::result::Result<(), ToolError> {
+        self.check_report_controller(controller, &task.fields().task_id, need)?;
+        let scope = &task.fields().resource_scope;
+        if scope.resources().len() != 1
+            || scope
+                .resources()
+                .next()
+                .is_none_or(|r| r.as_str() != HumanPurpose::LocalReport.resource())
+        {
+            return Err(ToolError::Runtime(ErrorCode::Forbidden));
+        }
+        let oversight = OversightRequirements::new(vec![], true, true, None)
+            .map_err(|_| ToolError::Runtime(ErrorCode::InvalidRequest))?;
+        Ok(self
+            .host
+            .create_governed_task(owner, actor, task, oversight)?)
+    }
+}

@@ -7,6 +7,7 @@ pub enum ReportError {
     Unsupported,
     NeedsSourceReview,
     NoEvidence,
+    Abstained,
     Conflict,
     RevisionConflict,
     InvalidWitness,
@@ -39,6 +40,7 @@ pub struct ReportNeed {
     pub task: TaskId,
     pub generation: u64,
     pub sections: Vec<(String, String)>,
+    source_binding: [u8; 32],
 }
 impl ReportNeed {
     pub fn new(
@@ -68,11 +70,23 @@ impl ReportNeed {
             task: TaskId::new(task).map_err(|_| ReportError::InvalidInput)?,
             generation,
             sections,
+            source_binding: [0; 32],
         })
+    }
+    pub fn bind_sources(&mut self, binding: [u8; 32]) -> Result<()> {
+        if self.source_binding != [0; 32] || binding == [0; 32] {
+            return Err(ReportError::InvalidInput);
+        }
+        self.source_binding = binding;
+        Ok(())
     }
     pub fn digest(&self) -> Result<[u8; 32]> {
         let v = Value::List(vec![
             Value::Text("report:need:v1".into()),
+            Value::Bytes(self.source_binding.to_vec()),
+            Value::Text(
+                "g30:c64:g8;g57:f750000:m100000;g68:d1024;c4096;report:root2500000000000:v1".into(),
+            ),
             Value::Text(self.project.as_str().into()),
             Value::Text(self.task.as_str().into()),
             Value::Unsigned(self.generation),

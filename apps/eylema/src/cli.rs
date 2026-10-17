@@ -62,6 +62,7 @@ fn run(arguments: impl IntoIterator<Item = OsString>) -> Result<()> {
     }
     let command = args[0].to_str().ok_or(CliError("INVALID_ARGUMENT"))?;
     match command {
+        "report" => crate::report::command(&args[1..]).map_err(|_| CliError("REPORT_FAILED")),
         "report-worker" => {
             if args.len() != 1 {
                 return Err(CliError("INVALID_ARGUMENT"));

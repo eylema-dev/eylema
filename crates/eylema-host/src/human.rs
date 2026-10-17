@@ -781,7 +781,7 @@ mod tests {
                 )
                 .is_ok()
         );
-        let controller = tools.simulate_report_controller(&o, g, &task, [7; 32]);
+        let controller = tools.simulate_report_controller(&o, g.clone(), &task, [7; 32]);
         assert!(
             tools
                 .check_report_controller(&controller, &task, [7; 32])
@@ -808,6 +808,13 @@ mod tests {
         assert!(
             other
                 .check_report_controller(&controller, &task, [7; 32])
+                .is_err()
+        );
+        let actor = tools.enroll(&o, g.clone()).unwrap();
+        let (foreign_task, _) = task_plan("task:report-a", &[1]);
+        assert!(
+            tools
+                .create_report_task(&o, &actor, &controller, [7; 32], foreign_task)
                 .is_err()
         );
         tools.revoke_report_controller(&controller).unwrap();
