@@ -65,7 +65,7 @@ impl HumanEnrollment {
         }
         Ok(())
     }
-    fn purpose(&self) -> HumanPurpose {
+    pub(crate) fn purpose(&self) -> HumanPurpose {
         if self
             .grant
             .resource_scope
@@ -74,6 +74,14 @@ impl HumanEnrollment {
             .is_some_and(|r| r.as_str() == HumanPurpose::LocalCli.resource())
         {
             HumanPurpose::LocalCli
+        } else if self
+            .grant
+            .resource_scope
+            .resources()
+            .next()
+            .is_some_and(|r| r.as_str() == HumanPurpose::LocalReport.resource())
+        {
+            HumanPurpose::LocalReport
         } else {
             HumanPurpose::AcceptanceProof
         }
@@ -89,17 +97,7 @@ impl HumanEnrollment {
         {
             return Err(HumanError::Expired);
         }
-        let purpose = if self
-            .grant
-            .resource_scope
-            .resources()
-            .next()
-            .is_some_and(|r| r.as_str() == HumanPurpose::LocalCli.resource())
-        {
-            HumanPurpose::LocalCli
-        } else {
-            HumanPurpose::AcceptanceProof
-        };
+        let purpose = self.purpose();
         eylema_platform::human::authenticate_device_owner(self.binding, purpose, timeout)
     }
 }
@@ -150,6 +148,22 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
         purpose: HumanPurpose,
         ttl: Duration,
     ) -> Result<HumanEnrollment> {
+        if purpose == HumanPurpose::LocalReport {
+            return Err(forbidden());
+        }
+        self.request_device_owner_bound(owner, grant, purpose, ttl, None)
+    }
+    pub(crate) fn request_device_owner_bound(
+        &self,
+        owner: &Owner,
+        grant: Grant,
+        purpose: HumanPurpose,
+        ttl: Duration,
+        report: Option<(&TaskId, [u8; 32])>,
+    ) -> Result<HumanEnrollment> {
+        if (purpose == HumanPurpose::LocalReport) != report.is_some() {
+            return Err(forbidden());
+        }
         self.owner(owner)?;
         validate_grant(&grant, purpose)?;
         if ttl < Duration::from_secs(1) || ttl > Duration::from_secs(300) {
@@ -173,13 +187,20 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
         Timestamp::new(deadline_ms).map_err(|_| forbidden())?;
         let nonce = eylema_platform::random_id(eylema_platform::IdKind::Request)
             .map_err(|_| HostError::Runtime(ErrorCode::CapabilityUnavailable))?;
-        let bytes = codec::encode(&Value::List(vec![
+        let mut fields = vec![
             Value::Text("owned:device-owner-enrollment:v1".into()),
             encoding::grant(&grant),
             Value::Text(nonce),
             Value::Unsigned(deadline_ms),
-        ]))
-        .map_err(|_| HostError::InvalidRecord)?;
+        ];
+        if let Some((task, digest)) = report {
+            if digest == [0; 32] {
+                return Err(forbidden());
+            }
+            fields.push(Value::Text(task.as_str().to_owned()));
+            fields.push(Value::Bytes(digest.to_vec()));
+        }
+        let bytes = codec::encode(&Value::List(fields)).map_err(|_| HostError::InvalidRecord)?;
         let binding = eylema_platform::sha256(&bytes)
             .map_err(|_| HostError::Runtime(ErrorCode::CapabilityUnavailable))?;
         Ok(HumanEnrollment {
@@ -192,6 +213,17 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
         })
     }
     pub fn enroll_device_owner(
+        &mut self,
+        owner: &Owner,
+        request: HumanEnrollment,
+        proof: DeviceOwnerProof,
+    ) -> Result<DeviceOwnerHuman> {
+        if request.purpose() == HumanPurpose::LocalReport {
+            return Err(forbidden());
+        }
+        self.enroll_device_owner_bound(owner, request, proof)
+    }
+    pub(crate) fn enroll_device_owner_bound(
         &mut self,
         owner: &Owner,
         request: HumanEnrollment,
@@ -352,6 +384,26 @@ impl<T: Storage, H: Sha256, S: HostServices> DurableHost<T, H, S> {
 #[cfg(test)]
 #[path = "../../eylema-runtime/tests/support/mod.rs"]
 mod test_support;
+#[cfg(test)]
+pub(crate) fn simulate_report_person<T: Storage, H: Sha256, S: HostServices>(
+    host: &mut DurableHost<T, H, S>,
+    owner: &Owner,
+    grant: Grant,
+    task: &TaskId,
+    need: [u8; 32],
+) -> DeviceOwnerHuman {
+    let request = host
+        .request_device_owner_bound(
+            owner,
+            grant,
+            HumanPurpose::LocalReport,
+            Duration::from_secs(300),
+            Some((task, need)),
+        )
+        .unwrap();
+    let binding = request.binding;
+    host.finish_device_owner(owner, request, binding).unwrap()
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -684,5 +736,92 @@ mod tests {
             ExecutionState::Queued
         );
         assert_eq!(h.task(&actor, &b.fields().task_id).unwrap().value, 0);
+    }
+    #[test]
+    fn report_purpose_cannot_use_generic_enrollment() {
+        let (h, o, _) = fixture();
+        let mut g = grant();
+        g.resource_scope =
+            ResourceScope::new(vec![ResourceId::new("state:report").unwrap()]).unwrap();
+        assert!(
+            h.request_device_owner(&o, g, HumanPurpose::LocalReport, Duration::from_secs(300))
+                .is_err()
+        );
+        assert_eq!(HumanPurpose::LocalReport.resource(), "state:report");
+    }
+
+    #[test]
+    fn foreign_controller_and_worker_text_cannot_approve() {
+        use crate::tool::ToolHost;
+        use eylema_contracts::{
+            platform::SemanticProfileId,
+            tool::{OwnedTool, ToolProfile},
+        };
+        use eylema_runtime::tool::ToolRegistry;
+        let (h, o, _) = fixture();
+        let registry = ToolRegistry::new(vec![ToolProfile::new(
+            SemanticProfileId::new("tool:add").unwrap(),
+            Revision::new(1).unwrap(),
+            OwnedTool::AddTaskValue,
+        )])
+        .unwrap();
+        let mut g = grant();
+        g.resource_scope =
+            ResourceScope::new(vec![ResourceId::new("state:report").unwrap()]).unwrap();
+        let task = TaskId::new("task:report-a").unwrap();
+        let mut tools = ToolHost::new(h, registry).unwrap();
+        assert!(
+            tools
+                .request_report_controller(
+                    &o,
+                    g.clone(),
+                    task.clone(),
+                    [7; 32],
+                    Duration::from_secs(300)
+                )
+                .is_ok()
+        );
+        let controller = tools.simulate_report_controller(&o, g.clone(), &task, [7; 32]);
+        assert!(
+            tools
+                .check_report_controller(&controller, &task, [7; 32])
+                .is_ok()
+        );
+        assert!(
+            tools
+                .check_report_controller(&controller, &TaskId::new("task:other").unwrap(), [7; 32])
+                .is_err()
+        );
+        assert!(
+            tools
+                .check_report_controller(&controller, &task, [8; 32])
+                .is_err()
+        );
+        let (h2, _, _) = fixture();
+        let r2 = ToolRegistry::new(vec![ToolProfile::new(
+            SemanticProfileId::new("tool:add").unwrap(),
+            Revision::new(1).unwrap(),
+            OwnedTool::AddTaskValue,
+        )])
+        .unwrap();
+        let other = ToolHost::new(h2, r2).unwrap();
+        assert!(
+            other
+                .check_report_controller(&controller, &task, [7; 32])
+                .is_err()
+        );
+        let actor = tools.enroll(&o, g.clone()).unwrap();
+        let (foreign_task, _) = task_plan("task:report-a", &[1]);
+        assert!(
+            tools
+                .create_report_task(&o, &actor, &controller, [7; 32], foreign_task)
+                .is_err()
+        );
+        tools.revoke_report_controller(&controller).unwrap();
+        assert!(
+            tools
+                .check_report_controller(&controller, &task, [7; 32])
+                .is_err()
+        );
     }
 }

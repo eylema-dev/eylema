@@ -517,3 +517,22 @@ mod matrix {
         }
     }
 }
+
+#[test]
+fn projection_vector_binding() {
+    use eylema_host::memory_store::MemoryStore;
+    use eylema_host::native::NativeHash;
+    use records::*;
+    let draft = claim(eylema_contracts::memory::durable::SourcePin {
+        reference: r("source"),
+        put_digest: [1; 32],
+    });
+    let actual = MemoryStore::<Mem, NativeHash>::preview_projection(&profile(), &draft).unwrap();
+    assert_eq!(
+        actual,
+        b"kind=fact; subject=pump-a; predicate=owner; object=\"Mira\"\n"
+    );
+    let mut invalid = draft;
+    invalid.sources.clear();
+    assert!(MemoryStore::<Mem, NativeHash>::preview_projection(&profile(), &invalid).is_err());
+}

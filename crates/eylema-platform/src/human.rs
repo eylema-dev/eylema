@@ -18,12 +18,14 @@ pub enum HumanError {
 pub enum HumanPurpose {
     LocalCli,
     AcceptanceProof,
+    LocalReport,
 }
 impl HumanPurpose {
     pub fn resource(self) -> &'static str {
         match self {
             Self::LocalCli => "state:cli",
             Self::AcceptanceProof => "state:g73-proof",
+            Self::LocalReport => "state:report",
         }
     }
     #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
@@ -32,6 +34,7 @@ impl HumanPurpose {
             Self::LocalCli => {
                 c"create an Eyleme stop session of at most 5 minutes for local state:cli tasks"
             }
+            Self::LocalReport => c"start, review, approve and stop one private Eyleme report on state:report for at most 5 minutes",
             Self::AcceptanceProof => {
                 c"approve and stop the bounded Eyleme state:g73-proof counter demonstration"
             }

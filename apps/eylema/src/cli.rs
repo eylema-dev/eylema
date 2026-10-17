@@ -62,6 +62,13 @@ fn run(arguments: impl IntoIterator<Item = OsString>) -> Result<()> {
     }
     let command = args[0].to_str().ok_or(CliError("INVALID_ARGUMENT"))?;
     match command {
+        "report" => crate::report::command(&args[1..]).map_err(|error| CliError(error.cli_code())),
+        "report-worker" => {
+            if args.len() != 1 {
+                return Err(CliError("INVALID_ARGUMENT"));
+            }
+            crate::report::worker_entry().map_err(|_| CliError("REPORT_WORKER_FAILED"))
+        }
         "--help" | "help" => {
             if args.len() != 1 {
                 return Err(CliError("INVALID_ARGUMENT"));
@@ -863,6 +870,14 @@ fn json_escape(text: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn report_argument_failure_preserves_closed_category_without_io() {
+        assert!(matches!(
+            run([OsString::from("report")]),
+            Err(CliError("REPORT_INVALID_INPUT"))
+        ));
+    }
 
     #[test]
     fn origin_must_be_exact_loopback_http() {
