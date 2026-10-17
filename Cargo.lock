@@ -9,6 +9,7 @@ dependencies = [
  "eylema-contracts",
  "eylema-host",
  "eylema-journal",
+ "eylema-model",
  "eylema-platform",
  "eylema-runtime",
  "eylema-web",
