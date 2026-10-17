@@ -582,6 +582,67 @@ mod reopen_regressions {
             Some(ReportError::RevisionConflict)
         );
     }
+    #[test]
+    fn proof_reader_releases_inspection_lock_before_mutating_synthetic_sources() {
+        let mut f = fixture();
+        let proof = f.root.with_extension("proof");
+        new_directory(&proof).unwrap();
+        std::fs::rename(&f.root, proof.join("positive")).unwrap();
+        f.root = proof;
+        let stopped_dir = f.root.join("stopped");
+        new_directory(&stopped_dir).unwrap();
+        let mut stopped =
+            JobData::create(&stopped_dir, f.config.project.clone(), &f.config.rows).unwrap();
+        stopped
+            .put(
+                "outcome",
+                encoded(&Value::Text("stopped_before_effect".into())).unwrap(),
+                vec![stopped.sources[0].pin.reference.clone()],
+                DataKind::Derived,
+            )
+            .unwrap();
+        stopped.memory.close();
+        stopped.data.close();
+        let (mut tool, _, actor) = tools(&stopped_dir).unwrap();
+        let need = ReportNeed::new(
+            f.config.project.as_str(),
+            &format!("{}:stop", f.config.task),
+            2,
+            f.config
+                .sections
+                .iter()
+                .map(|s| (s.language.clone(), s.site.clone()))
+                .collect(),
+        )
+        .unwrap();
+        let until = Timestamp::new(
+            u64::try_from(
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis(),
+            )
+            .unwrap()
+                + 60000,
+        )
+        .unwrap();
+        tool.create_task(&actor, task(&need, until).unwrap())
+            .unwrap();
+        drop(tool);
+        inspect_proof(&f.config, &f.root).unwrap();
+        let (mut data, _, session) = storage::reopen_data(
+            &f.root.join("positive"),
+            f.config.project.clone(),
+            &f.config.rows,
+        )
+        .unwrap();
+        let output = DataRef {
+            project: f.config.project.clone(),
+            id: storage::id("final").unwrap(),
+        };
+        assert!(data.read(&session, &output, DataUse::Execute).is_err());
+        data.close();
+    }
 }
 
 #[cfg(target_os = "macos")]

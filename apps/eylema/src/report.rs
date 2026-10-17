@@ -1337,6 +1337,7 @@ fn inspect_report(config: &Config, dir: &Path) -> Result<()> {
 fn inspect_proof(config: &Config, root: &Path) -> Result<()> {
     let deadline = Instant::now() + Duration::from_secs(10);
     let dir = root.join("positive");
+    inspect_report(config, &dir)?;
     let (mut data, owner, session) =
         storage::reopen_data(&dir, config.project.clone(), &config.rows)?;
     let reference = |name: &str| -> Result<DataRef> {
@@ -1346,7 +1347,6 @@ fn inspect_proof(config: &Config, root: &Path) -> Result<()> {
         })
     };
     let final_ref = reference("final")?;
-    inspect_report(config, &dir)?;
     let withdrawn = reference(&config.rows[0].id)?;
     let revision = data
         .inspect(&owner, &withdrawn)
