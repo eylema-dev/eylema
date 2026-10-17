@@ -688,13 +688,7 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
             vector(&embedded_queries[i])?,
         )?);
     }
-    let unknown = data.query("unknown", &queries[2], vector(&embedded_queries[2])?)?;
-    if unknown.status() != MemoryStatus::NoEvidence
-        || unknown.record_count() != 0
-        || unknown.source_count() != 0
-    {
-        return Err(ReportError::InvalidWitness);
-    }
+    let absence = data.prove_absence(&need, &query_receipts, vector(&embedded_queries[2])?)?;
     let facts = config
         .sections
         .iter()
@@ -820,6 +814,7 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
         digest(&receipts(&plans))?,
         digest(&receipts(&decisions))?,
         true,
+        Some(&absence),
     )?
     .bind_citations(&verified_pins)?
     .bind_generation(selection_generation)?;
@@ -833,6 +828,7 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
         digest(&receipts(&plans))?,
         digest(&receipts(&decisions))?,
         true,
+        Some(&absence),
     )
     .is_ok()
     {
@@ -846,6 +842,7 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
         digest(&receipts(&plans))?,
         digest(&receipts(&decisions))?,
         true,
+        Some(&absence),
     )?
     .bind_citations(&verified_pins)?
     .bind_generation(selection_generation)?;
@@ -866,6 +863,7 @@ fn run_job(config: &Config, dir: &Path, terminal: &control::Terminal, stopped: b
             decision: decision_receipts,
             review,
             generation: selection_generation,
+            absence: &absence,
             terminal,
             deadline,
         },
@@ -882,6 +880,7 @@ struct CommitInput<'a> {
     decision: SourcePin,
     review: SourcePin,
     generation: u64,
+    absence: &'a storage::AbsenceWitness,
     terminal: &'a control::Terminal,
     deadline: Instant,
 }
@@ -896,6 +895,7 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
         decision,
         review,
         generation,
+        absence,
         terminal,
         deadline,
     } = input;
@@ -904,7 +904,9 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
     if prepared.need() != need.digest()? || data.memory.generation() != generation {
         return Err(ReportError::RevisionConflict);
     }
+    absence.recheck(&mut data.data, &data.session)?;
     let mut parents = pins.references();
+    parents.push(absence.reference());
     parents.push(decision.reference.clone());
     parents.sort();
     parents.dedup();
@@ -921,6 +923,7 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
     terminal.acknowledge("approve", prepared.digest()?, deadline)?;
     check(tools, person, need, data, terminal, deadline)?;
     pins.recheck(&mut data.data, &data.session)?;
+    absence.recheck(&mut data.data, &data.session)?;
     let approval = data.put(
         "approval",
         encoded(&Value::List(vec![
@@ -937,6 +940,7 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
         vec![prepared_record.reference.clone()],
         DataKind::Derived,
     )?;
+    absence.recheck(&mut data.data, &data.session)?;
     let plan = checkpoint(task, prepared.fact_count() as u64, count.reference.clone())?;
     let binding = tools
         .preview_approval(actor, &plan, person.deadline())
@@ -950,6 +954,7 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
         deadline,
     )?;
     check(tools, person, need, data, terminal, deadline)?;
+    absence.recheck(&mut data.data, &data.session)?;
     let event = tools
         .approve_report_checkpoint(person, need.digest()?, &plan, binding)
         .map_err(|_| ReportError::Forbidden)?;
@@ -1055,6 +1060,7 @@ fn commit_report(tools: &mut Tools, data: &mut JobData, input: CommitInput<'_>) 
         finalize_report(data, final_record, prepared.digest()?, |data| {
             check(tools, person, need, data, terminal, deadline)?;
             pins.recheck(&mut data.data, &data.session)?;
+            absence.recheck(&mut data.data, &data.session)?;
             tools.revoke_report_controller(person).map_err(invalid)
         })
     })();
@@ -1299,6 +1305,13 @@ fn inspect_report(config: &Config, dir: &Path) -> Result<()> {
             Err(ReportError::InvalidWitness)
         }
     };
+    let absence = storage::AbsenceWitness::reopen(
+        &mut data,
+        &session,
+        &need,
+        &config.rows,
+        selected_generation,
+    )?;
     let expected = verify::prepare_report(
         &need,
         &sources,
@@ -1306,6 +1319,7 @@ fn inspect_report(config: &Config, dir: &Path) -> Result<()> {
         hash(&fields[4])?,
         hash(&fields[5])?,
         true,
+        Some(&absence),
     )?
     .bind_citations(&pins)?
     .bind_generation(selected_generation)?;

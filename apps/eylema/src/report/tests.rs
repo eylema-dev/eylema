@@ -194,17 +194,49 @@ fn literal_bilingual_facts_and_citations() {
             checklist: "C9".into(),
         },
     ];
-    let prepared = prepare_report(&need, &sources, &selected, [1; 32], [2; 32], true).unwrap();
+    let absence = synthetic_absence(&need, &sources);
+    assert_eq!(
+        prepare_report(&need, &sources, &selected, [1; 32], [2; 32], true, None).err(),
+        Some(ReportError::InvalidWitness)
+    );
+    let prepared = prepare_report(
+        &need,
+        &sources,
+        &selected,
+        [1; 32],
+        [2; 32],
+        true,
+        Some(&absence),
+    )
+    .unwrap();
     assert_eq!(prepared.fact_count(), 4);
     assert_ne!(prepared.digest().unwrap(), [0; 32]);
     let mut wrong = selected.clone();
     wrong[0].owner = "Leon".into();
     assert_eq!(
-        prepare_report(&need, &sources, &wrong, [1; 32], [2; 32], true).err(),
+        prepare_report(
+            &need,
+            &sources,
+            &wrong,
+            [1; 32],
+            [2; 32],
+            true,
+            Some(&absence)
+        )
+        .err(),
         Some(ReportError::InvalidWitness)
     );
     assert_eq!(
-        prepare_report(&need, &sources, &selected, [0; 32], [2; 32], true).err(),
+        prepare_report(
+            &need,
+            &sources,
+            &selected,
+            [0; 32],
+            [2; 32],
+            true,
+            Some(&absence)
+        )
+        .err(),
         Some(ReportError::InvalidWitness)
     );
 }
@@ -225,7 +257,7 @@ fn no_evidence_conflict_and_unreviewed_are_explicit() {
         checklist: "C7".into(),
     }];
     assert_eq!(
-        prepare_report(&need, &[], &selected, [1; 32], [2; 32], true).err(),
+        prepare_report(&need, &[], &selected, [1; 32], [2; 32], true, None).err(),
         Some(ReportError::NoEvidence)
     );
     let mut source = SourceDocument {
@@ -238,11 +270,11 @@ fn no_evidence_conflict_and_unreviewed_are_explicit() {
     source.owner = Some("Leon".into());
     sources.push(source);
     assert_eq!(
-        prepare_report(&need, &sources, &selected, [1; 32], [2; 32], true).err(),
+        prepare_report(&need, &sources, &selected, [1; 32], [2; 32], true, None).err(),
         Some(ReportError::Conflict)
     );
     assert_eq!(
-        prepare_report(&need, &sources, &selected, [1; 32], [2; 32], false).err(),
+        prepare_report(&need, &sources, &selected, [1; 32], [2; 32], false, None).err(),
         Some(ReportError::NeedsSourceReview)
     );
 }
@@ -408,6 +440,37 @@ mod reopen_regressions {
         d.store_reviewed(draft, None, storage::pin(&review))
             .unwrap();
         assert_eq!(d.memory.generation(), 2);
+        let query = d
+            .put(
+                "model:queries",
+                vec![1],
+                d.sources.iter().map(|s| s.pin.reference.clone()).collect(),
+                DataKind::Derived,
+            )
+            .unwrap();
+        let mut vector = vec![0.0; 1024];
+        vector[0] = 1.0;
+        let absence = d
+            .prove_absence(&need, &storage::pin(&query), vector)
+            .unwrap();
+        let draft = d.draft(1, None).unwrap();
+        let projection = d
+            .reference(&storage::projection_name(draft.id.as_str(), 1))
+            .unwrap();
+        let mut c = storage::memory_control().unwrap();
+        d.memory
+            .propose(
+                &mut d.data,
+                &d.memory_session,
+                2,
+                None,
+                draft,
+                None,
+                projection,
+                &mut c,
+            )
+            .unwrap();
+        assert_eq!(d.memory.generation(), 3);
         let pins = storage::verify_pins(
             &mut d.data,
             &d.session,
@@ -438,11 +501,12 @@ mod reopen_regressions {
             [1; 32],
             [2; 32],
             true,
+            Some(&absence),
         )
         .unwrap()
         .bind_citations(&pins)
         .unwrap()
-        .bind_generation(1)
+        .bind_generation(2)
         .unwrap();
         d.put(
             "need",
@@ -451,11 +515,14 @@ mod reopen_regressions {
             DataKind::Derived,
         )
         .unwrap();
+        let mut prepared_parents = pins.references();
+        prepared_parents.push(absence.reference());
+        prepared_parents.sort();
         let prepared = d
             .put(
                 "prepared",
                 report.bytes().to_vec(),
-                pins.references(),
+                prepared_parents,
                 DataKind::Derived,
             )
             .unwrap();
@@ -844,5 +911,286 @@ fn single_domain_repair_and_second_failure_stop() {
     assert_eq!(
         ledger.reserve(2_500_000_000_000).err(),
         Some(ReportError::Limit)
+    );
+}
+
+#[test]
+fn frozen_rag_bridge_with_synthetic_vectors() {
+    use super::storage::JobData;
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT: AtomicU64 = AtomicU64::new(0);
+    struct Scratch(std::path::PathBuf);
+    impl Drop for Scratch {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+    for dense in [false, true] {
+        let dir = Scratch(std::env::temp_dir().join(format!(
+            "g72-rag-synthetic-{}-{}-{}", std::process::id(),
+            std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        )));
+        super::new_directory(&dir.0).unwrap();
+        let rows = vec![
+            super::storage::SourceRow {
+                id: "en-main".into(),
+                entity: "north".into(),
+                body: b"language=en;site=North;owner=Mira;checklist=C7\n".to_vec(),
+            },
+            super::storage::SourceRow {
+                id: "tr-main".into(),
+                entity: "south".into(),
+                body: "language=tr;site=Güney;owner=Ece;checklist=C9\n"
+                    .as_bytes()
+                    .to_vec(),
+            },
+            super::storage::SourceRow {
+                id: "en-decoy".into(),
+                entity: "west".into(),
+                body: b"language=en;site=West;owner=Leon\n".to_vec(),
+            },
+        ];
+        let mut d = JobData::create(
+            &dir.0,
+            eylema_contracts::platform::ProjectId::new("project:synthetic-rag").unwrap(),
+            &rows,
+        )
+        .unwrap();
+        let parents = d.sources.iter().map(|s| s.pin.reference.clone()).collect();
+        let need = d
+            .put(
+                "need",
+                vec![1],
+                parents,
+                eylema_contracts::project_data::DataKind::Derived,
+            )
+            .unwrap();
+        let review = d
+            .put(
+                "review",
+                vec![1],
+                vec![need.reference],
+                eylema_contracts::project_data::DataKind::Derived,
+            )
+            .unwrap();
+        let review = super::storage::pin(&review);
+        let mut vector = vec![0.0_f32; 1024];
+        if dense {
+            vector.fill(0.03125);
+        } else {
+            vector[0] = 1.0;
+        }
+        for source in 0..3 {
+            let draft = d.draft(source, None).unwrap();
+            d.store_reviewed(draft, None, review.clone()).unwrap();
+            let draft = d.draft(source, Some("owner")).unwrap();
+            d.store_reviewed(draft, Some(&vector), review.clone())
+                .unwrap();
+            if source < 2 {
+                let draft = d.draft(source, Some("checklist")).unwrap();
+                d.store_reviewed(draft, Some(&vector), review.clone())
+                    .unwrap();
+            }
+        }
+        for (entity, text) in [
+            ("north", "North owner checklist"),
+            ("south", "Güney sorumlu kontrol listesi"),
+        ] {
+            let context = d
+                .query(entity, text, vector.clone())
+                .expect("synthetic required RAG query must succeed");
+            assert_eq!(context.record_count(), 2);
+        }
+        let need = ReportNeed::new(
+            "project:synthetic-rag",
+            "task:report",
+            1,
+            vec![("en".into(), "North".into())],
+        )
+        .unwrap();
+        let query = d
+            .put(
+                "model:queries",
+                vec![1],
+                vec![review.reference.clone()],
+                eylema_contracts::project_data::DataKind::Derived,
+            )
+            .unwrap();
+        let generation = d.memory.generation();
+        let unknown = d
+            .prove_absence(&need, &super::storage::pin(&query), vector.clone())
+            .expect("synthetic unknown query must succeed");
+        unknown
+            .validate(
+                &need,
+                &d.sources
+                    .iter()
+                    .map(|s| s.document.clone())
+                    .collect::<Vec<_>>(),
+            )
+            .unwrap();
+        unknown.recheck(&mut d.data, &d.session).unwrap();
+        assert_eq!(unknown.generation(), generation);
+        // An absent authority anchor still fails; it is never treated as absence.
+        assert_eq!(
+            d.query("unknown", "Unknown owner checklist", vector).err(),
+            Some(ReportError::Forbidden)
+        );
+        d.memory.close();
+        d.data.close();
+    }
+}
+
+struct AbsenceScratch(std::path::PathBuf);
+impl AbsenceScratch {
+    fn new() -> Self {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "g72-absence-{}-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos(),
+            NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+        ));
+        super::new_directory(&path).unwrap();
+        Self(path)
+    }
+}
+impl Drop for AbsenceScratch {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+fn absence_rows(documents: &[SourceDocument]) -> Vec<super::storage::SourceRow> {
+    documents
+        .iter()
+        .enumerate()
+        .map(|(i, d)| {
+            let mut body = format!("language={};site={}", d.language, d.site);
+            if let Some(v) = &d.owner {
+                body.push_str(&format!(";owner={v}"));
+            }
+            if let Some(v) = &d.checklist {
+                body.push_str(&format!(";checklist={v}"));
+            }
+            body.push('\n');
+            super::storage::SourceRow {
+                id: format!("source{i}"),
+                entity: format!("entity{i}"),
+                body: body.into_bytes(),
+            }
+        })
+        .collect()
+}
+fn synthetic_absence(
+    need: &ReportNeed,
+    documents: &[SourceDocument],
+) -> super::storage::AbsenceWitness {
+    let scratch = AbsenceScratch::new();
+    let mut d =
+        super::storage::JobData::create(&scratch.0, need.project.clone(), &absence_rows(documents))
+            .unwrap();
+    let receipt = d
+        .put(
+            "model:queries",
+            vec![1],
+            d.sources.iter().map(|s| s.pin.reference.clone()).collect(),
+            eylema_contracts::project_data::DataKind::Derived,
+        )
+        .unwrap();
+    let mut vector = vec![0.0; 1024];
+    vector[0] = 1.0;
+    let result = d
+        .prove_absence(need, &super::storage::pin(&receipt), vector)
+        .unwrap();
+    d.memory.close();
+    d.data.close();
+    result
+}
+#[test]
+fn absence_requires_complete_current_source_scope_and_unforgeable_witness() {
+    use super::storage::*;
+    use eylema_contracts::project_data::DataKind;
+    let need = ReportNeed::new(
+        "project:absence",
+        "task:report",
+        1,
+        vec![("en".into(), "North".into())],
+    )
+    .unwrap();
+    let documents = vec![
+        parse_document(b"language=en;site=North;owner=Mira;checklist=C7\n").unwrap(),
+        parse_document(b"language=en;site=West;owner=Leon\n").unwrap(),
+    ];
+    for mode in 0..5 {
+        let scratch = AbsenceScratch::new();
+        let mut rows = absence_rows(&documents);
+        if mode == 0 {
+            rows[1].body = b"language=en;site=Unknown;owner=Leon\n".to_vec();
+        }
+        let mut d = JobData::create(&scratch.0, need.project.clone(), &rows).unwrap();
+        let receipt = d
+            .put(
+                "model:queries",
+                vec![1],
+                d.sources.iter().map(|s| s.pin.reference.clone()).collect(),
+                DataKind::Derived,
+            )
+            .unwrap();
+        let mut vector = vec![0.0; 1024];
+        vector[0] = 1.0;
+        match mode {
+            0 => {}
+            1 => {
+                d.sources.pop();
+            }
+            2 => {
+                let r = d.sources[1].pin.reference.clone();
+                let v = d.sources[1].authorization_revision;
+                d.data.withdraw(&d.owner, &r, v).unwrap();
+            }
+            3 => {
+                d.sources[1].document.site = "Elsewhere".into();
+            }
+            _ => {
+                let r = d.sources[1].pin.reference.clone();
+                let v = d.sources[1].authorization_revision;
+                d.data
+                    .set_policy(&d.owner, &r, v, permissions(), false)
+                    .unwrap();
+            }
+        }
+        let error = d.prove_absence(&need, &pin(&receipt), vector).err();
+        assert_eq!(
+            error,
+            Some(match mode {
+                2 => ReportError::Forbidden,
+                4 => ReportError::RevisionConflict,
+                _ => ReportError::InvalidWitness,
+            })
+        );
+        d.memory.close();
+        d.data.close();
+    }
+    let witness = synthetic_absence(&need, &documents);
+    let other = ReportNeed::new(
+        "project:absence",
+        "task:other",
+        1,
+        vec![("en".into(), "North".into())],
+    )
+    .unwrap();
+    assert_eq!(
+        witness.validate(&other, &documents).err(),
+        Some(ReportError::InvalidWitness)
+    );
+    let mut truncated = documents.clone();
+    truncated.pop();
+    assert_eq!(
+        witness.validate(&need, &truncated).err(),
+        Some(ReportError::InvalidWitness)
     );
 }

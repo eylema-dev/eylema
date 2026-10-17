@@ -107,6 +107,7 @@ pub struct JobData {
     pub memory_session: MemorySession,
     pub profile: StoreProfile,
     pub sources: Vec<SourceValue>,
+    source_manifest: Vec<SourcePin>,
     pub expires: u64,
     pub operations: u32,
     pub work: u64,
@@ -185,6 +186,7 @@ pub fn scope(rows: &[SourceRow]) -> Result<Vec<DataId>> {
         "model:plans",
         "model:decisions",
         "prepared",
+        "absence",
         "count",
         "episode",
         "episode:projection",
@@ -257,12 +259,14 @@ impl JobData {
             memory_session,
             profile,
             sources: vec![],
+            source_manifest: vec![],
             expires,
             operations: 2,
             work: 200_000_000,
         };
         for row in rows {
             let meta = this.put(&row.id, row.body.clone(), vec![], DataKind::Artifact)?;
+            this.source_manifest.push(pin(&meta));
             this.sources.push(SourceValue {
                 entity: row.entity.clone(),
                 document: parse_document(&row.body)?,
@@ -439,6 +443,14 @@ impl JobData {
         Ok(pin(&meta))
     }
     pub fn query(&mut self, entity: &str, text: &str, vector: Vec<f32>) -> Result<MemoryContext> {
+        self.query_scope(vec![id(entity)?], text, vector)
+    }
+    fn query_scope(
+        &mut self,
+        entities: Vec<DataId>,
+        text: &str,
+        vector: Vec<f32>,
+    ) -> Result<MemoryContext> {
         self.authorize_sources()?;
         let now = self.data.trusted_time().map_err(data_error)?;
         let query = Query::new(QueryDraft {
@@ -452,7 +464,7 @@ impl JobData {
             origins: vec![Origin::DocumentClaim],
             knowledge: KnowledgeMode::Reusable,
             effective_at: now,
-            entities: vec![id(entity)?],
+            entities,
             edge_predicates: vec![],
             result_predicates: vec![semantic("owner")?, semantic("checklist")?],
             seeds: vec![],
@@ -476,6 +488,296 @@ impl JobData {
             .query(&mut self.data, &self.memory_session, &query, &mut c)
             .map_err(|_| ReportError::Forbidden)?;
         self.charge_memory(&c)?;
+        Ok(result)
+    }
+    /// Absence is scoped to the complete, reviewed input manifest, never top-k alone.
+    pub fn prove_absence(
+        &mut self,
+        need: &ReportNeed,
+        query_receipt: &SourcePin,
+        vector: Vec<f32>,
+    ) -> Result<AbsenceWitness> {
+        let context = self.query_scope(vec![], "Unknown owner checklist", vector)?;
+        if context.status() == MemoryStatus::Conflict {
+            return Err(ReportError::Conflict);
+        }
+        self.charge(65536)?;
+        self.authorize_sources()?;
+        if self.sources.len() != self.source_manifest.len()
+            || self
+                .sources
+                .iter()
+                .zip(&self.source_manifest)
+                .any(|(s, p)| s.pin != *p)
+        {
+            return Err(ReportError::InvalidWitness);
+        }
+        for source in &self.sources {
+            let body = self
+                .data
+                .read(&self.session, &source.pin.reference, DataUse::Execute)
+                .map_err(data_error)?;
+            if parse_document(&body)? != source.document {
+                return Err(ReportError::InvalidWitness);
+            }
+        }
+        let documents = self
+            .sources
+            .iter()
+            .map(|s| s.document.clone())
+            .collect::<Vec<_>>();
+        absent(&documents)?;
+        let coverage = verify_pins(&mut self.data, &self.session, &self.source_manifest)?;
+        if query_receipt.reference != self.reference("model:queries")? {
+            return Err(ReportError::InvalidWitness);
+        }
+        let query = verify_pins(
+            &mut self.data,
+            &self.session,
+            std::slice::from_ref(query_receipt),
+        )?;
+        let need_hash = need.digest()?;
+        if need.project != self.profile.project {
+            return Err(ReportError::InvalidWitness);
+        }
+        let generation = self.memory.generation();
+        let documents = documents_digest(&documents)?;
+        let retrieval =
+            eylema_platform::sha256(context.bytes()).map_err(|_| ReportError::Unsupported)?;
+        let value = absence_value(
+            need_hash, generation, documents, &coverage, &query, retrieval,
+        );
+        let mut parents = coverage.references();
+        parents.extend(query.references());
+        parents.sort();
+        let record = self.put(
+            "absence",
+            super::encoded(&value)?,
+            parents,
+            DataKind::Derived,
+        )?;
+        Ok(AbsenceWitness {
+            need: need_hash,
+            generation,
+            documents,
+            coverage,
+            query,
+            retrieval,
+            record: pin(&record),
+        })
+    }
+}
+fn absent(documents: &[SourceDocument]) -> Result<()> {
+    if documents.is_empty() || documents.len() > 16 {
+        return Err(ReportError::InvalidWitness);
+    }
+    if documents
+        .iter()
+        .any(|s| s.language == "en" && s.site == "Unknown")
+    {
+        return Err(ReportError::InvalidWitness);
+    }
+    Ok(())
+}
+fn documents_digest(documents: &[SourceDocument]) -> Result<[u8; 32]> {
+    let value = Value::List(
+        documents
+            .iter()
+            .map(|s| {
+                Value::List(vec![
+                    Value::Text(s.language.clone()),
+                    Value::Text(s.site.clone()),
+                    s.owner
+                        .as_ref()
+                        .map_or(Value::Null, |v| Value::Text(v.clone())),
+                    s.checklist
+                        .as_ref()
+                        .map_or(Value::Null, |v| Value::Text(v.clone())),
+                ])
+            })
+            .collect(),
+    );
+    eylema_platform::sha256(&super::encoded(&value)?).map_err(|_| ReportError::Unsupported)
+}
+fn absence_value(
+    need: [u8; 32],
+    generation: u64,
+    documents: [u8; 32],
+    coverage: &VerifiedPins,
+    query: &VerifiedPins,
+    retrieval: [u8; 32],
+) -> Value {
+    Value::List(vec![
+        Value::Text("report:absence:v1".into()),
+        Value::Bytes(need.to_vec()),
+        Value::Unsigned(generation),
+        Value::List(vec![
+            Value::Text("en".into()),
+            Value::Text("Unknown".into()),
+            Value::Text("owner".into()),
+            Value::Text("checklist".into()),
+        ]),
+        Value::Bytes(documents.to_vec()),
+        coverage.value(),
+        query.value(),
+        Value::Bytes(retrieval.to_vec()),
+    ])
+}
+/// Only a successful owned retrieval and complete current input coverage can mint this type.
+pub struct AbsenceWitness {
+    need: [u8; 32],
+    generation: u64,
+    documents: [u8; 32],
+    coverage: VerifiedPins,
+    query: VerifiedPins,
+    retrieval: [u8; 32],
+    record: SourcePin,
+}
+impl AbsenceWitness {
+    pub fn validate(&self, need: &ReportNeed, documents: &[SourceDocument]) -> Result<()> {
+        absent(documents)?;
+        if self.need != need.digest()?
+            || self.documents != documents_digest(documents)?
+            || self.retrieval == [0; 32]
+        {
+            return Err(ReportError::InvalidWitness);
+        }
+        Ok(())
+    }
+    pub fn generation(&self) -> u64 {
+        self.generation
+    }
+    pub fn reference(&self) -> DataRef {
+        self.record.reference.clone()
+    }
+    pub fn recheck(&self, data: &mut Data, session: &DataSession) -> Result<()> {
+        self.coverage.recheck(data, session)?;
+        self.query.recheck(data, session)?;
+        check_pin(data, session, &self.record)?;
+        let value = absence_value(
+            self.need,
+            self.generation,
+            self.documents,
+            &self.coverage,
+            &self.query,
+            self.retrieval,
+        );
+        if data
+            .read(session, &self.record.reference, DataUse::Execute)
+            .map_err(data_error)?
+            != super::encoded(&value)?
+        {
+            return Err(ReportError::InvalidWitness);
+        }
+        let mut parents = self.coverage.references();
+        parents.extend(self.query.references());
+        parents.sort();
+        let metadata = data
+            .authorized_metadata(session, &self.record.reference, DataUse::Execute)
+            .map_err(data_error)?;
+        if metadata.parents != parents {
+            return Err(ReportError::InvalidWitness);
+        }
+        Ok(())
+    }
+    pub fn reopen(
+        data: &mut Data,
+        session: &DataSession,
+        need: &ReportNeed,
+        rows: &[SourceRow],
+        generation: u64,
+    ) -> Result<Self> {
+        let reference = DataRef {
+            project: need.project.clone(),
+            id: id("absence")?,
+        };
+        let bytes = data
+            .read(session, &reference, DataUse::Execute)
+            .map_err(data_error)?;
+        let decoded = super::wire::decode_closed(&bytes)?;
+        let fields = super::wire::list(&decoded)?;
+        if fields.len() != 8 {
+            return Err(ReportError::InvalidWitness);
+        }
+        let hash = |v: &Value| -> Result<[u8; 32]> {
+            if let Value::Bytes(b) = v {
+                b.as_slice()
+                    .try_into()
+                    .map_err(|_| ReportError::InvalidWitness)
+            } else {
+                Err(ReportError::InvalidWitness)
+            }
+        };
+        let coverage = VerifiedPins::from_value(data, session, &fields[5])?;
+        let query = VerifiedPins::from_value(data, session, &fields[6])?;
+        let query_ref = DataRef {
+            project: need.project.clone(),
+            id: id("model:queries")?,
+        };
+        if query.references() != vec![query_ref] || coverage.references().len() != rows.len() {
+            return Err(ReportError::InvalidWitness);
+        }
+        let mut expected_pins = vec![];
+        let mut documents = vec![];
+        for row in rows {
+            let r = DataRef {
+                project: need.project.clone(),
+                id: id(&row.id)?,
+            };
+            let m = data
+                .authorized_metadata(session, &r, DataUse::Execute)
+                .map_err(data_error)?;
+            if data
+                .read(session, &r, DataUse::Execute)
+                .map_err(data_error)?
+                != row.body
+            {
+                return Err(ReportError::RevisionConflict);
+            }
+            expected_pins.push(pin(&m));
+            documents.push(parse_document(&row.body)?);
+        }
+        if verify_pins(data, session, &expected_pins)?.value() != coverage.value() {
+            return Err(ReportError::InvalidWitness);
+        }
+        let metadata = data
+            .authorized_metadata(session, &reference, DataUse::Execute)
+            .map_err(data_error)?;
+        let result = Self {
+            need: hash(&fields[1])?,
+            generation,
+            documents: hash(&fields[4])?,
+            coverage,
+            query,
+            retrieval: hash(&fields[7])?,
+            record: pin(&metadata),
+        };
+        result.validate(need, &documents)?;
+        if decoded
+            != absence_value(
+                result.need,
+                generation,
+                result.documents,
+                &result.coverage,
+                &result.query,
+                result.retrieval,
+            )
+        {
+            return Err(ReportError::InvalidWitness);
+        }
+        result.recheck(data, session)?;
+        let prepared = DataRef {
+            project: need.project.clone(),
+            id: id("prepared")?,
+        };
+        if !data
+            .authorized_metadata(session, &prepared, DataUse::Execute)
+            .map_err(data_error)?
+            .parents
+            .contains(&result.reference())
+        {
+            return Err(ReportError::InvalidWitness);
+        }
         Ok(result)
     }
 }

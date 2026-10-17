@@ -12,6 +12,7 @@ pub struct PreparedReport {
     bytes: Vec<u8>,
     facts: usize,
     need: [u8; 32],
+    absence_generation: u64,
 }
 impl PreparedReport {
     pub fn bytes(&self) -> &[u8] {
@@ -34,6 +35,9 @@ impl PreparedReport {
     }
 
     pub fn bind_generation(mut self, selected: u64) -> Result<Self> {
+        if selected != self.absence_generation {
+            return Err(ReportError::InvalidWitness);
+        }
         let mut rows = match codec::decode(&self.bytes).map_err(|_| ReportError::InvalidInput)? {
             Value::List(v) if v.len() == 7 => v,
             _ => return Err(ReportError::InvalidInput),
@@ -49,6 +53,7 @@ impl PreparedReport {
         eylema_platform::sha256(&self.bytes).map_err(|_| ReportError::Unsupported)
     }
 }
+#[allow(clippy::too_many_arguments)]
 pub fn prepare_report(
     need: &ReportNeed,
     sources: &[SourceDocument],
@@ -56,6 +61,7 @@ pub fn prepare_report(
     planner: [u8; 32],
     decision: [u8; 32],
     reviewed: bool,
+    absence: Option<&super::storage::AbsenceWitness>,
 ) -> Result<PreparedReport> {
     if !reviewed {
         return Err(ReportError::NeedsSourceReview);
@@ -98,6 +104,9 @@ pub fn prepare_report(
             Value::Text((*checklist).into()),
         ]));
     }
+    let absence = absence.ok_or(ReportError::InvalidWitness)?;
+    absence.validate(need, sources)?;
+    let absence_generation = absence.generation();
     let need = need.digest()?;
     let bytes = codec::encode(&Value::List(vec![
         Value::Text("report:v1".into()),
@@ -115,5 +124,6 @@ pub fn prepare_report(
         bytes,
         facts: 2 * selected.len(),
         need,
+        absence_generation,
     })
 }
